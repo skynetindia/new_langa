@@ -523,7 +523,7 @@ $(document).ready(function() {
 		var _token = $("input[name=_token]").val();
 		var saveData = $.ajax({
 		  type: "GET",
-		  url: "/easylanga/language",
+		  url: "./language",
 		  data: {locale:locale, _token:_token},
 		  dataType: "json",
 		  success: function(resultData){
