@@ -268,7 +268,7 @@ class AdminController extends Controller
 					]);
 			}		
 		}
-		
+		$this->writelanguagefile();
 		return Redirect::back()
                         ->with('error_code', 5)
                         ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Language aggiunto correttamente!</h4></div>');
@@ -301,15 +301,15 @@ class AdminController extends Controller
 				$i = 0;
 				foreach($phases as $phase){
 					if(++$i === $numItems) {
-						$content .= "
-						'".$phase->language_key."' => '".$phase->language_value."'";
+						$content .= '
+						"'.$phase->language_key.'" => "'.$phase->language_value.'"';
 					}
 					else {
-						$content .= "
-						'".$phase->language_key."' => '".$phase->language_value."',";
+						$content .= '
+						"'.$phase->language_key.'" => "'.$phase->language_value.'",';
 					}					
 				}
-				$content .= ']; ?>';
+				$content .= "]; ?>";
 				$fp = fopen($file,"wb");
 				fwrite($fp,$content);
 				fclose($fp);		
