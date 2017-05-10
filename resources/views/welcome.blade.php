@@ -51,7 +51,7 @@ div.desc {
         <div class="col-md-10 col-md-offset-1">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    Benvenuto nel Sistema Easy
+                    {{ trans('messages.keyword_welcome_to_the_easy_system') }}
                 </div>
 
                 <div class="panel-body">
@@ -65,12 +65,10 @@ div.desc {
 					</div>
                     <br><br>
 					<div class="col-md-8">
-                        <br><h4>Benvenuto su Easy <strong>LANGA</strong>!</h4>
-                        Un semplice, veloce e sicuro metodo per organizzare la tua azienda. Accedendo potrai gestire
-					    i tuoi eventi, visualizzare gli enti già contattati da altri utenti, gestire i progetti, 
-                        eseguire i preventivi per i clienti, gestire i pagamenti e le relative fatture.<br></br>
-                        <small>*ruoli e capacità della vostra utenza sono decisi a monte dalla divisione informatica LANGA WEB<br><br>
-                        Maggiori informazioni su <a href="http://www.langa.tv" target="_blank">www.langa.tv</a></small>
+                        <br><h4>{{ trans('messages.keyword_welcome_to')}} <strong>LANGA</strong>!</h4>
+                        {{ trans('messages.keyword_wecome_page_message')}}<br></br>
+                        <small>{{ trans('messages.keyword_welcome_page_message_1')}}<br><br>
+                        {{ trans('messages.keyword_more_information_about') }} <a href="http://www.langa.tv" target="_blank">www.langa.tv</a></small>
 					</div>                     
                 </div><br>
             </div>
