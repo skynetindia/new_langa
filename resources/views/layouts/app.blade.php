@@ -75,17 +75,17 @@
                                                     foreach ($submodule as $submodule) {
                                                         $subsubmodule = DB::table('modulo')
                                                                 ->where('modulo_subsub', $submodule->id)
-                                                                ->get();
+                                                                ->get();																
                                                         if ($subsubmodule->isEmpty() && $submodule->modulo_subsub == '0') {
                                                             ?><li><a href="{{url("$submodule->modulo_link")}}">{{ trans('messages.'.$submodule->phase_key.'') }} </a></li><?php
                                                         }
-                                                        if ($subsubmodule->isNotEmpty()) {
+                                                        else if ($subsubmodule->isNotEmpty()) {
                                                             ?><li><a>{{$submodule->modulo}}<span class="fa fa-chaevron-down"></span></a>
                                                                 <ul class="nav child_menu"><?php
-                                                                    foreach ($subsubmodule as $subsubmodule1) {
-                                                                        ?><li><a href="{{url("$subsubmodule1->modulo_link")}}">{{ trans('messages.'.$subsubmodule1->phase_key.'') }} </a></li><?php
-                                                                    }
-                                                                    ?></li><?php
+                                                                  foreach ($subsubmodule as $subsubmodule1) {
+                                                                      ?><li><a href="{{url("$subsubmodule1->modulo_link")}}">{{ trans('messages.'.$subsubmodule1->phase_key.'') }} </a></li><?php
+                                                                  }
+                                                                ?></ul></li><?php
                                                         }
                                                     }
                                                     ?> 
