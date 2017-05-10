@@ -196,7 +196,7 @@ class AdminController extends Controller
 	
 	
 	public function translation(Request $request){
-		$re = DB::table('language_transalation')->where('id',$request->code)->first();
+		$re = DB::table('languages')->where('id',$request->code)->first();
 		return view('language_translation', [
             'language_transalation' => DB::table('language_transalation')->where('code',$re->code)->get(),
             'language' => DB::table('languages')->where('is_deleted','0')->where('code',$re->code)->first(),
