@@ -22,6 +22,9 @@
   <?php $logged = false; ?>
 @if (!Auth::guest())
 <?php $logged = true; ?>
+    <script type="text/javascript">
+        var jsbaseurl = '<?php echo url('/');?>';
+		</script>
   <body class="nav-md">
     <div class="container body">
       <div class="main_container">
@@ -49,63 +52,37 @@
                       <li><a href="{{url('/utente-permessi')}}">Permessi</a></li>
                     </ul>
                   </li>
-                  
+                   <li><a href="{{url('/newenti')}}"><i class="fa fa-user"></i> Registered Enti </a></li>
                   <li><a><i class="fa fa-list-ul "></i> Tassonomie <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      
-                      
                         <li><a>Tipi e stati<span class="fa fa-chevron-down"></span></a>
                           <ul class="nav child_menu">
-
-
-                              <li><a>Enti<span class="fa fa-chevron-down"></span></a>
+                            <?php /* <li><a>Enti<span class="fa fa-chevron-down"></span></a>
                               <ul class="nav child_menu">
-                              
-                                <li><a href="{{url('/newenti')}}">New Enti</a>
-                                </li>
-
-                                <li><a href="{{url('admin/tassonomie/enti')}}">Enti</a>
-                                </li>
-                                
+                                <li><a href="{{url('admin/taxonomies/enti')}}">Enti</a></li>
                               </ul>
-                            </li>
-
-                            <li><a href="{{url('admin/tassonomie/preventivi')}}">Preventivi</a>
-                            </li>
+                            </li>*/?>
+                            <li><a href="{{url('admin/taxonomies/enti')}}">Enti</a></li>
+                            <li><a href="{{url('admin/taxonomies/estimates')}}">Preventivi</a></li>
                             <li><a>Progetti<span class="fa fa-chevron-down"></span></a>
-                              <ul class="nav child_menu">
-                              
-                                <li><a href="{{url('/admin/tassonomie/progetti')}}">Progetti</a>
-                                </li>
-
-                                <li><a href="{{url('admin/tassonomie/lavorazioni')}}">Lavorazioni</a>
-                                </li>
-                                
+                              <ul class="nav child_menu">                              
+                                <li><a href="{{url('/admin/taxonomies/project')}}">Progetti</a></li>
+                                <li><a href="{{url('admin/taxonomies/processing')}}">Lavorazioni</a></li>
                               </ul>
                             </li>
-                            <li><a href="{{url('/admin/tassonomie/pagamenti')}}">Pagamenti</a>
-                            </li>
+                            <li><a href="{{url('/admin/taxonomies/payments')}}">Pagamenti</a></li>
                           </ul>
                         </li>
-                      
-                      
             <li><a>Vendita<span class="fa fa-chevron-down"></span></a>
               <ul class="nav child_menu">
-                  <li class="sub_menu"><a href="{{url('/admin/tassonomie/pacchetti/add')}}">Pacchetti</a>
-                    </li>
-
+                  <li class="sub_menu"><a href="{{url('/admin/tassonomie/pacchetti/add')}}">Pacchetti</a></li>
                   <li><a>Optional<span class="fa fa-chevron-down"></span></a>
                        <ul class="nav child_menu">
-                          <li><a href="{{url('/admin/tassonomie/optional')}}">Optional</a>
-
-                          <li><a href="{{url('/show-provincie')}}">Indici Costo Vita</a>
-                      </li>
+                          <li><a href="{{url('/admin/taxonomies/optional')}}">Optional</a></li>
+                          <li><a href="{{url('/show-provincie')}}">Indici Costo Vita</a></li>
                       </ul>
-
                       </li>
-                  </li>
-
-                
+                  </li>                
                   <li><a href="{{url('/admin/tassonomie/sconti/add')}}">Sconti</a>
                   </li>
                   <li><a href="{{url('/admin/tassonomie/scontibonus/add')}}">Sconti Bonus</a>
@@ -145,9 +122,9 @@
 
             </div>
             <!-- /sidebar menu -->
-            <script type="text/javascript">
-        
-            function requestFullScreen() {
+            <script type="text/javascript">        
+		
+         function requestFullScreen() {
                 var el = document.documentElement
     , rfs = // for newer Webkit and Firefox
            el.requestFullScreen

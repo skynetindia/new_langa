@@ -24,6 +24,9 @@
 <?php $logged = false; ?>
 @if (!Auth::guest())
 <?php $logged = true; ?>
+<script type="text/javascript">
+	var jsbaseurl = '<?php echo url('/');?>';
+</script>
 <body class="nav-md">
 <div class="container body">
   <div class="main_container">
@@ -44,7 +47,7 @@
             <li><a href="{{url('/')}}"><img src="{{asset('images/BACHECA.svg')}}" alt="Bacheca" class="menu-icon" > <span>Bacheca</span></a> </li>
             <li><a><img src="{{asset('images/ENTI.svg')}}" alt="Enti" class="menu-icon" > <span>Enti</span> <span class="fa fa-chevron-down"></span></a>
               <ul class="nav child_menu">
-                <li><a href="{{url('/enti/miei')}}">Miei</a></li>
+                <li><a href="{{url('/enti/myenti')}}">Miei</a></li>
                 <li><a href="{{url('/enti')}}">Tutti</a></li>
               </ul>
             </li>
@@ -515,6 +518,18 @@
               </li>
             </ul>
           </li>
+           <li><?php
+				$allLanguages = DB::table('languages')
+							->select('*')
+							->where('is_deleted', '0')
+							->get();	
+				?><select id="languageSwicher" class="form-control"><?php
+					foreach($allLanguages as $langs){			
+					  $value = session('locale');
+						?><option value="<?php echo $langs->code; ?>" <?php if($value == $langs->code) { echo 'selected';}?>><?php echo $langs->original_name;?></option><?php 
+					}
+                 ?></select>
+                </li>
         </ul>
       </nav>
     </div>
@@ -830,5 +845,6 @@
         });
 
     </script>
+    
 </body>
 </html>

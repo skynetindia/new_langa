@@ -513,6 +513,134 @@ $(document).ready(function() {
             }
 
         });
+		
+		        // validate add sconti form on keyup and submit
+        $("#addscontiform").validate({
+            
+            rules: {
+                name: {
+                    required: true,
+                },
+                tipoente: {
+                    required: true,
+                },
+                sconto: {
+                    required: true
+                }
+            },
+            messages: {
+                name: {
+                    required: "Please enter a name"
+                },
+                tipoente: {
+                    required: "Please Select a tipo ente"
+                },
+                sconto: {
+                    required: "Please enter a sconto"
+                }
+            }
+
+        });
+
+        // validate add sconti form on keyup and submit
+        $("#editscontiform").validate({
+            
+            rules: {
+                name: {
+                    required: true,
+                },
+                tipoente: {
+                    required: true,
+                },
+                sconto: {
+                    required: true
+                }
+            },
+            messages: {
+                name: {
+                    required: "Please enter a name"
+                },
+                tipoente: {
+                    required: "Please Select a tipo ente"
+                },
+                sconto: {
+                    required: "Please enter a sconto"
+                }
+            }
+
+        });
+
+        // validate add bonus form on keyup and submit
+        $("#addbonusform").validate({
+            
+            rules: {
+                name: {
+                    required: true,
+                },
+                tipoente: {
+                    required: true,
+                },
+                sconto: {
+                    required: true
+                }
+            },
+            messages: {
+                name: {
+                    required: "Please enter a name"
+                },
+                tipoente: {
+                    required: "Please Select a tipo ente"
+                },
+                sconto: {
+                    required: "Please enter a sconto"
+                }
+            }
+
+        });
+
+        // validate edit bonus form on keyup and submit
+        $("#editbonusform").validate({
+            
+            rules: {
+                name: {
+                    required: true,
+                },
+                tipoente: {
+                    required: true,
+                },
+                sconto: {
+                    required: true
+                }
+            },
+            messages: {
+                name: {
+                    required: "Please enter a name"
+                },
+                tipoente: {
+                    required: "Please Select a tipo ente"
+                },
+                sconto: {
+                    required: "Please enter a sconto"
+                }
+            }
+
+        });
+
+         // validate add role form on keyup and submit
+        $("#addroleform").validate({
+            
+            rules: {
+                new_ruolo: {
+                    required: true,
+                }
+            },
+            messages: {
+                new_ruolo: {
+                    required: "Please enter a role name"
+                }
+            }
+
+        });
 
 });
 
@@ -523,7 +651,7 @@ $(document).ready(function() {
 		var _token = $("input[name=_token]").val();
 		var saveData = $.ajax({
 		  type: "GET",
-		  url: "./language",
+		  url: jsbaseurl+"/language",
 		  data: {locale:locale, _token:_token},
 		  dataType: "json",
 		  success: function(resultData){
