@@ -78,8 +78,8 @@ div.desc {
         <div class="col-md-10 col-md-offset-1">
             <div class="panel panel-default">
                 <div class="panel-heading" style="text-align: right">
-                    <a class="btn btn-warning" href="{{ url('/login') }}">Accedi al Mondo Easy</a>
-                    <a class="btn btn-warning" href="{{ url('/register') }}">Registrati QUI</a>
+                    <a class="btn btn-warning" href="{{ url('/login') }}">{{ trans('messages.keyword_access_the_easy_world') }}</a>
+                    <a class="btn btn-warning" href="{{ url('/register') }}">{{ trans('messages.keyword_register_here') }}</a>
                 </div>
             </div>
         </div>
