@@ -1988,6 +1988,197 @@ class AdminController extends Controller
 
     /* ==================================== Optional section END ======================================== */
 
+/* ==================================== Menu section START ======================================== */
+
+    public function menu() {
+        return view('menu');
+    }
+
+    public function menuadd() {
+
+        $parent = DB::table("modulo")->select('*')->where('modulo_sub', null)->limit(7)->get();
+        return view('menuadd', ['parent' => $parent]);
+    }
+
+    public function menumodify(Request $request) {
+
+        $parent = DB::table("modulo")->select('*')->where('modulo_sub', null)->limit(7)->get();
+        $menu = DB::table("modulo")->select('*')->where('id', $request->id)->first();
+        //echo "<pre>"; print_r($menu);die;
+        //$keyword_key = 'keyword_'.str_replace(" ","_",strtolower($request['keyword_title']));                               
+        return view('menumodify', ['menu' => $menu, 'parent' => $parent]);
+    }
+
+    public function menudelete(Request $request) {
+        DB::table('modulo')
+                ->where('id', $request->id)
+                ->delete();
+         return Redirect::back()
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Menu deleted successfully!</h4></div>');
+    }
+
+    public function storemenu(Request $request) {
+        $validator = Validator::make($request->all(), [
+                    'manuname' => 'required',
+                    'menulink' => 'required',
+                    'menuclass' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return Redirect::back()
+                            ->withInput()
+                            ->withErrors($validator);
+        }
+
+        if ($request->submenu != '') {
+            $status = $this->checkurl($request->menulink);
+            DB::table('modulo')->insert(
+                    ['modulo' => $request->manuname,
+                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo_sub' => $request->parentmenu,
+                        'modulo_subsub' => $request->submenu,
+                        'modulo_link' => $request->menulink,
+                        'modulo_class' => "",
+                        'menu_active' => $status
+                    ]
+            );
+        } elseif ($request->parentmenu != "") {
+            $status = $this->checkurl($request->menulink);
+            DB::table('modulo')->insert(
+                    ['modulo' => $request->manuname,
+                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo_sub' => $request->parentmenu,
+                        'modulo_link' => $request->menulink,
+                        'modulo_class' => "",
+                        'menu_active' => $status
+                    ]
+            );
+        } else {
+            $status = $this->checkurl($request->menulink);
+            DB::table('modulo')->insert(
+                    ['modulo' => strtoupper($request->manuname),
+                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo_link' => $request->menulink,
+                        'modulo_class' => $request->menuclass,
+                        'menu_active' => $status
+                    ]
+            );
+        }
+        return redirect('/admin/menu/')
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>New menu addedd successfully!</h4></div>');
+        //$keyword_key = 'keyword_'.str_replace(" ","_",strtolower($request['keyword_title']));                       
+    }
+
+    public function submenu(Request $request) {
+        $submenu = DB::table("modulo")
+                ->select('*')
+                ->where('modulo_sub', $request->parent)
+                ->where('modulo_subsub', 0)
+                ->get()
+                ->toArray();
+        // print_r($submenu);die;
+        echo json_encode($submenu);
+    }
+
+    public function checkurl($url) {
+        $menuactive = 0;
+        $handle = curl_init($url);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
+        /* Get the HTML or whatever is linked in $url. */
+        $response = curl_exec($handle);
+        /* Check for 404 (file not found). */
+        $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        if ($httpCode == 302 || $httpCode == 200) {
+            /* Handle 404 here. */
+            $menuactive = 1;
+        }
+        curl_close($handle);
+        return $menuactive;
+    }
+
+    public function menujson() {
+
+        $modulo = DB::table("modulo")
+                ->select('*')
+                ->get()
+                ->toArray();
+
+        foreach ($modulo as $key => $val) {
+            if ($val->dipartimento != 0) {
+                $department = DB::table("ruolo_utente")
+                        ->select('*')
+                        ->where('ruolo_id', $val->dipartimento)
+                        ->first();
+                $modulo[$key]->dipartimento = $department->nome_ruolo;
+            } else {
+                $modulo[$key]->dipartimento = 'All';
+            }
+            if ($val->menu_active == 0) {
+                $modulo[$key]->menu_active = 'Inactive';
+            } else {
+                $modulo[$key]->menu_active = 'Active';
+            }
+        }
+        echo json_encode($modulo);
+    }
+
+    public function menuupdate(Request $request) {
+        $validator = Validator::make($request->all(), [
+                    'manuname' => 'required',
+                    'menulink' => 'required',
+                    'menuclass' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return Redirect::back()
+                            ->withInput()
+                            ->withErrors($validator);
+        }
+
+        //module sub sub menu
+        if ($request->submenu != '') {
+            $status = $this->checkurl($request->menulink);
+            DB::table('modulo')->where('id', $request->id)->
+                    update(array(
+                        'modulo' => $request->manuname,
+                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo_sub' => $request->parentmenu,
+                        'modulo_subsub' => $request->submenu,
+                        'modulo_link' => $request->menulink,
+                        'modulo_class' => "",
+                        'menu_active' => $status
+            ));
+        } elseif ($request->parentmenu != "") {
+            //module sub menu
+            $status = $this->checkurl($request->menulink);
+            DB::table('modulo')
+                    ->where('id', $request->id)
+                    ->update(array(
+                        'modulo' => $request->manuname,
+                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo_sub' => $request->parentmenu,
+                        'modulo_subsub' => 0,
+                        'modulo_link' => $request->menulink,
+                        'modulo_class' => "",
+                        'menu_active' => $status,
+            ));
+        } else {
+            //module parent menu
+            $status = $this->checkurl($request->menulink);
+            DB::table('modulo')
+                    ->where('id', $request->id)
+                    ->update(array(
+                        'modulo' => strtoupper($request->manuname),
+                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo_sub' => $request->parentmenu,
+                        'modulo_link' => $request->menulink,
+                        'modulo_class' => $request->menuclass,
+                        'menu_active' => $status));
+        }
+        return Redirect::back()
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Menu updated successfully!</h4></div>');
+    }
+    /* ==================================== Menu section END ======================================== */  
 
 
 

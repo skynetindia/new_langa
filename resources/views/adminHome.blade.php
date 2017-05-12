@@ -75,7 +75,7 @@
                         </li>
             <li><a>Vendita<span class="fa fa-chevron-down"></span></a>
               <ul class="nav child_menu">
-                  <li class="sub_menu"><a href="{{url('/admin/tassonomie/pacchetti/add')}}">Pacchetti</a></li>
+                  <li class="sub_menu"><a href="{{url('/admin/tassonomie/pacchetti')}}">Pacchetti</a></li>
                   <li><a>Optional<span class="fa fa-chevron-down"></span></a>
                        <ul class="nav child_menu">
                           <li><a href="{{url('/admin/taxonomies/optional')}}">Optional</a></li>
@@ -83,9 +83,9 @@
                       </ul>
                       </li>
                   </li>                
-                  <li><a href="{{url('/admin/tassonomie/sconti/add')}}">Sconti</a>
+                  <li><a href="{{url('/admin/tassonomie/sconti')}}">Sconti</a>
                   </li>
-                  <li><a href="{{url('/admin/tassonomie/scontibonus/add')}}">Sconti Bonus</a>
+                  <li><a href="{{url('/admin/tassonomie/scontibonus')}}">Sconti Bonus</a>
                   </li>
                   <li><a href="{{url('admin/tassonomie/dipartimenti')}}">Dipartimenti</a></li>
                 </ul>
@@ -95,35 +95,25 @@
 
                   <li><a><i class="fa fa-user-times"></i> Avvisi <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-
-                      <li><a href="{{url('/admin/shownotification')}}">Notifiche</a></li>
-                     
+                      <li><a href="{{url('/admin/shownotification')}}">Notifiche</a></li>                     
                        <li><a>Alert<span class="fa fa-chevron-down"></span></a>
-                              <ul class="nav child_menu">
-                              
+                              <ul class="nav child_menu">                              
                                 <li><a href="{{url('/admin/alert')}}">Alert</a></li>
-
                                 <li><a href="{{url('/admin/alert/tipo')}}">Alert Tipo</a></li>
-
                               </ul>
                         </li>
-
-
                     </ul>
-                  </li>
-				          
+                  </li>				          
                   <li><a href="{{url('/taxation')}}"><i class="fa fa-percent"></i> Taxation </a></li>
-
                   <li><a href="{{url('/newsletter/add')}}"><i class="fa fa-newspaper-o"></i> Newsletter</a></li>
 				  <li><a href="{{url('/admin/pacchetto')}}"><i class="fa fa-gift"></i> Quiz Pacchetto </a></li>
                    <li><a href="{{url('/admin/language')}}"><i class="fa fa-gift"></i> Languages & Phases </a></li>
+                    <li><a href="{{url('/admin/menu')}}"><i class="fa fa-gift"></i> {{trans("messages.keyword_menu")}} </a></li>
                 </ul>
               </div>
-
             </div>
             <!-- /sidebar menu -->
-            <script type="text/javascript">        
-		
+            <script type="text/javascript">        		
          function requestFullScreen() {
                 var el = document.documentElement
     , rfs = // for newer Webkit and Firefox
@@ -139,7 +129,7 @@
         if (wscript!=null) {
            wscript.SendKeys("{F11}");
         }
-}}
+		}}
 
             </script> 
             
