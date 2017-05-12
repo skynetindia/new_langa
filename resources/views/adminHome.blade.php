@@ -164,6 +164,18 @@
               </li>
             </ul>
           </li>
+          <li><?php
+				$allLanguages = DB::table('languages')
+							->select('*')
+							->where('is_deleted', '0')
+							->get();	
+				?><select id="languageSwicher" class="form-control"><?php
+					foreach($allLanguages as $langs){			
+					  $value = session('locale');
+						?><option value="<?php echo $langs->code; ?>" <?php if($value == $langs->code) { echo 'selected';}?>><?php echo $langs->original_name;?></option><?php 
+					}
+                 ?></select>
+                </li>
         </ul>
       </nav>
     </div>
