@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="shortcut icon" href="favicon.png">
+<link rel="shortcut icon" href="{{url('favicon.png')}}">
 <title>Admin LANGA</title>
 
 <!-- Bootstrap -->
@@ -99,9 +99,9 @@
             <li><a href="{{url('/taxation')}}"><i class="fa fa-percent"></i> Taxation </a></li>
             <li><a href="{{url('/newsletter/add')}}"><i class="fa fa-newspaper-o"></i> Newsletter</a></li>
             <li><a href="{{url('/admin/pacchetto')}}"><img src="{{asset('images/ADMIN_QUIZ.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span> Quiz Pacchetto</span> </a></li>
-             <li><a href="{{url('/admin/language')}}"><i class="fa fa-gift"></i> Languages & Phases </a></li>
-             <li><a href="{{url('/admin/menu')}}"><i class="fa fa-gift"></i> {{trans("messages.keyword_menu")}} </a></li>
-            
+            <li><a href="{{url('/admin/language')}}"><i class="fa fa-gift"></i> Languages & Phases </a></li>
+            <li><a href="{{url('/admin/menu')}}"><i class="fa fa-gift"></i> {{trans("messages.keyword_menu")}} </a></li>
+
           </ul>
         </div>
       </div>
