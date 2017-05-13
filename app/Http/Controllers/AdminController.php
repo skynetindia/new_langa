@@ -394,6 +394,7 @@ class AdminController extends Controller
                                 ->get();
 			$approvemsg = 'return confirm("'.trans("messages.keyword_are_you_sure_you_want_to_approve_this_item?").'");';
 			$rejctemsg = 'return confirm("'.trans("messages.keyword_are_you_sure_you_want_to_reject_this_item?").'");';
+			$enti_return= array();
 			foreach($data as $data) {				
 				$data->action  = "<a class='btn btn-default' id='approvare' href='".url('/approveenti/'.$data->id)."' onclick='".$approvemsg."'>".trans("messages.keyword_approve")." </a>
     <a class='btn btn-default' id='rifiutare' class='btn btn-default' href='".url('/rifiutareenti/'.$data->id)."' onclick='".$rejctemsg."'>".trans("messages.keyword_reject")."</a>";
@@ -728,7 +729,7 @@ class AdminController extends Controller
 
 /* ============================================================================================= */
 // show user page list
-    public function utenti(Request $request)
+   /* public function utenti(Request $request)
     {
         if($request->user()->id != 0) {
             return redirect('/unauthorized');
@@ -743,10 +744,10 @@ class AdminController extends Controller
                     //     ->paginate(10),
             ]);
         }
-    }
+    }*/
 
     // 
-    public function getjsonusers(Request $request)
+  /*  public function getjsonusers(Request $request)
     {   
         $users = DB::table('users')
             ->join('ruolo_utente', 'users.dipartimento', '=', 'ruolo_utente.ruolo_id')
@@ -758,7 +759,7 @@ class AdminController extends Controller
             ->get();
                     
         return json_encode($users);
-    }
+    }*/
 
     public function modificautente(Request $request)
     {
@@ -810,49 +811,16 @@ class AdminController extends Controller
         }
     }
 
-    public function aggiornautente(Request $request)
+  public function aggiornautente(Request $request)
     {
-
         if($request->user()->id != 0) {
             return redirect('/unauthorized');
+
         } else {
 
             $user_id = $request->input('user_id');
 
             $dipartimento = $request->input('dipartimento');
-
-            if($request->utente){
-
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|max:20',
-                'email' => 'required|email|max:255|unique:users,email,'.$user_id.',id',
-                'idente' => 'required|max:35',
-                'dipartimento' => 'required|max:64',
-                'colore' => 'max:30',
-                'sconto' => 'required|numeric',
-                'sconto_bonus' => 'required|numeric',
-                'rendita' => 'required|numeric',
-                'rendita_reseller' => 'required|numeric',
-                'password' => 'max:64',
-            ]);
-
-            if ($validator->fails()) {
-                return Redirect::back()
-                    ->withInput()
-                    ->withErrors($validator);
-            }
-
-            $vecchiapassword = DB::table('users')
-                                ->where('id', $request->utente)
-                                ->first();
-
-            $vecchiapassword = (String)$vecchiapassword->password;
-            
-            if($request->password!=null)
-            {
-                $vecchiapassword = bcrypt($request->password);
-            }
-
 
             $idente = $request->input('idente');
 
@@ -874,14 +842,55 @@ class AdminController extends Controller
             $reading = $request->input('lettura');
             $writing = $request->input('scrittura');
             
-            if(isset($reading) || isset($writing)){
-                
+            if(isset($reading) && isset($writing)){
+ 				echo "if";
                 $permessi = json_encode(array_merge($reading, $writing));
-            } else {
 
+            } else if(isset($reading)){
+             	echo "if1";
+                $permessi = json_encode($reading);
+
+            } else if(isset($writing)){
+            	echo "if2";
+                $permessi = json_encode($writing);
+
+            } else {
+  				echo "else";
                 $permessi = json_encode(null);
             }
- 
+
+            if($request->utente){
+
+	            $validator = Validator::make($request->all(), [
+	                'name' => 'required|max:20',
+	                'email' => 'required|email|max:255|unique:users,email,'.$user_id.',id',
+	                'idente' => 'required|max:35',
+	                'dipartimento' => 'required|max:64',
+	                'colore' => 'max:30',
+	                'sconto' => 'required|numeric',
+	                'sconto_bonus' => 'required|numeric',
+	                'rendita' => 'required|numeric',
+	                'rendita_reseller' => 'required|numeric',
+	                'password' => 'max:64',
+	            ]);
+
+	            if ($validator->fails()) {
+	                return Redirect::back()
+	                    ->withInput()
+	                    ->withErrors($validator);
+	            }
+
+            	$vecchiapassword = DB::table('users')
+                    ->where('id', $request->utente)
+                    ->first();
+
+	            $vecchiapassword = (String)$vecchiapassword->password;
+	            
+	            if($request->password!=null)
+	            {
+	                $vecchiapassword = bcrypt($request->password);
+	            }
+
                DB::table('users')
                 ->where('id', $request->utente)
                 ->update(array(
@@ -890,7 +899,7 @@ class AdminController extends Controller
                 'id_ente' => $idente,
                 'id_citta' => $zone,
                 'dipartimento' => $request->dipartimento,
-                'color' => $request->colore,
+                'color' => isset($request->colore) ? $request->colore : '',
                 'cellulare' => $request->cellulare,
                 'password' => bcrypt($request->password),
                 'sconto' => (isset($request->sconto))? $request->sconto : 0,
@@ -906,32 +915,11 @@ class AdminController extends Controller
             
          } else {
 
-            $permessi = DB::table('ruolo_utente')
-                        ->select('permessi')
-                        ->where('ruolo_id', $request->dipartimento)
-                        ->first();
-
             if($request->password!=null)
             {
                 $vecchiapassword = bcrypt($request->password);
             }
-
-            $idente = $request->input('idente');
-
-            if(isset($idente)){
-                $idente = implode(",", $idente);
-             } else {
-                $idente = '';
-             }
-
-            $zone = $request->input('zone');
-            
-            if(isset($zone)){
-                $zone = implode(",", $zone);
-             } else {
-                $zone = '';
-             }            
-
+          
             $validator = Validator::make($request->all(), [
                 'name' => 'required|unique:users',
                 'email' => 'required|email|max:255|unique:users'
@@ -943,7 +931,6 @@ class AdminController extends Controller
                     ->withErrors($validator);
             }
 
-
             DB::table('users')->insert(array(
                 'name' => $request->name,
                 'email' => $request->email,
@@ -952,7 +939,7 @@ class AdminController extends Controller
                 'id_stato' => 0,
                 'id_citta' => $zone,
                 'dipartimento' => $request->dipartimento,
-                'color' => $request->colore,
+                'color' => isset($request->colore) ? $request->colore : '',
                 'cellulare' => $request->cellulare,
                 'password' => bcrypt($request->password),
                 'sconto' => (isset($request->sconto))? $request->sconto : 0,
@@ -960,17 +947,11 @@ class AdminController extends Controller
                 'rendita' => (isset($request->rendita))? $request->rendita : 0,
                 'rendita_reseller' => (isset($request->rendita_reseller))? $request->rendita_reseller : 0,
                 'is_approvato' => 1,
-                'permessi' => $permessi->{'permessi'}
-            
+                'permessi' => $permessi            
             ));
-            
-            return Redirect::back()
-            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Utente Add correttamente!</h4></div>');
-
-            }
-        
-        }
-            
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Utente Add correttamente!</h4></div>');
+            }        
+        }            
     }
 
     public function rolepermission(Request $request)
@@ -984,21 +965,15 @@ class AdminController extends Controller
                     ->select('permessi')
                     ->where('ruolo_id', '=', $request->ruolo_id)
                     ->first();           
-            //$collection = collect($arrLanguages);
-        //$arrLanguages = $collection->toArray();
-
-          // print_r($permessi);
-         // $replaceable=['[',']','"'];
-         
-           //$permessi=explode(',',str_replace($replaceable,'',$permessi->permessi));
+        
            $permessi=json_decode($permessi->permessi,true);
-         // dd($permessi);
+ 
             $module = DB::table('modulo')
                     ->where('modulo_sub', null)
                     ->get();
             $i=0;
             $newhtml='';
-            //echo "<pre>";print_r($permessi);
+    
             $newhtml.= "<table class='table table-striped table-bordered'><tr><th>". trans('messages.keyword_module')."</th> <th> ".trans('messages.keyword_reading')."</th> <th>  ".trans('messages.keyword_writing')."</th> </tr>";
             foreach ($module as $module) {
 
@@ -1016,11 +991,11 @@ class AdminController extends Controller
                     $newhtml.= $module->modulo;
                     $newhtml.= "</td></b> <td>";
                     
-                    $newhtml.= "<input type='checkbox' class='reading' id='lettura$i' name='lettura[]' value='".$module->id."|0|lettura' $read >";
+                    $newhtml.= "<input type='checkbox' class='reading' id='lettura".$i."' name='lettura[]' value='".$module->id."|0|lettura' $read >";
 
                     $newhtml.= "</td><td>";
 
-                    $newhtml.= "<input type='checkbox' class='writing' id='scrittura$i' name='scrittura[]'  value='$module->id|0|scrittura' $write >";
+                    $newhtml.= "<input type='checkbox' class='writing' id='scrittura".$i."' name='scrittura[]'  value='$module->id|0|scrittura' $write >";
 
                     $newhtml.= "</td></tr>";
 
@@ -1035,25 +1010,25 @@ class AdminController extends Controller
 
                     $newhtml.= "<td>"; 
 
-                    $newhtml.= "<input type='checkbox' class='lettura".$i."' id='lettura' name='lettura[]' value='$module->id|$submodule->id.'|lettura' $subread >";
+                    $newhtml.= "<input type='checkbox' class='lettura".$i."' id='lettura' name='lettura[]' value='$module->id|$submodule->id|lettura' $subread >";
               
                     $newhtml.= "</td>";
 
                     $newhtml.= "<td>"; 
 
-                    $newhtml.= "<input type='checkbox' class='scrittura'".$i."' id='scrittura' name='scrittura[]' value='$module->id|$submodule->id|scrittura'' $subwrite>";
-                    $newhtml.= "<input type='hidden' id='hidden' name='checkhidden' value=' $i'>";
+                    $newhtml.= "<input type='checkbox' class='scrittura".$i."' id='scrittura' name='scrittura[]' value='$module->id|$submodule->id|scrittura'' $subwrite>";
+                    $newhtml.= "<input type='hidden' id='hidden' name='checkhidden' value='".$i."'>";
             
                     $newhtml.= "</td>";
 
                     $newhtml.= "</tr>";
          
                     }
-
+                    $i++;
                 }
 
             } 
-            $newhtml.="</table>";      // return json_encode($ruolo_utente);
+            $newhtml.="</table>";  
         }
         return $newhtml;
     }
@@ -2181,7 +2156,791 @@ class AdminController extends Controller
     /* ==================================== Menu section END ======================================== */  
 
 
+// ===================================================================================    
+//    							Alert Functions
+// ===================================================================================
+
+	// show add alert form
+    public function addadminalert(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            
+            return view('addalertform', [
+                'enti' => DB::table('corporations')
+                    ->get(),
+                'ruolo_utente' => DB::table('ruolo_utente')
+                    ->where('is_delete', '=', 0)
+                    ->get(),
+                'alert_tipo' => DB::table('alert_tipo')
+            		->get(),
+            ]);
+        }
+    }
+
+    // get alert entity in json format
+    public function getalertjson(Request $request)
+    {
+        $entity = DB::table('inviare_avviso')
+                    ->get();  
+
+        return json_encode($entity);
+    }
+
+    // store alert details
+    public function storeadminalert(Request $request)
+    {
+        if($request->user()->id != 0) {
+            
+            return redirect('/unauthorized');
+
+        } else {
+
+            $validator = Validator::make($request->all(), [
+                'nome_alert' => 'required',
+                'tipo_alert' => 'required',
+                'ente' => 'required',
+                'ruolo' => 'required',
+                'messaggio' => ''
+            ]);
+
+            if ($validator->fails()) {
+                return Redirect::back()
+                    ->withInput()
+                    ->withErrors($validator);
+            }
+            
+            $entity = implode(",", $request->input('ente'));
+            $role = implode(",", $request->input('ruolo'));  
+
+            $today = date("Y-m-d");
+
+            $message = strip_tags($request->messaggio);
+
+            DB::table('alert')->insert([
+                'nome_alert' => $request->nome_alert,
+                'tipo_alert' => $request->tipo_alert,
+                'ente' => $entity,
+                'ruolo' => $role,
+                'messaggio' => $message,
+                'created_at' => $today
+            ]);
+
+            return Redirect::back()
+                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_addsuccessmsg').' </h4></div>');
+        }
+    }
+
+    // show and modify alert type
+    public function alertTipo()
+    {
+        return view('alerttipo', [
+            'alert_tipo' => DB::table('alert_tipo')
+                ->get()
+        ]);
+    }
+
+    // add alert type
+    public function newalertTipo(Request $request)
+    {
+            if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+        	$validator = Validator::make($request->all(), [
+                'nome_tipo' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                return Redirect::back()
+                    ->withInput()
+                    ->withErrors($validator);
+            }
+           
+            DB::table('alert_tipo')->insert([
+                'nome_tipo' => $request->nome_tipo,
+                'desc_tipo' => isset($request->desc_tipo) ? $request->desc_tipo :'',
+                'color' => isset($request->color) ? $request->color :'' 
+            ]);
+
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_addsuccessmsg').' </h4></div>');;
+        }
+    }
+
+    // update type color
+    public function alerttipoUpdate(Request $request)
+    {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+        	$validator = Validator::make($request->all(), [
+                'nome_tipo' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                return Redirect::back()
+                    ->withInput()
+                    ->withErrors($validator);
+            }
+
+            DB::table('alert_tipo')
+                ->where('id_tipo', $request->id_tipo)
+                ->update(array(
+                    'nome_tipo' => $request->nome_tipo,
+	                'desc_tipo' => isset($request->desc_tipo) ? $request->desc_tipo :'',
+	                'color' => isset($request->color) ? $request->color :'' 
+            ));
+
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_edisuccessmsg').' </h4></div>');;
+        }
+    }
+
+    // delete alert type
+    public function alerttipodelete(Request $request)
+    {
+        DB::table('alert_tipo')
+            ->where('id_tipo', $request->id_tipo)
+            ->delete();
+
+        return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_deletesuccessmsg').' </h4></div>');;
+    }
+
+    // send alert notification to users
+    public function sendalert(Request $request)
+    {
+        if($request->user()->id != 0) {
+            
+            return redirect('/unauthorized');
+
+        } else {
+
+            $today = date("Y-m-d");
+
+            $alert = DB::table('alert')
+                ->where('created_at', $today)
+                ->where('is_sent', '=', 0)
+                ->get();
 
 
+            if($alert->isEmpty()) {
+                return "Alert not set ..!!";
+            }
+           	
+           	
+            foreach ($alert as $value) {
+
+                $ente = explode(",", $value->ente);
+                $ruolo = explode(",", $value->ruolo);
+
+                foreach ($ente as $ente) {
+
+                    $getente = DB::table('enti_partecipanti')
+                        ->select('id_ente', 'id_user')
+                        ->where('id_ente', $ente)
+                        ->get();
+                                   
+                    foreach ($getente as $getente) {
+ 
+                        $getrole = DB::table('users')
+                            ->select('dipartimento')
+                            ->where('id', $getente->id_user)
+                            ->where('is_delete', 0)
+                            ->first();                       	
+                       	
+                        if(isset($getrole)) {   
+
+                        	$check = in_array($getrole->dipartimento, $ruolo);   
+
+                        	if($check){
+
+                        	$corporations = DB::table('corporations')
+                                ->where('id', $getente->id_ente)
+                                ->first();
+         
+                            $store = DB::table('inviare_avviso')->insert([
+                                'id_ente' => $corporations->id,
+                                'user_id' => $getente->id_user,
+                                'alert_id' => $value->alert_id,
+                                'nome_azienda' => $corporations->nomeazienda,
+                                'nome_referente' => $corporations->nomereferente,
+                                'settore' => $corporations->settore,
+                                'telefono_azienda' => $corporations->telefonoazienda,
+                                'email' => $corporations->email,
+                    
+                                'responsible_langa' => $corporations->responsabilelanga,
+                                'comment' => '',
+                                'conferma' => 'NON LETTO'
+                                ]);                            
+
+	                            if($store) {
+	                            	$true = true;     
+	                            }
+                         	}
+
+	                 		DB::table('alert')      
+	                            ->where('alert_id', $value->alert_id)       
+	                            ->update(array(     
+	                            'is_sent' => 1      
+	                    	));	
+                        } 
+                    }
+                }
+            }
+
+            if($true)
+            	return "Send All Alert Successfully";
+            else
+            	return "Somthing Went Wrong";
+        }
+    }
+ /* ==================================== Taxation section START ======================================== */
+
+    public function deletetaxation(Request $request) {
+        if ($request->user()->id != 0) {
+
+            return redirect('/unauthorized');
+        } else {
+
+            DB::table('tassazione')
+                    ->where('tassazione_id', $request->id)
+                    ->delete();
+
+            return Redirect::back()
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Taxation eliminata correttamente!</h4></div>');
+        }
+    }
+
+    public function storetaxation(Request $request) {
+
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+
+            $validator = Validator::make($request->all(), [
+                        'tassazione_nome' => 'required',
+                        'tassazione_percentuale' => 'required|numeric'
+            ]);
+
+            if ($validator->fails()) {
+                return Redirect::back()
+                                ->withInput()
+                                ->withErrors($validator);
+            }
+
+            $tassazione_id = $request->input('tassazione_id');
+
+            if ($tassazione_id) {
+
+                $tassazione_nome = $request->input('tassazione_nome');
+                $tassazione_percentuale = $request->input('tassazione_percentuale');
+
+                DB::table('tassazione')
+                        ->where('tassazione_id', $tassazione_id)
+                        ->update(array(
+                            'tassazione_nome' => $tassazione_nome,
+                            'tassazione_percentuale' =>
+                            $tassazione_percentuale
+                ));
+
+                return Redirect::back()
+                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Tassazione update correttamente!</h4></div>');
+            } else {
+
+                DB::table('tassazione')->insert([
+                    'tassazione_nome' => $request->tassazione_nome,
+                    'tassazione_percentuale' => $request->tassazione_percentuale
+                ]);
+
+                return Redirect::back()
+                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Tassazione aggiunta correttamente!</h4></div>');
+            }
+        }
+    }
+
+    public function getjsontaxation(Request $request) {
+
+        $tassazione = DB::table('tassazione')
+                ->get();
+        return json_encode($tassazione);
+    }
+
+    // show taxation form
+    public function addtaxation(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+            if ($request->id) {
+
+                $taxation = DB::table('tassazione')
+                        ->where('tassazione_id', $request->id)
+                        ->first();
+
+                return view('aggiungitaxation')->with('taxation', $taxation);
+            } else {
+                return view('aggiungitaxation');
+            }
+        }
+    }
+
+    // show taxation
+    public function showtaxation(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            return view('taxation');
+        }
+    }
+/* ==================================== Taxation section END ======================================== */
+
+/* ====================================  Department section START ======================================== */
+
+    public function dipartimenti(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            return $this->mostraDipartimenti();
+        }
+    }
+
+    public function mostraDipartimenti() {
+        return view('tassonomie_dipartimenti', [
+            'dipartimenti' => DB::table('departments')
+                    ->orderBy('id')
+                    ->limit(50)
+                    ->get(),
+        ]);
+    }
+
+    public function nuovo() {
+        return view('aggiungidipartimento', [
+            'utenti' => DB::table('users')
+                    ->get(),
+        ]);
+    }
+
+    public function add(Request $request) {
+        return redirect('admin/tassonomie/dipartimenti/add');
+    }
+
+    public function salvadipartimento(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            $validator = Validator::make($request->all(), [
+                        'nomedipartimento' => 'required|max:35',
+                        'nomereferente' => 'required|max:35',
+                        'settore' => 'max:50',
+                        'piva' => 'max:11',
+                        'cf' => 'max:16',
+                        'telefonodipartimento' => 'required|max:20',
+                        'cellularedipartimento' => 'max:20',
+                        'email' => 'required|max:64',
+                        'emailsecondaria' => 'max:64',
+                        'fax' => 'max:64',
+                        'indirizzo' => 'required',
+                        'noteenti' => 'max:255',
+                        'iban' => 'max:64',
+            ]);
+
+            if ($validator->fails()) {
+                return Redirect::back()
+                                ->withInput()
+                                ->withErrors($validator);
+            }
+            $nome = "";
+            if ($request->logo != null) {
+                // Memorizzo l'immagine nella cartella public/imagesavealpha
+                Storage::put(
+                        'images/' . $request->file('logo')->getClientOriginalName(), file_get_contents($request->file('logo')->getRealPath())
+                );
+                $nome = $request->file('logo')->getClientOriginalName();
+            } else {
+                // Imposto l'immagine di default
+                $nome = "mancalogo.jpg";
+            }
+
+            DB::table('departments')->insert([
+                'nomedipartimento' => $request->nomedipartimento,
+                'nomereferente' => $request->nomereferente,
+                'settore' => $request->settore,
+                'piva' => $request->piva,
+                'cf' => $request->cf,
+                'telefonodipartimento' => $request->telefonodipartimento,
+                'cellularedipartimento' => $request->cellularedipartimento,
+                'email' => $request->email,
+                'logo' => $nome,
+                'emailsecondaria' => $request->emailsecondaria,
+                'fax' => $request->fax,
+                'indirizzo' => $request->indirizzo,
+                'noteenti' => $request->noteenti,
+                'iban' => $request->iban
+            ]);
+
+            return Redirect::back()
+                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Dipartimento aggiunto correttamente!</h4></div>');
+        }
+    }
+
+    public function modificadipartimento(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            return view('modificadipartimento', [
+                'utenti' => DB::table('users')
+                        ->get(),
+                'dipartimento' => DB::table('departments')
+                        ->where('id', $request->department)
+                        ->first(),
+            ]);
+        }
+    }
+
+    public function destroydipartimento(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            DB::table('departments')
+                    ->where('id', $request->department)
+                    ->delete();
+            return Redirect::back()
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Dipartimento eliminato correttamente!</h4></div>');
+        }
+    }
+
+    public function aggiornadipartimento(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            $validator = Validator::make($request->all(), [
+                        'nomedipartimento' => 'required|max:35',
+                        'nomereferente' => 'required|max:35',
+                        'settore' => 'max:50',
+                        'piva' => 'max:11',
+                        'cf' => 'max:16',
+                        'telefonodipartimento' => 'required|max:20',
+                        'cellularedipartimento' => 'max:20',
+                        'email' => 'required|max:64',
+                        'emailsecondaria' => 'max:64',
+                        'fax' => 'max:64',
+                        'indirizzo' => 'required',
+                        'noteenti' => 'max:255',
+                        'iban' => 'max:64',
+            ]);
+
+            if ($validator->fails()) {
+                return Redirect::back()
+                                ->withInput()
+                                ->withErrors($validator);
+            }
+            $logo = DB::table('departments')
+                    ->select('logo')
+                    ->where('id', $request->department)
+                    ->first();
+            $arr = json_decode(json_encode($logo), true);
+            $nome = $arr['logo'];
+            if ($request->logo != null) {
+                // Memorizzo l'immagine nella cartella public/imagesavealpha
+                Storage::put(
+                        'images/' . $request->file('logo')->getClientOriginalName(), file_get_contents($request->file('logo')->getRealPath())
+                );
+                $nome = $request->file('logo')->getClientOriginalName();
+            }
+
+            DB::table('departments')
+                    ->where('id', $request->department)
+                    ->update(array(
+                        'nomedipartimento' => $request->nomedipartimento,
+                        'nomereferente' => $request->nomereferente,
+                        'settore' => $request->settore,
+                        'piva' => $request->piva,
+                        'cf' => $request->cf,
+                        'logo' => $nome,
+                        'telefonodipartimento' => $request->telefonodipartimento,
+                        'cellularedipartimento' => $request->cellularedipartimento,
+                        'email' => $request->email,
+                        'emailsecondaria' => $request->emailsecondaria,
+                        'fax' => $request->fax,
+                        'indirizzo' => $request->indirizzo,
+                        'noteenti' => $request->noteenti,
+                        'iban' => $request->iban
+            ));
+
+            return Redirect::back()
+                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Dipartimento modificato correttamente!</h4></div>');
+        }
+    }
+
+    /* ====================================  Department section END ======================================== */
+	/* ==================================== Quiz Demo section START  ======================================== */
+
+    public function quizdemo() {
+        /* tassonomie_lavorazioni */
+        return view('quiz_demo', [
+            'departments' => DB::table('departments')->get(),
+            'quizdemodettagli' => DB::table('quizdemodettagli')->get(),
+                /* 'lavorazioni' => DB::table('departments')
+                  ->leftJoin('lavorazioni', 'departments.id', '=', 'lavorazioni.departments_id')
+                  ->select('departments.id as departmentsID','departments.nomedipartimento','lavorazioni.*')
+                  ->get(), */
+        ]);
+    }
+
+    public function nuovoquizdemo(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            
+        }
+
+        $validator = Validator::make($request->all(), [
+                    'name' => 'required',
+                    'url' => 'required',
+                    'immagine' => 'mimes:jpeg,jpg,png|max:1000'
+        ]);
+        if ($validator->fails()) {
+            return Redirect::back()
+                            ->withInput()
+                            ->withErrors($validator);
+        }
+        $averageRate = '3';
+        $totalRate = '5';
+        $today = date("Y-m-d h:i:s");
+        $immaginenome = "";
+        if ($request->immagine != null) {
+            // Memorizzo l'immagine nella cartella public/imagesavealpha
+            Storage::put('images/quizdemo/' . $request->file('immagine')->getClientOriginalName(), file_get_contents($request->file('immagine')->getRealPath()));
+            $immaginenome = $request->file('immagine')->getClientOriginalName();
+        }
+        // Creo il nuovo tipo e lo memorizzo nel DB masterdatatypes
+        DB::table('quizdemodettagli')->insert([
+            'nome' => $request->name,
+            'url' => $request->url,
+            'immagine' => $immaginenome,
+            'tassomedio' => $averageRate,
+            'tassototale' => $totalRate,
+            'created_date' => $today,
+            'updated_date' => $today,
+        ]);
+        return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>' . trans('messages.keyword_quiz_added') . '</h4></div>');
+    }
+
+    public function quizdemodelete(Request $request) {
+        DB::table('quizdemodettagli')
+                ->where('id', $request->id)
+                ->delete();
+        return Redirect::back()
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>' . trans('messages.keyword_quiz_deleted') . '</h4></div>');
+    }
+
+    public function quizdemoUpdate(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+
+            $validator = Validator::make($request->all(), [
+                        'name' => 'required',
+                        'url' => 'required',
+                        'immagine' => 'mimes:jpeg,jpg,png|max:1000'
+            ]);
+            if ($validator->fails()) {
+                return Redirect::back()
+                                ->withInput()
+                                ->withErrors($validator);
+            }
+
+            $averageRate = '3';
+            $totalRate = '5';
+            $today = date("Y-m-d h:i:s");
+            $immagine = DB::table('quizdemodettagli')
+                    ->select('immagine')
+                    ->where('id', $request->id)
+                    ->first();
+
+            $arr = json_decode(json_encode($immagine), true);
+            $immaginenome = $arr['immagine'];
+
+            if ($request->immagine != null) {
+                // Memorizzo l'immagine nella cartella public/imagesavealpha
+                Storage::put(
+                        'images/quizdemo/' . $request->file('immagine')->getClientOriginalName(), file_get_contents($request->file('immagine')->getRealPath())
+                );
+                $immaginenome = $request->file('immagine')->getClientOriginalName();
+            }
+
+            DB::table('quizdemodettagli')
+                    ->where('id', $request->id)
+                    ->update(array(
+                        'nome' => $request->name,
+                        'url' => $request->url,
+                        'immagine' => $immaginenome,
+                        /* 'tassomedio' => $averageRate,
+                          'tassototale' => $totalRate, */
+                        'updated_date' => $today,
+            ));
+
+            //trans("messages.keyword_quiz_update");die;                
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>' . trans("messages.keyword_quiz_update") . '</h4></div>');
+        }
+    }
+
+    /* ==================================== Quiz Demo section END ======================================== */
+	
+	/* ==================================== Life Cost Indices section START======================================== */
+
+    // show list of provinces
+    public function showprovincie(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            $provincie = DB::table('citta')
+                    ->get();
+            $stato = DB::table('stato')
+                    ->get();
+            return view('provincie')->with('provincie', $provincie)->with('stato', $stato);
+        }
+    }
+
+// add new provincie 
+
+    public function addprovincie(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+            $validator = Validator::make($request->all(), [
+                        'stato' => 'required',
+                        'citta' => 'required',
+                        'provincie' => 'required|numeric'
+            ]);
+
+            if ($validator->fails()) {
+
+                // return Redirect::back()
+                //     ->withInput()
+                //     ->withErrors($validator);
+            }
+
+            $stato = $request->input('stato');
+            $citta = $request->input('citta');
+            $provincie = $request->input('provincie');
+
+            $check_citta = DB::table('citta')->get();
+
+            foreach ($check_citta as $check_citta) {
+
+                if ($check_citta->nome_citta == $citta && $check_citta->id_stato == $stato) {
+
+                    return '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> can not add same city in same state.! </h4></div>';
+                }
+            }
+
+            DB::table('citta')->insert(
+                    ['id_stato' => $stato, 'nome_citta' => $citta,
+                        'provincie' => $provincie]
+            );
+
+            return '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> Provincie added succesfully..!! </h4></div>';
+        }
+    }
+
+    // store provincie 
+    public function storeprovincie(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+            $citta = $request->input('citta');
+            $provincie = $request->input('provincie');
+            $id_citta = $request->input('id_citta');
+
+            foreach ($citta as $index => $nome_citta) {
+
+                foreach ($id_citta as $key => $value) {
+
+                    if ($index == $key) {
+
+                        DB::table('citta')
+                                ->where('id_citta', $value)
+                                ->update(['nome_citta' => $nome_citta]);
+                    }
+                }
+            }
+
+            foreach ($provincie as $index => $provincie) {
+
+                foreach ($id_citta as $key => $value) {
+
+                    if ($index == $key) {
+
+                        DB::table('citta')
+                                ->where('id_citta', $value)
+                                ->update(['provincie' => $provincie]);
+                    }
+                }
+            }
+
+            return Redirect::back()
+                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> provincie updated succesfully..!</h4></div>');
+        }
+    }
+
+    /* ==================================== Life Cost Indices section END ======================================== */
+	
+	/* ==================================== Login activity section START ======================================== */
+
+// show user page list
+    public function utenti(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            return view('utenti', [
+                    // 'utenti' => DB::table('users')
+                    //     ->join('ruolo_utente', 'users.dipartimento', '=', 'ruolo_utente.ruolo_id')
+                    //     ->select('*')
+                    //     ->where('id', '!=', 0)
+                    //     ->where('is_approvato', '=', 1)
+                    //     ->where('ruolo_utente.is_delete', '=', 0)
+                    //     ->paginate(10),
+            ]);
+        }
+    }
+
+    public function getjsonusers(Request $request) {
+        $users = DB::table('users')
+                ->join('ruolo_utente', 'users.dipartimento', '=', 'ruolo_utente.ruolo_id')
+                ->leftjoin('stato', 'users.id_stato', '=', 'stato.id_stato')
+                ->select('*')
+                ->where('id', '!=', 0)
+                ->where('users.is_delete', '=', 0)
+                ->where('is_approvato', '=', 1)
+                ->where('ruolo_utente.is_delete', '=', 0)
+                ->get()
+                ->toArray();
+        foreach ($users as $key => $usr) {
+            $users[$key]->button = '<button id="access" class="access btn btn-warning" onclick="access(' . $usr->id . ')" type="submit">Access</button>';
+        }
+        return json_encode($users);
+    }
+
+    protected function access(Request $request) {
+        
+        $user = DB::table('users')
+                ->where('id', $request->userid)
+                ->first();
+
+        $request->session()->put('isAdmin', 1);
+        $request->session()->put('adminID', Auth::id());
+        
+        if (Auth::loginUsingId($user->id)) {
+            return redirect('/');
+        }
+    }
+
+    /* ==================================== Login activity section END ======================================== */
 
 }

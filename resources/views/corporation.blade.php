@@ -79,51 +79,57 @@ li label {
 
 @endif
 </script>
-
+<?php $loginuser = collect($loginuser)->toArray();?>
+@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
 <form action="{{ url('/enti/add/') }}" method="post" style="display:inline;">
 {{ csrf_field() }}
 <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo ente"><i class="fa fa-plus"></i></button>
 </form>
+@endif
 <!-- Inizio filtraggio miei/tutti -->
+
 @if(isset($miei))
 <a id="miei" href="{{url('/enti/miei')}}" style="display:inline;">
-<button class="button button2" type="button" name="miei" title="Miei - Filtra i tuoi enti" style="background-color:#337AB7;color:#ffffff">Miei</button>
+<button class="button button2" type="button" name="miei" title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>" style="background-color:#337AB7;color:#ffffff">{{trans('messages.keyword_my')}}</button>
 </a>
 <a id="tutti" href="{{url('/enti')}}" style="display:inline;">
-<button class="button button3" type="button" name="tutti" title="Tutti - Mostra tutti gli enti">Tutti</button>
+<button class="button button3" type="button" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>">{{trans('messages.keyword_all')}}</button>
 </a>
 @else
 <a id="miei" href="{{url('/enti/miei')}}" style="display:inline;">
-<button class="button button2" type="button" name="miei" title="Miei - Filtra i tuoi enti">Miei</button>
+<button class="button button2" type="button" name="miei" title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>">{{trans('messages.keyword_my')}}</button>
 </a>
 <a id="tutti" href="{{url('/enti')}}" style="display:inline;">
-<button class="button button3" type="button" name="tutti" title="Tutti - Mostra tutti gli enti" style="background-color:#D9534F;color:#ffffff">Tutti</button>
+<button class="button button3" type="button" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>" style="background-color:#D9534F;color:#ffffff">{{trans('messages.keyword_my')}}</button>
 </a>
 @endif
 <!-- Fine filtraggio miei/tutti -->
+@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
 <div class="btn-group">
 
 <a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-<button class="btn btn-primary" type="button" name="update" title="Modifica - Modifica l'ultimo ente selezionato"><i class="fa fa-pencil"></i></button>
+<button class="btn btn-primary" type="button" name="update" title="<?php echo trans('messages.keyword_edit_-_edit_the_last_selected_entities');?>"><i class="fa fa-pencil"></i></button>
 </a>
 
 <a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
-<button class="btn btn-info" type="button" name="duplicate" title="Duplica - Duplica gli enti selezionati"><i class="fa fa-files-o"></i></button>
+<button class="btn btn-info" type="button" name="duplicate" title="<?php echo trans('messages.keyword_duplicate_-_duplicates_selected_entities');?>"><i class="fa fa-files-o"></i></button>
 </a>
 
 <a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="fa fa-trash"></i></button>
+<button class="btn btn-danger" type="button" name="remove" title="<?php echo trans('messages.keyword_delete_-_delete_selected_entities') ?>"><i class="fa fa-trash"></i></button>
 </a>
 
 <a id="newclient" onclick="multipleAction('newclient');" style="display:inline;">
-<button class="btn btn-warning" type="button" name="newclient" title="Crea e invia le credenziali per il pannello Clienti all'ente selezionato">Nuovo Cliente</button>
+<button class="btn btn-warning" type="button" name="newclient" title="<?php echo trans('messages.keyword_create_send_credentials_for_the_customer_entity');?>">{{trans('messages.keyword_new_client')}}</button>
 </a>
 </div>
+
 <div class="skype-call">
 <a id="call" href="#">
 <button class="btn btn-warning" type="button" name="call" title="skype "><img src="../images/phone-call.png" alt="skype call"/></button>
 </a>
 </div>
+@endif
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php if(isset($miei)) echo url('enti/myenti/json'); else echo url('/enti/json');?>" data-classes="table table-bordered" id="table">
 <thead>
 <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
@@ -169,7 +175,7 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 
 function check() {
 
-	return confirm("Sei sicuro di voler eliminare: " + n + " enti?");
+	return confirm("<?php echo trans('messages.keyword_are_you_sure_you_want_to_delete:');?> " + n + " <?php echo trans('messages.keyword_entity');?>?");
 }
 function multipleAction(act) {
 	var link = document.createElement("a");
@@ -224,7 +230,7 @@ function multipleAction(act) {
             case 'newclient':
                 if(n!=0) {
                     n--;
-                    link.href = "{{ url('/enti/nuovocliente/corporation') }}" + '/' + indici[n];
+                    link.href = "{{ url('/enti/newclient/corporation') }}" + '/' + indici[n];
                     n = 0;
                     selezione = undefined;
                     link.dispatchEvent(clickEvent);

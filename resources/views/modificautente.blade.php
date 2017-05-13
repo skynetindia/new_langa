@@ -161,61 +161,90 @@
                   
       <tbody id="ente">
 
-      <?php 
+<?php 
 
+if(isset($utente->id_ente))
+{
+    $ente = explode(",", $utente->id_ente);          
+    $i=0;
+          
+    foreach ($ente as $ente_value) { ?>
+          
+    <tr>                      
+    <label class="checkente<?php echo $i;?>">
 
-      $ente = (isset($utente->id_ente))?explode(",", $utente->id_ente):array();
-        
-      $i=0;
-          
-      foreach ($ente as $ente_value) { ?>
-          
-      <tr>
-                      
-      <label class="checkente<?php echo $i;?>">
-      <select name="idente[]" class="form-control" id="id_ente" style="width: 200px">
+    <select name="idente[]" class="form-control" id="id_ente" style="width: 200px">
 
       <option style="background-color:white" selected disabled>-- select --</option>  
-      <?php  
-        foreach ($enti as $enti_value) { ?> 
 
-         <option <?php if($enti_value->id == $ente_value){ echo 'selected'; } ?> value="<?php if(isset($enti_value->id)){ echo $enti_value->id; } ?>">
-         <?php if(isset($enti_value->nomereferente)){ echo $enti_value->nomereferente; }  ?> </option> 
-
+      <?php foreach ($enti as $enti_value) { ?> 
+        <option <?php if($enti_value->id == $ente_value){ echo 'selected'; } ?> value="<?php echo $enti_value->id ?>"><?php echo $enti_value->nomereferente ?> </option> 
       <?php  }  ?>
     
     </select>
-      
     <input id="checkente<?php echo $i;?>" type="checkbox" class="checkente">  
 
     </label>
 
     <?php $i++; ?>
-    </tr>
-    <?php  } 
 
-    ?>
+    </tr>
+    <?php } ?>
+
     <input type="hidden" id="hidden" name="check" value="<?php echo $i; ?>">
+
+<?php 
+} else {  
+
+  $i=0;
+  ?>        
+      <tr>
+                      
+    <label class="checkente<?php echo $i;?>">
+      <select name="idente[]" class="form-control" id="id_ente" style="width: 200px">
+
+      <option style="background-color:white" selected disabled>-- select --</option> 
+
+      <?php foreach ($enti as $enti_value) { ?> 
+
+        <option value="<?php echo $enti_value->id ?>">
+        <?php echo $enti_value->nomereferente ?> </option> 
+
+      <?php  }  ?>
     
-    </tbody>
+      </select>
+      
+      <input id="checkente<?php echo $i;?>" type="checkbox" class="checkente">  
+
+    </label>
+
+    <?php $i++; ?>
+
+    </tr>
+   
+    <input type="hidden" id="hidden" name="check" value="<?php echo $i; ?>">
+
+<?php } ?>
+
+</tbody>
 
     <script>
                     
     $('#aggiungiente').on("click", function() {
     var i = $("#hidden").val();
       
-      $('#ente').append("<label class='checkente"+i+"'><select name='idente[]' class='form-control' id='id_ente'> <?php $check = false; ?> <option selected style='background-color:white'></option><?php for($i = 0; $i < count((array)$enti); $i++){if(isset($utente->id_ente) && $enti[$i]->id == $utente->id_ente){ ?><option selected value='<?php echo $enti[$i]->id ?>'><?php echo $enti[$i]->nomereferente ?></option><?php $check = true; } if($check==false){ ?> <option value='<?php echo $enti[$i]->id ?>'><?php echo $enti[$i]->nomereferente ?> </option>+<?php } $check = false; }?></select><input id='checkente"+i+"' type='checkbox' class='checkente'></label>" );
+      $('#ente').append("<label class='checkente"+i+"'><select name='idente[]' class='form-control' id='id_ente'> <option selected style='background-color:white' disabled> -- select -- </option><?php foreach ($enti as $enti_value) { ?><option value='<?php echo  $enti_value->id ?>'><?php echo $enti_value->nomereferente ?></option><?php } ?></select><input id='checkente"+i+"' type='checkbox' class='checkente'></label>" );
         i++;
+
         $('#hidden').val(i);
 
-            });
+        });
 
               $('#eliminaente').on("click", function() {
 
                   if($('#checkente0').prop('checked') == true) {
-
                       alert("Can not remove default ente");
-                      $('input:checkbox').removeAttr('checked');
+                      $('#checkente0').attr('checked', false);                    
 
                   } else {
 
@@ -237,7 +266,9 @@
                   }                 
               });
 
-                  </script>
+          </script>
+
+
               </table>
         </div>  
       <br>
@@ -273,7 +304,8 @@
     <label for="dipartimento">{{ trans('messages.keyword_profile') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
     <select id="dipartimento" class="form-control" name="dipartimento">
-         
+        
+        <option style="background-color:white" selected disabled>-- select --</option>  
          @foreach($ruolo as $ruolo)
            <option  value="{{ $ruolo->ruolo_id }}" <?php echo (isset($utente->dipartimento) && $utente->dipartimento == $ruolo->ruolo_id) ? 'selected="selected"':'';?>>{{ $ruolo->nome_ruolo }}</option>  
         @endforeach 
@@ -290,9 +322,58 @@
           var fullurl = url+'/'+$(this).val();
 
           $.get( fullurl, function( data ) {
-            var permessi = $( "#permissionview" ).html( data );       
-          });
+            var permessi = $( "#permissionview" ).html( data );  
 
+              $('.reading').click(function () {   
+                var $id = $(this).attr('id');
+                $('.'+$id).prop('checked', this.checked);
+              });
+
+              $('.writing').click(function () {
+                  var $id = $(this).attr('id');
+                  $('.'+$id).prop('checked', this.checked);
+             });
+
+          //   $('.input_class_checkbox').each(function(){
+          //       $(this).hide().after('<div class="class_checkbox" />');
+          //     if($(this).hasClass('reading'))
+          //     {
+          //       $thisid=$(this).attr('id');
+          //       $this=$("#"+$thisid);
+          //       $(document).find($this).next().addClass('reading');
+          //       $(document).find($this).next().attr('data-info',$thisid);
+          //     }
+              
+          //     else 
+          //     {
+          //       if($(this).hasClass('writing'))
+          //       {
+          //         $thisid=$(this).attr('id');
+          //         $this=$("#"+$thisid);
+          //         $(document).find($this).next().addClass('writing');
+          //         $(document).find($this).next().attr('data-info',$thisid);
+                  
+          //       }
+          //       else
+          //       {
+          //         $class= $(this).attr("class");
+          //         $cls=$class.split(' ');
+          //         $(this).next().addClass($cls[0]);
+          //       }
+          //     }
+
+          //   });
+
+          //   $('.class_checkbox').on('click',function(){
+          //       $(this).toggleClass('checked').prev().prop('checked',$(this).is('.checked'));
+          //     if($(this).hasClass('writing') || $(this).hasClass('reading'))
+          //     {
+          //       $class=$(this).attr('data-info');
+          //       $(document).find('.'+$class).toggleClass('checked');
+          //     }
+          //   }); 
+
+          });
 
         });
 
@@ -321,10 +402,14 @@
                   
     <tbody id="zone">
 
-    <?php 
-      $city = (isset($utente->id_citta))?explode(",", $utente->id_citta):[];
+<?php 
 
-      $i=0;
+if(isset($utente->id_citta))
+{
+
+    $city = explode(",", $utente->id_citta);
+
+    $i=0;
 
     foreach ($city as $city_value) { ?>
 
@@ -351,6 +436,40 @@
     <?php  } ?>
 
     <input type="hidden" id="hiddenzone" name="checkhidden" value="<?php echo $i; ?>">
+
+<?php 
+} else {  
+
+  $i=0;
+  ?>
+
+   <tr>
+
+    <label class="checkzone<?php echo $i;?>">                    
+
+    <select name="zone[]" class="form-control" id="zone" style="width: 200px">
+          <option style="background-color:white" selected disabled>-- select --</option> 
+    <?php  
+
+    foreach ($citta as $citta_value) { ?> 
+
+     <option value=""><?php echo $citta_value->nome_citta ?> </option> 
+
+    <?php    }
+    ?>
+
+    </select>
+
+    <input id="checkzone<?php echo $i;?>" type="checkbox" class="checkzone"> 
+    </label>
+
+    <?php $i++; ?>
+        </tr>
+
+    <input type="hidden" id="hiddenzone" name="checkhidden" value="<?php echo $i; ?>">
+
+<?php } ?>
+   
     
     </tbody>
 
@@ -361,27 +480,27 @@
 
       var i = $("#hiddenzone").val();
 
-      $('#zone').append("<label class='checkzone"+i+"'><select name='zone[]' class='form-control' id='zone' style='width: 250px'> <?php $check = false; ?> <option selected style='background-color:white'></option><?php for($i = 0; $i < count((array)$citta); $i++){if(isset($utente->id_citta) && $citta[$i]->id_citta == $utente->id_citta){ ?><option selected value='<?php echo $citta[$i]->id_citta ?>'><?php echo $citta[$i]->nome_citta ?></option><?php $check = true; } if($check==false){ ?> <option value='<?php echo $citta[$i]->id_citta ?>'><?php echo $citta[$i]->nome_citta ?> </option>+<?php } $check = false; }?></select><input id='checkzone"+i+"' type='checkbox' class='checkzone'></label>");
+      $('#zone').append("<label class='checkzone"+i+"'><select name='zone[]' class='form-control' id='zone'> <option selected style='background-color:white' disabled> -- select -- </option><?php foreach ($citta as $citta_value) { ?><option value='<?php echo  $citta_value->id_citta ?>'><?php echo $citta_value->nome_citta ?></option><?php } ?></select><input id='checkzone"+i+"' type='checkbox' class='checkzone'></label>" );
 
-          i++;
-          $('#hiddenzone').val(i);
+        i++;
+        $('#hiddenzone').val(i);
 
-          });
+        });
 
         $('#eliminazone').on("click", function() {
 
             if($('#checkzone0').prop('checked') == true) {
 
               alert("Can not remove default zone");
-              $('input:checkbox').removeAttr('checked');
+              $('#checkzone0').attr('checked', false);
 
           } else {
-
+                
               $(".checkzone").each(function(){
 
               var i = $("#hiddenzone").val();
-
-                if($(this).prop('checked') ==true) {
+              
+                if($(this).prop('checked') == true) {
 
                   var newclass = $(this).prop('id');
                   $("."+newclass).remove(); 
@@ -440,9 +559,15 @@
             echo "<td><b>";
             echo $module->modulo;
             echo "</td></b> <td>";
-       ?><input type="checkbox" class="reading" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :''; ?>>        <?php
+       ?><input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]"  value="<?php echo $module->id.'|0|lettura';?>" 
+       <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?>> 
+       
+        <?php
             echo "</td><td>"; ?>
-              <input type="checkbox" class="writing" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"<?php echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :''; ?>>
+              <input type="checkbox" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"<?php echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :''; ?>>
+
+              <!-- <div class="class_checkbox writing <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
+             
             <?php
         echo "</td></tr>";
 
@@ -455,12 +580,18 @@
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" class="lettura<?php echo $i; ?>" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"<?php echo (in_array($module->id.'|'.$submodule->id.'|lettura', $permessi)) ? 'checked' :''; ?> >
+              <input type="checkbox" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"<?php echo (in_array($module->id.'|'.$submodule->id.'|lettura', $permessi)) ? 'checked' :''; ?> >
+
+              <!-- <div class="class_checkbox lettura <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
+
               <?php
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" class="scrittura<?php echo $i; ?>" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo (in_array($module->id.'|'.$submodule->id.'|scrittura', $permessi)) ? 'checked' :''; ?> >
+              <input type="checkbox" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo (in_array($module->id.'|'.$submodule->id.'|scrittura', $permessi)) ? 'checked' :''; ?> >
+
+              <!-- <div class="class_checkbox scrittura <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
+
               <input type="hidden" id="hidden" name="checkhidden" value="<?php echo $i; ?>">
             <?php
             echo "</td>";
@@ -476,7 +607,10 @@
          echo "</td></b> ";
 
           echo "<td>"; ?>
-            <input type="checkbox" class="reading" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :''; ?>>
+            <input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :''; ?>>
+
+             <!-- <div class="class_checkbox reading <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
+
             <?php
           echo "</td>";
 
@@ -506,9 +640,10 @@
             echo "<td><b>";
             echo $module->modulo;
             echo "</td></b> <td>";
-       ?><input type="checkbox" class="reading" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">        <?php
+
+       ?><input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">        <?php
             echo "</td><td>"; ?>
-              <input type="checkbox" class="writing" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>">
+              <input type="checkbox" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>">
             <?php
         echo "</td></tr>";
 
@@ -521,12 +656,12 @@
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" class="lettura<?php echo $i; ?>" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>">
+              <input type="checkbox" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>">
               <?php
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" class="scrittura<?php echo $i; ?>" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>">
+              <input type="checkbox" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>">
               <input type="hidden" id="hidden" name="checkhidden" value="<?php echo $i; ?>">
             <?php
             echo "</td>";
@@ -542,7 +677,7 @@
          echo "</td></b> ";
 
           echo "<td>"; ?>
-            <input type="checkbox" class="reading" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
+            <input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
             <?php
           echo "</td>";
 
@@ -559,18 +694,68 @@
 ?>
 @endif
 </div>
+
 <script type="text/javascript">
   
-  $('.reading').click(function () {    
-       // $('#sublettura').prop('checked', this.checked); 
-        var $id = $(this).attr('id');
-        $('.'+$id).prop('checked', this.checked);
-   });
+  $('.reading').click(function () {   
+    var $id = $(this).attr('id');
+    $('.'+$id).prop('checked', this.checked);
+  });
 
-  $('.writing').click(function () {    
-       var $id = $(this).attr('id');
-        $('.'+$id).prop('checked', this.checked);
-   });
+  $('.writing').click(function () {
+      var $id = $(this).attr('id');
+      $('.'+$id).prop('checked', this.checked);
+  });
+
+// setTimeout(function(){
+
+// $('.input_class_checkbox').each(function(){
+//   if($(this).attr('checked') == true){
+//     $(this).hide().after('<div class="class_checkbox checked" />');
+//   }else{
+//     $(this).hide().after('<div class="class_checkbox" />');
+//   }
+
+//   if($(this).hasClass('reading'))
+//   {
+//     $thisid=$(this).attr('id');
+//     $this=$("#"+$thisid);
+//     $(document).find($this).next().addClass('reading');
+//     $(document).find($this).next().attr('data-info',$thisid);
+//   }
+  
+//   else 
+//   {
+//     if($(this).hasClass('writing'))
+//     {
+//       $thisid=$(this).attr('id');
+//       $this=$("#"+$thisid);
+//       $(document).find($this).next().addClass('writing');
+//       $(document).find($this).next().attr('data-info',$thisid);
+      
+//     }
+//     else
+//     {
+//       $class= $(this).attr("class");
+//       $cls=$class.split(' ');
+//       $(this).next().addClass($cls[0]);
+//     }
+//   }
+
+// });
+// }, 200);
+
+// $('.class_checkbox').on('click',function(){
+//     $(this).toggleClass('checked').prev().prop('checked',$(this).is('.checked'));
+//   if($(this).hasClass('writing') || $(this).hasClass('reading'))
+//   {
+//     $class=$(this).attr('data-info');
+//     $(document).find('.'+$class).toggleClass('checked');
+//   }
+// });
+
+</script>
+
 
 </script>
 

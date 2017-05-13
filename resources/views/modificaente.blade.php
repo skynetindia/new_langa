@@ -14,7 +14,8 @@
 <!--<link href="{{asset('build/js/jquery.datetimepicker.min.css')}}" rel="stylesheet">
 <script src="{{asset('build/js/jquery.datetimepicker.full.js')}}"></script>-->
 
-<h1><?php echo (isset($action) && $action=='add') ? 'Aggiungi ente' : 'Modifica ente'; ?></h1><hr>
+<h1><?php echo (isset($action) && $action=='add') ? trans('messages.keyword_add_entity') : trans('messages.keyword_edit_entity'); ?></h1><hr>
+<?php $loginuser = collect($loginuser)->toArray();?>
 <style>
 table tr td {
 	text-align:left;
@@ -110,13 +111,14 @@ table tr td {
 @if(isset($corp->logo))
 <div class="container-fluid col-md-10">
 	<div style="display:inline">
- 	<img src="{{url('/storage/app/images/').'/'.$corp->logo}}" style="max-width:100px; max-height:100px;display:inline"></img><h4 style="display:inline">  Codice: {{$corp->id}}</h4>
+ 	<img src="{{url('/storage/app/images/').'/'.$corp->logo}}" style="max-width:100px; max-height:100px;display:inline"></img><h4 style="display:inline">  {{trans('messages.keyword_code')}}: {{$corp->id}}</h4>
     <hr>
 	</div>
 </div>
 <div class="col-md-2 top-right-btn"  >
-		
-		<button onclick="mostra2()" id="btnSubmiTop" type="submit" class="btn btn-warning">Salva</button>
+		@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
+		<button onclick="mostra2()" id="btnSubmiTop" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+		@endif
 	</div>
 @endif
 <?php /*<div class="container-fluid col-md-12" style="background:#2a3f54;color:#ffffff"><br>
@@ -134,33 +136,36 @@ table tr td {
 		</div>
 	</form>
 </div>*/?>
-<?php 
+<?php
+
+	
 if(isset($corp->id)){
 	echo Form::open(array('url' => '/enti/update/corporation/' . $corp->id, 'files' => true,'id'=>'frmModificaente')); 
 }
 else {
 	echo Form::open(array('url' => '/enti/store/', 'files' => true,'id'=>'frmModificaente'));
 }
+
 ?>
 	{{ csrf_field() }}
        
 	<!-- inizio chiamata -->
   <div class="row">
 	<div class="col-md-12" style="padding-top:10px;">
-		<h4>Note (Conversazioni, costi, appunti,..)</h4>
+		<h4>{{trans('messages.keyword_note')}} ({{trans('messages.keyword_conversations')}}, {{trans('messages.keyword_costs')}}, {{trans('messages.keyword_notes')}},..)</h4>
 		<a id="creaNuovaChiamata" class="btn btn-warning" name="create" title="Crea nuovo"><i class="fa fa-plus"></i></a>
 		<a class="btn btn-danger" id="removeNote"  name="remove" title="Elimina"><i class="fa fa-eraser"></i></a>
 		<div class="table-editable" style="padding-top:10px">
 			<table class="table table-striped table-bordered">
 			<thead>
 				<th>#
-				<th>Utente
-                <th>Appunti
-                <th>Date
-                <th>Banca
-                <th>Cassa
-                <th>Frequenza
-                <th>Notifiche                
+				<th>{{trans('messages.keyword_user')}}
+                <th>{{trans('messages.keyword_notes')}}
+                <th>{{trans('messages.keyword_date')}}
+                <th>{{trans('messages.keyword_bank')}}
+                <th>{{trans('messages.keyword_case')}}
+                <th>{{trans('messages.keyword_frequency')}}
+                <th>{{trans('messages.keyword_notifications')}}                
 				<?php /*<th>Ricontattare il giorno
 				<th>Alle
 				<th>Data inserimento*/?>
@@ -176,21 +181,21 @@ else {
                                           $.datepicker.regional['nl']
                                         )
                                       ); 
-                    var $j = jQuery.noConflict();</script>
-					@for($i = 0; $i < count($chiamate); $i++)
+                    var $j = jQuery.noConflict();</script>					
+					@foreach($actionmessages as $i => $actionmessages)
 						<tr>
 						<td>
 							<input type="checkbox" class="selezione_note">
 						</td>
                         <td><select class="form-control" id="utenti<?php echo $i; ?>"  name="utente[]"  class="form-control" >
                         @if(isset($action) && $action == 'add')
-                         @foreach($utenti as $utente)
-                            <option value="{{$utente->id}}" <?php if(isset($chiamate[$i]->id_utente) && $chiamate[$i]->id_utente == $utente->id ){ echo 'selected';}?>>{{$utente->name}}</option>
+                         @foreach($users as $utente)
+                            <option value="{{$utente->id}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $utente->id ){ echo 'selected';}?>>{{$utente->name}}</option>
                          @endforeach
                         @else
-                            @foreach($partecipanti as $partecipante)
-                            <option value="{{$partecipante->id_user}}" <?php if(isset($chiamate[$i]->id_utente) && $chiamate[$i]->id_utente == $partecipante->id_user ){ echo 'selected';}?>>
-                             @foreach($utenti as $utente)
+                            @foreach($participant as $partecipante)
+                            <option value="{{$partecipante->id_user}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $partecipante->id_user ){ echo 'selected';}?>>
+                             @foreach($users as $utente)
                                             @if($utente->id == $partecipante->id_user)
                                                 {{$utente->name}}
                                                 @break
@@ -202,34 +207,34 @@ else {
 	        	        </select>
 						</td>
 						<td>
-							<input type="text" id="editable<?php echo $i; ?>" name="ric[]" class="form-control" value="<?php echo isset($chiamate[$i]->appunti) ? $chiamate[$i]->appunti : ""; ?>">
+							<input type="text" id="editable<?php echo $i; ?>" name="ric[]" class="form-control" value="<?php echo isset($actionmessages->appunti) ? $actionmessages->appunti : ""; ?>">
 						</td>
 						<td>
-							<span class="datapicker-icon"><i class="fa fa-calendar" aria-hidden="true"></i></span> <span class="select-date"><input type="text" id="datepicker_to<?php echo $i; ?>" name="datepicker_to[]" class="form-control" value="<?php echo $chiamate[$i]->datainserimento; ?>"></span>                            
+							<span class="datapicker-icon"><i class="fa fa-calendar" aria-hidden="true"></i></span> <span class="select-date"><input type="text" id="datepicker_to<?php echo $i; ?>" name="datepicker_to[]" class="form-control" value="<?php echo $actionmessages->datainserimento; ?>"></span>                            
 						</td>
                         <td>
-							<input type="text" name="banca[]" class="form-control" value="<?php echo isset($chiamate[$i]->banca) ? $chiamate[$i]->banca : ""; ?>">
+							<input type="text" name="banca[]" class="form-control" value="<?php echo isset($actionmessages->banca) ? $actionmessages->banca : ""; ?>">
 						</td>
                         <td>
-							<input type="text" name="cassa[]" class="form-control" value="<?php echo isset($chiamate[$i]->cassa) ? $chiamate[$i]->cassa : ""; ?>">
+							<input type="text" name="cassa[]" class="form-control" value="<?php echo isset($actionmessages->cassa) ? $actionmessages->cassa : ""; ?>">
 						</td>
                         <td><?php 
                         	$arrFrequen = array('1_M'=>'1 M.','2_M'=>'2 M.','3_M'=>'3 M.','6_M'=>'6 M.','1_A'=>'1 A.');
 							foreach($arrFrequen as $key => $val){
-                        		?><div class="cust-radio"><input type="radio" name="frequenza[<?php echo $i; ?>]" <?php if($key == $chiamate[$i]->frequenza){ echo 'checked';}?> id="frequenza_<?php echo $i.$key; ?>" value="{{ $key }}" />
+                        		?><div class="cust-radio"><input type="radio" name="frequenza[<?php echo $i; ?>]" <?php if($key == $actionmessages->frequenza){ echo 'checked';}?> id="frequenza_<?php echo $i.$key; ?>" value="{{ $key }}" />
                                 <label for="frequenza_<?php echo $i.$key; ?>"> <?php echo $val; ?></label><div class="check"><div class="inside"></div></div></div> <?php
 							}
 						?></td>
-						<td><div class="switch"><input type="checkbox" name="notifiche[<?php echo $i;?>]" id="notifiche_<?php echo $i;?>" value="1" <?php if(isset($chiamate[$i]->notifiche) && $chiamate[$i]->notifiche == '1') { echo 'checked';}?>/><label for="notifiche_<?php echo $i;?>"></label></div>
+						<td><div class="switch"><input type="checkbox" name="notifiche[<?php echo $i;?>]" id="notifiche_<?php echo $i;?>" value="1" <?php if(isset($actionmessages->notifiche) && $actionmessages->notifiche == '1') { echo 'checked';}?>/><label for="notifiche_<?php echo $i;?>"></label></div>
                         </td>
 						<?php /*<td>
-							<input type="text" id="impedisci<?php echo $i; ?>" name="datainserimento[]" class="form-control " value="<?php echo $chiamate[$i]->datainserimento; ?>">
+							<input type="text" id="impedisci<?php echo $i; ?>" name="datainserimento[]" class="form-control " value="<?php echo $actionmessages->datainserimento; ?>">
 						</td>*/?>	
 						</tr>
 						<script>                                             
 						var impedisciModifica2 = function() {
 							this.blur();
-							this.value = "<?php echo $chiamate[$i]->datainserimento; ?>";
+							this.value = "<?php echo $actionmessages->datainserimento; ?>";
 						}	
 						//$j("#datepicker_to<?php echo $i; ?>").datepicker();
 						//$(function() {
@@ -248,7 +253,7 @@ else {
 						$j('#impedisci<?php echo $i; ?>').bind("click", impedisciModifica2);
 						k++;
 						</script>
-					@endfor
+					@endforeach
 				</tbody>
 			</table>
 		</div>
@@ -284,14 +289,14 @@ else {
 				td +='<td><select class="form-control" id="utenti'+count+'" name="utente[]"  class="form-control">';
                 td +='<?php 
 				        if(isset($action) && $action == 'add'){
-                         foreach($utenti as $utente){
-                            ?><option value="{{$utente->id}}" <?php if(isset($chiamate[$i]->id_utente) && $chiamate[$i]->id_utente == $utente->id ){ echo 'selected';}?>>{{$utente->name}}</option><?php
+                         foreach($users as $utente){
+                            ?><option value="{{$utente->id}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $utente->id ){ echo 'selected';}?>>{{$utente->name}}</option><?php
 						 }
 						}
 						else {
-                            foreach($partecipanti as $partecipante) {
-                            ?><option value="{{$partecipante->id_user}}" <?php if(isset($chiamate[$i]->id_utente) && $chiamate[$i]->id_utente == $partecipante->id_user ){ echo 'selected';}?>><?php
-                             foreach($utenti as $utente){
+                            foreach($participant as $partecipante) {
+                            ?><option value="{{$partecipante->id_user}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $partecipante->id_user ){ echo 'selected';}?>><?php
+                             foreach($users as $utente){
                                  if($utente->id == $partecipante->id_user){
                                     echo $utente->name;
 	                                 break;
@@ -301,7 +306,7 @@ else {
 							}
 					}
 				
-				/*foreach($utenti as $utente){
+				/*foreach($users as $utente){
                 	    ?><option value="<?php echo $utente->id;?>"><?php echo $utente->name;?></option><?php
 					}*/
 					
@@ -402,12 +407,12 @@ else {
 	<!-- colonna a sinistra -->
   <div class="row">
 	<div class="col-md-4">
-		<br><label for="nomeazienda">Nome azienda <p style="color:#f37f0d;display:inline">(*)</p></label>
-		<input value="{{ isset($corp->nomeazienda) ? $corp->nomeazienda : ""}}" class="form-control" type="text" name="nomeazienda" id="nomeazienda" placeholder="Nome azienda"><br>
-		<label for="piva">Partita IVA / Codice fiscale</label>
-		<input value="{{isset($corp->piva) ? $corp->piva : ""}}" class="form-control" type="text" name="piva" id="piva" placeholder="Partita iva"><br>
-		<label for="cellulareazienda">Telefono Secondario </label>
-		<input value="{{isset($corp->cellulareazienda) ? $corp->cellulareazienda : ""}}" class="form-control" type="text" name="cellulareazienda" id="cellulareazienda" placeholder="Telefono opzionale"><br>
+		<br><label for="nomeazienda">{{trans('messages.keyword_company_name')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<input value="{{ isset($corp->nomeazienda) ? $corp->nomeazienda : ""}}" class="form-control" type="text" name="nomeazienda" id="nomeazienda" placeholder="{{trans('messages.keyword_company_name')}}"><br>
+		<label for="piva">{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}</label>
+		<input value="{{isset($corp->piva) ? $corp->piva : ""}}" class="form-control" type="text" name="piva" id="piva" placeholder="{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}"><br>
+		<label for="cellulareazienda">{{trans('messages.keyword_secondary_telephone')}} </label>
+		<input value="{{isset($corp->cellulareazienda) ? $corp->cellulareazienda : ""}}" class="form-control" type="text" name="cellulareazienda" id="cellulareazienda" placeholder="{{trans('messages.keyword_secondary_telephone')}}"><br>
 		<label for="iban">IBAN</label>
 		<input value="{{isset($corp->iban) ? $corp->iban : ""}}" class="form-control" type="text" name="iban" id="iban" placeholder="IBAN"><br>
         <label for="swift">Swift</label>
@@ -416,21 +421,21 @@ else {
 		
 	</div>
      <div class="col-md-8">
-	<div class=""><strong>Indirizzo <p style="color:#f37f0d;display:inline">(*)</p></strong><br>
+	<div class=""><strong>{{trans('messages.keyword_address')}} <p style="color:#f37f0d;display:inline">(*)</p></strong><br>
 	 <input value="{{ isset($corp->indirizzo) ? $corp->indirizzo : old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text"
-        placeholder="Inserisci un indirizzo (*)">
+        placeholder="{{trans('messages.keyword_enter_an_address')}} (*)">
     <div id="type-selector" class="controls">
       <input type="radio" name="type" id="changetype-all" checked="checked">
-      <label for="changetype-all">Tutti</label>
+      <label for="changetype-all">{{trans('messages.keyword_all')}}</label>
 
       <input type="radio" name="type" id="changetype-establishment">
-      <label for="changetype-establishment">Aziende</label>
+      <label for="changetype-establishment">{{trans('messages.keyword_company')}}</label>
 
       <input type="radio" name="type" id="changetype-address">
-      <label for="changetype-address">Indirizzi</label>
+      <label for="changetype-address">{{trans('messages.keyword_addresses')}}</label>
 
       <input type="radio" name="type" id="changetype-geocode">
-      <label for="changetype-geocode">CAP</label>
+      <label for="changetype-geocode">{{trans('messages.keyword_postal_code')}}</label>
     </div>
 	
     <div id="map"></div>
@@ -438,22 +443,22 @@ else {
 	<!-- colonna centrale -->
     <div class="row">
 	<div class="col-md-6">
-		<br><label for="nomereferente">Nome referente <p style="color:#f37f0d;display:inline">(*)</p></label>
-		<input value="{{ isset($corp->nomereferente) ? $corp->nomereferente : ""}}" class="form-control" type="text" name="nomereferente" id="nomereferente" placeholder="Nome referente"><br>
-		<label for="cf">Carta di Credito </label>
-		<input value="{{isset($corp->cf) ? $corp->cf : ""}}" class="form-control" type="text" name="cf" id="cf" placeholder="Carta di Credito"><br>
+		<br><label for="nomereferente">{{trans('messages.keyword_reference_name')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<input value="{{ isset($corp->nomereferente) ? $corp->nomereferente : ""}}" class="form-control" type="text" name="nomereferente" id="nomereferente" placeholder="{{trans('messages.keyword_reference_name')}}"><br>
+		<label for="cf">{{trans('messages.keyword_credit_card')}} </label>
+		<input value="{{isset($corp->cf) ? $corp->cf : ""}}" class="form-control" type="text" name="cf" id="cf" placeholder="{{trans('messages.keyword_credit_card')}}"><br>
 		<label for="fax">Fax</label>
 		<input value="{{isset($corp->fax) ? $corp->fax :""}}" class="form-control" type="text" name="fax" id="fax" placeholder="Fax"><br>
-		<label for="statoemotivo">Stato emotivo</label>
+		<label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
 		<select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
-			<!-- statoemotivoselezionato -->
+			<!-- selectedemotionState -->
 			<option style="background-color:white"></option>
-			@if($statoemotivoselezionato!=null)
-				@foreach($statiemotivi as $statoemotivo)
-					<option @if($statoemotivo->id == $statoemotivoselezionato->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+			@if($selectedemotionState!=null)
+				@foreach($emotionState as $statoemotivo)
+					<option @if($statoemotivo->id == $selectedemotionState->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
 				@endforeach
 			@else
-				@foreach($statiemotivi as $statoemotivo)
+				@foreach($emotionState as $statoemotivo)
 					<option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
 				@endforeach
 			@endif
@@ -471,14 +476,14 @@ else {
 	<!-- colonna a destra -->
 	<div class="col-md-6">
 		<br><datalist id="settori"></datalist>
-		<label for="settore">Settore</label>
-		<input value="{{isset($corp->settore) ? $corp->settore : old('settore')}}" list="settori" class="form-control" type="text" id="settore" name="settore" placeholder="Cerca un settore..."><br>
-		<label for="telefonoazienda">Telefono Primario <p style="color:#f37f0d;display:inline">(*)</p></label>
-		<input value="{{ isset($corp->telefonoazienda) ? $corp->telefonoazienda : old('telefonoazienda')}}" class="form-control" type="text" name="telefonoazienda" id="telefonoazienda" placeholder="Telefono primario"><br>
-		<label for="email">Email primaria <p style="color:#f37f0d;display:inline">(*)</p></label>
-		<input value="{{isset($corp->email) ? $corp->email : old('email')}}" class="form-control" type="email" name="email" id="email" placeholder="Email di notifica"><br>
-		<label for="emailsecondaria">Email secondaria</label>
-		<input value="{{isset($corp->emailsecondaria) ? $corp->emailsecondaria : old('emailsecondaria')}}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="Email opzionale"><br>
+		<label for="settore">{{trans('messages.keyword_sector')}}</label>
+		<input value="{{isset($corp->settore) ? $corp->settore : old('settore')}}" list="settori" class="form-control" type="text" id="settore" name="settore" placeholder="{{trans('messages.keyword_seek_an_industry')}}"><br>
+		<label for="telefonoazienda">{{trans('messages.keyword_primary_phone')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<input value="{{ isset($corp->telefonoazienda) ? $corp->telefonoazienda : old('telefonoazienda')}}" class="form-control" type="text" name="telefonoazienda" id="telefonoazienda" placeholder="{{trans('messages.keyword_primary_phone')}}"><br>
+		<label for="email">{{trans('messages.keyword_primary_email')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<input value="{{isset($corp->email) ? $corp->email : old('email')}}" class="form-control" type="email" name="email" id="email" placeholder="{{trans('messages.keyword_notification_email')}}"><br>
+		<label for="emailsecondaria">{{trans('messages.keyword_secondary_email')}}</label>
+		<input value="{{isset($corp->emailsecondaria) ? $corp->emailsecondaria : old('emailsecondaria')}}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="{{trans('messages.keyword_secondary_email')}}"><br>
 
 	</div></div>
  
@@ -508,29 +513,31 @@ else {
     
     <div class="col-md-6">
     	<!-- sede legale -->
-        <br><label for="sedelegale">Sede legale</label>
-        	<textarea rows="9" title="Sede dell'ente che verrà riporata nel preventivo" class="form-control" name="sedelegale" id="sedelegale" placeholder="Sede legale">{{ isset($corp->sedelegale) ? $corp->sedelegale : old('sedelegale')  }}</textarea>
+        <br><label for="sedelegale">{{trans('messages.keyword_registered_office')}}</label>
+        	<textarea rows="9" title="{{trans('messages.keyword_headquarters_estimate')}}" class="form-control" name="sedelegale" id="sedelegale" placeholder="{{trans('messages.keyword_registered_office')}}">{{ isset($corp->sedelegale) ? $corp->sedelegale : old('sedelegale')  }}</textarea>
         <!-- /sede legale -->
     </div>
     <div class="col-md-6">
-    	<!-- logo resp tel partecipanti -->
-
-	<br><label for="logo">Logo</label>
+    	<!-- logo resp tel participant -->
+		<br><label for="skype_id">Skype Id</label>
+		<input value="{{isset($corp->skype_id) ? $corp->skype_id : old('skype_id')}}" class="form-control" type="text" name="skype_id" id="skype_id" placeholder="Skype Id">
+		
+	<label for="{{trans('messages.keyword_logo')}}">{{trans('messages.keyword_logo')}}</label>
 	<?php echo Form::file('logo', ['class' => 'form-control']); ?><br>
     
-    <label for="responsabilelanga">Responsabile LANGA <p style="color:#f37f0d;display:inline">(*)</p></label>
-		<select title="Responsabile associato a questo ente" name="responsabilelanga" id="responsabilelanga" class="form-control"  onchange="trovaTelefono()">
+    <label for="responsabilelanga">{{trans('messages.keyword_responsible')}} LANGA <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<select title="{{trans('messages.keyword_responsible_associated_body')}}" name="responsabilelanga" id="responsabilelanga" class="form-control"  onchange="trovaTelefono()">
 			<option></option>
-			@for($i = 1; $i < count($utenti); $i++)
-				@if(isset($corp->responsabilelanga) && $corp->responsabilelanga == $utenti[$i]->name)
-					<option selected>{{ $utenti[$i]->name }}</option>
+			@for($i = 1; $i < count($users); $i++)
+				@if(isset($corp->responsabilelanga) && $corp->responsabilelanga == $users[$i]->name)
+					<option selected>{{ $users[$i]->name }}</option>
 				@else
-					<option>{{ $utenti[$i]->name }}</option>
+					<option>{{ $users[$i]->name }}</option>
 				@endif
 			@endfor
 		</select>
-        <br><label for="telefonoresponsabile">Telefono responsabile Langa</label>
-		<input class="form-control" type="text" name="telefonoresponsabile" readonly id="telefonoresponsabile" placeholder="Telefono responsabile Langa"><br>
+        <br><label for="telefonoresponsabile">{{trans('messages.keyword_responsible_phone_langa')}}</label>
+		<input class="form-control" type="text" name="telefonoresponsabile" readonly id="telefonoresponsabile" placeholder="{{trans('messages.keyword_responsible_phone_langa')}}"><br>
 
 		<?php /*<div title="Se Sì, ente mostrato solamente all'utente che l'ha creato e all'admin" style="text-align:right">
 			<label for="privato">Ente Privato?</label>
@@ -553,18 +560,18 @@ else {
 		<table class="table-bordered">
 		<tr>
 		<?php $check = false; ?>
-		@for($i = 0; $i < count($tipi); $i++)
+		@for($i = 0; $i < count($type); $i++)
 			@if($i%4==0)
 				</tr><tr>
 			@endif
-			@for($k = 0; $k < count($tipiselezionati); $k++)
-				@if($tipiselezionati[$k]->id_tipo == $tipi[$i]->id)
-					<td class="ciao"><input type="checkbox" checked name="tipi[]" id="tipi[]" value="<?php echo $tipi[$i]->name; ?>"><?php echo " " . $tipi[$i]->name; ?></td>
+			@for($k = 0; $k < count($selectedtype); $k++)
+				@if($selectedtype[$k]->id_tipo == $type[$i]->id)
+					<td class="ciao"><input type="checkbox" checked name="tipi[]" id="tipi[]" value="<?php echo $type[$i]->name; ?>"><?php echo " " . $type[$i]->name; ?></td>
 					<?php $check = true; ?>
 				@endif
 			@endfor
 			@if($check==false)
-				<td class="ciao"><input type="checkbox" name="tipi[]" id="tipi[]" value="<?php echo $tipi[$i]->name; ?>"><?php echo " " . $tipi[$i]->name; ?></td>
+				<td class="ciao"><input type="checkbox" name="tipi[]" id="tipi[]" value="<?php echo $type[$i]->name; ?>"><?php echo " " . $type[$i]->name; ?></td>
 			@endif
 			<?php $check = false; ?>
 		@endfor
@@ -572,19 +579,19 @@ else {
 		</table>
 	</div></div><?php */?>
     <div class="col-md-6">
-        	<br><label for="indirizzospedizione">Indirizzo spedizione</label>
-        	<textarea rows="9" title="Sede dell'ente che verrà riporata nel preventivo" class="form-control" name="indirizzospedizione" id="indirizzospedizione" placeholder="Indirizzo spedizione">{{ isset($corp->indirizzospedizione) ? $corp->indirizzospedizione :  old('sedelegale') }}</textarea>
+        	<br><label for="indirizzospedizione">{{trans('messages.keyword_shipping_address')}}</label>
+        	<textarea rows="9" title="Sede dell'ente che verrà riporata nel preventivo" class="form-control" name="indirizzospedizione" id="indirizzospedizione" placeholder="{{trans('messages.keyword_shipping_address')}}">{{ isset($corp->indirizzospedizione) ? $corp->indirizzospedizione :  old('sedelegale') }}</textarea>
         </div>
         
 
 	
 		
 	<div class="col-md-6">
-     		<br><label for="partecipanti">Partecipanti</label><br>
+     		<br><label for="partecipanti">{{trans('messages.keyword_participants')}}</label><br>
 	        <div class="col-md-12">
 	            <div class="col-xs-6">
 	                <select class="form-control" id="utenti">
-                	    @foreach($utenti as $utente)
+                	    @foreach($users as $utente)
                 	    <option value="{{$utente->id}}">{{$utente->name}}</option>
                 	    @endforeach
         	        </select>
@@ -598,12 +605,12 @@ else {
 	            <table class="table table-striped table-bordered">
 	                <thead>
 	                    <th>#</th>
-	                    <th>Id</th>
-	                    <th>Utente</th>
-                        <th>Notifiche</th>
+	                    <th>{{trans('messages.keyword_id')}}</th>
+	                    <th>{{trans('messages.keyword_user')}}</th>
+                        <th>{{trans('messages.keyword_notifications')}}</th>
 	                </thead>
 	                <tbody id="partecipanti">
-						@foreach($partecipanti as $partecipante)
+						@foreach($participant as $partecipante)
 	                        <tr>
 	                            <td>
 	                                <input type="checkbox" class="selezione">
@@ -612,7 +619,7 @@ else {
 	                                <input type="text" name="partecipanti[]" readonly value="<?php echo $partecipante->id_user; ?>" class="form-control">
 	                            </td>
 	                            <td>
-	                                @foreach($utenti as $utente)
+	                                @foreach($users as $utente)
 	                                	@if($utente->id == $partecipante->id_user)
 	                                		{{$utente->name}}
 	                                		@break
@@ -707,24 +714,24 @@ else {
 <script>
 	setTimeout(function() {
 		var cellulari = ["<?php
-			for($i=1;$i<count($utenti);$i++) {
-				if($i == count($utenti) - 1)
-					echo $utenti[$i]->cellulare . "\"";
+			for($i=1;$i<count($users);$i++) {
+				if($i == count($users) - 1)
+					echo $users[$i]->cellulare . "\"";
 				else
-					echo $utenti[$i]->cellulare . "\",\"";
+					echo $users[$i]->cellulare . "\",\"";
 			}
 		?>];
 		var nomi = ["<?php
-			for($i=1;$i<count($utenti);$i++) {
-				if($i == count($utenti) - 1)
-					echo $utenti[$i]->name . "\"";
+			for($i=1;$i<count($users);$i++) {
+				if($i == count($users) - 1)
+					echo $users[$i]->name . "\"";
 				else
-					echo $utenti[$i]->name . "\",\"";
+					echo $users[$i]->name . "\",\"";
 			}
 		?>];
 			var k;
 			var nome = $j("#responsabilelanga option:selected" ).text();
-			for(var i = 0; i < <?php echo count($utenti)-1;?>;i++) {
+			for(var i = 0; i < <?php echo count($users)-1;?>;i++) {
 				if(nomi[i] == nome) {
 					k = i;
 					break;
@@ -734,24 +741,24 @@ else {
 	}, 100);
 	function trovaTelefono() {
 		var cellulari = ["<?php
-			for($i=1;$i<count($utenti);$i++) {
-				if($i == count($utenti) - 1)
-					echo $utenti[$i]->cellulare . "\"";
+			for($i=1;$i<count($users);$i++) {
+				if($i == count($users) - 1)
+					echo $users[$i]->cellulare . "\"";
 				else
-					echo $utenti[$i]->cellulare . "\",\"";
+					echo $users[$i]->cellulare . "\",\"";
 			}
 		?>];
 		var nomi = ["<?php
-			for($i=1;$i<count($utenti);$i++) {
-				if($i == count($utenti) - 1)
-					echo $utenti[$i]->name . "\"";
+			for($i=1;$i<count($users);$i++) {
+				if($i == count($users) - 1)
+					echo $users[$i]->name . "\"";
 				else
-					echo $utenti[$i]->name . "\",\"";
+					echo $users[$i]->name . "\",\"";
 			}
 		?>];
 			var k;
 			var nome = $j("#responsabilelanga option:selected" ).text();
-			for(var i = 0; i < <?php echo count($utenti)-1;?>;i++) {
+			for(var i = 0; i < <?php echo count($users)-1;?>;i++) {
 				if(nomi[i] == nome) {
 					k = i;
 					break;
@@ -788,29 +795,29 @@ else {
                     </script>
                     <tbody id="tab">
 
-                        @for($i = 0; $i < count($costi); $i++)
+                        @for($i = 0; $i < count($cost); $i++)
                             <tr>
                             <td>
                                 <input type="checkbox" class="selezione">
                             </td>
                             <td>
-                                <input type="text" name="oggettocosto[]" class="form-control" value="<?php echo $costi[$i]->oggetto; ?>">
+                                <input type="text" name="oggettocosto[]" class="form-control" value="<?php echo $cost[$i]->oggetto; ?>">
                             </td>
                             <td>
-                                <input type="text" name="costi[]" class="form-control" value="<?php echo $costi[$i]->costo; ?>">
+                                <input type="text" name="costi[]" class="form-control" value="<?php echo $cost[$i]->costo; ?>">
                             </td>
                             <td>
-                                <input type="text" id="datepicker<?php echo $i; ?>" name="datainserimentocosto[]" class="form-control " value="<?php echo $costi[$i]->datainserimento; ?>">
+                                <input type="text" id="datepicker<?php echo $i; ?>" name="datainserimentocosto[]" class="form-control " value="<?php echo $cost[$i]->datainserimento; ?>">
                             </td>
                             <td>
-                            	<a href="{{url('/costo/delete/') . '/' . $costi[$i]->id}}" onclick="return confirm('Sei sicuro di voler cancellare questo costo?');" class="btn btn-danger" style="text-decoration:none">Cancella</a>
+                            	<a href="{{url('/costo/delete/') . '/' . $cost[$i]->id}}" onclick="return confirm('Sei sicuro di voler cancellare questo costo?');" class="btn btn-danger" style="text-decoration:none">Cancella</a>
                             </td>
                             </tr>
                             <script>
                                                  
                             var impedisciModifica2 = function() {
                                 this.blur();
-                                this.value = "<?php echo $costi[$i]->datainserimento; ?>";
+                                this.value = "<?php echo $cost[$i]->datainserimento; ?>";
                             }
                             $j("#datepicker<?php echo $i; ?>").datepicker();
                             $j('.selezione').on("click", function() {
@@ -903,8 +910,9 @@ else {
  <div class="col-md-6" style="padding-top:10px;padding-bottom:10px;">
  </div>
 <div class="col-md-6" style="padding-top:10px;padding-bottom:10px;text-align:right">
-		
-		<button onclick="mostra2()" id="btnSubmitEnti" type="submit" class="btn btn-warning">Salva</button>
+		@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
+		<button onclick="mostra2()" id="btnSubmitEnti" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+		@endif
 	</div>
 <?php echo Form::close(); ?>
 <script>
@@ -1042,31 +1050,37 @@ xhr.send();
                 },
                 responsabilelanga: {   
                     required: true                
-                }
+                },
+				indirizzo:{
+					required: true                
+				}
             },
             messages: {
                 nomeazienda: {
-                    required: "Please enter Nome azienda",
-                    maxlength: "Nome azienda must be less than 35 characters"
+                    required: "<?php echo trans('messages.keyword_please_enter_company_name');?>",
+                    maxlength: "<?php echo trans('messages.keyword_company_name_must_be_less_than_35_characters');?>"
                 },
                 nomereferente: {
-					required: "Please enter Nome referente",
-                    maxlength: "Nome referente must be less than 35 characters"
+					required: "<?php echo trans('messages.keyword_please_enter_reference_name');?>",
+                    maxlength: "<?php echo trans('messages.keyword_the_reference_name_must_be_less_than_35_characters');?>"
                 },
                 telefonoazienda: {
-                    required: "Please enter Telefono Primario",                    
-                    maxlength: "Telefono Primario must be less than 15",
+                    required: "<?php echo trans('messages.keyword_please_enter_primary_phone'); ?>",                    
+                    maxlength: "<?php echo trans('messages.keyword_primary_phone_must_be_less_than_15');?>",
                 },
                 email: {
-                    required: "Please enter Email primaria",   
-                    email: "Please enter valid Email primaria"                 
+                    required: "<?php echo trans('messages.keyword_please_enter_primary_email');?>",   
+                    email: "<?php echo trans('messages.keyword_please_enter_a_valid_primary_email');?>"                 
                 },
                 emailsecondaria: {
-                    email: "Please enter valid Email secondaria"
+                    email: "<?php echo trans('messages.keyword_enter_a_valid_secondary_email');?>"
                 },
                 responsabilelanga: {   
-                    required: "Please select a Responsabile LANGA"                
-                }
+                    required: "<?php echo trans('messages.keyword_please_select_a_responsabile_langa');?>"                
+                },
+				indirizzo:{
+					required: "<?php echo trans('messages.keyword_please_enter_a_address');?>"                
+				}
             }
 
         });

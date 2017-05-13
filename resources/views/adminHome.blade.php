@@ -101,6 +101,12 @@
             <li><a href="{{url('/admin/pacchetto')}}"><img src="{{asset('images/ADMIN_QUIZ.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span> Quiz Pacchetto</span> </a></li>
             <li><a href="{{url('/admin/language')}}"><i class="fa fa-gift"></i> Languages & Phases </a></li>
             <li><a href="{{url('/admin/menu')}}"><i class="fa fa-gift"></i> {{trans("messages.keyword_menu")}} </a></li>
+            <li><a><i class="fa fa-user-times"></i> {{trans('messages.keyword_quiz')}} <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu">
+                                        <li><a href="{{url('/admin/quiz')}}">{{trans('messages.keyword_demo')}}</a></li>
+
+                                    </ul>
+                                </li>
 
           </ul>
         </div>
