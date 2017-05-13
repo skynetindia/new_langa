@@ -59,8 +59,8 @@
             </li>
             <li><a><img src="{{asset('images/PREVENTIVI.svg')}}" alt="Preventivi" class="menu-icon" > <span>Preventivi</span> <span class="fa fa-chevron-down"></span></a>
               <ul class="nav child_menu">
-                <li class="sub_menu"><a href="{{url('/preventivi/miei')}}">Miei</a> </li>
-                <li><a href="{{url('/preventivi')}}">Tutti</a> </li>
+                <li class="sub_menu"><a href="{{url('/estimates/my')}}">Miei</a> </li>
+                <li><a href="{{url('/estimates')}}">Tutti</a> </li>
               </ul>
             </li>
             <li><a><img src="{{asset('images/PROGETTI.svg')}}" alt="Progetti" class="menu-icon" > <span> Progetti</span> <span class="fa fa-chevron-down"></span></a>

@@ -30,6 +30,7 @@
 <div class="table-responsive">
 		<table class="table table-striped table-bordered" style="text-align:right">
 	@foreach($estimates_stats as $estimatestype)
+    	<div class="row">
 		<tr>
 		<form action="{{url('/admin/taxonomies/updateestimates')}}" method="post">
 		{{ csrf_field() }}
@@ -51,6 +52,7 @@
 				</div>
 			</form>
 		</tr>
+        </div>
 	@endforeach
 	</table>
 	</div>

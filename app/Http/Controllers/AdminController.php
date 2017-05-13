@@ -9,6 +9,8 @@ use Redirect;
 use Validator;
 use Mail;
 use File;
+use Hash;
+use Auth;
 
 class AdminController extends Controller
 {
@@ -2942,5 +2944,124 @@ class AdminController extends Controller
     }
 
     /* ==================================== Login activity section END ======================================== */
+	
+    /* ============================ Quiz Package section Start ========================  */
+    /* Package sesction listing : Paras */
+     public function quizpackage(Request $request) {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            return view('quizpackage', [
+                'pacchetto' => DB::table('pacchetto')
+                                ->select('*')
+                                ->where('id', '!=', 0)
+                                ->where('is_deleted', '=', 0)
+                                ->paginate(10),
+            ]);
+        }
+    }
+    // Language details
+    public function getjsonquizpackage(Request $request) {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+		else { 
+			$data = DB::table('pacchetto')
+                        ->select('*')
+                        ->where('id', '!=', 0)
+                        ->where('is_deleted', '=', 0)
+                        ->get();            
+			foreach($data as $data) {								
+				$ente_return[] = $data;	
+			}
+			return json_encode($ente_return);
+        }
+    }
+	
+    public function modifyquizpackage(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {
+            if($request->pacchetto){
+                return view('modifyquizpackage', [                   
+                    'action'=>'edit',
+                    'pacchetto_data' => DB::table('pacchetto')
+                                ->select('*')
+                                ->where('id', $request->pacchetto)
+                                ->get()               
+                ]);
+            } 
+            else {
+                return view('modifyquizpackage', ['action'=>'add']);
+            }
+        }
+    }
+     
+    public function savequizpackage(Request $request) {
+
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {
+            $validator = Validator::make($request->all(), [
+                'nome_pacchetto' => 'required|max:35',
+                'pagine_totali' => 'required',
+                'prezzo_pacchetto' => 'required|max:10',
+                'per_pagina_prezzo' => 'required|max:10',
+            ]);
+
+            if ($validator->fails()) {
+                return Redirect::back()
+                                ->withInput()
+                                ->withErrors($validator);
+            }
+            
+         if($request->pacchetto){
+            DB::table('pacchetto')
+                ->where('id', $request->pacchetto)
+                ->update(array(
+                'nome_pacchetto' => $request->nome_pacchetto,
+                'pagine_totali' => $request->pagine_totali,
+                'prezzo_pacchetto' => $request->prezzo_pacchetto,
+                'per_pagina_prezzo' => $request->per_pagina_prezzo,
+                'updated_date'=> date('Y-m-d H:i:s')
+            ));            
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_quiz_package_updated_successfully').'</h4></div>');
+            
+         } 
+         else {
+            DB::table('pacchetto')->insert(array(
+                'nome_pacchetto' => $request->nome_pacchetto,
+                'pagine_totali' => $request->pagine_totali,
+                'prezzo_pacchetto' => $request->prezzo_pacchetto,
+                'per_pagina_prezzo' => $request->per_pagina_prezzo,
+                'created_date' => date('Y-m-d H:i:s')
+            ));
+            return Redirect::back()
+           ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_quiz_package_added_successfully').'</h4></div>');
+
+        }        
+        }            
+    }
+    
+     public function destroyquizpackage(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+             DB::table('pacchetto')
+                ->where('id', $request->pacchetto)
+                ->update(array(
+                'is_deleted' => '1',
+                'updated_date'=> date('Y-m-d H:i:s')
+            ));   
+            return Redirect::back()
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Pacchetto eliminato correttamente!</h4></div>');
+        }
+    }
+    /* ============================ Package section ========================  */
+
 
 }

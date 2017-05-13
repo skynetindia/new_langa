@@ -98,7 +98,7 @@
             </li>
             <li><a href="{{url('/taxation')}}"><i class="fa fa-percent"></i> Taxation </a></li>
             <li><a href="{{url('/newsletter/add')}}"><i class="fa fa-newspaper-o"></i> Newsletter</a></li>
-            <li><a href="{{url('/admin/pacchetto')}}"><img src="{{asset('images/ADMIN_QUIZ.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span> Quiz Pacchetto</span> </a></li>
+            <li><a href="{{url('/admin/quizpackage')}}"><img src="{{asset('images/ADMIN_QUIZ.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span> Quiz Pacchetto</span> </a></li>
             <li><a href="{{url('/admin/language')}}"><i class="fa fa-gift"></i> Languages & Phases </a></li>
             <li><a href="{{url('/admin/menu')}}"><i class="fa fa-gift"></i> {{trans("messages.keyword_menu")}} </a></li>
             <li><a><i class="fa fa-user-times"></i> {{trans('messages.keyword_quiz')}} <span class="fa fa-chevron-down"></span></a>
@@ -156,11 +156,15 @@
 				  ?>
             <img src="http://easy.langa.tv/storage/app/images/<?php if(is_object($logo)) echo $logo->logo; ?>" id="immagineprofilo" alt="">@if (!Auth::guest()) {{Auth::user()->name}} @endif <span class=" fa fa-angle-down"></span> </a>
             <ul class="dropdown-menu dropdown-usermenu pull-right">
-              <li><a href="javascript:;"> Profilo</a></li>
-              <li> <a href="javascript:;"> <span class="badge bg-red pull-right">Admin</span> <span>Impostazioni</span> </a>
-              <li><a href="javascript:;">Aiuto</a></li>
-              <li><a href="{{url('/logout')}}"><i class="fa fa-sign-out pull-right"></i> Esci</a></li>
-            </ul>
+                                        <li><a href="{{url('/profilo')}}"> {{trans("messages.keyword_profile")}}</a></li>
+                                        <li>
+                                            <a href="javascript:;">
+                                                <span class="badge bg-red pull-right">{{trans("messages.keyword_admin")}}</span>
+                                                <span>{{trans('messages.keyword_settings')}}</span>
+                                            </a>
+                                        <li><a href="javascript:;">{{trans('messages.keyword_help')}}</a></li>
+                                        <li><a href="{{url('/logout')}}"><i class="fa fa-sign-out pull-right"></i> {{trans('messages.keyword_logout')}}</a></li>
+                                    </ul>
           </li>
           <li role="presentation" class="dropdown"> <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-envelope-o"></i> <span class="badge bg-green">6</span> </a>
             <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">

@@ -40,6 +40,7 @@
 <div class="table-responsive">
 		<table class="table table-striped table-bordered" style="text-align:right">
 	@foreach($lavorazioni as $lavorazioni)		
+    	<div class="row">
 		<tr>
 		<form action="{{url('/admin/taxonomies/updateprocessing')}}" method="post">        
 		{{ csrf_field() }}
@@ -64,7 +65,8 @@
 			</div>	
 		</div>		
 	</form>
-	</tr>	
+	</tr>
+    </div>	
 	@endforeach
 	</table>
 	</div>	
