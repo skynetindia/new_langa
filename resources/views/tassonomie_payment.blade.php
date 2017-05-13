@@ -11,11 +11,11 @@
 
 <fieldset>
 
-<legend style="padding-left:10px;color:#fff;background-color: #999">{{trans('messages.keyword_emotional_state')}}</legend>
+<legend>{{trans('messages.keyword_emotional_state')}}</legend>
 
 <form action="{{url('/admin/taxonomies/addstatepayment')}}" method="post">
     {{ csrf_field() }}
-
+    <div class="row">
 	<div class="col-md-4">
 		<input type="text" class="form-control" name="name" placeholder="{{trans('messages.keyword_name')}}"><br> 
 	</div>
@@ -28,38 +28,33 @@
 		<input class="form-control color no-alpha" value="#f37f0d" name="color" /><br>
 	</div>
 
-	<div style="text-align:right">
+	<div class="col-md-12 text-right">
 		<input type="submit" class="btn btn-primary" value="{{trans('messages.keyword_add')}}">
+	</div>
 	</div>
 </form>
 
 <h4>{{trans('messages.keyword_edit_emotional_payment_state')}}</h4>
 <div class="table-responsive">
-		<table class="table table-striped table-bordered" style="text-align:right">
-	@foreach($statepayments as $statepayment)
-    	<div class="row">
-		<tr>
-		<form action="{{url('/admin/tassonomie/updatestatepayment')}}" method="post">
-		{{ csrf_field() }}
-		<input type="hidden" name="id" value="{{$statepayment->id}}">
-		<div class="form-group">
-                <div class="col-xs-6 col-sm-3">    
-                    <td><input type="text" class="form-control" name="name" id="name" value="{{$statepayment->name}}"> </td>    
-                </div>    
-                <div class="col-xs-6 col-sm-3">    
-                    <td><input type="text" class="form-control" name="description" value="{{$statepayment->description}}"></td>    
-                </div>    
-                <div class="col-xs-6 col-sm-3">    
-                    <td><input type="text" class="form-control color no-alpha" name="color" value="{{$statepayment->color}}"></td>    
-                </div>
-                    <div class="col-xs-6 col-sm-3">
-                        <td><input type="submit" class="btn btn-primary" value="Salva">
-                        <a  onclick="conferma(event);" type="submit" href="{{url('/admin/taxonomies/statepayment/delete/id' . '/' . $statepayment->id)}}" class="btn danger"><button type="button" class="btn btn-danger">Cancella</button></a></td>
-                    </div>	
-				</div>
+		<table class="table table-striped table-bordered text-right">
+	@foreach($statepayments as $statepayment)    	
+	<tr>
+		<td>
+			<form action="{{url('/admin/tassonomie/updatestatepayment')}}" method="post">
+				{{ csrf_field() }}
+				<input type="hidden" name="id" value="{{$statepayment->id}}">
+					<table class="table sub-table">
+		              <tr>
+		                <td><input type="text" class="form-control" name="name" id="name" value="{{$statepayment->name}}"></td>
+		                <td><input type="text" class="form-control" name="description" value="{{$statepayment->description}}"></td>
+		                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$statepayment->color}}"></td>
+		                <td><input type="submit" class="btn btn-primary" value="Salva">
+		                  <a  onclick="conferma(event);" type="submit" href="{{url('/admin/taxonomies/statepayment/delete/id' . '/' . $statepayment->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a></td>
+		              </tr>
+				    </table>
 			</form>
-		</tr>
-        </div>
+		</td>
+	</tr>       
 	@endforeach
 	</table>
 	</div>
