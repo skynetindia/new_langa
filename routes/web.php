@@ -24,6 +24,7 @@ Route::get('/onworking', function () {
 });
 
 Route::auth();
+//Auth::routes();
 
 Route::get('/logout', 'Auth\LoginController@logout');
 Route::get('/admin', 'AdminController@index');
@@ -100,7 +101,7 @@ Route::get('/enti/delete/corporation/{corporation}', 'CorporationController@dest
 Route::get('/enti/modify/corporation/{corporation}', 'CorporationController@modify');
 Route::post('/enti/update/corporation/{corporation}', 'CorporationController@update');
 Route::get('/enti/duplicate/corporation/{corporation}', 'CorporationController@duplicate');
-Route::get('/enti/nuovocliente/corporation/{corporation}', 'CorporationController@nuovocliente');
+Route::get('/enti/newclient/corporation/{corporation}', 'CorporationController@newclient');
 Route::post('/enti/add/', 'CorporationController@add');
 Route::get('/enti/add/', 'CorporationController@add');
 Route::post('/enti/store/', 'CorporationController@store');
@@ -205,7 +206,98 @@ Route::get('/menu/modify/{id}', 'AdminController@menumodify');
 Route::post('/menu/update/{id}', 'AdminController@menuupdate');
 Route::get('/menu/delete/{id}', 'AdminController@menudelete');
 
-Auth::routes();
-
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/admin/user/access/{userid}', 'AdminController@access')->name('home');
 
+
+// ========================================================================================
+// 									Alert Route
+// ========================================================================================
+
+// show aff alert form
+Route::get('/admin/alert', 'AdminController@addadminalert');
+// get alert entity in json
+Route::get('/alert/enti/json', 'AdminController@getalertjson');
+// store alert details
+Route::post('/admin/alert/store', 'AdminController@storeadminalert');
+// show and modify alert type
+Route::get('/admin/alert/tipo', 'AdminController@alertTipo');
+// add alert type
+Route::post('/alert/add/tipo', 'AdminController@newalertTipo');
+// update alert type
+Route::post('/admin/update/tipo', 'AdminController@alerttipoUpdate');
+// delete alert type
+Route::get('/admin/delete/tipo/{id_tipo}', 'AdminController@alerttipodelete');
+// send alert to users
+Route::get('/send-alert', 'AdminController@sendalert');
+
+// Deparments
+Route::get('admin/tassonomie/dipartimenti', 'AdminController@dipartimenti');
+Route::post('/admin/tassonomie/dipartimenti/add', 'AdminController@add');
+Route::get('/admin/tassonomie/dipartimenti/add', 'AdminController@nuovo');
+Route::post('/admin/tassonomie/dipartimenti/store', 'AdminController@salvadipartimento');
+Route::get('/admin/tassonomie/dipartimenti/modify/department/{department}', 'AdminController@modificadipartimento');
+Route::get('/admin/tassonomie/dipartimenti/delete/department/{department}', 'AdminController@destroydipartimento');
+Route::post('/admin/tassonomie/dipartimenti/update/department/{department}', 'AdminController@aggiornadipartimento');
+
+// show taxation 
+Route::get('/taxation', 'AdminController@showtaxation');
+// add taxation
+Route::get('/taxation/add/{id?}', 'AdminController@addtaxation');
+// store taxation
+Route::post('/taxation/store', 'AdminController@storetaxation');
+// delete taxation
+Route::get('/taxation/delete/{id}', 'AdminController@deletetaxation');
+// get taxation
+Route::get('taxation/json', 'AdminController@getjsontaxation');
+
+Route::get('/admin/quiz', 'AdminController@quizdemo');
+Route::post('/admin/quizdemonew', 'AdminController@nuovoquizdemo');
+Route::get('/admin/quizdemodelete/id/{id}', 'AdminController@quizdemodelete');
+Route::post('/admin/quizdemoupdate', 'AdminController@quizdemoUpdate');
+
+// show all provinces
+Route::get('/show-provincie', 'AdminController@showprovincie');
+// store provinces
+Route::post('/store-provincie', 'AdminController@storeprovincie');
+// add new provinces
+Route::post('/addprovincie', 'AdminController@addprovincie');
+/*================================================================ Quiz Package =============================================================== */
+/// Pacchetto (Package)
+Route::get('/admin/quizpackage', 'AdminController@quizpackage');
+Route::get('/admin/modify/quizpaackage/{pacchetto?}', 'AdminController@modifyquizpackage');
+Route::get('/admin/quizpackage/json', 'AdminController@getjsonquizpackage');
+Route::post('/admin/save/quizpackage/{pacchetto?}', 'AdminController@savequizpackage');
+Route::get('/admin/destroy/quizpackage/{pacchetto}', 'AdminController@destroyquizpackage');
+
+// Profilo utente
+Route::get('/profilo', 'HomeController@mostraprofilo');
+Route::post('/profilo/aggiornaimmagine/{id}', 'HomeController@aggiornaimmagine');
+Route::get('/profilo/link/elimina/{id}', 'HomeController@eliminalink');
+Route::post('/profilo/aggiungilink', 'HomeController@aggiungilink');
+
+/*================================================================= Preveti (Quote section) Front ====================================================== */
+// Preventivi (Estimates)
+Route::get('/estimates', 'QuoteController@index');
+Route::get('/estimates/my', 'QuoteController@myestimates');
+Route::post('/estimates/add', 'QuoteController@newEstimates');
+Route::get('/estimates/add', 'QuoteController@add');
+Route::post('/estimates/store', 'QuoteController@store');
+Route::get('/estimates/modify/quote/{quote}', 'QuoteController@modify');
+Route::post('/estimates/modify/quote/{quote}', 'QuoteController@update');
+Route::get('/estimates/delete/quote/{quote}', 'QuoteController@deleteEstimates');
+Route::get('/estimates/duplicate/quote/{quote}', 'QuoteController@duplicatEstimates');
+Route::get('/estimates/pdf/quote/{quote}', 'QuoteController@pdf');
+Route::get('/estimates/noprezzi/pdf/quote/{quote}', 'QuoteController@pdfnoprice');
+
+/*Route::get('/preventivi/optional/{quote}', 'QuoteController@eliminaoptional');
+Route::post('/preventivo/optional/aggiorna/{id}', 'QuoteController@aggiornaoptional');
+Route::get('/preventivi/optional/elimina/{id}', 'QuoteController@eliminaoptionaldalprev');*/
+Route::get('estimates/json', 'QuoteController@getjson');
+Route::get('estimates/miei/json', 'QuoteController@getJsonMyestimates');
+Route::get('/estimates/files/{id}', 'QuoteController@filequote');
+Route::post('/estimates/modify/quote/uploadfiles/{code}', 'QuoteController@fileupload');
+Route::get('/estimates/modify/quote/getfiles/{code}', 'QuoteController@fileget');
+Route::get('/estimates/modify/quote/deletefiles/{id}', 'QuoteController@filedelete');
+Route::get('/estimates/modify/quote/updatefiletype/{typeid}/{id}', 'QuoteController@filetypeupdate');
+Route::get('/estimates/modify/quote/getdefaultfiles/{quote_id}', 'QuoteController@fileget');
