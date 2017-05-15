@@ -117,6 +117,7 @@ li label {
 <th data-field="id" data-sortable="true">n° ente</th>
 <th data-field="language_label" data-sortable="true">Language Label</th>
 <th data-field="language_value" data-sortable="true">Language Phase</th>
+<th data-field="language_key" data-sortable="true">Phase Key</th>
 </thead>
 </table>
 
