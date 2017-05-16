@@ -2584,7 +2584,7 @@ class AdminController extends Controller
             ]);
 
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans("messages.	keyword_department_added_successfully").'</div>');
+                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans("messages.keyword_department_added_successfully").'</div>');
         }
     }
 
