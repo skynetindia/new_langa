@@ -1,5 +1,12 @@
 @extends('layouts.app')
 @section('content')
+@include('common.errors')
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
 
 <div class="row">
   <div class="col-md-10 col-md-offset-1">
@@ -17,8 +24,8 @@
 							<?php echo Form::open(array('url' => '/profilo/aggiornaimmagine' . "/$ente->id", 'files' => true)) ?>
 								{{ csrf_field() }}
 								<label for="logo">{{trans("messages.keyword_load_profile_image")}}</label>
-								<input class="form-control" type="file" id="logo" name="logo"><br>
-								<input class="form-control btn btn-warning" type="submit" value="{{trans("messages.keyword_update_image")}}">
+								<input class="form-control" type="file" id="logo" name="logo" required="required"><br>
+								<input class="form-control btn btn-warning" type="submit" value="{{trans('messages.keyword_update_image')}}">
 							</form>
 						</div>
 						<div class="col-md-6">

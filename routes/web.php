@@ -239,6 +239,7 @@ Route::post('/admin/tassonomie/dipartimenti/store', 'AdminController@salvadipart
 Route::get('/admin/tassonomie/dipartimenti/modify/department/{department}', 'AdminController@modificadipartimento');
 Route::get('/admin/tassonomie/dipartimenti/delete/department/{department}', 'AdminController@destroydipartimento');
 Route::post('/admin/tassonomie/dipartimenti/update/department/{department}', 'AdminController@aggiornadipartimento');
+Route::get('admin/tassonomie/dipartimentijson', 'AdminController@dipartimentijson');
 
 // show taxation 
 Route::get('/taxation', 'AdminController@showtaxation');
@@ -301,3 +302,58 @@ Route::get('/estimates/modify/quote/getfiles/{code}', 'QuoteController@fileget')
 Route::get('/estimates/modify/quote/deletefiles/{id}', 'QuoteController@filedelete');
 Route::get('/estimates/modify/quote/updatefiletype/{typeid}/{id}', 'QuoteController@filetypeupdate');
 Route::get('/estimates/modify/quote/getdefaultfiles/{quote_id}', 'QuoteController@fileget');
+// user read alert
+Route::get('/alert/user-read', 'AdminController@userreadalert');
+// make comment alert 
+Route::get('/alert/make-comment', 'AdminController@alertmakecomment');
+
+
+// ========================================================================================
+// 									Zone Route
+// ========================================================================================
+
+// get citi list by state id
+Route::get('/cities/{id}','CommonController@getCityList');
+
+// ========================================================================================
+
+// cleint sign up form
+Route::get('/client-registration', function () {
+    return view('client_signup');
+});
+// store new client details
+Route::post('/client-signup/store','CommonController@storeclientsignup');
+
+//notification
+Route::get('/admin/shownotification', 
+	'AdminController@showadminnotification');
+// get notification json
+Route::get('/notification/json', 'AdminController@getnotificationjson');
+
+// get enti notification json
+Route::get('/notification/enti/json', 
+	'AdminController@getentinotificationjson');
+
+// add notification
+Route::get('/admin/notification/{id?}', 
+	'AdminController@addadminnotification');
+
+Route::get('/notification/delete/{id}', 'AdminController@deletenotification');
+
+// store notification
+Route::post('/admin/notification/store/{id?}', 'AdminController@storeadminnotification');
+
+// detail notification
+Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');
+
+// make comment in notification
+Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');
+
+// user read notification
+Route::get('/notification/user-read', 'AdminController@userreadnotification');
+
+
+// make comment in role wised notification
+Route::get('/note_role/make-comment', 'AdminController@notemakecomment');
+// role wised read notification
+Route::get('/note_role/user-read', 'AdminController@userreadnote');

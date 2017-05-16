@@ -150,7 +150,7 @@ class AdminController extends Controller
 						->update(array('is_default'=>'0'));
 				}
 				return Redirect::back()
-								->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Language updated successfully!</h4></div>');
+								->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language updated successfully!</div>');
 			}
 			else {
 				$nome = "";
@@ -175,7 +175,7 @@ class AdminController extends Controller
 							'is_default'=>isset($request->is_default) ? $request->is_default : '0'
 				));
 				return Redirect::back()
-								->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Language added successfully!</h4></div>');
+								->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language added successfully!</div>');
 			}
         }
     }
@@ -193,7 +193,7 @@ class AdminController extends Controller
                         ->count();
 			if($countRec > 0){
 				return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Default Language not destroyed!</h4></div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Default Language not destroyed!</div>');
 				
 			}
 			else {
@@ -203,7 +203,7 @@ class AdminController extends Controller
 							'is_deleted' =>'1'
 				));
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Language deleted successfully!</h4></div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language deleted successfully!</div>');
 			}
         }
     }
@@ -225,7 +225,7 @@ class AdminController extends Controller
             ->delete();
 			
 			return Redirect::back()
-		  ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Phase deleted successfully!</h4></div>');
+		  ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Phase deleted successfully!</div>');
 	}
 	public function getjsontranslation(Request $request)
 	{
@@ -285,7 +285,7 @@ class AdminController extends Controller
 		$this->writelanguagefile();
 		return Redirect::back()
                         ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Language aggiunto correttamente!</h4></div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language aggiunto correttamente!</div>');
 		
 	}
 	/* this function is used to write the lanague file/dir */
@@ -363,7 +363,7 @@ class AdminController extends Controller
 		$this->writelanguagefile();
 		return Redirect::back()
                         ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Language updated successfully!</h4></div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language updated successfully!</div>');
 		
 	}
 	
@@ -656,7 +656,7 @@ class AdminController extends Controller
 				'color' => $request->color,
                 'departments_id' => $request->departments_id
             ]);
-			return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_processing_added_successfully').'</h4></div>');
+			return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_added_successfully').'</div>');
         }
     }
 	
@@ -664,7 +664,7 @@ class AdminController extends Controller
 		DB::table('lavorazioni')
 			->where('id', $request->id)
 			->delete();
-		  return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_processing_deleted_successfully').'</h4></div>');
+		  return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_deleted_successfully').'</div>');
 	}
 	
 	public function updateProcessing(Request $request)
@@ -679,7 +679,7 @@ class AdminController extends Controller
                         'description' => $request->description,
                         'color' => $request->color,
             ));
-			return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_processing_updated_successfully').'</h4></div>');
+			return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_updated_successfully').'</div>');
         }
     }
 	/* ==================================== Lavorazioni section END ======================================== */
@@ -913,7 +913,7 @@ class AdminController extends Controller
             
 
             return Redirect::back()
-                ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Utente modificato correttamente!</h4></div>');
+                ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Utente modificato correttamente!</div>');
             
          } else {
 
@@ -951,7 +951,7 @@ class AdminController extends Controller
                 'is_approvato' => 1,
                 'permessi' => $permessi            
             ));
-            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Utente Add correttamente!</h4></div>');
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Utente Add correttamente!</div>');
             }        
         }            
     }
@@ -1134,7 +1134,7 @@ class AdminController extends Controller
                     ->update(array('permessi' => $permessi));
  
                 return Redirect::back()
-                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> permessi updated succesfully..!</h4></div>');
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> permessi updated succesfully..!</div>');
             } else {
 
                 $validator = Validator::make($request->all(), [
@@ -1155,7 +1155,7 @@ class AdminController extends Controller
                     );
  
                 return Redirect::back()
-                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> Role Add succesfully..!</h4></div>');
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> Role Add succesfully..!</div>');
             }
         }
     }
@@ -1174,7 +1174,7 @@ class AdminController extends Controller
                 ));
 
         return Redirect::back()
-            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> Ruolo deleted succesfully..!</h4></div>');
+            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> Ruolo deleted succesfully..!</div>');
           
         }
     }
@@ -1368,7 +1368,7 @@ class AdminController extends Controller
             }
             
             return Redirect::back()
-                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '. trans('messages.keyword_addsuccessmsg') .' </h4></div>');
+                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '. trans('messages.keyword_addsuccessmsg') .' </div>');
         }
     }
 
@@ -1449,7 +1449,7 @@ class AdminController extends Controller
             }
 
             return Redirect::back()
-                ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '. trans('messages.keyword_editsuccessmsg') .  ' </h4></div>');
+                ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '. trans('messages.keyword_editsuccessmsg') .  ' </div>');
         }
     }
 
@@ -1465,7 +1465,7 @@ class AdminController extends Controller
                     ->where('id', $request->pacchetto)
                     ->delete();
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>  '. trans('messages.keyword_deletesuccessmsg') .  '</h4></div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>  '. trans('messages.keyword_deletesuccessmsg') .  '</div>');
         }
     }
 
@@ -1563,7 +1563,7 @@ class AdminController extends Controller
                 ]);
                     
             return Redirect::back()
-               ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'. trans('messages.keyword_addsuccessmsg') .  '</h4></div>');
+               ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'. trans('messages.keyword_addsuccessmsg') .  '</div>');
         }
     }
 
@@ -1617,7 +1617,7 @@ class AdminController extends Controller
             ->update(array('id_tipo' => $request->tipoente));
             
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '. trans('messages.keyword_editsuccessmsg') .  ' </h4></div>');
+                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '. trans('messages.keyword_editsuccessmsg') .  ' </div>');
         }
     }
 
@@ -1633,7 +1633,7 @@ class AdminController extends Controller
                     ->where('id_sconto', $request->sconto)
                     ->delete();
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '. trans('messages.keyword_deletesuccessmsg') .  ' </h4></div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '. trans('messages.keyword_deletesuccessmsg') .  ' </div>');
         }
     }
 
@@ -1724,7 +1724,7 @@ class AdminController extends Controller
             ]);
                     
             return Redirect::back()
-               ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_addsuccessmsg').' </h4></div>');
+               ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
         }
     }
 
@@ -1779,7 +1779,7 @@ class AdminController extends Controller
             ->update(array('id_tipo' => $request->tipoente));
             
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_editsuccessmsg').' </h4></div>');
+                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' </div>');
         }
     }
 
@@ -1796,7 +1796,7 @@ class AdminController extends Controller
                     ->where('id_sconto', $request->sconto)
                     ->delete();
             return Redirect::back()
-                ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_deletesuccessmsg').' </h4></div>');
+                ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
         }
     }
 
@@ -1835,6 +1835,8 @@ class AdminController extends Controller
                         'description' => 'max:255',
                         'price' => 'max:16',
                         'frequenza' => 'required',
+                        'logo'=>'image|max:2000',
+                        'immagine'=>'image|max:2000'
                         //'dipartimento' => 'required'
             ]);
 
@@ -1865,7 +1867,7 @@ class AdminController extends Controller
                 'dipartimento' => $request->dipartimento,
             ]);
 
-            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Dipartimento aggiunto correttamente!</h4></div>');
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Dipartimento aggiunto correttamente!</div>');
         }
     }
 
@@ -1933,7 +1935,7 @@ class AdminController extends Controller
             ));
 
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Optional modificato correttamente!</h4></div>');
+                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Optional modificato correttamente!</div>');
         }
     }
 
@@ -1946,7 +1948,7 @@ class AdminController extends Controller
                     ->where('id', $request->optional)
                     ->delete();
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Optional eliminato correttamente!</h4></div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Optional eliminato correttamente!</div>');
         }
     }
 
@@ -1991,7 +1993,7 @@ class AdminController extends Controller
                 ->where('id', $request->id)
                 ->delete();
          return Redirect::back()
-                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Menu deleted successfully!</h4></div>');
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Menu deleted successfully!</div>');
     }
 
     public function storemenu(Request $request) {
@@ -2042,7 +2044,7 @@ class AdminController extends Controller
             );
         }
         return redirect('/admin/menu/')
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>New menu addedd successfully!</h4></div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>New menu addedd successfully!</div>');
         //$keyword_key = 'keyword_'.str_replace(" ","_",strtolower($request['keyword_title']));                       
     }
 
@@ -2153,7 +2155,7 @@ class AdminController extends Controller
                         'menu_active' => $status));
         }
         return Redirect::back()
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Menu updated successfully!</h4></div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Menu updated successfully!</div>');
     }
     /* ==================================== Menu section END ======================================== */  
 
@@ -2186,8 +2188,12 @@ class AdminController extends Controller
     {
         $entity = DB::table('inviare_avviso')
                     ->get();  
-
-        return json_encode($entity);
+		foreach($entity as $newkey=>$newval)
+		{
+			$newval->data_lettura=($newval->data_lettura!='0000-00-00 00:00:00')?date('d-m-Y h:i:s a',strtotime($newval->data_lettura)):'-';
+			$allaray[]=$newval;
+		}
+        return json_encode($allaray);
     }
 
     // store alert details
@@ -2230,7 +2236,7 @@ class AdminController extends Controller
             ]);
 
             return Redirect::back()
-                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_addsuccessmsg').' </h4></div>');
+                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
         }
     }
 
@@ -2266,7 +2272,7 @@ class AdminController extends Controller
                 'color' => isset($request->color) ? $request->color :'' 
             ]);
 
-            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_addsuccessmsg').' </h4></div>');;
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');;
         }
     }
 
@@ -2295,7 +2301,7 @@ class AdminController extends Controller
 	                'color' => isset($request->color) ? $request->color :'' 
             ));
 
-            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_edisuccessmsg').' </h4></div>');;
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_edisuccessmsg').' </div>');;
         }
     }
 
@@ -2306,7 +2312,7 @@ class AdminController extends Controller
             ->where('id_tipo', $request->id_tipo)
             ->delete();
 
-        return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_deletesuccessmsg').' </h4></div>');;
+        return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');;
     }
 
     // send alert notification to users
@@ -2410,7 +2416,7 @@ class AdminController extends Controller
                     ->delete();
 
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Taxation eliminata correttamente!</h4></div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Taxation eliminata correttamente!</div>');
         }
     }
 
@@ -2448,7 +2454,7 @@ class AdminController extends Controller
                 ));
 
                 return Redirect::back()
-                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Tassazione update correttamente!</h4></div>');
+                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Tassazione update correttamente!</div>');
             } else {
 
                 DB::table('tassazione')->insert([
@@ -2457,7 +2463,7 @@ class AdminController extends Controller
                 ]);
 
                 return Redirect::back()
-                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Tassazione aggiunta correttamente!</h4></div>');
+                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Tassazione aggiunta correttamente!</div>');
             }
         }
     }
@@ -2509,12 +2515,7 @@ class AdminController extends Controller
     }
 
     public function mostraDipartimenti() {
-        return view('tassonomie_dipartimenti', [
-            'dipartimenti' => DB::table('departments')
-                    ->orderBy('id')
-                    ->limit(50)
-                    ->get(),
-        ]);
+        return view('tassonomie_dipartimenti');
     }
 
     public function nuovo() {
@@ -2583,7 +2584,7 @@ class AdminController extends Controller
             ]);
 
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Dipartimento aggiunto correttamente!</h4></div>');
+                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans("messages.	keyword_department_added_successfully").'</div>');
         }
     }
 
@@ -2609,7 +2610,7 @@ class AdminController extends Controller
                     ->where('id', $request->department)
                     ->delete();
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Dipartimento eliminato correttamente!</h4></div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans("messages.	keyword_department_deleted_properly").'</div>');
         }
     }
 
@@ -2623,7 +2624,7 @@ class AdminController extends Controller
                         'settore' => 'max:50',
                         'piva' => 'max:11',
                         'cf' => 'max:16',
-                        'telefonodipartimento' => 'required|max:20',
+                       // 'telefonodipartimento' => 'required|max:20',
                         'cellularedipartimento' => 'max:20',
                         'email' => 'required|max:64',
                         'emailsecondaria' => 'max:64',
@@ -2672,9 +2673,24 @@ class AdminController extends Controller
             ));
 
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Dipartimento modificato correttamente!</h4></div>');
+                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans("messages.keyword_modify_department").'</div>');
         }
     }
+	public function dipartimentijson()
+	{ //echo "hello";
+		
+            $dipartimenti = DB::table('departments')
+                    ->orderBy('id')
+                    ->limit(50)
+                    ->get();
+			foreach($dipartimenti as $key=>$val)
+			{
+				$val->logo="<img src='".url('storage/app/images/'.$val->logo)."' style='max-width:100px; max-height:100px'></img>";
+				$department[]=$val;
+			}
+			return json_encode($department);
+      
+	}
 
     /* ====================================  Department section END ======================================== */
 	/* ==================================== Quiz Demo section START  ======================================== */
@@ -2727,7 +2743,7 @@ class AdminController extends Controller
             'created_date' => $today,
             'updated_date' => $today,
         ]);
-        return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>' . trans('messages.keyword_quiz_added') . '</h4></div>');
+        return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>' . trans('messages.keyword_quiz_added') . '</div>');
     }
 
     public function quizdemodelete(Request $request) {
@@ -2735,7 +2751,7 @@ class AdminController extends Controller
                 ->where('id', $request->id)
                 ->delete();
         return Redirect::back()
-                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>' . trans('messages.keyword_quiz_deleted') . '</h4></div>');
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>' . trans('messages.keyword_quiz_deleted') . '</div>');
     }
 
     public function quizdemoUpdate(Request $request) {
@@ -2786,7 +2802,7 @@ class AdminController extends Controller
             ));
 
             //trans("messages.keyword_quiz_update");die;                
-            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>' . trans("messages.keyword_quiz_update") . '</h4></div>');
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>' . trans("messages.keyword_quiz_update") . '</div>');
         }
     }
 
@@ -2837,7 +2853,7 @@ class AdminController extends Controller
 
                 if ($check_citta->nome_citta == $citta && $check_citta->id_stato == $stato) {
 
-                    return '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> can not add same city in same state.! </h4></div>';
+                    return '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> can not add same city in same state.! </div>';
                 }
             }
 
@@ -2846,7 +2862,7 @@ class AdminController extends Controller
                         'provincie' => $provincie]
             );
 
-            return '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> Provincie added succesfully..!! </h4></div>';
+            return '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> Provincie added succesfully..!! </div>';
         }
     }
 
@@ -2887,7 +2903,7 @@ class AdminController extends Controller
             }
 
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> provincie updated succesfully..!</h4></div>');
+                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> provincie updated succesfully..!</div>');
         }
     }
 
@@ -2911,7 +2927,6 @@ class AdminController extends Controller
             ]);
         }
     }
-
     public function getjsonusers(Request $request) {
         $users = DB::table('users')
                 ->join('ruolo_utente', 'users.dipartimento', '=', 'ruolo_utente.ruolo_id')
@@ -3028,7 +3043,7 @@ class AdminController extends Controller
                 'per_pagina_prezzo' => $request->per_pagina_prezzo,
                 'updated_date'=> date('Y-m-d H:i:s')
             ));            
-            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_quiz_package_updated_successfully').'</h4></div>');
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_quiz_package_updated_successfully').'</div>');
             
          } 
          else {
@@ -3040,7 +3055,7 @@ class AdminController extends Controller
                 'created_date' => date('Y-m-d H:i:s')
             ));
             return Redirect::back()
-           ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_quiz_package_added_successfully').'</h4></div>');
+           ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_quiz_package_added_successfully').'</div>');
 
         }        
         }            
@@ -3058,10 +3073,422 @@ class AdminController extends Controller
                 'updated_date'=> date('Y-m-d H:i:s')
             ));   
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Pacchetto eliminato correttamente!</h4></div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Pacchetto eliminato correttamente!</div>');
         }
     }
     /* ============================ Package section ========================  */
+	// user read alert 
+    public function userreadalert(Request $request)
+    {
 
+        $today = date("Y-m-d h:i:s");
+
+        $alert_id = $request->input('alert_id');
+        $user_id = $request->input('user_id');
+      
+         DB::table('inviare_avviso')
+            ->where('alert_id', $alert_id)
+            ->where('user_id', $user_id)
+            ->update(array(
+	            'data_lettura' => $today,
+	            'conferma' => 'LETTO'
+            ));
+                
+        return Redirect::back();
+        
+    }
+
+    // make comment alert
+    public function alertmakecomment(Request $request)
+    {
+        $messaggio = $request->input('messaggio');
+        $alert_id = $request->input('alert_id');
+        $user_id = $request->input('user_id');
+        
+        DB::table('inviare_avviso')
+            ->where('alert_id', $alert_id)
+            ->where('user_id', $user_id)
+            ->update(array(
+                'comment' => $messaggio
+        	));
+                
+        return Redirect::back();    
+    }   
+	
+    /* ==================================== Alert end======================================== */
+	
+	/* ====================================Notification start ======================================== */
+
+	
+	 // show notification
+    public function showadminnotification(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            
+            return view('elenconotifiche', [
+                'elenconotifiche' => DB::table('notifica')
+                    ->get()            
+            ]);
+        }
+    }
+
+    public function deletenotification(Request $request) {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+            DB::table('notifica')
+                ->where('id', $request->id)
+                ->delete();
+
+            return Redirect::back()
+                ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>notification eliminata correttamente!</div>');
+        }
+    }
+
+    // detail notification
+    public function detailadminnotification(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+            if($request->id) {
+                return view('notifichedetails', [
+                    'detail_notifica' => DB::table('invia_notifica')
+                    ->where('notification_id', "=", $request->id)
+                    ->get()      
+                ]);
+            } else {
+                 return view('notifichedetails', [
+                    'detail_notifica' => DB::table('invia_notifica')
+                    ->get()      
+                ]);
+            }
+           
+        }
+    }
+
+
+    // add notification
+    public function addadminnotification(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+
+            if($request->id){
+
+                return view('addadminnotification', [
+                    'notifica' => DB::table('notifica')
+                        ->where('id', "=", $request->id)
+                        ->first(),
+                    'enti' => DB::table('corporations')
+                        ->get(),
+                    'modulo' => DB::table('modulo')
+                        ->where('modulo_sub', '=', null)
+                        ->get(),
+                    'ruolo_utente' => DB::table('ruolo_utente')
+                        ->get()                
+                ]);
+
+            } else {
+
+                return view('addadminnotification', [
+                    'enti' => DB::table('corporations')
+                        ->get(),
+                    'modulo' => DB::table('modulo')
+                        ->where('modulo_sub', '=', null)
+                        ->get(),
+                    'ruolo_utente' => DB::table('ruolo_utente')
+                        ->get()                
+                ]);
+            }
+            
+        }
+    }
+
+  
+
+     // store admin notification
+    public function storeadminnotification(Request $request)
+    {
+        if($request->user()->id != 0) {
+            
+            return redirect('/unauthorized');
+
+        } else {
+
+            $id = $request->input('id');
+
+            if($id){
+
+                $validator = Validator::make($request->all(), [
+                    'type' => 'required',
+                    'modulo' => 'required',
+                    'tempo_avviso' => 'required',
+                    'ruolo' => 'required'
+                ]);
+
+                if ($validator->fails()) {
+                    return Redirect::back()
+                        ->withInput()
+                        ->withErrors($validator);
+                }
+
+          	    $ente = $request->input('ente');
+                if(isset($request->ente)){
+                    $ente = implode(",", $request->input('ente'));
+                } else {
+                    $ente = null;
+                }
+
+                $ruolo = implode(",", $request->input('ruolo'));  
+
+                $today = date("Y-m-d");
+
+                $description = strip_tags($request->description);
+
+                    DB::table('notifica')
+                    ->where('id', $id)
+                    ->update(array(
+                        'notification_type' => $request->type,
+                        'modulo' => $request->modulo,
+                        'tempo_avviso' => $request->tempo_avviso,
+                        'id_ente' => $ente,
+                        'ruolo' => $ruolo,
+                        'notification_desc' => $description,
+                        'created_at' => $today
+                    ));
+
+                    return Redirect::back()
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Notification update correttamente!</div>');
+
+            } else {
+
+                $validator = Validator::make($request->all(), [
+                'type' => 'required',
+                'modulo' => 'required',
+                'tempo_avviso' => 'required',
+                'ruolo' => 'required'
+                ]);
+
+                if ($validator->fails()) {
+                    return Redirect::back()
+                        ->withInput()
+                        ->withErrors($validator);
+                }
+				$ente = $request->input('ente');
+                if(isset($ente)){
+                    $ente = implode(",", $request->input('ente'));
+                } else {
+                    $ente = null;
+                }
+                
+                $ruolo = implode(",", $request->input('ruolo'));  
+
+                $today = date("Y-m-d");
+
+                $description = strip_tags($request->description);
+
+                 DB::table('notifica')->insert([
+                    'notification_type' => $request->type,
+                    'modulo' => $request->modulo,
+                    'tempo_avviso' => $request->tempo_avviso,
+                    'id_ente' => $ente,
+                    'ruolo' => $ruolo,
+                    'notification_desc' => $description,
+                    'created_at' => $today
+                ]);
+
+                return Redirect::back()
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Notification add correttamente!</div>');
+            }    
+        }
+    }
+
+    // send alert notification to users
+  
+
+    // send notification to users
+    public function sendnotification(Request $request)
+    {
+        if($request->user()->id != 0) {
+            
+            return redirect('/unauthorized');
+
+        } else {
+
+
+            $today = date("Y-m-d");
+
+            $notifica = DB::table('notifica')
+                ->where('created_at', $today)
+                ->get();
+
+            if(empty($notifica)) {
+
+                return "Notification not set for today.!!";
+            }
+
+            foreach ($notifica as $value) {
+                
+                $ente = explode(",", $value->id_ente);
+                $ruolo = explode(",", $value->ruolo);
+
+                if($ente[0] != null){
+                      
+                  foreach ($ente as $ente) {
+
+                    $getente = DB::table('enti_partecipanti')
+                        ->select('id_user')
+                        ->where('id_ente', $ente)
+                        ->get();
+
+                    foreach ($getente as $getente) {
+
+                        foreach ($ruolo as $role) {
+
+                            $getrole = DB::table('users')
+                                ->select('*')
+                                ->where('id', $getente->id_user)
+                                ->where('dipartimento', '=',  $role)
+                                ->first();
+
+                            if($getrole) {
+
+                                $corporations = DB::table('corporations')
+                                    ->where('id', $value->id_ente)
+                                ->first();
+                            
+                             $true = DB::table('invia_notifica')->insert([
+                                    'id_ente' => $corporations->id,
+                                    'ruolo' => $role,
+                                    'user_id' => $getrole->id,
+                                    'notification_id' => $value->id,
+                                    'nome_azienda' => $corporations->nomeazienda,
+                                    'nome_referente' => $corporations->nomereferente,
+                                    'settore' => $corporations->settore,
+                                    'telefono_azienda' => $corporations->telefonoazienda,
+                                    'email' => $corporations->email,
+                                    'data_lettura' => '',
+                                    'conferma' => 'NON LETTO'
+                                ]);
+
+                      
+                                if($true){
+                                    return "notification send succesfully.!";
+
+                                } else {
+
+                                    return false;
+                                }
+
+                            }
+                        } 
+                    }
+                }
+
+                } // end if 
+                else {
+
+                    foreach ($ruolo as $role) {
+
+                        $getdept = DB::table('users')
+                            ->where('dipartimento', $role)
+                            ->get();
+                      
+                        foreach ($getdept as $getdept) {
+
+                            $corporations = DB::table('corporations')
+                            ->where('id', $getdept->id)
+                            ->first();
+   
+                            $true = DB::table('invia_notifica')->insert([
+                            'ruolo' => $role,
+                            'user_id' => $getdept->id,
+                            'notification_id' => $value->id,
+                            'nome_azienda' => $corporations->nomeazienda,
+                            'nome_referente' => $corporations->nomereferente,
+                            'settore' => $corporations->settore,
+                            'telefono_azienda' => $corporations->telefonoazienda,
+                            'email' => $corporations->email,
+                            'data_lettura' => '',
+                            'conferma' => 'NON LETTO'
+                            ]);
+
+                        }
+                    }
+
+                    if($true){
+
+                        return "notification send succesfully.!";
+
+                    } else {
+
+                        return false;
+                    }
+                             
+                }
+            }
+        }
+    }
+
+   
+
+    public function getnotificationjson(Request $request)
+    {
+        $notifica = DB::table('notifica')
+                    ->get();  
+
+        $role_values = DB::table('ruolo_utente')->where('is_delete',0)
+                ->get();
+
+        $notification = [];
+
+        foreach ($notifica as $notifica) {
+
+            $ruolo = explode(",", $notifica->ruolo);
+
+            $r = '';
+            foreach($role_values as $role) {
+
+                if(in_array($role->ruolo_id, $ruolo)){
+					$r .= '<div class="round-checkbox">';
+					$r .= '<input name="ruolo" disabled="disabled" checked id="ruolo_'.$role->ruolo_id.'_id_M" value="'.$role->ruolo_id.'" type="checkbox">';
+					$r .= '<label for="ruolo_'.$role->ruolo_id.'_id_M">'.$role->nome_ruolo.'</label>';
+					$r .= '<div class="check"><div class="inside"></div></div></div>';
+                    /*$r .= "<input type='checkbox' name='ruolo' id='ruolo' value='$role->ruolo_id' disabled='disabled' checked /> $role->nome_ruolo ";*/
+                } else {
+					$r .= '<div class="round-checkbox">';
+					$r .= '<input name="ruolo" disabled="disabled" id="ruolo_'.$role->ruolo_id.'_id_M" value="'.$role->ruolo_id.'" type="checkbox">';
+					$r .= '<label for="ruolo_'.$role->ruolo_id.'_id_M">'.$role->nome_ruolo.'</label>';
+					$r .= '<div class="check"><div class="inside"></div></div></div>';
+                    /*$r .= "<input type='checkbox' name='ruolo' id='ruolo' disabled='disabled' value='$role->ruolo_id' /> $role->nome_ruolo ";*/
+                }
+
+            }
+            
+            $notifica->ruolo = $r;
+
+            array_push($notification, $notifica);
+            
+        }
+
+        return json_encode($notification);
+    }
+
+    public function getentinotificationjson(Request $request)
+    {
+        $invia_notifica = DB::table('invia_notifica')
+                    ->get();  
+
+        return json_encode($invia_notifica);
+    }
+
+
+    
 
 }

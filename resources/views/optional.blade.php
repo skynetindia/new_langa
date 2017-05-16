@@ -99,9 +99,9 @@ document.write(msg);
 </table>
 </div>
 
-<div class="pull-right">
+<!--<div class="pull-right">
     {{ $optional->links() }}
-</div>
+</div>-->
 <script>
     var selezione = [];
     var indici = [];

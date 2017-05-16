@@ -104,7 +104,7 @@ table tr td {
 	<!-- colonna a sinistra -->
 	<div class="col-md-4">
 		<label for="nomedipartimento">{{trans('messages.keyword_department_name')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
-		<input value="{{ old('nomedipartimento') }}" class="form-control" type="text" name="nomedipartimento" id="nomedipartimento" placeholder="{{trans('messages.keyword_department_name')}}"><br>
+		<input value="{{ old('nomedipartimento') }}" class="form-control" type="text" name="nomedipartimento" id="nomedipartimento" placeholder="{{trans('messages.keyword_department_name')}}" required="required"><br>
 		<label for="piva">{{trans('messages.keyword_vat_number')}}</label>
 		<input value="{{ old('piva') }}" class="form-control" type="text" name="piva" id="piva" placeholder="{{trans('messages.keyword_vat_number')}}"><br>
 		<label for="cellulareazienda">{{trans('messages.keyword_phone_department')}}</label>
@@ -117,7 +117,7 @@ table tr td {
 	<!-- colonna centrale -->
 	<div class="col-md-4">
 		<label for="nomereferente">{{trans('messages.keyword_head_of_department')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
-		<select title="Responsabile associato a questo ente" name="nomereferente" id="nomereferente" class="form-control" onchange="trovaTelefono()">
+		<select title="Responsabile associato a questo ente" name="nomereferente" id="nomereferente" class="form-control" onchange="trovaTelefono()" required>
 			<option></option>
 			@for($i = 1; $i < count($utenti); $i++)
 			<option>{{ $utenti[$i]->name }}</option>
@@ -170,14 +170,13 @@ table tr td {
 		}
 		</script>
 		<label for="email">{{trans('messages.keyword_primary_email')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
-		<input value="{{ old('email') }}" class="form-control" type="email" name="email" id="email" placeholder="{{trans('messages.keyword_notification_email')}}"><br>
+		<input value="{{ old('email') }}" class="form-control" type="email" name="email" id="email" placeholder="{{trans('messages.keyword_notification_email')}}" required><br>
 		<label for="emailsecondaria">{{trans('messages.keyword_secondary_email')}}</label>
 		<input value="{{ old('emailsecondaria') }}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="{{trans('messages.keyword_optional_email')}}"><br>
 
 	</div>
 	<div class="col-md-12"><strong>{{trans('messages.keyword_address')}} <p style="color:#f37f0d;display:inline">(*)</p></strong><br>
-	 <input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text"
-        placeholder="Inserisci un indirizzo (*)">
+	 <input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text" required placeholder="Inserisci un indirizzo (*)">
     <div id="type-selector" class="controls">
       <input type="radio" name="type" id="changetype-all" checked="checked">
       <label for="changetype-all">Tutti</label>

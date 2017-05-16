@@ -323,8 +323,8 @@ class HomeController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
-        return view('/');
+   public function index() {
+        return redirect('/');
     }
 
     /* ==================================== Profile section START ======================================== */
@@ -353,13 +353,21 @@ class HomeController extends Controller {
 
     public function aggiornaimmagine(Request $request) {
         // Aggiorno l'immagine memorizzandola con un nome univoco
+		 $validator = Validator::make($request->all(), [
+                'logo' => 'required|image|max:2000'
+            ]);
 
+            if ($validator->fails()) {
+                return Redirect::back()
+                                ->withInput()
+                                ->withErrors($validator);
+            }
         if ($request->logo != null) {
             $nome = time() . uniqid() . '-' . '-ente';
             Storage::put(
                     'images/' . $nome, file_get_contents($request->file('logo')->getRealPath())
             );
-
+			
             $res = DB::table('corporations')
                     ->where('id', $request->id)
                     ->update(array(
@@ -373,7 +381,7 @@ class HomeController extends Controller {
         $validator = Validator::make($request->all(), [
                     'name' => 'required|max:150',
                     'url' => 'required|max:150',
-                    'img' => 'required',
+                    'img' => 'required|image|2000',
         ]);
 
         if ($validator->fails()) {
