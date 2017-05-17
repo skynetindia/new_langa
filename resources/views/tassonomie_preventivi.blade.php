@@ -10,7 +10,7 @@
 </script>
 <fieldset>
 <legend>{{trans('messages.keyword_emotional_state')}}</legend>
-<form action="{{url('/admin/taxonomies/addestimates')}}" method="post">
+<form action="{{url('/admin/taxonomies/addestimates')}}" method="post" id="frmemotionalest">
     {{ csrf_field() }}
     <div class="row">
 	<div class="col-md-4">
@@ -33,7 +33,7 @@
 		<table class="table table-striped table-bordered text-right">
 	@foreach($estimates_stats as $estimatestype)
 	<tr>
-        <td><form action="{{url('/admin/taxonomies/updateestimates')}}" method="post">
+        <td><form action="{{url('/admin/taxonomies/updateestimates')}}" method="post" id="frmemotionalestEdit_{{$estimatestype->id}}">
             {{ csrf_field() }}
             <input type="hidden" name="id" value="{{$estimatestype->id}}">
             <table class="table sub-table">
@@ -45,7 +45,22 @@
                   <a  onclick="conferma(event);" type="submit" href="{{url('/admin/taxonomies/statiestimate/delete/id' . '/' . $estimatestype->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a></td>
               </tr>
             </table>
-          </form></td>
+          </form><script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmemotionalestEdit_{{$estimatestype->id}}").validate({            
+                      rules: {
+                          name: {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          name: {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script></td>
       </tr>    	
 	@endforeach
 	</table>
@@ -60,5 +75,22 @@ function conferma(e) {
 	return confirmation ;
 }
 </script>
-<script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
+<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script>
+<script type="text/javascript">
+ $(document).ready(function() {
+   $("#frmemotionalest").validate({            
+              rules: {
+                  name: {
+                      required: true,
+                  }
+              },
+              messages: {
+                  name: {
+                      required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                  }
+              }
+          });   
+   
+  });
+</script>
 @endsection

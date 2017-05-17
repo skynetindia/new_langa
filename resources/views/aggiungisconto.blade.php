@@ -100,7 +100,7 @@ table tr td {
 
 @include('common.errors')
 
-<?php echo Form::open(array('url' => '/admin/tassonomie/sconti/store', 'files' => true, 'id' => 'addscontiform', 'name'=>'addscontiform')) ?>
+<?php echo Form::open(array('url' => '/admin/tassonomie/sconti/store', 'files' => true, 'id' => 'scontiform', 'name'=>'addscontiform')) ?>
 	{{ csrf_field() }}
 	<!-- colonna a sinistra -->
 	<div class="col-md-4">
@@ -141,5 +141,32 @@ table tr td {
 		<button type="submit" class="btn btn-primary"> {{ trans('messages.keyword_save') }} </button>
 	</div>
     <?php echo Form::close(); ?>  
+
+     $("#scontiform").validate({
+            
+            rules: {
+                name: {
+                    required: true,
+                },
+                tipoente: {
+                    required: true,
+                },
+                sconto: {
+                    required: true
+                }
+            },
+            messages: {
+                name: {
+                    required: "Please enter a name"
+                },
+                tipoente: {
+                    required: "Please Select a tipo ente"
+                },
+                sconto: {
+                    required: "Please enter a sconto"
+                }
+            }
+
+        });
 
 @endsection

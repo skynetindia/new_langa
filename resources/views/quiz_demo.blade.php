@@ -9,7 +9,6 @@
 </script>
 @endif
 @include('common.errors')
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script>
 <script type="text/javascript" src="{{asset('public/scripts/jqColorPicker.min.js')}}"></script>
@@ -25,22 +24,25 @@
         <br />
         {{ csrf_field() }}
         <div class="col-sm-4">
-            <td width="20%"><label class="pull-left"><br></label><input type="text" required="required" class="form-control" name="name" id="name" value="" placeholder="{{trans("messages.keyword_name")}}"> </td>
+            <td width="20%">
+            <label class="pull-left"><br></label>
+            <input type="text" required="required" class="form-control" name="name" id="name" value="{{old('name')}}" placeholder="{{trans("messages.keyword_name")}}"> </td>
                            </div>
                            <div class="col-sm-4">
-                   <td><label class="pull-left"><br></label><input type="url" class="form-control" name="url" placeholder="{{trans("messages.keyword_url")}}"></td>
+                   <td><label class="pull-left"><br></label>
+                   <input type="url" class="form-control" required="required" name="url" value="{{old('url')}}" placeholder="{{trans("messages.keyword_url")}}"></td>
     </div>
     <div class="col-sm-4">
         <td><label class="pull-left">{{trans("messages.keyword_highlighted_image")}}</label><input type="file" class="form-control" id="immagine" name="immagine"></td>
     </div>           
-                      <div style                          ="text-align:right">
+                      <div style="text-align:right">
                           <input type="submit" class="btn btn-primary" value="{{trans("messages.keyword_add")}}">
                                                 </div>
                                       </form>
                                        @if(count($quizdemodettagli) > 0)
                           <h4>{{trans("messages.keyword_edit_types")}}</h4>
                           <div class="table-responsive">
-                              <table class="table                                                       table-striped table-bordered" style="text-align:righ t">
+                              <table class="table table-striped table-bordered" style="text-align:right">
 	@foreach($quizdemodettagli as $quizdemodettagli)		
                                                           <div class="row">
                                                           <tr>

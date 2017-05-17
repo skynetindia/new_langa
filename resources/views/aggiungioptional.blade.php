@@ -6,91 +6,6 @@
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 <h1>{{trans('messages.keyword_add_optional')}}</h1><hr>
-<style>
-    table tr td {
-        text-align:left;
-
-    }
-    .table-editable {
-        position: relative;
-    }
-    .table-editable .glyphicon {
-        font-size: 20px;
-    }
-
-    .table-remove {
-        color: #700;
-        cursor: pointer;
-    }
-    .table-remove:hover {
-        color: #f00;
-    }
-
-    .table-up, .table-down {
-        color: #007;
-        cursor: pointer;
-    }
-    .table-up:hover, .table-down:hover {
-        color: #00f;
-    }
-
-    .table-add {
-        color: #070;
-        cursor: pointer;
-        position: absolute;
-        top: 8px;
-        right: 0;
-    }
-    .table-add:hover {
-        color: #0b0;
-    }
-
-    #map {
-        height: 100%;
-        height: 400px;
-    }
-    .controls {
-        margin-top: 10px;
-        border: 1px solid transparent;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        height: 32px;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    }
-
-    #pac-input {
-        background-color: #fff;
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-        margin-left: 12px;
-        padding: 0 11px 0 13px;
-        text-overflow: ellipsis;
-        width: 300px;
-    }
-
-    #pac-input:focus {
-        border-color: #4d90fe;
-    }
-
-    .pac-container {
-        font-family: Roboto;
-    }
-
-    #type-selector {
-        color: #fff;
-        background-color: #4d90fe;
-        padding: 5px 11px 0px 11px;
-    }
-
-    #type-selector label {
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-    }
-</style>
 @if(!empty(Session::get('msg')))
 <script>
 var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -100,19 +15,25 @@ document.write(msg);
 @include('common.errors')
 <?php echo Form::open(array('url' => '/admin/taxonomies/optional/store', 'files' => true, 'id' => 'frmoptional')) ?>
 {{ csrf_field() }}
-<div class="pull-right">
-    {{trans("messages.keyword_exclude_from_quiz?_(even)")}} <input value="1" <?php if (isset($optional->escludi_da_quiz) && $optional->escludi_da_quiz == '1') {
-    echo 'checked';
-} ?> class="" type="checkbox" name="escludi_da_quiz" id="escludi_da_quiz">
-</div>
+<div class="col-md-12 text-right">
+    <div class="quiz-check">
+       <span>{{trans("messages.keyword_exclude_from_quiz?_(even)")}}</span><div class="switch"><input value="1" <?php if(isset($optional->escludi_da_quiz) && $optional->escludi_da_quiz=='1'){ echo 'checked';}?> class="" type="checkbox" name="escludi_da_quiz" id="escludi_da_quiz"><label for="escludi_da_quiz"></label></div>
+    </div>
+    </div>
 <div class="col-md-4">
-    <label for="code">{{trans('messages.keyword_short_name')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label for="code">{{trans('messages.keyword_short_name')}}<span class="required">(*)</span></label>
     <input value="{{ old('code') }}" class="form-control" type="text" name="code" id="code" placeholder="{{trans('messages.keyword_short_name')}}"><br>
-    <label for="logo">{{trans('messages.keyword_logo')}}</label>
-    <?php echo Form::file('logo', ['class' => 'form-control']); ?>
-    <label for="immagine">{{trans("messages.keyword_image")}}</label>
-<?php echo Form::file('immagine', ['class' => 'form-control']); ?><br>
-    <label for="frequeny">{{trans('messages.keyword_frequency')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <div class="row">
+        <div class="col-md-6">
+            <label for="logo">{{trans('messages.keyword_logo')}}</label>
+            <?php echo Form::file('logo', ['class' => 'form-control']); ?>
+        </div>
+        <div class="col-md-6">
+            <label for="immagine">{{trans("messages.keyword_image")}}</label>
+            <?php echo Form::file('immagine', ['class' => 'form-control']); ?>
+        </div>
+    </div><br>
+    <label for="frequeny">{{trans('messages.keyword_frequency')}} <span class="required">(*)</span></label>
     <select name="frequenza" class="form-control">
         @foreach($frequenze as $frequenza)
         @if($frequenza->id == old('code'))
@@ -127,41 +48,55 @@ document.write(msg);
 <div class="col-md-4">
     <label for="description">{{trans("messages.keyword_description")}} </label>
     <textarea class="form-control" name="description" id="description" rows="5" placeholder="{{trans("messages.keyword_description")}} ">{{ old('description') }}</textarea><br />
-
-    <label for="price">{{trans('messages.keyword_base_price_list')}} (€)</label>
-    <input value="{{ old('price') }}" class="form-control" type="text" name="price" id="price" placeholder="{{trans('messages.keyword_base_price_list')}}"><br>
-    <label for="price">{{trans("messages.keyword_discount_reseller_discount")}} (%)</label>
-    <input value="{{ old('sconto_reseller') }}" class="form-control" type="text" name="sconto_reseller" id="sconto_reseller" placeholder="{{trans("messages.keyword_discount_reseller_discount")}}"><br>
+    <div class="row">
+        <div class="col-md-6">
+            <label for="price">{{trans('messages.keyword_base_price_list')}} (€)</label>
+            <input value="{{ old('price') }}" class="form-control" type="text" name="price" id="price" placeholder="{{trans('messages.keyword_base_price_list')}}">
+        </div>
+        <div class="col-md-6">
+            <label for="price">{{trans("messages.keyword_discount_reseller_discount")}} (%)</label>
+            <input value="{{ old('sconto_reseller') }}" class="form-control" type="text" name="sconto_reseller" id="sconto_reseller" placeholder="{{trans("messages.keyword_discount_reseller_discount")}}">
+        </div>
+    </div>
 <?php /* <label for="label">Nome <p style="color:#f37f0d;display:inline">(*)</p></label>
   <input value="{{ $optional->label }}" class="form-control" type="text" name="label" id="label" placeholder="Nome"><br> */ ?>         
 </div>
 <div class="col-md-4">
     <label for="description">{{trans('messages.keyword_description_quiz')}} </label>
     <textarea class="form-control" name="description_quize" id="description_quize" rows="5" placeholder="{{trans('messages.keyword_description_quiz')}}">{{ old('description_quize') }}</textarea><br />
-    <label for="department">{{trans("messages.keyword_department")}} <p style="color:#f37f0d;display:inline">(*)</p></label>
-    <select name="department" class="form-control">      
-        @foreach($dipartimenti as $dipartimento)
-        @if($dipartimento->id == old('dipartimento'))
-        <option selected value="{{$dipartimento->id}}">{{$dipartimento->nomedipartimento}}</option>
-        @else
-        <option value="{{$dipartimento->id}}">{{$dipartimento->nomedipartimento}}</option>
-        @endif
-        @endforeach
-    </select>
-    <label for="processing">{{trans('messages.keyword_processing')}} </label>
-    <select name="lavorazione" class="form-control">
-        <option value="0">Seleziona Lavorazione</option>
-        @foreach($lavorazioni as $lavorazioni)
-        @if($lavorazioni->id == old('lavorazione'))
-        <option selected value="{{$lavorazioni->id}}">{{$lavorazioni->nome}}</option>
-        @else
-        <option value="{{$lavorazioni->id}}">{{$lavorazioni->nome}}</option>
-        @endif
-        @endforeach
-    </select><br>
+    <div class="row">
+        <div class="col-md-6">
+            <label for="department">{{trans("messages.keyword_department")}} <span class="required">(*)</span></label>
+            <select name="department" class="form-control">      
+                @foreach($dipartimenti as $dipartimento)
+                @if($dipartimento->id == old('dipartimento'))
+                <option selected value="{{$dipartimento->id}}">{{$dipartimento->nomedipartimento}}</option>
+                @else
+                <option value="{{$dipartimento->id}}">{{$dipartimento->nomedipartimento}}</option>
+                @endif
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="processing">{{trans('messages.keyword_processing')}} </label>
+            <select name="lavorazione" class="form-control">
+                <option value="0">Seleziona Lavorazione</option>
+                @foreach($lavorazioni as $lavorazioni)
+                @if($lavorazioni->id == old('lavorazione'))
+                <option selected value="{{$lavorazioni->id}}">{{$lavorazioni->nome}}</option>
+                @else
+                <option value="{{$lavorazioni->id}}">{{$lavorazioni->nome}}</option>
+                @endif
+                @endforeach
+            </select>
+        </div>
+    </div>
 </div>	
-<div class="col-xs-6" style="padding-top:10px;padding-bottom:10px;">		
-    <button type="submit" class="btn btn-primary">{{trans('messages.keyword_save')}}</button>
+<div class="col-xs-12">     
+    <button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+</div>
+<div class="footer-svg">
+    <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
 </div>
 <?php echo Form::close(); ?>  
 <script>

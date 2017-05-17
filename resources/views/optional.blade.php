@@ -2,58 +2,6 @@
 @section('page')
 <h1>{{trans('messages.keyword_optional')}}</h1><hr>
 @include('common.errors')
-<style>
-     tr:hover {
-        background: #f39538;
-    }
-    .selected {
-        font-weight: bold;
-        font-size: 16px;
-    }
-    th {
-        cursor: pointer;
-    }
-    li label {
-        padding-left: 10px;
-    }
-    .button {
-        background-color: #4CAF50; /* Green */
-        border: none;
-        color: white;
-        padding: 3px 15px;
-        padding-bottom: 6px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        -webkit-transition-duration: 0.4s; /* Safari */
-        transition-duration: 0.4s;
-        cursor: pointer;
-        border-radius: 4px;
-    }
-    .button2 { /* blue */
-        background-color: white;
-        color: black;
-        border: 2px solid #337ab7;
-    }
-
-    .button2:hover {
-        background-color: #337ab7;
-        color: white;
-    }
-
-    .button3 { /* red */
-        background-color: white;
-        color: black;
-        border: 2px solid #d9534f;
-    }
-
-    .button3:hover {
-        background-color: #d9534f;
-        color: white;
-    }
-</style>
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
@@ -74,20 +22,15 @@ document.write(msg);
 @endif
 
 </script>
-<div class="btn-group">
-    <form action="{{ url('/admin/taxonomies/optional/add') }}" method="post" style="display:inline;">
-        {{ csrf_field() }}
-        <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo optional"><i class="fa fa-plus"></i></button>
-    </form><br>
-    <a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-        <button class="btn btn-primary" type="button" name="update" title="Modifica - Modifica l'ultimo ente selezionato"><i class="glyphicon glyphicon-pencil"></i></button>
-    </a>
-    <a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-        <button class="btn btn-danger" type="button" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="glyphicon glyphicon-erase"></i></button>
-    </a>
-</div>
-<br><br>
-
+<form action="{{ url('/admin/taxonomies/optional/add') }}" method="post">
+  {{ csrf_field() }}
+  <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo optional"><i class="fa fa-plus"></i></button>
+</form>
+<div class="space10"></div>
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" title="Modifica - Modifica l'ultimo ente selezionato"> <i class="glyphicon glyphicon-pencil"></i></a> 
+<a id="delete" onclick="multipleAction('delete');"  class="btn btn-danger" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="fa fa-trash"></i> </a>
+<div class="space30"></div>
+<div class=" table-responsive table-custom-design">
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('admin/taxonomies/json'); ?>" data-classes="table table-bordered" id="table">
     <thead>
     <th data-field="id" data-sortable="true">{{trans('messages.keyword_code')}}
@@ -98,7 +41,10 @@ document.write(msg);
  </thead>
 </table>
 </div>
-
+<div class="space50"></div>
+<div class="footer-svg">
+    <img src="http://betaeasy.langa.tv/images/ADMIN_TASSONOMIE-footer.svg" alt="tassonomie">
+</div>
 <!--<div class="pull-right">
     {{ $optional->links() }}
 </div>-->

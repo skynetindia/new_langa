@@ -7,93 +7,6 @@
 <script type="text/javascript">
      $('.color').colorPicker();
 </script>
-<style>
-table tr td {
-	text-align:left;
-	
-}
-.table-editable {
-  position: relative;
-}
-.table-editable .glyphicon {
-  font-size: 20px;
-}
-.table-remove {
-  color: #700;
-  cursor: pointer;
-}
-.table-remove:hover {
-  color: #f00;
-}
-.table-up, .table-down {
-  color: #007;
-  cursor: pointer;
-}
-.table-up:hover, .table-down:hover {
-  color: #00f;
-}
-.table-add {
-  color: #070;
-  cursor: pointer;
-  position: absolute;
-  top: 8px;
-  right: 0;
-}
-.table-add:hover {
-  color: #0b0;
-}
-      #map {
-        height: 100%;
-		height: 400px;
-      }
-      .controls {
-        margin-top: 10px;
-        border: 1px solid transparent;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        height: 32px;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      }
-      #pac-input {
-        background-color: #fff;
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-        margin-left: 12px;
-        padding: 0 11px 0 13px;
-        text-overflow: ellipsis;
-        width: 300px;
-      }
-      #pac-input:focus {
-        border-color: #4d90fe;
-      }
-      .pac-container {
-        font-family: Roboto;
-      }
-      #type-selector {
-        color: #fff;
-        background-color: #4d90fe;
-        padding: 5px 11px 0px 11px;
-      }
-      #type-selector label {
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-      }
-table, td, th {    
-    border: 1px solid #ddd;
-    text-align: left;
-}
-table {
-    border-collapse: collapse;
-    width: 100%;
-}
-th, td {
-    padding: 15px;
-}
-</style>
 <script type="text/javascript"> 
  $(document).ready(function() {
   $("#dipartimento").change(function(){
@@ -140,24 +53,35 @@ th, td {
   ?>
     {{ csrf_field() }}
     <!-- colonna a sinistra -->  
-   <div class="col-md-4">
-    <label for="name">{{trans('messages.keyword_package_name')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
-    <input value="{{ isset($pacchetto_data[0]->nome_pacchetto) ? $pacchetto_data[0]->nome_pacchetto : "" }}" class="form-control" type="text" name="nome_pacchetto" id="nome_pacchetto" placeholder="{{trans('messages.keyword_package_name')}}"><br>  		
-                
-    <label for="colore">{{trans('messages.keyword_total_pages')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
-    <input value="{{ isset($pacchetto_data[0]->pagine_totali) ? $pacchetto_data[0]->pagine_totali : ""}}" class="form-control no-alpha" type="text" name="pagine_totali" id="pagine_totali" placeholder="{{trans('messages.keyword_total_pages')}}"><br>    
+   <div class="col-md-6">
+    <div class="form-group">
+      <label for="name">{{trans('messages.keyword_package_name')}} <span class="required">(*)</span></label>
+      <input value="{{ isset($pacchetto_data[0]->nome_pacchetto) ? $pacchetto_data[0]->nome_pacchetto : "" }}" class="form-control" type="text" name="nome_pacchetto" id="nome_pacchetto" placeholder="{{trans('messages.keyword_package_name')}}">
+    </div>  
+    <div class="form-group">                
+      <label for="colore">{{trans('messages.keyword_total_pages')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+      <input value="{{ isset($pacchetto_data[0]->pagine_totali) ? $pacchetto_data[0]->pagine_totali : ""}}" class="form-control no-alpha" type="text" name="pagine_totali" id="pagine_totali" placeholder="{{trans('messages.keyword_total_pages')}}"><br>    
+    </div>
     </div>
     <!-- colonna centrale -->
-      <div class="col-md-4">    
-          <label for="colore">{{trans('messages.keyword_package_price')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
- 	   <input value="{{ isset($pacchetto_data[0]->prezzo_pacchetto) ? $pacchetto_data[0]->prezzo_pacchetto : ""}}" class="form-control no-alpha" type="text" name="prezzo_pacchetto" id="prezzo_pacchetto" placeholder="{{trans('messages.keyword_package_price')}}"><br>      
+      <div class="col-md-6">           
+          <div class="form-group">
+            <label for="colore">{{trans('messages.keyword_package_price')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+ 	   <input value="{{ isset($pacchetto_data[0]->prezzo_pacchetto) ? $pacchetto_data[0]->prezzo_pacchetto : ""}}" class="form-control no-alpha" type="text" name="prezzo_pacchetto" id="prezzo_pacchetto" placeholder="{{trans('messages.keyword_package_price')}}">
+     </div>     
+    <div class="form-group">      
  	     <label for="email">{{trans('messages.keyword_per_price_page')}} </label><p style="color:#f37f0d;display:inline"> (*) </p></label>
-    	  <input value="{{isset($pacchetto_data[0]->per_pagina_prezzo) ? $pacchetto_data[0]->per_pagina_prezzo : ""}}" class="form-control no-alpha" type="text" name="per_pagina_prezzo" id="per_pagina_prezzo" placeholder="{{trans('messages.keyword_per_price_page')}}"><br>
+    	  <input value="{{isset($pacchetto_data[0]->per_pagina_prezzo) ? $pacchetto_data[0]->per_pagina_prezzo : ""}}" class="form-control no-alpha" type="text" name="per_pagina_prezzo" id="per_pagina_prezzo" placeholder="{{trans('messages.keyword_per_price_page')}}">
        </div>
+      </div>
     <!-- colonna a destra -->    
-	<div class="col-md-12" style="padding-top:10px;padding-bottom:10px;">
-		<button type="submit" class="btn btn-primary">{{trans('messages.keyword_save')}}</button>
+	 <div class="col-md-12">
+		<button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+    <div class="space50"> </div>
 	</div>
+  <div class="footer-svg">
+    <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
+  </div>
     <?php echo Form::close(); ?>  
 <script>
 $('.ciao').on("click", function() {

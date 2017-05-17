@@ -10,7 +10,7 @@
 </script>
 <fieldset>
 <legend>{{trans('messages.keyword_emotional_state')}}</legend>
-<form action="{{url('/admin/taxonomies/addstatesproject')}}" method="post">
+<form action="{{url('/admin/taxonomies/addstatesproject')}}" method="post" id="frmemotionalProject">
     {{ csrf_field() }}
     <div class="row">
 		<div class="col-md-4">
@@ -32,7 +32,7 @@
 	<table class="table table-striped table-bordered text-right">
 	@foreach($statesproject as $statoemotivotipo)
 	<tr>
-        <td><form action="{{url('/admin/taxonomies/updatestatesproject')}}" method="post">
+        <td><form action="{{url('/admin/taxonomies/updatestatesproject')}}" method="post" id="frmemotionalProject_{{$statoemotivotipo->id}}">
             {{ csrf_field() }}
             <input type="hidden" name="id" value="{{$statoemotivotipo->id}}">
             <table class="table sub-table">
@@ -44,7 +44,22 @@
                   <a  onclick="conferma(event);" type="submit" href="{{ url('/admin/taxonomies/statesproject/delete/id' . '/' . $statoemotivotipo->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}} </a></td>
               </tr>
             </table>
-          </form></td>
+          </form><script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmemotionalProject_{{$statoemotivotipo->id}}").validate({            
+                      rules: {
+                          name: {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          name: {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script></td>
       </tr>
 	@endforeach
 	</table>
@@ -59,5 +74,22 @@ function conferma(e) {
 	return confirmation ;
 }
 </script>
-<script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
+<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script>
+<script type="text/javascript">
+ $(document).ready(function() {
+   $("#frmemotionalProject").validate({            
+              rules: {
+                  name: {
+                      required: true,
+                  }
+              },
+              messages: {
+                  name: {
+                      required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                  }
+              }
+          });   
+   
+  });
+</script>
 @endsection

@@ -3,59 +3,6 @@
 
 @include('common.errors')
 
-<style>
-tr:hover {
-  background: #f39538;
-}
-.selected {
-  font-weight: bold;
-  font-size: 16px;
-}
-th {
-  cursor: pointer;
-}
-li label {
-  padding-left: 10px;
-}
-.button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 3px 15px;
-    padding-bottom: 6px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 4px;
-}
-.button2 { /* blue */
-    background-color: white;
-    color: black;
-    border: 2px solid #337ab7;
-}
-
-.button2:hover {
-    background-color: #337ab7;
-    color: white;
-}
-
-.button3 { /* red */
-    background-color: white;
-    color: black;
-    border: 2px solid #d9534f;
-}
-
-.button3:hover {
-    background-color: #d9534f;
-    color: white;
-}
-</style>
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 
 <!-- Latest compiled and minified CSS -->
@@ -77,36 +24,19 @@ li label {
     </script>
 @endif
 
-
-<div class="btn-group" style="display:inline">
-
-<a onclick="multipleAction('add');" id="add" style="display:inline;">
-
-<button class="btn btn-warning" type="submit" name="create" title="{{trans('messages.keyword_new_taxation')}}"><span class="fa fa-plus"></span></button>
-
-
-<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-
-<button class="btn btn-primary" type="button" name="update" title="{{'messages.keyword_modift_taxation'}}"><span class="fa fa-pencil"></span></button>
-
-</a>
-
-
-<a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-
-<button class="btn btn-danger" type="button" name="remove" title="{{trans('messages.keyword_delete_taxation')}}"><span class="fa fa-trash"></span></button>
-
-</a>
-
-</div>
-
+<a onclick="multipleAction('add');" id="add"  class="btn btn-warning" name="create" title="{{trans('messages.keyword_new_taxation')}}"><span class="fa fa-plus"></span></a>
+<div class="space10"></div>
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary"  name="update" title="{{'messages.keyword_modift_taxation'}}"><span class="fa fa-pencil"></span></a>
+<a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="{{trans('messages.keyword_delete_taxation')}}"><span class="fa fa-trash"></span></a>
+<div class="table-responsive">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="taxation/json" data-classes="table table-bordered" id="table">
         <thead>
-            <th data-field="tassazione_id" data-sortable="true">{{trans('messages.keyword_id')}}
-            <th data-field="tassazione_nome" data-sortable="true">{{trans('messages.keyword_name')}}
-            <th data-field="tassazione_percentuale" data-sortable="true">{{trans("messages.keyword_percentage")}}
+            <th data-field="tassazione_id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
+            <th data-field="tassazione_nome" data-sortable="true">{{trans('messages.keyword_name')}}</th>
+            <th data-field="tassazione_percentuale" data-sortable="true">{{trans("messages.keyword_percentage")}}</th>
         </thead>
     </table>
+  </div>
 <script>
 var selezione = [];
 var indici = [];
@@ -132,8 +62,7 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
     n--;
   }
 });
-
-function check() { return confirm("Sei sicuro di voler eliminare: " + n + " tassazione?"); }
+function check() { return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}} " + n + " {{trans('messages.keyword_taxation')}}?"); }
 function multipleAction(act) {
   var error = false;
   var link = document.createElement("a");
@@ -156,9 +85,9 @@ function multipleAction(act) {
                 link.dispatchEvent(clickEvent);
                           } 
             }
-                    });
+          });
         }
-                selezione = undefined;
+        selezione = undefined;
         setTimeout(function(){location.reload();},100*n);
         n = 0;
           }

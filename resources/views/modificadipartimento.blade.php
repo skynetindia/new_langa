@@ -6,91 +6,6 @@
 		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 <h1>{{trans("messages.keyword_modify_department")}}</h1><hr>
-<style>
-table tr td {
-	text-align:left;
-	
-}
-.table-editable {
-  position: relative;
-}
-.table-editable .glyphicon {
-  font-size: 20px;
-}
-
-.table-remove {
-  color: #700;
-  cursor: pointer;
-}
-.table-remove:hover {
-  color: #f00;
-}
-
-.table-up, .table-down {
-  color: #007;
-  cursor: pointer;
-}
-.table-up:hover, .table-down:hover {
-  color: #00f;
-}
-
-.table-add {
-  color: #070;
-  cursor: pointer;
-  position: absolute;
-  top: 8px;
-  right: 0;
-}
-.table-add:hover {
-  color: #0b0;
-}
-
-      #map {
-        height: 100%;
-		height: 400px;
-      }
-      .controls {
-        margin-top: 10px;
-        border: 1px solid transparent;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        height: 32px;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      }
-
-      #pac-input {
-        background-color: #fff;
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-        margin-left: 12px;
-        padding: 0 11px 0 13px;
-        text-overflow: ellipsis;
-        width: 300px;
-      }
-
-      #pac-input:focus {
-        border-color: #4d90fe;
-      }
-
-      .pac-container {
-        font-family: Roboto;
-      }
-
-      #type-selector {
-        color: #fff;
-        background-color: #4d90fe;
-        padding: 5px 11px 0px 11px;
-      }
-
-      #type-selector label {
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-      }
-</style>
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -99,15 +14,19 @@ table tr td {
 @endif
 @include('common.errors')
 <div class="container-fluid col-md-12">
-	<div style="display:inline">
-	<img src="http://easy.langa.tv/storage/app/images/<?php echo $dipartimento->logo; ?>" style="max-width:100px; max-height:100px;display:inline"></img><h1 style="display:inline">  {{trans("messages.keyword_code")}}: {{$dipartimento->id}}</h1><hr>
-	</div>
+  <div> </div>
 </div>
+<div class="row">
+  <div class="col-md-6"> <img src="http://easy.langa.tv/storage/app/images/<?php echo $dipartimento->logo; ?>" class="option-image">
+    <h1 class="option-heading"> {{trans("messages.keyword_code")}}: {{$dipartimento->id}}</h1>
+  </div>
+</div>
+
 <?php echo Form::open(array('url' => '/admin/tassonomie/dipartimenti/update/department/' . $dipartimento->id, 'files' => true)) ?>
 	{{ csrf_field() }}
 	<!-- colonna a sinistra -->
 	<div class="col-md-4">
-		<label for="nomedipartimento">{{trans('messages.keyword_department_name')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+		<label for="nomedipartimento">{{trans('messages.keyword_department_name')}}<span class="required">(*)</span></label>
 		<input value="{{ $dipartimento->nomedipartimento }}" class="form-control" type="text" name="nomedipartimento" id="nomedipartimento" placeholder="{{trans('messages.keyword_department_name')}}"><br>
 		<label for="piva">{{trans('messages.keyword_vat_number')}}</label>
 		<input value="{{ $dipartimento->piva }}" class="form-control" type="text" name="piva" id="piva" placeholder="{{trans('messages.keyword_vat_number')}}"><br>
@@ -120,7 +39,7 @@ table tr td {
 	</div>
 	
 	<div class="col-md-4">
-		<label for="nomereferente">{{trans('messages.keyword_head_of_department')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<label for="nomereferente">{{trans('messages.keyword_head_of_department')}} <span class="required">(*)</span></label>
 		<select title="Responsabile associato a questo ente" name="nomereferente" id="nomereferente" class="form-control" onchange="trovaTelefono()">
 			<option></option>
 			@for($i = 1; $i < count($utenti); $i++)
@@ -177,13 +96,13 @@ table tr td {
 			$('#telefonodipartimento').val(cellulari[k]);
 		}
 		</script>
-		<label for="email">{{trans('messages.keyword_primary_email')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<label for="email">{{trans('messages.keyword_primary_email')}} <span class="required">(*)</span></label>
 		<input value="{{ $dipartimento->email }}" class="form-control" type="email" name="email" id="email" placeholder="{{trans('messages.keyword_notification_email')}}"><br>
 		<label for="emailsecondaria">{{trans('messages.keyword_secondary_email')}}</label>
 		<input value="{{ $dipartimento->emailsecondaria }}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="{{trans('messages.keyword_optional_email')}}"><br>
 
 	</div>
-	<div class="col-md-12"><strong>{{trans('messages.keyword_address')}} <p style="color:#f37f0d;display:inline">(*)</p></strong><br>
+	<div class="col-md-12"><strong>{{trans('messages.keyword_address')}} <span class="required">(*)</span></strong><br>
 	 <input value="{{ $dipartimento->indirizzo }}" id="pac-input" name="indirizzo" class="controls" type="text"
         placeholder="Inserisci un indirizzo (*)">
     <div id="type-selector" class="controls">
@@ -202,16 +121,22 @@ table tr td {
 	
     <div id="map"></div>
 	</div>
-	<div class="container-fluid col-md-12" style="padding-top:10px">
+  <div class="space10"></div>
+	<div class="col-md-12">
+  <div class="form-group">
 	<label for="noteenti" >{{trans('messages.keyword_entries_note')}}</label>
 	<textarea title="{{trans('messages.keyword_public_note')}}" class="form-control" rows="7" name="noteenti" id="noteenti" placeholder="{{trans('messages.keyword_entries_note')}}">{{ $dipartimento->noteenti }}</textarea><br>
 	</div>
+  </div>
 
-	<div class="col-xs-6" style="padding-top:10px;padding-bottom:10px;">
-		
-		<button type="submit" class="btn btn-primary">{{trans('messages.keyword_save')}} </button>
+	<div class="col-xs-12">		
+		<button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}} </button>
+    <div class="space50"> </div>
 	</div>
 <?php echo Form::close(); ?>  
+<div class="footer-svg">
+  <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
+</div>
 <script>
 
 function punto() {

@@ -1,27 +1,19 @@
 @extends('adminHome')
 @section('page')
-
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
-
 <!-- Latest compiled and minified JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
 <!-- Latest compiled and minified Locales -->
 <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>  
 <!-- ckeditor -->
 <script src="//cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
 <h1> {{ trans('messages.keyword_addalert') }}  </h1><hr>
-
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -36,20 +28,19 @@
   {{ csrf_field() }}
 
   <div class="col-md-9">
-
-    <label> {{ trans('messages.keyword_alert') }}  <p style="color:#f37f0d;display:inline">(*)</p> </label>
-
-    <input class="form-control" id="nome_alert" name="nome_alert" value="" placeholder="{{ trans('messages.keyword_alert') }} {{ trans('messages.keyword_name') }}">
-
+    <div class="form-group">
+      <label> {{ trans('messages.keyword_alert') }}  <span class="required" >(*)</span> </label>
+      <input class="form-control" id="nome_alert" name="nome_alert" value="" placeholder="{{ trans('messages.keyword_alert') }} {{ trans('messages.keyword_name') }}">
+    </div>
   </div>
 
   <div class="col-md-3">
-
-    <label> {{ trans('messages.keyword_tipoalert') }}  <p style="color:#f37f0d;display:inline">(*)</p></label>
+<div class="form-group">
+    <label> {{ trans('messages.keyword_tipoalert') }}  <span class="required" >(*)</span></label>
 
       <select  class="form-control" id="tipo_alert" name="tipo_alert" style="color:#ffffff" >
 
-        <!-- <option style="background-color:black;" selected disabled>-- select --</option>   -->
+        <!-- <option style="background-color:black;" selected disabled> select </option>   -->
 
         <option selected disabled>-- {{ trans('messages.keyword_select') }} --</option>  
 
@@ -59,7 +50,8 @@
 
         @endforeach
         
-      </select><br>
+      </select>
+      </div>
 	  <script>
 	    var yourSelect = document.getElementById( "tipo_alert" );
      document.getElementById("tipo_alert").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
@@ -72,7 +64,7 @@
   </div>
 
 <div class="col-md-6">
-
+<div class="form-group">
 <label for="ente"> {{ trans('messages.keyword_entity') }} </label>
 
 <select id="ente" name="ente[]" class="js-example-basic-multiple form-control" multiple="multiple">
@@ -83,11 +75,11 @@
       </option>
     @endforeach
   </select>
-
+</div>
   </div>
 
 <div class="col-md-6">
-
+<div class="form-group">
 <label for="ruolo"> {{ trans('messages.keyword_role') }} </label>
 
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple">
@@ -98,6 +90,7 @@
       </option>
     @endforeach
 </select>
+</div>
 
       <script type="text/javascript">
 
@@ -131,38 +124,27 @@
         }
 
       </script>
-
-  </div>
-
 </div>
 
     
-    <br>
+<div class="row">
+<div class="col-md-12">
+ <div class="form-group">
 
     <label> {{ trans('messages.keyword_message') }} </label>
 
     <textarea name="messaggio" id="messaggio" rows="10" cols="50" class="form-control"></textarea>
-
+</div>
     <script type="text/javascript" >
       CKEDITOR.replace( 'messaggio' );
     </script>
-
-    <br>
-
     <input class="btn btn-warning" type="submit" value="{{ trans('messages.keyword_send') }}">
-
-    </form>
-
-  </div>
-
 </div>
-
-
-  <div class="space30"></div>
+  </div>
+    </form>
+  </div>
+<div class="space30"></div>
 <h1 class="cst-datatable-heading"> {{ trans('messages.keyword_activitylist') }} </h1>
-
-
-
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('/alert/enti/json') }}" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="id_ente" data-sortable="true">
@@ -187,4 +169,56 @@
             {{ trans('messages.keyword_confirm') }}  </th>
         </thead>
     </table>
+    <div class="footer-svg">
+  <img src="{{asset('images/ADMIN_AVVISI-footer.svg')}}" alt="avvisi">
+</div>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        // validate signup form on keyup and submit
+        $("#addalert").validate({
+            rules: {
+                nome_alert: {
+                    required: true
+                },
+                tipo_alert: {
+                    required: true
+                },
+                ente: {
+                    required: true
+                },
+                ruolo: {
+                    required: true              
+                },
+                messaggio: {                   
+                     required: function(textarea) {
+                      CKEDITOR.instances[textarea.id].updateElement(); // update textarea
+                      var editorcontent = textarea.value.replace(/<[^>]*>/gi, ''); // strip tags
+                      return editorcontent.length === 0;
+                    }
+                }
+            },
+            messages: {
+                nome_alert: {
+                    required: "{{trans('messages.keyword_please_enter_a_alert_name')}}"
+                },
+                tipo_alert: {
+                    required: "{{trans('messages.keyword_please_select_a_alert_type')}}"
+                },
+                ente: {
+                    required: "{{trans('messages.keyword_please_select_an_entity')}}"
+                },
+                ruolo: {
+                    required: "{{trans('messages.keyword_please_select_a_role')}}"                    
+                },
+                messaggio: {
+                    required: "{{trans('messages.keyword_please_enter_message')}}"            
+                }
+            }
+
+        });
+      });
+
+
+      
+    </script>
 @endsection

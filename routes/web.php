@@ -50,15 +50,22 @@ Route::post('admin/languagetranslation/update/{key}', 'AdminController@updatetra
 Route::get('/language-chooser', 'LanguageController@changeLanguage');
 Route::get('/language/', array('before'=> 'csrf','as'=>'language-chooser','uses'=>'LanguageController@changeLanguage'));
 
-/*===================================== Entiity section routes =============================== */
+/*===================================== Entiity Emotion section routes =============================== */
 //Company(Entities) sections
 Route::get('admin/taxonomies/enti', 'AdminController@enti');
 
-// for getting new enti list
-Route::get('/newenti', 'AdminController@newregisteredenti');
-//Route::get('/admin/language', 'AdminController@language');
-Route::get('/newenti/json', 'AdminController@getjsonregisteredenti');
+Route::post('/admin/tassonomie/new', 'AdminController@nuovoTipo');
+Route::post('/admin/tassonomie/update', 'AdminController@tassonomieUpdate');
+Route::get('/admin/tassonomie/delete/id/{id}', 'AdminController@delete');
+// Stati emotivi enti
+Route::post('/admin/tassonomie/nuovostatoemotivo', 'AdminController@nuovoStatoEmotivo');
+Route::post('/admin/tassonomie/aggiornastatiemotivi', 'AdminController@aggiornaStatiEmotivi');
+Route::get('/admin/tassonomie/statiemotivi/delete/id/{id}', 'AdminController@deleteStatiEmotivi');
 
+
+// for getting new enti list New Enti sections
+Route::get('/newenti', 'AdminController@newregisteredenti');
+Route::get('/newenti/json', 'AdminController@getjsonregisteredenti');
 // approve enti
 Route::get('/approveenti/{id}', 'AdminController@approveenti');
 // reject enti
@@ -357,3 +364,4 @@ Route::get('/notification/user-read', 'AdminController@userreadnotification');
 Route::get('/note_role/make-comment', 'AdminController@notemakecomment');
 // role wised read notification
 Route::get('/note_role/user-read', 'AdminController@userreadnote');
+

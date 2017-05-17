@@ -1,6 +1,5 @@
 @extends('adminHome')
 @section('page')
-
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
@@ -12,62 +11,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
 
 <h1>{{trans('messages.keyword_quiz_pacchetto')}}</h1><hr>
-<style>
-tr:hover {
-	background: #f39538;
-}
-.selected {
-	font-weight: bold;
-	font-size: 16px;
-}
-th {
-	cursor: pointer;
-}
-li label {
-	padding-left: 10px;
-}
-.button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 3px 15px;
-    padding-bottom: 6px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 4px;
-}
-.button2 { /* blue */
-    background-color: white;
-    color: black;
-    border: 2px solid #337ab7;
-}
-
-.button2:hover {
-    background-color: #337ab7;
-    color: white;
-}
-
-.button3 { /* red */
-    background-color: white;
-    color: black;
-    border: 2px solid #d9534f;
-}
-
-.button3:hover {
-    background-color: #d9534f;
-    color: white;
-}
-</style>
-
-
-<script>
-    
+ 
     
 @if(!empty(Session::get('msg')))
 
@@ -78,17 +22,12 @@ li label {
 @endif
 </script>
 <!-- Fine filtraggio miei/tutti -->
-<div class="btn-group">
-<a onclick="multipleAction('add');" id="add" style="display:inline;">
-<button class="btn btn-primary" type="button" name="add" title="{{trans('messages.keyword_add_new_quiz_package')}}"><i class="glyphicon glyphicon-plus"></i></button>
-<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-<button class="btn btn-primary" type="button" name="update" title="{{trans('messages.keyword_modify_selected_quiz_package')}}"><i class="glyphicon glyphicon-pencil"></i></button>
-</a>
-<a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title="{{trans('messages.keyword_delete_selected_quiz_package')}}"><i class="glyphicon glyphicon-erase"></i></button>
-</a>
-</div>
-
+<a onclick="multipleAction('add');" id="add" class="btn btn-warning" name="add" title="{{trans('messages.keyword_add_new_quiz_package')}}"><i class="glyphicon glyphicon-plus"></i></a>
+<div class="space10"></div>
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="{{trans('messages.keyword_modify_selected_quiz_package')}}"><i class="glyphicon glyphicon-pencil"></i></a>
+<a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="{{trans('messages.keyword_delete_selected_quiz_package')}}"><i class="fa fa-trash"></i></a>
+<div class="space30"></div>
+<div class="table-responsive">
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php  echo url('admin/quizpackage/json');?>" data-classes="table table-bordered" id="table">
 <thead>
 <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
@@ -98,6 +37,10 @@ li label {
 <th data-field="per_pagina_prezzo" data-sortable="true">{{trans('messages.keyword_per_price_page')}}</th>
 </thead>
 </table>
+</div>
+<div class="footer-svg">
+    <img src="{{asset('images/ADMIN_QUIZ-footer.svg')}}" alt="quiz">
+</div>
 
 <script>
 var selezione = [];

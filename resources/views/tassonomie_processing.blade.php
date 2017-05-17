@@ -17,7 +17,7 @@
 @foreach($departments as $departments)
 	<?php $lavorazioni = DB::table('lavorazioni')->where('departments_id', $departments->id)->get(); ?>
 <fieldset class="top-up-wrap">
-<form action="{{url('/admin/taxonomies/addprocessing')}}" method="post">
+<form action="{{url('/admin/taxonomies/addprocessing')}}" method="post" id="frmemotionalProcessing">
 	<div class="row">
 		<div class="col-md-8">
     		<legend>{{$departments->nomedipartimento}}</legend>
@@ -53,7 +53,7 @@
 		<table class="table table-striped table-bordered top-up text-right">
 	@foreach($lavorazioni as $lavorazioni)		    	
 		<tr>
-		<td><form action="{{url('/admin/taxonomies/updateprocessing')}}" method="post">        
+		<td><form action="{{url('/admin/taxonomies/updateprocessing')}}" method="post" id="frmemotionalProcessing_{{$lavorazioni->id}}">        
 		{{ csrf_field() }}
         <input type="hidden" name="departments_id" id="departments_id" value="{{$departments->id}}" />
 		<input type="hidden" name="id" value="{{$lavorazioni->id}}">
@@ -75,7 +75,22 @@
                   <a onclick="conferma(event);" type="submit" href="{{url('/admin/taxonomies/deleteprocessing/id' . '/' . $lavorazioni->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a></td>
               </tr>
             </table>			
-	</form></td>
+	</form><script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmemotionalProcessing_{{$lavorazioni->id}}").validate({            
+                      rules: {
+                          name: {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          name: {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script></td>
 	</tr>    
 	@endforeach
 	</table>
@@ -92,5 +107,22 @@
 	return confirmation ;
 }
 </script>
-<script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
+<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script>
+<script type="text/javascript">
+ $(document).ready(function() {
+   $("#frmemotionalProcessing").validate({            
+              rules: {
+                  name: {
+                      required: true,
+                  }
+              },
+              messages: {
+                  name: {
+                      required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                  }
+              }
+          });   
+   
+  });
+</script>
 @endsection

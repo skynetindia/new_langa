@@ -12,7 +12,7 @@
 <fieldset>
 <legend>{{ trans('messages.keyword_type')}}</legend>
 <h4>{{ trans('messages.keyword_add_type')}}</h4>
-<form action="{{url('/admin/tassonomie/new')}}" method="post">
+<form action="{{url('/admin/tassonomie/new')}}" method="post" id="frmentiadd" name="frmentiadd">
     {{ csrf_field() }}
 	<div class="col-md-4">
 		<div class="form-group">
@@ -36,21 +36,38 @@
 <h4>{{trans('messages.keyword_edit_types')}}</h4>
 <div class="table-responsive">
     <table class="table table-striped table-bordered text-right">
-      @foreach($tipi as $tipo)
+      @foreach($type as $types)
       <tr>
-        <td><form action="{{url('/admin/tassonomie/update')}}" method="post">
+        <td><form action="{{url('/admin/tassonomie/update')}}" method="post" id="frmentiedit_{{$types->id}}">
             {{ csrf_field() }}
-            <input type="hidden" name="id" value="{{$tipo->id}}">
+            <input type="hidden" name="id" value="{{$types->id}}">
             <table class="table sub-table">
               <tr>
-                <td><input type="text" class="form-control" name="name" id="name" value="{{$tipo->name}}"></td>
-                <td><input type="text" class="form-control" name="description" value="{{$tipo->description}}"></td>
-                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$tipo->color}}"></td>
+                <td><input type="text" class="form-control" name="name" id="name" value="{{$types->name}}"></td>
+                <td><input type="text" class="form-control" name="description" value="{{$types->description}}"></td>
+                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$types->color}}"></td>
                 <td><input type="submit" class="btn btn-primary" value="Salva">
-                  <a  onclick="conferma(event);" type="submit" href="{{url('/admin/tassonomie/delete/id' . '/' . $tipo->id)}}" class="btn btn-danger"> Cancella</a></td>
+                  <a  onclick="conferma(event);" type="submit" href="{{url('/admin/tassonomie/delete/id' . '/' . $types->id)}}" class="btn btn-danger"> Cancella</a></td>
               </tr>
             </table>
-          </form></td>
+          </form>
+          <script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmentiedit_{{$types->id}}").validate({            
+                      rules: {
+                          name: {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          name: {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script>
+          </td>
       </tr>
       @endforeach
     </table>
@@ -60,7 +77,7 @@
 <div class="space40"></div>
 <fieldset>
 <legend>{{trans('messages.keyword_emotional_state')}}</legend>
-<form action="{{url('/admin/tassonomie/nuovostatoemotivo')}}" method="post">
+<form action="{{url('/admin/tassonomie/nuovostatoemotivo')}}" method="post" id="frmentiemotionadd" >
     {{ csrf_field() }}
     <div class="row">
 	<div class="col-md-4">
@@ -86,21 +103,38 @@
 <h4>{{trans('messages.keyword_edit_emotional_state')}}</h4>
  <div class="table-responsive">
     <table class="table table-striped table-bordered text-right">
-      @foreach($statiemotivitipi as $statoemotivotipo)
+      @foreach($emotional_states_types as $emostatetye)
       <tr>
-        <td><form action="{{url('/admin/tassonomie/aggiornastatiemotivi')}}" method="post">
+        <td><form action="{{url('/admin/tassonomie/aggiornastatiemotivi')}}" method="post" id="frmentiemotionedit_{{$emostatetye->id}}">
             {{ csrf_field() }}
-            <input type="hidden" name="id" value="{{$statoemotivotipo->id}}">
+            <input type="hidden" name="id" value="{{$emostatetye->id}}">
             <table class="table sub-table">
               <tr>
-                <td><input type="text" class="form-control" name="name" id="name" value="{{$statoemotivotipo->name}}"></td>
-                <td><input type="text" class="form-control" name="description" value="{{$statoemotivotipo->description}}"></td>
-                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$statoemotivotipo->color}}"></td>
+                <td><input type="text" class="form-control" name="name" id="name" value="{{$emostatetye->name}}"></td>
+                <td><input type="text" class="form-control" name="description" value="{{$emostatetye->description}}"></td>
+                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$emostatetye->color}}"></td>
                 <td><input type="submit" class="btn btn-primary" value="Salva">
-                  <a  onclick="conferma(event);" type="submit" href="{{url('/admin/tassonomie/statiemotivi/delete/id' . '/' . $statoemotivotipo->id)}}" class="btn btn-danger"> Cancella </a></td>
+                  <a  onclick="conferma(event);" type="submit" href="{{url('/admin/tassonomie/statiemotivi/delete/id' . '/' . $emostatetye->id)}}" class="btn btn-danger"> Cancella </a></td>
               </tr>
             </table>
-          </form></td>
+          </form>
+          <script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmentiemotionedit_{{$emostatetye->id}}").validate({            
+                      rules: {
+                          name: {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          name: {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script>
+          </td>
       </tr>
       @endforeach
     </table>
@@ -115,5 +149,36 @@
 	return confirmation ;
 }
 </script>
-<script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
+<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script>
+<script type="text/javascript">
+ $(document).ready(function() {
+   $("#frmentiadd").validate({            
+              rules: {
+                  name: {
+                      required: true,
+                  }
+              },
+              messages: {
+                  name: {
+                      required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                  }
+              }
+          });
+   $("#frmentiemotionadd").validate({            
+              rules: {
+                  name: {
+                      required: true,
+                  }
+              },
+              messages: {
+                  name: {
+                      required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                  }
+              }
+          });
+   
+  });
+
+
+  </script>
 @endsection

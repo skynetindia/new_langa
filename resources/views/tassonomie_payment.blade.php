@@ -13,7 +13,7 @@
 
 <legend>{{trans('messages.keyword_emotional_state')}}</legend>
 
-<form action="{{url('/admin/taxonomies/addstatepayment')}}" method="post">
+<form action="{{url('/admin/taxonomies/addstatepayment')}}" method="post" id="frmemotionalPayment">
     {{ csrf_field() }}
     <div class="row">
 	<div class="col-md-4">
@@ -40,7 +40,7 @@
 	@foreach($statepayments as $statepayment)    	
 	<tr>
 		<td>
-			<form action="{{url('/admin/tassonomie/updatestatepayment')}}" method="post">
+			<form action="{{url('/admin/tassonomie/updatestatepayment')}}" method="post" id="frmemotionalPayment_{{$statepayment->id}}">
 				{{ csrf_field() }}
 				<input type="hidden" name="id" value="{{$statepayment->id}}">
 					<table class="table sub-table">
@@ -53,6 +53,22 @@
 		              </tr>
 				    </table>
 			</form>
+			<script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmemotionalPayment_{{$statepayment->id}}").validate({            
+                      rules: {
+                          name: {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          name: {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script>
 		</td>
 	</tr>       
 	@endforeach
@@ -70,5 +86,22 @@ function conferma(e) {
 }
 </script>
 
-<script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
+<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script>
+<script type="text/javascript">
+ $(document).ready(function() {
+   $("#frmemotionalPayment").validate({            
+              rules: {
+                  name: {
+                      required: true,
+                  }
+              },
+              messages: {
+                  name: {
+                      required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                  }
+              }
+          });   
+   
+  });
+</script>
 @endsection

@@ -44,7 +44,7 @@
                 <li><a href="{{url('/utente-permessi')}}">Permessi</a></li>
               </ul>
             </li>
-            <li><a href="{{url('/newenti')}}">Registered Enti</a> </li>
+            <li><a href="{{url('/newenti')}}"> <img src="{{asset('images/ENTI.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span>Registered Enti</span> </a> </li>
             <li>
             <a><img src="{{asset('images/ADMIN_TASSONOMIE.svg')}}" alt="Tassonomie" class="menu-icon" > <span> Tassonomie</span> <span class="fa fa-chevron-down"></span></a>
             <ul class="nav child_menu">
@@ -81,6 +81,7 @@
                 <li><a href="{{url('/admin/tassonomie/sconti')}}">Sconti</a> </li>
                 <li><a href="{{url('/admin/tassonomie/scontibonus')}}">Sconti Bonus</a> </li>
                 <li><a href="{{url('admin/tassonomie/dipartimenti')}}">Dipartimenti</a></li>
+                 <li><a href="{{url('/taxation')}}"> Taxation </a></li>
               </ul>
               </li>
             </ul>
@@ -96,15 +97,18 @@
                 </li>
               </ul>
             </li>
-            <li><a href="{{url('/taxation')}}"><i class="fa fa-percent"></i> Taxation </a></li>
-            <li><a href="{{url('/newsletter/add')}}"><i class="fa fa-newspaper-o"></i> Newsletter</a></li>
-            <li><a href="{{url('/admin/quizpackage')}}"><img src="{{asset('images/ADMIN_QUIZ.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span> Quiz Pacchetto</span> </a></li>
-            <li><a href="{{url('/admin/language')}}"><i class="fa fa-gift"></i> Languages & Phases </a></li>
-            <li><a href="{{url('/admin/menu')}}"><i class="fa fa-gift"></i> {{trans("messages.keyword_menu")}} </a></li>
-            <li><a><i class="fa fa-user-times"></i> {{trans('messages.keyword_quiz')}} <span class="fa fa-chevron-down"></span></a>
+          
+            <li><a href="javascript:void(0);"><i class="fa fa-newspaper-o"></i> Newsletter</a></li>            
+            <li><a><img src="{{asset('images/ADMIN_QUIZ.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span> {{trans('messages.keyword_quiz')}} </span> <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu">
                                         <li><a href="{{url('/admin/quiz')}}">{{trans('messages.keyword_demo')}}</a></li>
-
+	                                    <li><a href="{{url('/admin/quizpackage')}}"> <span> Quiz Pacchetto</span> </a></li>
+                                    </ul>
+                                </li>
+              <li><a><i class="fa fa-cog" aria-hidden="true"></i> <span>Settings</span> <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu">
+							            <li><a href="{{url('/admin/language')}}"> Languages & Phases </a></li>
+							            <li><a href="{{url('/admin/menu')}}">{{trans("messages.keyword_menu")}} </a></li>
                                     </ul>
                                 </li>
 

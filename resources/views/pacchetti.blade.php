@@ -5,35 +5,6 @@
 <h1> {{ trans('messages.keyword_packages') }} </h1><hr>
 
 @include('common.errors')
-
-<style>
-
-tr:hover td {
-
-	background:#f2ba81
-
-}
-
-.selected {
-  font-weight: bold;
-  font-size: 16px;
-}
-
-th {
-
-	cursor: pointer;
-
-}
-
-li label {
-
-	padding-left: 10px;
-
-}
-
-</style>
-
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 
 <!-- Latest compiled and minified CSS -->
@@ -63,37 +34,13 @@ li label {
 @endif
 
 </script>
-
-
-
-<div class="btn-group">
-
-
-<a onclick="multipleAction('add');" id="modifica" style="display:inline;">
-
-<button class="btn btn-primary" type="button" name="create" title="{{ trans('messages.keyword_addpackage') }}"><i class="glyphicon glyphicon-plus"></i></button>
-
-<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-
-<button class="btn btn-primary" type="button" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></button>
-
-</a>
-
-
-<a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-
-<button class="btn btn-danger" type="button" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="glyphicon glyphicon-erase"></i></button>
-
-</a>
-
-</div>
-
-<br><br>
-
-<div class="table-responsive table-custom-design">
-
-    <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('/admin/tassonomie/pacchetti/json') }}" data-classes="table table-bordered" id="table">
-    <thead>
+<a onclick="multipleAction('add');" class="btn btn-warning" id="modifica" title="{{ trans('messages.keyword_addpackage') }}"><i class="fa fa-plus"></i></a>
+<div class="space10"></div>
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a> <a name="remove" title="{{ trans('messages.keyword_delete') }}" class="btn btn-danger" id="delete" onclick="multipleAction('delete');" > <i class="fa fa-trash"></i> </a>
+<div class="space30"></div>
+<div class="table-responsive">    
+    <table data-toggle="table" class="selectable table table-hover table-bordered"  data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('/admin/tassonomie/pacchetti/json') }}" data-classes="table table-bordered" id="table">
+    <thead>    
       <th data-field="id" data-sortable="true">
       {{ trans('messages.keyword_id') }} </th>
       <th data-field="label" data-sortable="true">
@@ -101,10 +48,9 @@ li label {
       <th data-field="icon" data-sortable="true">
       {{ trans('messages.keyword_icon') }} </th>
       <th data-field="optional" data-sortable="true">
-      {{ trans('messages.keyword_optional') }} </th>
+      {{ trans('messages.keyword_optional') }} </th>      
     </thead>
     </table>
-    
 </div>
 
 <script>

@@ -8,55 +8,6 @@
 <!-- Latest compiled and minified JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
 <!-- Latest compiled and minified Locales -->
-<style>
-tr:hover td {
-    background:#f2ba81
-}
-.selected {
-    background: #f37f0d;
-color: #ffffff;
-}
-th {
-    cursor: pointer;
-}
-li label {
-    padding-left: 10px;
-}
-.button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 3px 15px;
-    padding-bottom: 6px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 4px;
-}
-.button2 { /* blue */
-    background-color: white;
-    color: black;
-    border: 2px solid #337ab7;
-}
-.button2:hover {
-    background-color: #337ab7;
-    color: white;
-}
-.button3 { /* red */
-    background-color: white;
-    color: black;
-    border: 2px solid #d9534f;
-}
-.button3:hover {
-    background-color: #d9534f;
-    color: white;
-}
-</style>
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 <script>
   $(function(){
@@ -68,14 +19,12 @@ li label {
 @endif
 </script>
 <div class="btn-group">
-@if (\Session::has('success'))
-    <div class="alert alert-success">
-        <ul>
-            <li style="list-style-type:none; width: 1000px; text-align: center; font-size: 20px">{!! \Session::get('success') !!}</li>
-        </ul>
-    </div>
+@if (\Session::has('success'))    
+<div class="alert alert-success fade in alert-dismissable"> 
+    <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a> {!! \Session::get('success') !!} </div>
 @endif
 </div>
+<div class="table-responsive">
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php  echo url('newenti/json');?>" data-classes="table table-bordered" id="table">
 <thead>
 <th data-field="id" data-sortable="true">{{ trans('messages.keyword_code')}}</th>
@@ -84,9 +33,12 @@ li label {
 <th data-field="action" data-sortable="true">{{ trans('messages.keyword_action')}}</th>
 </thead>
 </table>
-<br><br>
-<div class="pull-right">
 </div>
+<div class="footer-svg">
+    <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
+</div>
+
+
 <script>
 var selezione = [];
 var n = 0;

@@ -17,109 +17,6 @@
 <!-- Latest compiled and minified Locales -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
 
-<style>
-
-tr:hover td {
-
-	background:#f2ba81
-
-}
-
-.selected {
-
-	background: #f37f0d;
-color: #ffffff;
-}
-
-th {
-
-	cursor: pointer;
-
-}
-
-li label {
-
-	padding-left: 10px;
-
-}
-
-.button {
-
-    background-color: #4CAF50; /* Green */
-
-    border: none;
-
-    color: white;
-
-    padding: 3px 15px;
-
-    padding-bottom: 6px;
-
-    text-align: center;
-
-    text-decoration: none;
-
-    display: inline-block;
-
-    font-size: 16px;
-
-    margin: 4px 2px;
-
-    -webkit-transition-duration: 0.4s; /* Safari */
-
-    transition-duration: 0.4s;
-
-    cursor: pointer;
-
-    border-radius: 4px;
-
-}
-
-.button2 { /* blue */
-
-    background-color: white;
-
-    color: black;
-
-    border: 2px solid #337ab7;
-
-}
-
-
-
-.button2:hover {
-
-    background-color: #337ab7;
-
-    color: white;
-
-}
-
-
-
-.button3 { /* red */
-
-    background-color: white;
-
-    color: black;
-
-    border: 2px solid #d9534f;
-
-}
-
-
-
-.button3:hover {
-
-    background-color: #d9534f;
-
-    color: white;
-
-}
-
-</style>
-
-
 <script>
 
   $(function(){
@@ -143,64 +40,36 @@ li label {
 
 
 
-
-<div class="btn-group">
-
-
-
-<form action="{{ url('/admin/tassonomie/dipartimenti/add') }}" method="post" style="display:inline;">
-
-{{ csrf_field() }}
-
-<button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo dipartimento"><i class="fa fa-plus"></i></button>
-
-</form><br>
-
-
-
-<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-
-<button class="btn btn-primary" type="button" name="update" title="Modifica - Modifica l'ultimo ente selezionato"><i class="glyphicon glyphicon-pencil"></i></button>
-
-</a>
-
-
-
-<a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-
-<button class="btn btn-danger" type="button" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="glyphicon glyphicon-erase"></i></button>
-
-</a>
-
-</div>
-
-<br><br>
-
+  <form action="{{ url('/admin/tassonomie/dipartimenti/add') }}" method="post">
+    {{ csrf_field() }}
+    <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo dipartimento"><i class="fa fa-plus"></i></button>
+  </form>
+  <div class="space10"></div>
+  <a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="Modifica - Modifica l'ultimo ente selezionato"><i class="glyphicon glyphicon-pencil"></i>  </a>
+ <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="Elimina - Elimina gli enti selezionati"> <i class="fa fa-trash"></i>  </a>
+<div class="space30"></div>
 <div class="table-responsive">
-
  <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="dipartimentijson" data-classes="table table-bordered" id="table">
-        <thead>
-          
-            <th data-field="id" data-sortable="true">{{trans('messages.keyword_code')}}</th>
-            <th data-field="nomedipartimento" data-sortable="true">{{trans("messages.keyword_department_name")}}</th>
-             <th data-field="nomereferente" data-sortable="true">{{trans("messages.keyword_reference_name")}}</th>
-             <th data-field="settore" data-sortable="true">{{trans("messages.keyword_sector")}}</th>
-             <th data-field="piva" data-sortable="true">P.iva</th>
-              <th data-field="cf" data-sortable="true">C.F</th>
-			<th data-field="telefonodipartimento" data-sortable="true">Tel.{{trans("messages.keyword_department")}}</th>
-			<th data-field="cellularedipartimento" data-sortable="true">Cell.{{trans("messages.keyword_department")}}</th>
-			 <th data-field="email" data-sortable="true">Email</th>
-			<th data-field="emailsecondaria" data-sortable="true">{{trans("messages.keyword_secondary_email")}}</th>
-			 <th data-field="fax" data-sortable="true">Fax</th>
-			<th data-field="indirizzo" data-sortable="true">{{trans("messages.keyword_address")}}</th>
-			<th data-field="iban" data-sortable="true">IBAN</th>
-			<th data-field="logo" data-sortable="true">Logo</th>
-
+        <thead>          
+           <th data-field="id" data-sortable="true">{{trans('messages.keyword_code')}}</th>
+           <th data-field="nomedipartimento" data-sortable="true">{{trans("messages.keyword_department_name")}}</th>
+           <th data-field="nomereferente" data-sortable="true">{{trans("messages.keyword_reference_name")}}</th>
+           <th data-field="settore" data-sortable="true">{{trans("messages.keyword_sector")}}</th>
+           <th data-field="piva" data-sortable="true">P.iva</th>
+           <th data-field="cf" data-sortable="true">C.F</th>
+			     <th data-field="telefonodipartimento" data-sortable="true">Tel.{{trans("messages.keyword_department")}}</th>
+    			 <th data-field="cellularedipartimento" data-sortable="true">Cell.{{trans("messages.keyword_department")}}</th>
+    			 <th data-field="email" data-sortable="true">Email</th>
+    			 <th data-field="emailsecondaria" data-sortable="true">{{trans("messages.keyword_secondary_email")}}</th>
+    			 <th data-field="fax" data-sortable="true">Fax</th>
+    			 <th data-field="indirizzo" data-sortable="true">{{trans("messages.keyword_address")}}</th>
+    			 <th data-field="iban" data-sortable="true">IBAN</th>
+    			 <th data-field="logo" data-sortable="true">Logo</th>
         </thead>
     </table>
-		
-
-
+</div>
+<div class="footer-svg">
+  <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
 </div>
 <script>
 var selezione = [];

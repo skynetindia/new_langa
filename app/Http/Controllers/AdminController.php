@@ -12,6 +12,7 @@ use File;
 use Hash;
 use Auth;
 
+
 class AdminController extends Controller
 {
     public function __construct(Request $request){ 
@@ -19,6 +20,7 @@ class AdminController extends Controller
     }
 	public function index(Request $request)
 	{
+
         if ($request->user()->id != 0) {
      	      return redirect('/unauthorized');
         } else {
@@ -549,7 +551,7 @@ class AdminController extends Controller
 			'estimates_stats' => DB::table('statiemotivipreventivi')->orderBy('id', 'desc')->get(),
 			]);
         }
-    }
+    }   
 	
 	public function updateStatiEstimates(Request $request) {
             if ($request->user()->id != 0) {
@@ -656,7 +658,8 @@ class AdminController extends Controller
 				'color' => $request->color,
                 'departments_id' => $request->departments_id
             ]);
-			return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_added_successfully').'</div>');
+            return Redirect::back();
+			/*return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_added_successfully').'</div>');*/
         }
     }
 	
@@ -664,14 +667,15 @@ class AdminController extends Controller
 		DB::table('lavorazioni')
 			->where('id', $request->id)
 			->delete();
-		  return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_deleted_successfully').'</div>');
+		return Redirect::back();
+		 /*return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_deleted_successfully').'</div>');*/
 	}
 	
 	public function updateProcessing(Request $request)
 	{
             if ($request->user()->id != 0) {
             return redirect('/unauthorized');
-        } else {
+        } else {	
             DB::table('lavorazioni')
                     ->where('id', $request->id)
                     ->update(array(
@@ -679,7 +683,8 @@ class AdminController extends Controller
                         'description' => $request->description,
                         'color' => $request->color,
             ));
-			return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_updated_successfully').'</div>');
+            return Redirect::back();
+			/*return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_updated_successfully').'</div>');*/
         }
     }
 	/* ==================================== Lavorazioni section END ======================================== */
@@ -903,17 +908,18 @@ class AdminController extends Controller
                 'dipartimento' => $request->dipartimento,
                 'color' => isset($request->colore) ? $request->colore : '',
                 'cellulare' => $request->cellulare,
-                'password' => bcrypt($request->password),
+                'password' => $vecchiapassword,
                 'sconto' => (isset($request->sconto))? $request->sconto : 0,
                 'sconto_bonus' => (isset($request->sconto_bonus))? $request->sconto_bonus : 0,
                 'rendita' => (isset($request->rendita))? $request->rendita : 0,
                 'rendita_reseller' => (isset($request->rendita_reseller))? $request->rendita_reseller : 0,
+                'is_internal_profile' => (isset($request->is_internal_profile))? $request->is_internal_profile : 0,
                 'permessi' => $permessi
                ));
             
 
             return Redirect::back()
-                ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Utente modificato correttamente!</div>');
+                ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_user_updated_successfully').'</div>');
             
          } else {
 
@@ -948,10 +954,11 @@ class AdminController extends Controller
                 'sconto_bonus' => (isset($request->sconto_bonus))? $request->sconto_bonus : 0,
                 'rendita' => (isset($request->rendita))? $request->rendita : 0,
                 'rendita_reseller' => (isset($request->rendita_reseller))? $request->rendita_reseller : 0,
+                'is_internal_profile' => (isset($request->is_internal_profile))? $request->is_internal_profile : 0,
                 'is_approvato' => 1,
                 'permessi' => $permessi            
             ));
-            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Utente Add correttamente!</div>');
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_user_added_successfully').'</div>');
             }        
         }            
     }
@@ -1201,10 +1208,11 @@ class AdminController extends Controller
                     ->where('is_approvato', '=', 0)
                     ->get();
         // dd($users);
+                   
         foreach ($users as $user) {
 
-         $user->azione="<a class='btn btn-default' id='approvare' href='".url('/approvare/'.$user->id)."' onclick=\"return confirm('Are you sure you want to approve this item?');\"> Approve </a> 
-             <a class='btn btn-default' id='rifiutare' class='btn btn-default' href='".url('/rifiutare/'.$user->id)."' onclick=\"return confirm('Are you sure you want to reject this item?');\"> Reject </a>";
+         $user->azione="<a class='btn btn-default' id='approvare' href='".url('/approvare/'.$user->id)."' onclick=\"return confirm('".trans('messages.keyword_are_you_sure_you_want_to_approve_this_item?')."');\">".trans('messages.keyword_approve')." </a> 
+             <a class='btn btn-default' id='rifiutare' class='btn btn-default' href='".url('/rifiutare/'.$user->id)."' onclick=\"return confirm('".trans('messages.keyword_are_you_sure_you_want_to_reject_this_item?')."');\">".trans('messages.keyword_reject')."  </a>";
 
           $utenti[] = $user;
 
@@ -1225,7 +1233,8 @@ class AdminController extends Controller
                 ->update(array(
                     'is_approvato' => 1));
 
-            return Redirect::back()->with('success', 'Approve Successfully..!!');;
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '. trans('messages.keyword_approved_successfully') .' </div>');
+
 
         }
     }
@@ -1242,8 +1251,7 @@ class AdminController extends Controller
                 ->update(array(
                     'is_approvato' => 2));
 
-            return Redirect::back()->with('success', 'Reject Successfully..!!');;
-
+			return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '. trans('messages.keyword_rejected_successfully').' </div>');
         }
     }
 
@@ -1326,6 +1334,7 @@ class AdminController extends Controller
             $validator = Validator::make($request->all(), [
                 'code' => 'required|unique:pack|max:35',
                 'label' => 'required|max:35',
+                'logo'=>'mimes:jpeg,jpg,png|max:1000'
             ]);
 
             if ($validator->fails()) {
@@ -1398,6 +1407,7 @@ class AdminController extends Controller
             $validator = Validator::make($request->all(), [
                 'code' => 'required|max:35',
                 'label' => 'required|max:35',
+                'logo'=>'mimes:jpeg,jpg,png|max:1000'
             ]);
 
             if ($validator->fails()) {
@@ -1519,7 +1529,7 @@ class AdminController extends Controller
         if($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {
-            return view('aggiungisconto', [
+            return view('modificasconto', [
                 'tipienti' => DB::table('masterdatatypes')
                         ->get(),
             ]);
@@ -1681,7 +1691,7 @@ class AdminController extends Controller
         if($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {
-            return view('aggiungiscontobonus', [
+            return view('modificascontobonus', [
                 'tipienti' => DB::table('users')
                                 ->get(),
             ]);
@@ -1835,7 +1845,7 @@ class AdminController extends Controller
                         'description' => 'max:255',
                         'price' => 'max:16',
                         'frequenza' => 'required',
-                        'logo'=>'image|max:2000',
+						 'logo'=>'image|max:2000',
                         'immagine'=>'image|max:2000'
                         //'dipartimento' => 'required'
             ]);
@@ -1967,25 +1977,25 @@ class AdminController extends Controller
 
     /* ==================================== Optional section END ======================================== */
 
-/* ==================================== Menu section START ======================================== */
+	/* ==================================== Menu section START ======================================== */
 
     public function menu() {
         return view('menu');
     }
 
     public function menuadd() {
-
-        $parent = DB::table("modulo")->select('*')->where('modulo_sub', null)->limit(7)->get();
-        return view('menuadd', ['parent' => $parent]);
+        $parent = DB::table("modulo")->select('*')->where('modulo_sub', null)->get();
+        $departments = DB::table("departments")->select('*')->get();
+        return view('menuaddmodify', ['parent' => $parent,'departments'=>$departments]);
     }
 
     public function menumodify(Request $request) {
-
-        $parent = DB::table("modulo")->select('*')->where('modulo_sub', null)->limit(7)->get();
+        $parent = DB::table("modulo")->select('*')->where('modulo_sub', null)->get();
         $menu = DB::table("modulo")->select('*')->where('id', $request->id)->first();
+        $departments = DB::table("departments")->select('*')->get();
         //echo "<pre>"; print_r($menu);die;
         //$keyword_key = 'keyword_'.str_replace(" ","_",strtolower($request['keyword_title']));                               
-        return view('menumodify', ['menu' => $menu, 'parent' => $parent]);
+        return view('menuaddmodify', ['menu' => $menu, 'parent' => $parent,'departments'=>$departments]);
     }
 
     public function menudelete(Request $request) {
@@ -1999,7 +2009,7 @@ class AdminController extends Controller
     public function storemenu(Request $request) {
         $validator = Validator::make($request->all(), [
                     'manuname' => 'required',
-                    'menulink' => 'required',
+                   /* 'menulink' => 'required',*/
                     'menuclass' => 'required',
         ]);
 
@@ -2008,8 +2018,19 @@ class AdminController extends Controller
                             ->withInput()
                             ->withErrors($validator);
         }
+        $status = $this->checkurl($request->menulink);
+            DB::table('modulo')->insert(
+                    ['modulo' => $request->manuname,
+                        'phase_key' => 'keyword_'.str_replace(" ","_",strtolower($request->manuname)),
+                        'modulo_sub' => (isset($request->submenu) && $request->submenu != "") ? $request->submenu : $request->parentmenu,                        
+                        'modulo_link' => $request->menulink,
+                        'modulo_class' => $request->menuclass,
+                        'menu_active' => $status,
+                        'dipartimento' => $request->deparments,
+                    ]
+            );
 
-        if ($request->submenu != '') {
+       /* if ($request->submenu != '') {
             $status = $this->checkurl($request->menulink);
             DB::table('modulo')->insert(
                     ['modulo' => $request->manuname,
@@ -2042,19 +2063,28 @@ class AdminController extends Controller
                         'menu_active' => $status
                     ]
             );
-        }
+        }*/
         return redirect('/admin/menu/')
                         ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>New menu addedd successfully!</div>');
         //$keyword_key = 'keyword_'.str_replace(" ","_",strtolower($request['keyword_title']));                       
     }
 
-    public function submenu(Request $request) {
-        $submenu = DB::table("modulo")
+    public function submenu(Request $request) {    	
+
+    	if($request->parent != '0'){
+        	$submenu = DB::table("modulo")
                 ->select('*')
-                ->where('modulo_sub', $request->parent)
-                ->where('modulo_subsub', 0)
+                ->where('modulo_sub', $request->parent)                                
                 ->get()
                 ->toArray();
+        }
+        else {
+        $submenu = DB::table("modulo")
+                ->select('*')                
+                ->where('modulo_sub','!=', null)            	
+                ->get()
+                ->toArray();	
+        }
         // print_r($submenu);die;
         echo json_encode($submenu);
     }
@@ -2416,7 +2446,7 @@ class AdminController extends Controller
                     ->delete();
 
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Taxation eliminata correttamente!</div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_taxation_deleted_successfully').'</div>');
         }
     }
 
@@ -2454,7 +2484,7 @@ class AdminController extends Controller
                 ));
 
                 return Redirect::back()
-                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Tassazione update correttamente!</div>');
+                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_taxation_updated_successfully').'</div>');
             } else {
 
                 DB::table('tassazione')->insert([
@@ -2463,7 +2493,7 @@ class AdminController extends Controller
                 ]);
 
                 return Redirect::back()
-                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Tassazione aggiunta correttamente!</div>');
+                                ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_taxation_inserted_successfully').'</div>');
             }
         }
     }
@@ -2515,7 +2545,7 @@ class AdminController extends Controller
     }
 
     public function mostraDipartimenti() {
-        return view('tassonomie_dipartimenti');
+       return view('tassonomie_dipartimenti');
     }
 
     public function nuovo() {
@@ -2610,7 +2640,7 @@ class AdminController extends Controller
                     ->where('id', $request->department)
                     ->delete();
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans("messages.	keyword_department_deleted_properly").'</div>');
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans("messages.keyword_department_deleted_properly").'</div>');
         }
     }
 
@@ -2624,7 +2654,7 @@ class AdminController extends Controller
                         'settore' => 'max:50',
                         'piva' => 'max:11',
                         'cf' => 'max:16',
-                       // 'telefonodipartimento' => 'required|max:20',
+                        //'telefonodipartimento' => 'required|max:20',
                         'cellularedipartimento' => 'max:20',
                         'email' => 'required|max:64',
                         'emailsecondaria' => 'max:64',
@@ -2699,7 +2729,7 @@ class AdminController extends Controller
         /* tassonomie_lavorazioni */
         return view('quiz_demo', [
             'departments' => DB::table('departments')->get(),
-            'quizdemodettagli' => DB::table('quizdemodettagli')->get(),
+            'quizdemodettagli' => DB::table('quizdemodettagli')->orderBy('id', 'desc')->get(),
                 /* 'lavorazioni' => DB::table('departments')
                   ->leftJoin('lavorazioni', 'departments.id', '=', 'lavorazioni.departments_id')
                   ->select('departments.id as departmentsID','departments.nomedipartimento','lavorazioni.*')
@@ -2710,12 +2740,9 @@ class AdminController extends Controller
     public function nuovoquizdemo(Request $request) {
         if ($request->user()->id != 0) {
             return redirect('/unauthorized');
-        } else {
-            
         }
-
         $validator = Validator::make($request->all(), [
-                    'name' => 'required',
+                    'name' => 'required|max:255|unique:quizdemodettagli,nome',                         
                     'url' => 'required',
                     'immagine' => 'mimes:jpeg,jpg,png|max:1000'
         ]);
@@ -2762,6 +2789,7 @@ class AdminController extends Controller
 
             $validator = Validator::make($request->all(), [
                         'name' => 'required',
+                        'name' => 'required|max:255|unique:quizdemodettagli,nome,'.$request->id.',id',                    
                         'url' => 'required',
                         'immagine' => 'mimes:jpeg,jpg,png|max:1000'
             ]);
@@ -2809,7 +2837,6 @@ class AdminController extends Controller
     /* ==================================== Quiz Demo section END ======================================== */
 	
 	/* ==================================== Life Cost Indices section START======================================== */
-
     // show list of provinces
     public function showprovincie(Request $request) {
         if ($request->user()->id != 0) {
@@ -2927,6 +2954,7 @@ class AdminController extends Controller
             ]);
         }
     }
+
     public function getjsonusers(Request $request) {
         $users = DB::table('users')
                 ->join('ruolo_utente', 'users.dipartimento', '=', 'ruolo_utente.ruolo_id')
@@ -3488,7 +3516,5 @@ class AdminController extends Controller
         return json_encode($invia_notifica);
     }
 
-
-    
 
 }

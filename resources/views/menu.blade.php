@@ -1,75 +1,12 @@
 @extends('adminHome')
 @section('page')
-
 @if(!empty(Session::get('msg')))
-
 <script>
-
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
-
     document.write(msg);
-
 </script>
-
 @endif
-
-
-
 @include('common.errors')
-
-<style>
-    tr:hover {
-        background: #f39538;
-    }
-    .selected {
-        font-weight: bold;
-        font-size: 16px;
-    }
-    th {
-        cursor: pointer;
-    }
-    li label {
-        padding-left: 10px;
-    }
-    .button {
-        background-color: #4CAF50; /* Green */
-        border: none;
-        color: white;
-        padding: 3px 15px;
-        padding-bottom: 6px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        -webkit-transition-duration: 0.4s; /* Safari */
-        transition-duration: 0.4s;
-        cursor: pointer;
-        border-radius: 4px;
-    }
-    .button2 { /* blue */
-        background-color: white;
-        color: black;
-        border: 2px solid #337ab7;
-    }
-
-    .button2:hover {
-        background-color: #337ab7;
-        color: white;
-    }
-
-    .button3 { /* red */
-        background-color: white;
-        color: black;
-        border: 2px solid #d9534f;
-    }
-
-    .button3:hover {
-        background-color: #d9534f;
-        color: white;
-    }
-</style>
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
@@ -77,9 +14,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
 <!-- Latest compiled and minified Locales -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
-
 <h1>{{trans('messages.keyword_menu')}}</h1><hr>
-
 <form action="{{ url('/menu/add') }}" method="post" style="display:inline;">
     {{ csrf_field() }}
     <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo preventivo"><i class="fa fa-plus"></i></button>
@@ -95,7 +30,7 @@
 <br><br>
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('menu/json'); ?>" data-classes="table table-bordered" id="table">
     <thead>
-    <th data-field="id" data-sortable="true">{{trans('messages.keyword_no_body')}}
+    <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}
     <th data-field="modulo" data-sortable="true">{{trans('messages.keyword_menu')}}
 <!--    <th data-field="modulo_sub" data-sortable="true">Sub menu
     <th data-field="modulo_subsub" data-sortable="true">Menu of Sub menu-->
@@ -103,7 +38,7 @@
     <th data-field="modulo_class" data-sortable="true">{{trans('messages.keyword_menu_class')}}
     <th data-field="menu_active" data-sortable="true">{{trans('messages.keyword_menu_active')}}
     <th data-field="dipartimento" data-sortable="true">{{trans('messages.keyword_department')}}
-        </thead>
+    </thead>
 </table>
 <script>
     var selezione = [];

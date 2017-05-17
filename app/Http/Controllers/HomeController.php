@@ -330,14 +330,29 @@ class HomeController extends Controller {
     /* ==================================== Profile section START ======================================== */
 
     public function mostraprofilo(Request $request) {
-        $user = $request->user();
+        $user = $request->user();        
         $ente = DB::table('corporations')
                 ->where('id', $user->id_ente)
                 ->first();
+        $user_role = DB::table('ruolo_utente')
+                ->where('ruolo_id', $user->dipartimento)
+                ->first();
+                
+        $module = DB::table('modulo')
+                        ->where('modulo_sub', null)
+                        ->get();                    
+        $permessi = array();
+
+                if(isset($user->permessi) && !empty($user->permessi)){
+                    $permessi = json_decode($user->permessi);
+                }
 
         return view('profilo', [
             'utente' => $user,
             'ente' => $ente,
+            'module' => $module,
+            'permessi' => $permessi,
+            'user_role' => $user_role,
             'link' => DB::table('link_profilo')
                     ->where('id_user', $user->id)
                     ->get()
@@ -352,30 +367,57 @@ class HomeController extends Controller {
     }
 
     public function aggiornaimmagine(Request $request) {
-        // Aggiorno l'immagine memorizzandola con un nome univoco
-		 $validator = Validator::make($request->all(), [
-                'logo' => 'required|image|max:2000'
-            ]);
+        DB::enableQueryLog();
+        // Aggiorno l'immagine memorizzandola con un nome univoco                   
+      	    $validator = Validator::make($request->all(), [
+                    'name' => 'required|max:20',                                        
+                    'email' => 'required|max:255|unique:users,email,'.$request->user_id.',id',                    
+                    'sconto' => 'numeric',
+                    'sconto_bonus' => 'numeric',
+                    'rendita' => 'numeric',
+                    'rendita_reseller' => 'numeric',
+                    'password' => 'max:64',
+                    'logo' => 'image|max:2000'                    
+                ]);  
+               
+                if ($validator->fails()) {
+                    return Redirect::back()
+                        ->withInput()
+                        ->withErrors($validator);
+                }                
 
-            if ($validator->fails()) {
-                return Redirect::back()
-                                ->withInput()
-                                ->withErrors($validator);
-            }
-        if ($request->logo != null) {
-            $nome = time() . uniqid() . '-' . '-ente';
-            Storage::put(
-                    'images/' . $nome, file_get_contents($request->file('logo')->getRealPath())
-            );
-			
-            $res = DB::table('corporations')
-                    ->where('id', $request->id)
-                    ->update(array(
-                'logo' => $nome,
-            ));
-        }
+                $oldDetails = DB::table('users')->where('id',$request->user_id)->first();
+                /*$queries = DB::getQueryLog();
+                $last_query = end($queries);
+                print_r($last_query);
+                print_r($oldDetails);
+                exit;*/
+                $nome = $oldDetails->logo;
+                if ($request->logo != null) {
+                    $nome = time() . uniqid() . '-' . '-ente';
+                    Storage::put('images/' . $nome, file_get_contents($request->file('logo')->getRealPath()));
+                }
 
-        return Redirect::back();
+                $vecchiapassword = (String)$oldDetails->password;                
+                if($request->password!=null) {
+                    $vecchiapassword = bcrypt($request->password);
+                }
+
+
+               DB::table('users')
+                ->where('id', $request->user_id)
+                ->update(array(
+                'name' => $request->name,
+                'email' => $request->email,                
+                'password' => $vecchiapassword,
+                'sconto' => (isset($request->sconto))? $request->sconto : $oldDetails->sconto,
+                'sconto_bonus' => (isset($request->sconto_bonus))? $request->sconto_bonus : $oldDetails->sconto_bonus,
+                'rendita' => (isset($request->rendita))? $request->rendita : $oldDetails->rendita,
+                'rendita_reseller' => (isset($request->rendita_reseller))? $request->rendita_reseller : $oldDetails->rendita_reseller,
+                'is_internal_profile' => (isset($request->is_internal_profile))? $request->is_internal_profile : $oldDetails->is_internal_profile,                
+                'logo' => $nome
+               ));        
+            return Redirect::back();
     }
     public function aggiungilink(Request $request) {
         $validator = Validator::make($request->all(), [

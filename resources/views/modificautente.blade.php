@@ -19,13 +19,12 @@
   $("#dipartimento").change(function(){
 
     if( $(this).val() == 1) {
-
         $("#sconto_section").hide();       
         $("#rendita").hide();
         $("#rendita_reseller").hide();
         $("#zone").hide();
-
-    } else if( $(this).val() == 3) {
+    } 
+    else if( $(this).val() == 3) {
 
         $("#sconto_section").hide();    
         $("#rendita").hide();
@@ -35,18 +34,28 @@
     } else if( $(this).val() == 4) {
 
         $("#sconto_section").show();      
-        $("#rendita").show();
+        if (!$('#profilazioneinterna').is(':checked')) {
+          $("#rendita").show();
+        }
+        else {
+          $("#rendita").hide(); 
+        }
         $("#rendita_reseller").hide();
         $("#zone").show();
 
-    } else {
-
+    } 
+    else {
       $("#sconto_section").show(); 
-      $("#rendita").show();
+      if (!$('#profilazioneinterna').is(':checked')) {
+          $("#rendita").show();
+        }
+        else {
+          $("#rendita").hide(); 
+        }
       $("#rendita_reseller").show();
       $("#zone").show();
-
     }
+
 
   });
 
@@ -83,7 +92,7 @@
 @include('common.errors')
 
 
-  <h1>{{ trans('messages.keyword_edituser') }} </h1><hr>
+  <h1>{{ isset($utente) ? trans('messages.keyword_edituser') : trans('messages.keyword_adduser') }} </h1><hr>
 
   
   <!-- echo $utente->id -->
@@ -100,7 +109,7 @@
   <div id="profilazione" class="pull-right">
 
     <label for="profilazione" >
-        <input type="checkbox" id="profilazioneinterna" <?php if(isset($utente->dipartimento)){ if($utente->dipartimento == 1 || $utente->dipartimento == 3) { ?> checked="checked" <?php } }?> />
+        <input type="checkbox" id="profilazioneinterna" name="is_internal_profile" value="1" <?php if(isset($utente->is_internal_profile) && ($utente->is_internal_profile == '1')) { echo 'checked'; } ?>  />
         {{ trans('messages.keyword_internalprofile') }}?
     </label>
 
@@ -277,11 +286,11 @@ if(isset($utente->id_ente))
 
       <input value="<?php if(isset($utente->email)){ echo $utente->email; } ?>" class="form-control" type="email" name="email" id="email" placeholder="enter email"><br>
 
-      <div id="rendita" <?php if( isset($utente->dipartimento) && ($utente->dipartimento == 1 || $utente->dipartimento == 3)) { ?> style="display: none" <?php } ?>>
+      <div id="rendita" <?php if(isset($utente->is_internal_profile) && ($utente->is_internal_profile == 1)) { echo 'style="display: none"';} ?> >
 
       <label for="rendita">{{ trans('messages.keyword_revenue') }} <p style="color:#f37f0d;display:inline"> (*) </p></label>
 
-      <input value="<?php if(isset($utente->rendita)){ echo $utente->rendita; } ?> " class="form-control" type="text" name="rendita" id="rendita" placeholder="enter revenue l'annuità"><br>
+      <input value="<?php if(isset($utente->rendita)){ echo $utente->rendita; } ?>" class="form-control" type="text" name="rendita" id="rendita" placeholder="enter revenue l'annuità"><br>
     
       </div>
 
@@ -290,7 +299,7 @@ if(isset($utente->id_ente))
 
      <label for="rendita_reseller">{{ trans('messages.keyword_revenuereseller') }}<p style="color:#f37f0d;display:inline"> (*) </p></label>
 
-      <input value="<?php if(isset($utente->rendita_reseller)){ echo $utente->rendita_reseller; } ?> " class="form-control" type="text" name="rendita_reseller" id="rendita_reseller" placeholder="enter revenue of reseller"><br>
+      <input value="<?php if(isset($utente->rendita_reseller)){ echo $utente->rendita_reseller; } ?>" class="form-control" type="text" name="rendita_reseller" id="rendita_reseller" placeholder="enter revenue of reseller"><br>
 
       </div>
 
@@ -320,6 +329,7 @@ if(isset($utente->id_ente))
 
           var url = '<?php echo url('/admin/role/permission');?>';
           var fullurl = url+'/'+$(this).val();
+
 
           $.get( fullurl, function( data ) {
             var permessi = $( "#permissionview" ).html( data );  
@@ -779,5 +789,109 @@ $('.ciao').on("click", function() {
 
 </script>
 
-<script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
+<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script>
+<script>
+  $(document).ready(function() {
+        // validate signup form on keyup and submit
+        $("#user_modification").validate({
+
+            rules: {
+                name: {
+                    required: true,
+                    maxlength: 50
+                },
+                add_password: {
+                    required: true,
+          minlength : 8,
+                    maxlength: 16
+                },
+                email: {
+                    required: true,
+                    email: true,
+                    maxlength: 64,
+                },
+                idente: {
+                    required: true
+                  
+                },
+                dipartimento: {
+                    required: true                    
+                },
+                colore: {   
+                    maxlength: 30                 
+                },
+                sconto: {
+                    required: true,
+                    digits: true
+                },
+                sconto_bonus: {
+                    required: true,
+                    digits: true
+                },
+                rendita: {
+                    required: true,
+                    digits: true
+                },
+                rendita_reseller: {
+                    required: true,
+                    digits: true
+                },
+                zone: {
+                    required: true
+                    
+                }
+            },
+            messages: {
+                name: {
+                    required: "<?php echo trans('messages.keyword_please_enter_a_name');?>",
+                    maxlength: "<?php echo trans('messages.keyword_name_less_than_50_characters');?>"
+                },
+                add_password: {
+                    required: "<?php echo trans('messages.keyword_please_enter_a_password');?>",
+                    minlength : "<?php echo trans('messages.keyword_password_6_characters_long');?>",
+                    maxlength: "<?php echo trans('messages.keyword_password_less_than_16_characters');?>"
+                },
+                email: {
+                    required: "<?php echo trans('messages.keyword_please_enter_email_address');?>",
+                    email: "<?php echo trans('messages.keyword_please_enter_valid_email_address');?>",
+                    maxlength: "<?php echo trans('messages.keyword_email__less_than_64_characters');?>",
+                },
+                idente: {
+                    required: "<?php echo trans('messages.keyword_please_select_an_entity');?>"                   
+                },
+                dipartimento: {
+                    required: "<?php echo trans('messages.keyword_please_select_a_profiling');?>"
+                },
+                colore: {   
+                    maxlength: "<?php echo trans('messages.keyword_colore_maximum_length_30_characters');?>"
+                },
+                sconto: {
+                    required: "<?php echo trans('messages.keyword_please_enter_a_discount');?>",
+                    digits: "<?php echo trans('messages.keyword_only_digits_allowed');?>"
+                },
+                sconto_bonus: {
+                    required: "<?php echo trans('messages.keyword_please_enter_a_discount_bonus');?>",
+                    digits: "{{ trans('messages.keyword_only_digits_allowed')}}"
+                },
+                rendita: {
+                    required: "{{trans('messages.keyword_please_enter_a_revenue')}}",
+                    digits: "{{ trans('messages.keyword_only_digits_allowed')}}"
+                },
+                rendita_reseller: {
+                    required: "{{trans('messages.keyword_please_enter_a_revenue_of_reseller')}}",
+                    digits: "{{ trans('messages.keyword_only_digits_allowed')}}"
+                },
+                zone: {
+                   required: "{{trans('messages.keyword_please_enter_a_zone')}}"
+                }
+            }
+
+        });
+
+        $.validator.setDefaults({
+        ignore: []
+    });
+}); 
+        
+</script>
 @endsection
