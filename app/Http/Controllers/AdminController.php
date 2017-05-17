@@ -2433,6 +2433,157 @@ class AdminController extends Controller
             	return "Somthing Went Wrong";
         }
     }
+
+    // send notification to users		
+    public function sendnotification(Request $request)		
+    {		
+        if($request->user()->id != 0) {		
+            		
+            return redirect('/unauthorized');		
+        } else {		
+            $today = date("Y-m-d");		
+            $notifica = DB::table('notifica')		
+                ->where('created_at', $today)		
+                ->where('is_sent', '=', 0)		
+                ->get();		
+            if($notifica->isEmpty()) {		
+                return "Alert not set ..!!";		
+            }		
+            foreach ($notifica as $value) {		
+                		
+                $ente = explode(",", $value->id_ente);		
+                $ruolo = explode(",", $value->ruolo);		
+                if($ente[0] != null){		
+                			
+                	foreach ($ente as $ente) {		
+                		$getente = DB::table('enti_partecipanti')		
+	                        ->select('id_ente', 'id_user')		
+	                        ->where('id_ente', $ente)		
+	                        ->get();		
+	                    $store = false;		
+                        foreach ($getente as $getente) {                        		
+                            $getrole = DB::table('users')		
+	                            ->select('dipartimento')		
+	                            ->where('id', $getente->id_user)		
+	                            ->where('is_delete', 0)		
+	                            ->first(); 		
+             			
+	                        if(isset($getrole)) {  		
+                        	$check = in_array($getrole->dipartimento, $ruolo);  		
+                        	if($check){		
+	                        	$corporations = DB::table('corporations')		
+	                                ->where('id', $getente->id_ente)		
+	                                ->first();		
+	                            $store = DB::table('invia_notifica')->insert([		
+	                            	'id_ente' => $corporations->id,		
+	                                'user_id' => $getente->id_user,		
+	                                'notification_id' => $value->id,		
+	                                'nome_azienda' => $corporations->nomeazienda,		
+	                                'nome_referente' => $corporations->nomereferente,		
+	                                'settore' => $corporations->settore,		
+	                                'telefono_azienda' => $corporations->telefonoazienda,		
+	                                'email' => $corporations->email,		
+	                                'data_lettura' => '',		
+	                                'conferma' => 'NON LETTO'		
+	                            ]);	       		
+	                            DB::table('notifica')		
+                                ->where('id', $value->id)		
+                                ->update(array( 'is_sent' => 1 ));   		
+                                $true = true;                  		
+                    			}		
+                        	} 		
+                        } 		
+                	}		
+                } else {		
+                			
+                	foreach ($ruolo as $role) {		
+                        $getdept = DB::table('users')		
+                        	->select('id', 'dipartimento')		
+                            ->where('dipartimento', $role)		
+                            ->where('is_delete', 0)		
+                            ->get();                       			
+                        foreach ($getdept as $getdept) {		
+	                        $store = DB::table('invia_notifica')->insert([		
+	                            'ruolo' => $role,		
+	                            'user_id' => $getdept->id,		
+	                            'notification_id' => $value->id,		
+	                            'nome_azienda' => '',		
+	                            'nome_referente' => '',		
+	                            'settore' => '',		
+	                            'telefono_azienda' => '',		
+	                            'email' => '',		
+	                            'data_lettura' => '',		
+	                            'conferma' => 'NON LETTO'		
+	                        ]);		
+                            if($store) {		
+                            	$true = true;     		
+                            }			
+                        }		
+                        DB::table('notifica')		
+                        ->where('id', $value->id)		
+                        ->update(array( 'is_sent' => 1 ));		
+                    } 		
+                }		
+            }			
+            if($true){		
+                return "Send all notifications successfully.!!";		
+            } else {		
+                return "Somthing Went Wrong";		
+            }                       		
+        }		
+    }		
+    
+    // user read notification		
+    public function userreadnotification(Request $request)		
+    {		
+        $today = date("Y-m-d h:i:s");		
+        $notification_id = $request->input('notification_id');		
+        $user_id = $request->input('user_id');		
+        DB::table('invia_notifica')		
+            ->where('notification_id', $notification_id)		
+            ->where('user_id', $user_id)		
+            ->update(array(		
+	            'data_lettura' => $today,		
+	            'conferma' => 'LETTO'		
+            ));                		
+        		
+        return Redirect::back();        		
+    }		
+
+    // make comment in notification		
+    public function notificationmakecomment(Request $request)		
+    {		
+    	$messaggio = $request->input('messaggio');		
+        $notification_id = $request->input('notification_id');		
+        $user_id = $request->input('user_id');		
+        		
+        DB::table('invia_notifica')		
+            ->where('notification_id', $notification_id)		
+            ->where('user_id', $user_id)		
+            ->update(array(		
+                'comment' => $messaggio		
+        	));		
+                		
+        return Redirect::back();  		
+    }   
+
+    // detail notification json		
+    public function detailnotificationjson(Request $request)		
+    {		
+        if($request->id) {		
+            $notifica = DB::table('invia_notifica')		
+                ->where('notification_id', "=", $request->id)		
+                ->get();   		
+               		
+        } else {		
+            $notifica = DB::table('invia_notifica')		
+                ->get();               		
+        }		
+        return json_encode($notifica);		
+    }		
+
+
+
  /* ==================================== Taxation section START ======================================== */
 
     public function deletetaxation(Request $request) {

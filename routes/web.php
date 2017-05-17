@@ -238,6 +238,29 @@ Route::get('/admin/delete/tipo/{id_tipo}', 'AdminController@alerttipodelete');
 // send alert to users
 Route::get('/send-alert', 'AdminController@sendalert');
 
+// ========================================================================================
+// 									Notification Route		
+// ========================================================================================		
+// user send notification		
+Route::get('/send-notification', 'AdminController@sendnotification');		
+// detail notification		
+Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');		
+// detail notification json		
+Route::get('/notifica/detail/json/{id?}', 'AdminController@detailnotificationjson');		
+// add notification		
+Route::get('/admin/notification/{id?}', 'AdminController@addadminnotification');		
+// user read notification		
+Route::get('/notification/user-read', 'AdminController@userreadnotification');		
+// make comment in notification		
+Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');		
+// show all notification		
+Route::get('/notifiche', 'HomeController@mostranotifiche');		
+// get list of notifications 		
+Route::get('/notifiche/json', 'HomeController@getjsonnotifiche');		
+// delete notification		
+Route::get('/notifiche/delete/{id}', 'HomeController@cancellanotifica');	
+
+
 // Deparments
 Route::get('admin/tassonomie/dipartimenti', 'AdminController@dipartimenti');
 Route::post('/admin/tassonomie/dipartimenti/add', 'AdminController@add');
@@ -341,23 +364,23 @@ Route::get('/notification/json', 'AdminController@getnotificationjson');
 Route::get('/notification/enti/json', 
 	'AdminController@getentinotificationjson');
 
-// add notification
-Route::get('/admin/notification/{id?}', 
-	'AdminController@addadminnotification');
+// // add notification
+// Route::get('/admin/notification/{id?}', 
+// 	'AdminController@addadminnotification');
 
 Route::get('/notification/delete/{id}', 'AdminController@deletenotification');
 
 // store notification
 Route::post('/admin/notification/store/{id?}', 'AdminController@storeadminnotification');
 
-// detail notification
-Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');
+// // detail notification
+// Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');
 
 // make comment in notification
-Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');
+// Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');
 
-// user read notification
-Route::get('/notification/user-read', 'AdminController@userreadnotification');
+// // user read notification
+// Route::get('/notification/user-read', 'AdminController@userreadnotification');
 
 
 // make comment in role wised notification

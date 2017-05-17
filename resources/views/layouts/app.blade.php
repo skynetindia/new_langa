@@ -487,23 +487,38 @@
             }
           }
 
+		?>
 
-				?>
-          <li role="presentation" class="dropdown"> <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-envelope-o"></i> <span class="badge bg-green">
+		<?php  
+
+			$userId = Auth::id();
+
+			$notifications = DB::table('invia_notifica')
+	          ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
+	          ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
+	          ->where('user_id', $userId)
+	          ->orderBy('data_lettura', 'asc')	         
+	          ->get(); 
+		?>
+
+
+		<li role="presentation" class="dropdown"> <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false"> 
+
+        	<i class="fa fa-envelope-o"></i> <span class="badge bg-green">
+            
             <?php if(Auth::user()->id === 0) echo '!'; else echo count($notifiche); ?>
             </span> </a>
+
             <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu" >
               <?php $count = 0; ?>
               <!-- notifiche layout --> 
-              @foreach($notifiche as $notifica)
-              <li> <a @if(Auth::user()->id !== 0) href="{{url('/notifiche/disdisci') . '/' . $notifica->id}}" @else href="{{url('/notifiche')}}" @endif onclick="return confirm('Sei sicuro di voler disdire questa notifica?')"> <span> <span>Hey, {{$notifica->nome}}</span> <span class="time">{{$notifica->datascadenza}}</span> </span> <span class="message">
-                <?php if($notifica->target != null) echo $notifica->target; ?>
-                <br>
-                <?php if($notifica->id_ente != null) echo DB::table('corporations')
-						  				->where('id', $notifica->id_ente)
-										->first()->nomeazienda; ?>
-                <br>
-                {{$notifica->oggetto}} </span> </a> </li>
+              @foreach($notifications as $notification)
+              <li> <a href="{{url('/notifiche/delete') . '/' . $notification->id}}"  onclick="return confirm('Sei sicuro di voler disdire questa notifica?')"> <span> <span>Hey, {{$notification->notification_type}}</span> <span class="time">{{$notification->created_at}}</span> </span> <span class="message">
+       
+
+                {{$notification->notification_desc}} </span> </a> </li>
+
+
               <?php $count++; ?>
               @endforeach
               @if($count == 0)
@@ -518,7 +533,11 @@
               </li>
             </ul>
           </li>
-           <li><?php
+
+
+
+
+          <li><?php
 				$allLanguages = DB::table('languages')
 							->select('*')
 							->where('is_deleted', '0')
@@ -533,125 +552,126 @@
         </ul>
       </nav>
     </div>
-    <?php
-
-
-        $userId = Auth::id();
-
-        $notification = DB::table('inviare_avviso')
-          ->join('alert', 'inviare_avviso.alert_id', '=', 'alert.alert_id')
-          ->where('id_ente', $userId)
-          ->where('conferma', '!=', 'LETTO')
-          ->get();  
-          ?>
-    <div id="success_message"></div>
-    <div class="col-md-6">
-      <?php foreach ($notification as $notification) {  ?>
-      <div class="alert alert-warning"> <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-        <h4>
-          <div id="alert" class="comment" > {{ $notification->nome_alert }}
-            <div id="comment"> {{ $notification->  messaggio }}
-              <textarea id="messaggio" rows="4" cols="5"> </textarea>
-              <input type="hidden" id="alert_id" name="" value="{{ $notification->alert_id  }}">
-              <br>
-              <br>
-            </div>
-            <div id="send">
-              <button id="send" value="send"> Send </button>
-            </div>
-          </div>
-        </h4>
-      </div>
-      <?php
-          }
-      ?>
-    </div>
-    <?php
-
-        $notifica = DB::table('invia_notifica')
-          ->where('user_id', $userId)
-          ->get(); 
-
-        foreach ($notifica as $notifica) {
-          
-          if(!empty($notifica->id_ente)) {
-
-            $notifica = DB::table('invia_notifica')
-                ->join('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
-                ->where('user_id', $userId)
-                ->where('invia_notifica.id_ente', '=', '')
-                ->where('conferma', '!=', 'LETTO')
-                ->get();
-
-            foreach ($notifica as $notifica) {  ?>
-    <div id="success_message"></div>
-    <div class="col-md-6">
-      <div class="alert alert-info"> <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-        <h4>
-          <div id="notifica" class="comment" > {{ $notifica->notification_type }} <br>
-            <br>
-            <div id="g_comment"> {{ $notifica->notification_desc }} <br>
-              <br>
-              <textarea id="g_messaggio" rows="4" cols="5" > </textarea>
-              <input type="hidden" id="notification_id" name="" value="{{ $notifica->id  }}">
-              <br>
-              <br>
-            </div>
-            <div id="notifica_send" >
-              <button id="notifica_send" value="notifica_send"> Send </button>
-            </div>
-          </div>
-        </h4>
-      </div>
-    </div>
-    <?php
-
-                }
-          
-
-          } else {
-
-              $notifica = DB::table('invia_notifica')
-                ->join('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
-                ->where('user_id', $userId)
-                ->where('invia_notifica.id_ente', '!=', '')
-                ->where('conferma', '!=', 'LETTO')
-                ->distinct()
-                ->get();
-
-              foreach ($notifica as $notifica) {  ?>
-    <div class="col-md-6">
-      <div class="alert alert-danger"> <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-        <h4>
-          <div id="role_notifica" class="comment"> {{ $notifica->notification_type }} <br>
-            <br>
-            <div id="comment" > {{ $notifica->notification_desc }} <br>
-              <br>
-              <textarea id="messaggio" rows="4" cols="5" > </textarea>
-              <input type="hidden" id="note_id" name="" value="{{ $notifica->id  }}">
-              <br>
-              <br>
-            </div>
-            <div id="note_send">
-              <button id="note_send" value="note_send"> Send </button>
-            </div>
-          </div>
-        </h4>
-      </div>
-    </div>
-    <?php }
-          }
-      }
-    ?>
+  
   </div>
   <!-- /top navigation --> 
   @endif 
+
+
   <!-- Content -->
+
   <div class="right_col" role="main">
+
+  	<div class="row">
+  		
+  	<?php
+
+        $userId = Auth::id();
+
+        $alert = DB::table('inviare_avviso')
+          ->join('alert', 'inviare_avviso.alert_id', '=', 'alert.alert_id')
+          ->where('user_id', $userId)
+          ->where('conferma', '!=', 'LETTO')
+          ->get();            
+    ?>
+
+      <!-- <div id="success_message"></div> -->
+
+        <div class="col-md-6">
+
+  <?php foreach ($alert as $alert) {  ?>
+
+          <div class="alert alert-warning">
+
+            <div id="myalert" class="comment" > 
+
+            <b style="font-size: 16px;"> {{ $alert->nome_alert }} </b>
+
+              <div id="alert_comment" style="display: none;font-weight: bold;"> 
+
+                <p style="text-indent:40px;">
+                  {{ $alert->  messaggio }}  
+                </p>
+                  
+                <textarea class="form-control" id="alert_messaggio" rows="4" cols="5" style="color: black"></textarea> 
+
+                <input type="hidden" id="alert_id" name="" value="{{ $alert->alert_id  }}">
+                <input type="hidden" id="user_id" name="" value="{{ $userId  }}">
+                
+                <br>
+                <button id="alert_send" value="send" style="color: black">
+                Send
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+
+  <?php } ?>
+
+        </div>
+
+    </div>
+
+
+    <!-- Notification -->
+
+    <div class="row">
+    	
+    <?php
+			$userId = Auth::id();
+
+			$notifications = DB::table('invia_notifica')
+	          ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
+	          ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
+	          ->where('user_id', $userId)
+	          ->orderBy('data_lettura', 'asc')	         
+	          ->get(); 
+       
+ 		foreach ($notifications as $notification) { ?>
+
+  		<div class="col-md-6" <?php if($notification->id_ente != null) { ?> style="float: right;" <?php  } ?> >
+
+          <div class="alert alert-<?php if($notification->id_ente != null) { ?>danger <?php  } else { ?>info <?php } ?> ">
+
+            <div id="myrolenote" class="comment">
+
+            <b style="font-size: 16px;"> {{ $notification->notification_type }} </b>
+
+              <div id="rolenote_comment" style="display: none;font-weight: bold;"> 
+
+                <p style="text-indent:40px;">
+                  {{ $notification->notification_desc }}  
+                </p>
+                  
+                <textarea class="form-control" id="rolenote_messaggio" rows="4" cols="5" style="color: black"></textarea> 
+
+                <input type="hidden" id="notification_id" name="" value="{{ $notification->noti_id  }}">
+                <input type="hidden" id="user_id" name="" value="{{ $userId  }}">
+                
+                <br>
+                <button id="noti_send" value="send" style="color: black">
+                Send
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+
+    	</div>
+
+  <?php  } ?>
+
+    </div>
+
+
     <div class="row tile_count">
       <div class="container-fluid"> @yield('content') </div>
     </div>
   </div>
+
   <!-- /content --> 
   <!-- footer content -->
   <footer>
@@ -678,171 +698,121 @@
 
       $(document).ready(function(){
 
-            $('#alert').on('click', function(e) {  
+          $('#myalert').on('click', function(e) {  
 
-                  $('#comment').css({
-                      'display': 'block'
-                  });
-                  $('#send').css({
-                      'display': 'block'
-                  });
+            $('#alert_comment').css({
+                'display': 'block'
+            });
 
-                  e.preventDefault();
-                  var alert_id = $("#alert_id").val(); 
+            e.preventDefault();
 
-                  $.ajax({
-                        type:'GET',
-                          data: {
-                                  'alert_id': alert_id
-                                },
-                          url: '{{ url('alert/user-read') }}',
+            var alert_id = $("#alert_id").val(); 
+            var user_id = $("#user_id").val();
 
-                          success:function(data) {
-                             // console.log(data);
-                            //  $('#success_message').html(data);
-                           
-                            }
+            $.ajax({
 
-                        });
-
-            $("#send").click(function(e){
-       
-              e.preventDefault();
-
-              var messaggio = $("#messaggio").val(); 
-              var alert_id = $("#alert_id").val(); 
-              // var _token = $('input[name="_token"]').val();
-
-              $.ajax({
-                    type:'GET',
-                      data: {
-                              'messaggio': messaggio,
-                              'alert_id': alert_id
-                            },
-                      url: '{{ url('alert/make-comment') }}',
-
-                      success:function(data) {
-                         console.log(data);
-                        //  $('#success_message').html(data);
-                          location.reload();
-                        }
-
-                    });
-
-                });
-
+              type:'GET',
+              data: {
+                      'alert_id': alert_id,
+                      'user_id': user_id
+                    },
+              url: '{{ url('alert/user-read') }}',
+              
+              success:function(data) {
+                // console.log(data);
+                //  $('#success_message').html(data);                     
+              }
 
             });
 
-            $('#notifica').on('click', function(e) {  
+          });
 
-                  $('#g_comment').css({
-                      'display': 'block'
-                  });
-                  $('#notifica_send').css({
-                      'display': 'block'
-                  });
+          $("#alert_send").click(function(e){
+     
+            e.preventDefault();
 
-                  e.preventDefault();
-                  var id = $("#notification_id").val(); 
+            var messaggio = $("#alert_messaggio").val(); 
+            var alert_id = $("#alert_id").val();
+            var user_id = $("#user_id").val();
 
-                  $.ajax({
-                        type:'GET',
-                          data: {
-                                  'id': id
-                                },
-                          url: '{{ url('notification/user-read') }}',
+            $.ajax({
 
-                          success:function(data) {
-                             // console.log(data);
-                            //  $('#success_message').html(data);
-                           
-                            }
+              type:'GET',
+              data: {
+                      'messaggio': messaggio,
+                      'alert_id': alert_id,
+                      'user_id': user_id
+                    },
+              url: '{{ url('alert/make-comment') }}',
 
-                  });
-
-            });
-
-             $("#notifica_send").click(function(e){
-         
-              e.preventDefault();
-
-              var messaggio = $("#g_messaggio").val(); 
-              var id = $("#notification_id").val();
-                 alert(messaggio);
-              $.ajax({
-                    type:'GET',
-                      data: {
-                              'messaggio': messaggio,
-                              'id': id
-                            },
-                      url: '{{ url('notification/make-comment') }}',
-
-                      success:function(data) {
-                         console.log(data);
-                        //  $('#success_message').html(data);
-                          location.reload();
-                        }
-
-                    });
-
-                });
-
-             $('#role_notifica').on('click', function(e) {  
-
-                  $('#comment').css({
-                      'display': 'block'
-                  });
-                  $('#note_send').css({
-                      'display': 'block'
-                  });
-
-                  e.preventDefault();
-                  var id = $("#note_id").val(); 
-
-                  $.ajax({
-                        type:'GET',
-                          data: {
-                                  'id': id
-                                },
-                          url: '{{ url('note_role/user-read') }}',
-
-                          success:function(data) {
-                             // console.log(data);
-                            //  $('#success_message').html(data);
-                           
-                            }
-
-                  });
+              success:function(data) {
+                // console.log(data);
+                // $('#success_message').html(data);
+                location.reload();
+              }
 
             });
 
-             $("#note_send").click(function(e){
-         
-              e.preventDefault();
+          });
 
-              var messaggio = $("#messaggio").val(); 
-              var id = $("#note_id").val();
-                 
-              $.ajax({
-                    type:'GET',
-                      data: {
-                              'messaggio': messaggio,
-                              'id': id
-                            },
-                      url: '{{ url('note_role/make-comment') }}',
+          $('#myrolenote').on('click', function(e) {  
 
-                      success:function(data) {
-                         console.log(data);
-                        //  $('#success_message').html(data);
-                          location.reload();
-                        }
+            $('#rolenote_comment').css({
+                'display': 'block'
+            });
 
-                    });
+            e.preventDefault();
 
-                });
+            var notification_id = $("#notification_id").val(); 
+            var user_id = $("#user_id").val();
 
-        });
+            $.ajax({
+
+              type:'GET',
+              data: {
+                      'notification_id': notification_id,
+                      'user_id': user_id
+                    },
+              url: '{{ url('notification/user-read') }}',
+              
+              success:function(data) {
+                console.log(data);
+                //  $('#success_message').html(data);                     
+              }
+
+            });
+
+          });
+
+           $("#noti_send").click(function(e){
+     
+            e.preventDefault();
+
+            var messaggio = $("#rolenote_messaggio").val(); 
+            var notification_id = $("#notification_id").val();
+            var user_id = $("#user_id").val();
+
+            $.ajax({
+
+              type:'GET',
+              data: {
+                      'messaggio': messaggio,
+                      'notification_id': notification_id,
+                      'user_id': user_id
+                    },
+              url: '{{ url('notification/make-comment') }}',
+
+              success:function(data) {
+                // console.log(data);
+                // $('#success_message').html(data);
+                location.reload();
+              }
+
+            });
+
+          });         
+
+      });
 
     </script>
     

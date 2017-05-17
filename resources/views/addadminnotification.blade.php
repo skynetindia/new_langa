@@ -91,27 +91,27 @@ li label {
 
 
   @if(isset($notifica))
-    <h1>update Notification</h1><hr>
+    <h1>{{ trans('messages.keyword_editnoti') }}</h1><hr>
      <div class="col-md-4">
 
-    <label>Tipo <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label>{{ trans('messages.keyword_type') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
-    <input class="form-control" id="type" name="type" value="{{ $notifica->notification_type }}" placeholder="type of notification">
+    <input class="form-control" id="type" name="type" value="{{ $notifica->notification_type }}" placeholder="{{ trans('messages.keyword_enternotitype') }}">
 
   </div>
 
   <div class="col-md-4">
 
-    <label> Tempo di Avviso <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label>{{ trans('messages.keyword_warntime') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
-    <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="{{ $notifica->tempo_avviso }}" placeholder="enter tempo di avviso">
+    <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="{{ $notifica->tempo_avviso }}" placeholder="{{ trans('messages.keyword_enterwarntime') }} ">
 
   </div>
 
 
   <div class="col-md-4">
 
-    <label> Modulo <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label> {{ trans('messages.keyword_module') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
       <select class="form-control" id="modulo" name="modulo">
 
@@ -151,7 +151,7 @@ li label {
 
 <div class="col-md-6">
 
-<label for="ente">Ente</label>
+<label for="ente">{{ trans('messages.keyword_entity') }}</label>
 
 <select id="ente" name="ente[]" class="js-example-basic-multiple form-control" onchange="myEnte()" multiple="multiple">
 
@@ -178,7 +178,7 @@ li label {
 
 <div class="col-md-6">
 
-<label for="ruolo">Ruolo <p style="color:#f37f0d;display:inline">(*)</p></label>
+<label for="ruolo">{{ trans('messages.keyword_role') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
 <?php $ruolo = explode(",", $notifica->ruolo); ?>
 
@@ -237,7 +237,7 @@ li label {
     
     <br>
 
-    <label> Description </label>
+    <label> {{ trans('messages.keyword_description') }} </label>
 
     <textarea name="description" id="description" rows="10" cols="50" class="form-control">{{ $notifica->notification_desc }}</textarea>
 
@@ -248,26 +248,28 @@ li label {
     <input type="hidden" name="id" value="{{ $notifica->id }}">
 
   @else
-    <h1>Aggiungi Notification</h1><hr>
+
+    <h1> {{ trans('messages.keyword_addnoti') }} </h1><hr>
+
  <div class="col-md-4">
 
-    <label>Tipo<p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label> {{ trans('messages.keyword_type') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
-    <input class="form-control" id="type" name="type" value="" placeholder="type of notification">
-
-  </div>
-
-  <div class="col-md-4">
-
-    <label> Tempo di Avviso <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="" placeholder="enter tempo di avviso">
+    <input class="form-control" id="type" name="type" value="" placeholder="{{ trans('messages.keyword_enternotitype') }}">
 
   </div>
 
   <div class="col-md-4">
 
-    <label> Modulo <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label> {{ trans('messages.keyword_warntime') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
+
+    <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="" placeholder="{{ trans('messages.keyword_enterwarntime') }} ">
+
+  </div>
+
+  <div class="col-md-4">
+
+    <label>{{ trans('messages.keyword_module') }}  <p style="color:#f37f0d;display:inline">(*)</p></label>
 
       <select class="form-control" id="modulo" name="modulo">
 
@@ -297,7 +299,7 @@ li label {
 
 <div class="col-md-6">
 
-<label for="ente">Ente</label>
+<label for="ente">{{ trans('messages.keyword_entity') }} </label>
 
 <select id="ente" name="ente[]" class="js-example-basic-multiple form-control " onchange="myEnte()" multiple="multiple">
 
@@ -313,7 +315,7 @@ li label {
 
 <div class="col-md-6">
 
-<label for="ruolo">Ruolo<p style="color:#f37f0d;display:inline">(*)</p></label>
+<label for="ruolo"> {{ trans('messages.keyword_role') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple" required>
 
@@ -356,7 +358,7 @@ li label {
     
     <br>
 
-    <label> Description </label>
+    <label>{{ trans('messages.keyword_description') }}  </label>
 
     <textarea name="description" id="description" rows="10" cols="50" class="form-control"></textarea>
 
@@ -368,7 +370,7 @@ li label {
 
       <br>
 
-    <input class="btn btn-warning" type="submit" value="INVIA">
+    <input class="btn btn-warning" type="submit" value="{{ trans('messages.keyword_send') }}">
 
     </form>
 
