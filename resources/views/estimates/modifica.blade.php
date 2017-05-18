@@ -17,7 +17,7 @@ tr:hover td {
 }
 </style>
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
-<h1>Modifica preventivo :<?php echo $preventivo->id . '/' . $preventivo->anno;?></h1>
+<h1> {{trans('messages.keyword_modifyquote')}}  :<?php echo $preventivo->id . '/' . $preventivo->anno;?></h1>
 
 
 
@@ -51,29 +51,19 @@ tr:hover td {
 {{ csrf_field() }}
 <input type="hidden" name="idutente" value="{{$preventivo->idutente}}">
 <input type="hidden" name="mediaCode" id="mediaCode" value="{{$mediaCode}}" />
-<?php $selectedVal = 'NON CONFERMATO'; ?>
-@if($statoemotivoselezionato!=null)
-	@foreach($statiemotivi as $statoemotivo)
-		@if($statoemotivo->id == $statoemotivoselezionato->id_tipo) 
-	        <?php $selectedVal = $statoemotivo->name; ?>        	 
-       	@endif 
-	@endforeach
-@endif
-<input type="hidden" id="hdstatoemotivo" name="statoemotivo" value="{{$selectedVal}}" />
-<input type="hidden" id="hdPrezzo" name="prezzo" value="{{$preventivo->prezzo_confermato}}" />
 
-        <label for="id">n° preventivo
-			<input disabled value=":{{$preventivo->id}}/{{$preventivo->anno}}" type="text" id="id" name="id" placeholder="Codice del preventivo" class="form-control">
+        <label for="id"> {{trans('messages.keyword_no_estimate')}} 
+			<input disabled value=":{{$preventivo->id}}/{{$preventivo->anno}}" type="text" id="id" name="id" placeholder=" {{trans('messages.keyword_codebudget')}}  " class="form-control">
 		</label>
 		<div class="btn-group">
         	<a target="new" href="{{url('/preventivi/pdf/quote/') . '/' . $preventivo->id}}" class="btn" title="Vedi preventivo" style="display:inline;background-color:#DDD"><i class="fa fa-file-pdf-o"></i></a>
         </div>
         <br>
-		<label for="oggetto">Oggetto</label>
-        <input value="{{$preventivo->oggetto}}" type="text" id="oggetto" name="oggetto" placeholder="Oggetto del preventivo" class="form-control"><br>
+		<label for="oggetto">{{trans('messages.keyword_name_quotation')}} </label>
+        <input value="{{$preventivo->oggetto}}" type="text" id="oggetto" name="oggetto" placeholder="{{trans('messages.keyword_name_quotation')}}" class="form-control"><br>
         <div class="row">
     			<div class="col-md-4">
-    				<label for="dipartimento">DA</label>
+    				<label for="dipartimento">{{trans('messages.keyword_from')}}</label>
                         <select name="dipartimento" class="js-example-basic-single form-control">
                             <option selected></option>
                             @foreach($dipartimenti as $dipartimento)   
@@ -86,7 +76,7 @@ tr:hover td {
                         </select>
     			</div>
     			<div class="col-md-4">
-    				<label for="idente">A</label>
+    				<label for="idente">{{trans('messages.keyword_to')}}</label>
                     <select name="idente" class="js-example-basic-single form-control">
                         <option selected></option>
                         @foreach($enti as $ente)
@@ -104,22 +94,22 @@ tr:hover td {
     			</div>
     			
     			<div class="col-md-4">
-    				<label for="data">Data</label>
-                    <input value="{{$preventivo->data}}"type="text" id="data" name="data" placeholder="Data creazione preventivo" class="form-control"><br>
+    				<label for="data">{{trans('messages.keyword_date')}}</label>
+                    <input value="{{$preventivo->data}}"type="text" id="data" name="data" placeholder="{{trans('messages.keyword_date_creation_preventive')}}" class="form-control"><br>
     			</div>
         </div>
 
 
 		<div class="col-md-12">
 
-    <h4>Pacchetti e Optional</h4><hr>
+    <h4>{{trans('messages.keyword_packages_and_optional')}}</h4><hr>
     <div class="col-md-4">        
          <a target="new" href="{{url('/preventivi/optional') . '/' . $preventivo->id}}" class="btn btn-info" style="color:#ffffff;text-decoration: none" title="Vedi Optional già inseriti"><i class="fa fa-info"></i></a>
 	    <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="add"><i class="fa fa-plus"></i></a>
 	    <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="delete"><i class="fa fa-eraser"></i></a>
     </div>
     <div class="col-md-4">
-            <label>Elenco pacchetti</label>
+            <label>{{trans('messages.keyword_list_of_packages')}}</label>
         <select style="display:inline" id="pacchetti" class="js-example-basic-single form-control">
             <option></option>
             @foreach($pacchetti as $pacchetto)
@@ -128,7 +118,7 @@ tr:hover td {
         </select>
     </div>
     <div class="col-md-4">
-            <label>Elenco optional</label>
+            <label>{{trans('messages.keyword_optional_list')}}/label>
         <select style="display:inline" id="optional" class="js-example-basic-single form-control">
             <option></option>
             @foreach($optional as $opt)
@@ -148,13 +138,13 @@ tr:hover td {
                 <th>#</th>
               <!--  <th>Ordine</th>
                 <th>Codice</th>-->
-                <th>Oggetto</th>
-                <th>Descrizione</th>
-                <th>Q.tà</th>
-                <th>Prezzo unitario</th>
-                <th>Subtotale</tH>
-                <th>Ciclicita</th>
-                <th>Asterisca</th>
+                <th>{{trans('messages.keyword_object')}}</th>
+                <th>{{trans('messages.keyword_description')}}</th>
+                <th>{{trans('messages.keyword_qty')}}</th>
+                <th>{{trans('messages.keyword_unit_price')}}</th>
+                <th>{{trans('messages.keyword_subtotal')}}</th>
+                <th>{{trans('messages.keyword_cyclicality')}}</th>
+                <th>{{trans('messages.keyword_asterisca')}}</th>
             </thead>
             <tbody id="tabella">
             </tbody>
@@ -167,7 +157,7 @@ tr:hover td {
         var optionalLength = Object.keys(optional).length;
         var optionalPack = <?php echo json_encode($optional_pack); ?>;
         var optionalPackLength = Object.keys(optionalPack).length;
-        count=0;
+        
         $('#pacchetti').on("change", function() {
             var id = $('#pacchetti').val();
             for(var i = 0; i < pacchettiLength; i++) {
@@ -184,7 +174,6 @@ tr:hover td {
                                     checkbox.type = "checkbox";
                                     checkbox.className = "selezione";
                                     var td = document.createElement("td");
-									
                                     td.appendChild(checkbox);
                                     
 									/*var ordine = document.createElement("input");
@@ -205,13 +194,6 @@ tr:hover td {
                                     codiceInput.className ="form-control";
                                     codice.appendChild(codiceInput);*/
                                     
-									 var codiceInput = document.createElement("input");
-                                    codiceInput.type = "hidden";
-                                    codiceInput.value = count+1;
-                                    codiceInput.name = "codici[]";
-                                    codiceInput.className ="form-control";
-                                    td.appendChild(codiceInput);
-									
                                     // Oggetto
                                     var label = optional[k]['label'];
                                     var oggetto = document.createElement("td");
@@ -275,53 +257,6 @@ tr:hover td {
 										select1.appendChild(option);
 									}
 									*/
-									
-									
-                                    var radio1 = document.createElement("input");
-                                    radio1.type = "radio";
-
-                                    var radio2 = document.createElement("input");
-                                    radio2.type = "radio";
-
-                                    var radio3 = document.createElement("input");
-                                    radio3.type = "radio";
-
-                                    var radio4 = document.createElement("input");
-                                    radio4.type = "radio";
-
-                                    var radio5 = document.createElement("input");
-                                    radio5.type = "radio";
-
-                                    var ciclicita = document.createElement("td");
-                                    radio1.name = "cicli["+count+"]";
-                                    radio2.name = "cicli["+count+"]";
-                                    radio3.name = "cicli["+count+"]";
-                                    radio4.name = "cicli["+count+"]";
-                                    radio5.name = "cicli["+count+"]";
-									
-									radio1.value = "1_M";
-									radio2.value = "2_M";
-									radio3.value = "3_M";
-									radio4.value = "4_M";
-									radio5.value = "5_M";
-
-                                    
-                                    ciclicita.appendChild(radio1);
-                                    ciclicita.appendChild(document.createTextNode(" 1 M. "));
-
-                                    ciclicita.appendChild(radio2);
-                                    ciclicita.appendChild(document.createTextNode(" 2 M. "));
-
-                                    ciclicita.appendChild(radio3);
-                                    ciclicita.appendChild(document.createTextNode(" 3 M. "));
-
-                                    ciclicita.appendChild(radio4);
-                                    ciclicita.appendChild(document.createTextNode(" 6 M. "));
-
-                                    ciclicita.appendChild(radio5);
-                                    ciclicita.appendChild(document.createTextNode(" 1 A. "));
-
-									
 									    // Asterisca
 									var check = document.createElement("input");
 									check.type = "checkbox";
@@ -340,12 +275,9 @@ tr:hover td {
 									tr.appendChild(tdQt);
 									tr.appendChild(prezzo);
 									tr.appendChild(tdTot);
-                                    tr.appendChild(ciclicita);
 									tr.appendChild(compl);
-									
                                     // Aggiungo la nuova riga
                                     tabella.appendChild(tr);
-									count++;
                                 }
                             }
                         }
@@ -436,53 +368,6 @@ tr:hover td {
                     totale.className = "form-control tot";
                     tdTot.appendChild(totale);
                     tr.appendChild(tdTot);
-					
-					
-                     var radio1 = document.createElement("input");
-                    radio1.type = "radio";
-
-                    var radio2 = document.createElement("input");
-                    radio2.type = "radio";
-
-                    var radio3 = document.createElement("input");
-                    radio3.type = "radio";
-
-                    var radio4 = document.createElement("input");
-                    radio4.type = "radio";
-
-                    var radio5 = document.createElement("input");
-                    radio5.type = "radio";
-
-                    var ciclicita = document.createElement("td");
-                    radio1.name = "cicli["+count+"]";
-                    radio2.name = "cicli["+count+"]";
-                    radio3.name = "cicli["+count+"]";
-                    radio4.name = "cicli["+count+"]";
-                    radio5.name = "cicli["+count+"]";
-					
-					radio1.value = "1_M";
-					radio2.value = "2_M";
-					radio3.value = "3_M";
-					radio4.value = "4_M";
-					radio5.value = "5_M";
-
-                    
-                    ciclicita.appendChild(radio1);
-                    ciclicita.appendChild(document.createTextNode(" 1 M. "));
-
-                    ciclicita.appendChild(radio2);
-                    ciclicita.appendChild(document.createTextNode(" 2 M. "));
-
-                    ciclicita.appendChild(radio3);
-                    ciclicita.appendChild(document.createTextNode(" 3 M. "));
-
-                    ciclicita.appendChild(radio4);
-                    ciclicita.appendChild(document.createTextNode(" 6 M. "));
-
-                    ciclicita.appendChild(radio5);
-                    ciclicita.appendChild(document.createTextNode(" 1 A. "));
-                    tr.appendChild(ciclicita);
-					
                     // Asterisca
                     var check = document.createElement("input");
                     check.type = "checkbox";
@@ -491,8 +376,7 @@ tr:hover td {
                     tdAst.appendChild(check);
                     tr.appendChild(tdAst);
                     // Aggiungo la nuova riga
-                    tabella.appendChild(tr);   
-					count++;          
+                    tabella.appendChild(tr);             
                 }
             }
         });
@@ -516,7 +400,7 @@ tr:hover td {
             codiceInput.name = "codici[]";
             codiceInput.className ="form-control";
             codice.appendChild(codiceInput);
-            //tr.appendChild(codice);
+            tr.appendChild(codice);
 			var ordine = document.createElement("input");
                                     ordine.type = "number";
                                     var qt1 = document.createElement("td");
@@ -540,7 +424,7 @@ tr:hover td {
             inputDesc.name = "desc[]";
             inputDesc.className = "form-control";
             descrizione.appendChild(inputDesc);
-            tr.appendChild(descrizione);
+            //tr.appendChild(descrizione);
             // Q.tà
             var qt = document.createElement("input");
             qt.type = "number";
@@ -565,53 +449,6 @@ tr:hover td {
             totale.className = "form-control tot";
             tdTot.appendChild(totale);
             tr.appendChild(tdTot);
-			
-			 var radio1_optional = document.createElement("input");
-            radio1_optional.type = "radio";
-
-            var radio2_optional = document.createElement("input");
-            radio2_optional.type = "radio";
-
-            var radio3_optional = document.createElement("input");
-            radio3_optional.type = "radio";
-
-            var radio4_optional = document.createElement("input");
-            radio4_optional.type = "radio";
-
-            var radio5_optional = document.createElement("input");
-            radio5_optional.type = "radio";
-
-            var ciclicita_optional = document.createElement("td");
-            radio1_optional.name = "cicli["+count+"]";
-            radio2_optional.name = "cicli["+count+"]";
-            radio3_optional.name = "cicli["+count+"]";
-            radio4_optional.name = "cicli["+count+"]";
-            radio5_optional.name = "cicli["+count+"]";
-			
-			radio1_optional.value = "1_M";
-            radio2_optional.value = "2_M";
-            radio3_optional.value = "3_M";
-            radio4_optional.value = "4_M";
-            radio5_optional.value = "5_M";
-            
-            
-            ciclicita_optional.appendChild(radio1_optional);
-            ciclicita_optional.appendChild(document.createTextNode(" 1 M. "));
-
-            ciclicita_optional.appendChild(radio2_optional);
-            ciclicita_optional.appendChild(document.createTextNode(" 2 M. "));
-
-            ciclicita_optional.appendChild(radio3_optional);
-            ciclicita_optional.appendChild(document.createTextNode(" 3 M. "));
-
-            ciclicita_optional.appendChild(radio4_optional);
-            ciclicita_optional.appendChild(document.createTextNode(" 6 M. "));
-
-            ciclicita_optional.appendChild(radio5_optional);
-            ciclicita_optional.appendChild(document.createTextNode(" 1 A. "));
-
-            tr.appendChild(ciclicita_optional);
-			
             // Asterisca
             var check = document.createElement("input");
             check.type = "checkbox";
@@ -621,7 +458,6 @@ tr:hover td {
             tr.appendChild(tdAst);
             // Aggiungo la nuova riga
             tabella.appendChild(tr);  
-			count++;
         });
         
         
@@ -672,37 +508,29 @@ tr:hover td {
 		</div>
 		<div class="col-md-12">
 			<div class="col-md-4">
-				<label for="considerazioni">Considerazioni</label>
-    <textarea id="considerazioni" name="considerazioni" placeholder="Considerazioni sul preventivo" class="form-control">{{$preventivo->considerazioni}}</textarea><br>
-				<label for="valenza">Valenza</label>
-    <input value="{{$preventivo->valenza}}" type="text" id="valenza" name="valenza" placeholder="Valenza del preventivo" class="form-control"><br>
-				<label for="scontoagente">Sconto agente <p style="color:#f37f0d;display:inline">(%)</p></label>
-    <input value="{{$preventivo->scontoagente}}" type="number" step=any id="scontoagente" name="scontoagente" placeholder="Sconto agente - calcolato sul totale" class="form-control" title="% di sconto massimo attribuibile in base al proprio tipo di utenza"><br>
+			<label for="considerazioni">{{trans('messages.keyword_considerations')}}</label>
+    <textarea id="considerazioni" name="considerazioni" placeholder="{{trans('messages.keyword_budget_considerations')}}" class="form-control">{{$preventivo->considerazioni}}</textarea><br>
+				<label for="valenza">{{trans('messages.keyword_valenza')}}</label>
+    <input value="{{$preventivo->valenza}}" type="text" id="valenza" name="valenza" placeholder="{{trans('messages.keyword_valency_of_the_budget')}}" class="form-control"><br>
+				<label for="scontoagente">{{trans('messages.keyword_agent_discount')}} <p style="color:#f37f0d;display:inline">(%)</p></label>
+    <input value="{{$preventivo->scontoagente}}" type="number" step=any id="scontoagente" name="scontoagente" placeholder="{{trans('messages.keyword_agent_discount_-_calculated_on_the_total')}}" class="form-control" title="% di sconto massimo attribuibile in base al proprio tipo di utenza"><br>
 				
 			</div>
 			<div class="col-md-4">
-				<label for="noteimportanti">Note importanti</label>
-    <textarea id="noteimportanti" name="noteimportanti" placeholder="Note importanti" class="form-control">{{$preventivo->noteimportanti}}</textarea><br>
-				<label for="finelavori">Data fine lavori</label>
-    <input value="{{$preventivo->finelavori}}" type="text" id="finelavori" name="finelavori" placeholder="Data presunta fine lavori" class="form-control"><br>
-				<label for="scontobonus">Sconto bonus agente <p style="color:#f37f0d;display:inline">(%)</p></label>
-    <input value="{{$preventivo->scontobonus}}" type="number" step=any id="scontobonus" name="scontobonus" placeholder="Sconto bonus - calcolata sul totale già scontato" class="form-control" title="% di sconto guadagnata dal commerciale"><br>
+				<label for="noteimportanti">{{trans('messages.keyword_important_notes')}}</label>
+    <textarea id="noteimportanti" name="noteimportanti" placeholder="{{trans('messages.keyword_important_notes')}}" class="form-control">{{$preventivo->noteimportanti}}</textarea><br>
+				<label for="finelavori">{{trans('messages.keyword_end_date_works')}}</label>
+    <input value="{{$preventivo->finelavori}}" type="text" id="finelavori" name="finelavori" placeholder="{{trans('messages.keyword_date_expected_end_of_work')}}" class="form-control"><br>
+				<label for="scontobonus">{{trans('messages.keyword_agent_discount_discount')}} <p style="color:#f37f0d;display:inline">(%)</p></label>
+    <input value="{{$preventivo->scontobonus}}" type="number" step=any id="scontobonus" name="scontobonus" placeholder="{{trans('messages.keyword_calculated_on_the_total_already_discounted')}}" class="form-control" title="% {{trans('messages.keyword_discounted_by_the_retailer')}}"><br>
 			</div>
 			<div class="col-md-4">
-				<label for="metodo">Metodo di pagamento</label>
+				<label for="metodo">{{trans('messages.keyword_payment_method')}}</label>
                  <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="addpay"><i class="fa fa-plus"></i></a>
 	    <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="deletepay"><i class="fa fa-eraser"></i></a>
     <div id="paymethod"><table class="table table-striped table-bordered">
 	               
 	                <tbody id="filespay">
-                    @foreach($quote_paymento as $quote_paymento)
-                    <tr>
-                    	<td><input class="selezione" type="checkbox"></td>
-                        <td><input class="form-control datapicker" name="datapay[]" value="{{ $quote_paymento->qp_data}}" id="datapay{{ $quote_paymento->qp_id }}" placeholder="Data" type="text"></td>
-                        <td><input class="form-control" name="amountper[]" placeholder="%" value="{{ $quote_paymento->qp_percenti}}" type="text"></td>
-                        <td><input class="form-control" name="importo[]" placeholder="importo" value="{{ $quote_paymento->qp_amnt}}" type="text"></td>
-                    </tr>
-                    @endforeach
 	                </tbody>
 	                <script>
 	                var $j = jQuery.noConflict();
@@ -764,21 +592,21 @@ tr:hover td {
 	                </script>
 	            </table></div>
   
-				<label for="subtotale">Totale <p style="color:#f37f0d;display:inline">(€)</p><a onclick="calcola()" style="text-decoration:none" class="" title="Compilazione assistita">  Clicca <i class="fa fa-info"></i> per compilazione</a></label>
-    <input value="{{$preventivo->subtotale}}" step=any type="number" id="subtotale" name="subtotale" placeholder="Prezzo iniziale" class="form-control" title="Valore iniziale calcolato dalla somma dei prezzi dei singoli pacchetti/optional oppure valore sovrascritto"><br>
-    <label for="totale">Totale scontato <p style="color:#f37f0d;display:inline">(€)</p></label>
-    <input value="{{$preventivo->totale}}" type="number" step=any id="totale" name="totale" placeholder="Prezzo totale" class="form-control" title="Valore scontato oppure valore sovrascritto"><br>
+				<label for="subtotale">{{trans('messages.keyword_total')}} <p style="color:#f37f0d;display:inline">(€)</p><a onclick="calcola()" style="text-decoration:none" class="" title="{{trans('messages.keyword_assembled_compilation')}}">{{trans('messages.keyword_click')}} <i class="fa fa-info"></i>{{trans('messages.keyword_for_compilation')}} </a></label>
+    <input value="{{$preventivo->subtotale}}" step=any type="number" id="subtotale" name="subtotale" placeholder="{{trans('messages.keyword_initial_price')}}" class="form-control" title="{{trans('messages.keyword_initial_value_calculated_individual_packages')}}"><br>
+    <label for="totale">{{trans('messages.keyword_discounted_total')}} <p style="color:#f37f0d;display:inline">(€)</p></label>
+    <input value="{{$preventivo->totale}}" type="number" step=any id="totale" name="totale" placeholder="{{trans('messages.keyword_discounted_total')}} " class="form-control" title="{{trans('messages.keyword_discounted_value_or_overwritten_value')}}"><br>
 			</div>
 		</div>
 		<div class="col-md-12">
 			<div class="col-md-4">
 				
-				<label for="totaledapagare">Da pagare <p style="color:#f37f0d;display:inline">(€)</p></label>
-    <input value="{{$preventivo->totaledapagare}}" type="number" step=any id="totaledapagare" name="totaledapagare" placeholder="Prezzo totale da pagare" class="form-control" title="Valore da inserire per eventuale arrotondamenti"><br>
+				<label for="totaledapagare">{{trans('messages.keyword_to_pay')}} <p style="color:#f37f0d;display:inline">(€)</p></label>
+    <input value="{{$preventivo->totaledapagare}}" type="number" step=any id="totaledapagare" name="totaledapagare" placeholder="{{trans('messages.keyword_total_price_to_be_paid')}}" class="form-control" title="{{trans('messages.keyword_value_to_be_entered_for_any_rounding')}}"><br>
             </div>
 			<div class="col-md-4">
-				<label for="lineebianche">Numero di linee</label>
-				<input value="{{$preventivo->lineebianche}}" type="number" id="lineebianche" name="lineebianche" placeholder="Numero di linee" class="form-control" title="Indicare quanti righe si vogliono avere nell'ultima pagina del preventivo">
+				<label for="lineebianche">{{trans('messages.keyword_number_of_lines')}}</label>
+				<input value="{{$preventivo->lineebianche}}" type="number" id="lineebianche" name="lineebianche" placeholder="{{trans('messages.keyword_number_of_lines')}}" class="form-control" title="{{trans('messages.keyword_enter_how_many_lines_page_of_the_quote')}}">
     <script>
 	var testo = "<?php echo $preventivo->noteintestazione; ?>";
 	function mostra() {
@@ -827,14 +655,14 @@ tr:hover td {
       </script>
 		</div>
         <div class="col-md-6">
-    <button onclick="mostra2()" type="submit" class="btn btn-warning">Salva</button>
+    <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
 </div>
         </form>
 	</div>
 	<div class="col-md-4">
 	
 
-		<label for="statoemotivo">Stato emotivo</label>
+		<label for="statoemotivo">{{trans('messages.keyword_emo')}}</label>
 		<select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
 			<!-- statoemotivoselezionato -->
 			@if($statoemotivoselezionato!=null)
@@ -854,24 +682,19 @@ tr:hover td {
 		$j('#statoemotivo').on("change", function() {
 			var yourSelect = document.getElementById( "statoemotivo" );
 			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
-			$("#hdstatoemotivo").val($j(this).val());
-		});		
+		});
 		</script>
         <div class="col-md-12" id="prezzo" <?php if((Auth::user()->dipartimento == 2 ) || (Auth::user()->id == 0 )){ ?> style="display: block" <?php } else{?> style="display:block;"<?php }?>>
 
-            <label for="prezzo">Prezzo confermato a:</label>
-            <br>            
-            <input type="textarea" id="prezzo_confermato" name="prezzo" class="form-control" value="{{$preventivo->prezzo_confermato}}">
+            <label for="prezzo">{{trans('messages.keyword_confirmpriceto')}}</label>
+            <br>
+            <input type="textarea" name="prezzo" class="form-control" value="">
             <br>
 
-        </div><script>
-		$j('#prezzo_confermato').on("change", function() {
-			$("#hdPrezzo").val($j(this).val());
-		});	
-        </script>
+        </div>
 
             <div class="col-md-12">
-	        <label for="scansione">Allega file amministrativo (Scansione preventivo, contratto, ...)</label><br>
+	        <label for="scansione">{{trans('messages.keyword_attachment')}}</label><br>
 	        <br>
 	        <div class="col-md-12">
             	<div class="image_upload_div">

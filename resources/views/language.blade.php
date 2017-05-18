@@ -123,6 +123,19 @@ li label {
 </a>
 
 
+<div>
+<br>
+<a href="{{ url('download/csv') }} " class="btn btn-info"> Download CSV </a>    
+</div>
+<br>
+<div>
+<form action="{{ url('upload/csv') }}" method = "POST" enctype="multipart/form-data">
+    <input  name="file" type="file"><br>
+     {{ csrf_field() }}
+    <input class="btn btn-primary" type="Submit" value="Import CSV" name='submit'/>
+</form>
+</div>
+
 </div>
 
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php  echo url('admin/language/json');?>" data-classes="table table-bordered" id="table">

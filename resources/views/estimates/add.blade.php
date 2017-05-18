@@ -716,7 +716,7 @@ tr:hover td {
         });
         
         function check() {
-            return confirm("Sei sicuro di voler eliminare: " + n + " pacchetti/optional?");
+            return confirm("{{trans('messages.keyword_sure')}} " + n + " {{trans('messages.keyword_packages')}}/optional?");
         }
         
         j('#deletepay').on("click", function() {
@@ -732,7 +732,7 @@ tr:hover td {
                     </script>
                 </table></div>
   
-                <label for="subtotale">Totale <p style="color:#f37f0d;display:inline">(€)</p><a onclick="calcola()" style="text-decoration:none" class="" title="{{trans('messages.keyword_assembled_compilation')}}">{{trans('messages.keyword_click')}} <i class="fa fa-info"></i> {{trans('messages.keyword_for_compilation')}}</a></label>
+                <label for="subtotale">{{trans('messages.keyword_total')}}  <p style="color:#f37f0d;display:inline">(€)</p><a onclick="calcola()" style="text-decoration:none" class="" title="{{trans('messages.keyword_assembled_compilation')}}">{{trans('messages.keyword_click')}} <i class="fa fa-info"></i> {{trans('messages.keyword_for_compilation')}}</a></label>
     <input value="{{old('subtotale')}}" step=any type="number" id="subtotale" name="subtotale" placeholder="{{trans('messages.keyword_initial_price')}}" class="form-control" title="{{trans('messages.keyword_initial_value_calculated_individual_packages')}}"><br>
     <label for="totale">{{trans('messages.keyword_discounted_total')}} <p style="color:#f37f0d;display:inline">(€)</p></label>
     <input value="{{old('totale')}}" type="number" step=any id="totale" name="totale" placeholder="{{trans('messages.keyword_discounted_total')}} " class="form-control" title="{{trans('messages.keyword_discounted_value_or_overwritten_value')}}"><br>
@@ -794,14 +794,14 @@ tr:hover td {
       </script>
         </div>
         <div class="col-md-6">
-    <button onclick="mostra2()" type="submit" class="btn btn-warning">Salva</button>
+    <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
 </div>
         </form>
     </div>
     <div class="col-md-4">
     
 
-        <label for="statoemotivo">Stato emotivo</label>
+        <label for="statoemotivo"> {{trans('messages.keyword_emo')}}</label>
         <select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
             <!-- statoemotivoselezionato -->
      
@@ -822,12 +822,12 @@ tr:hover td {
         </script>
 
             <div class="col-md-12">
-            <label for="scansione">Allega file amministrativo (Scansione preventivo, contratto, ...)</label><br>
+            <label for="scansione">{{trans('messages.keyword_attachment')}} </label><br>
             <br>
             <div class="col-md-12">
                 <div class="image_upload_div">
-                <?php echo Form::open(array('url' => '/estimates/modify/quote/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
-{{ csrf_field() }}
+                <?php echo Form::open(array('ussrl' => '/estimates/modify/quote/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
+{{ csrf_field() }}ss
                 </form>             
                 </div><script>
                 var url = '<?php echo url('/estimates/modify/quote/getfiles/'.$mediaCode); ?>';

@@ -67,7 +67,7 @@ li label {
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
 
 <!-- Latest compiled and minified Locales -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
+<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 
@@ -81,21 +81,21 @@ li label {
     </script>
 @endif
 
-<h1>Elenco Enti</h1><hr>
+<h1>{{trans('messages.keyword_entelist')}} </h1><hr>
 
 <div class="table-responsive table-custom-design">
 
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php if(isset($notification_id)){ echo url('/notifica/detail/json/'.$notification_id); } else { echo url('/notifica/detail/json'); } ?>" data-classes="table table-bordered" id="table">
     <thead>
-    <th data-field="id" data-sortable="true">ente </th>
-    <th data-field="nome_azienda" data-sortable="true">Nome azienda </th>
-    <th data-field="nome_referente" data-sortable="true">Nome referente </th>
-    <th data-field="settore" data-sortable="true">Settore </th>
-    <th data-field="telefono_azienda" data-sortable="true">Telefono azienda </th>
-    <th data-field="email" data-sortable="true">Email </th>
-    <th data-field="data_lettura" data-sortable="true">Data ora di Lettura </th>
-    <th data-field="comment" data-sortable="true">Comment </th>
-    <th data-field="conferma" data-sortable="true">Conferma </th>
+    <th data-field="id" data-sortable="true"> {{trans('messages.keyword_entity')}}  </th>
+    <th data-field="nome_azienda" data-sortable="true"> {{trans('messages.keyword_compname')}} </th>
+    <th data-field="nome_referente" data-sortable="true"> {{trans('messages.keyword_refname')}} </th>
+    <th data-field="settore" data-sortable="true"> {{trans('messages.keyword_sector')}}  </th>
+    <th data-field="telefono_azienda" data-sortable="true"> {{trans('messages.keyword_comptele')}} </th>
+    <th data-field="email" data-sortable="true"> {{trans('messages.keyword_email')}} </th>
+    <th data-field="data_lettura" data-sortable="true"> {{trans('messages.keyword_readdatetime')}}  </th>
+    <th data-field="comment" data-sortable="true"> {{trans('messages.keyword_comment')}}  </th>
+    <th data-field="conferma" data-sortable="true"> {{trans('messages.keyword_confirm')}} </th>
 
     </thead>
 
@@ -103,79 +103,5 @@ li label {
 
 </div>
 
-
-
-<!-- <div class="table-responsive">
-
-<table class="selectable table table-hover table-bordered" id="table" cellspacing="0" cellpadding="0">
-
-<thead>
-
-<tr style="background: #999; color:#ffffff"> -->
-
-<!-- Intestazione tabella dipartimenti -->
-
-<!-- <th>ente</th>
-
-<th>Nome azienda</th>
-
-<th>Nome referente</th>
-
-<th>Settore</th>
-
-<th>Telefono azienda</th>
-
-<th>Email</th>
-
-<th>Data ora di Lettura</th>
-
-<th>Comment</th>
-
-<th>Conferma</th>
-
-</tr>
-
-</thead>
-
-<tbody>
- -->
-<!-- @if(isset($detail_notifica))
-
-    @foreach($detail_notifica as $detail_notifica) -->
-
-     <!--  <tr>
-
-        <td>{{ $detail_notifica->id }}</td>
-
-        <td>{{ $detail_notifica->nome_azienda }}</td>
-
-        <td>{{ $detail_notifica->nome_referente }}</td>
-
-        <td>{{ $detail_notifica->settore }}</td>
-
-        <td>{{ $detail_notifica->telefono_azienda }}</td>
-
-        <td>{{ $detail_notifica->email }}</td>
-
-        <td>{{ $detail_notifica->data_lettura }}</td>
-
-        <td>{{ $detail_notifica->comment }}</td>
-
-        <td>{{ $detail_notifica->conferma }}</td>
-      
-      </tr>
-
-    @endforeach
-
-@else  -->
-  
-  <?php //echo "<h3 style='text-align:center;'>Nessuno utenti trovato</h3>"; ?>
-
-<!-- @endif
-
-</tbody>
-
-</table> -->
-  
 
 @endsection

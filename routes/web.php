@@ -345,6 +345,11 @@ Route::get('/alert/make-comment', 'AdminController@alertmakecomment');
 // get citi list by state id
 Route::get('/cities/{id}','CommonController@getCityList');
 
+	// download csv		
+Route::get('/download/csv','CommonController@downloadcsv');		
+// upload csv		
+Route::post('/upload/csv','CommonController@uploadcsv');
+
 // ========================================================================================
 
 // cleint sign up form
