@@ -36,86 +36,81 @@
       <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
         <div class="menu_section">
           <ul class="nav side-menu">
-            <li><a href="{{url('/admin')}}"><i class="fa fa-wrench"></i> Impostazioni globali</a> </li>
-            <li><a><img src="{{asset('images/ADMIN_RUOLI-E-CAPACITA.svg')}}" alt="Tassonomie" class="menu-icon" > <span> Ruoli e capacità</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li><a href="{{url('/newutente')}}">Newutente</a></li>
-                <li><a href="{{url('/admin/utenti')}}">Utenti</a></li>
-                <li><a href="{{url('/utente-permessi')}}">Permessi</a></li>
-              </ul>
-            </li>
-            <li><a href="{{url('/newenti')}}"> <img src="{{asset('images/ENTI.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span>Registered Enti</span> </a> </li>
-            <li>
-            <a><img src="{{asset('images/ADMIN_TASSONOMIE.svg')}}" alt="Tassonomie" class="menu-icon" > <span> Tassonomie</span> <span class="fa fa-chevron-down"></span></a>
-            <ul class="nav child_menu">
-              <li><a>Tipi e stati<span class="fa fa-chevron-down"></span></a>
-                <ul class="nav child_menu">
-                  <?php /*<li><a>Enti<span class="fa fa-chevron-down"></span></a>
-                    <ul class="nav child_menu">
-                      
-                      <li><a href="{{url('admin/tassonomie/enti')}}">Enti</a> </li>
-                    </ul>
-                  </li>*/?>
-                  <li><a href="{{url('admin/taxonomies/enti')}}">Enti</a> </li>
-                  <li><a href="{{url('admin/taxonomies/estimates')}}">Preventivi</a> </li>
-                  <li><a>Progetti<span class="fa fa-chevron-down"></span></a>
-                    <ul class="nav child_menu">
-                      <li><a href="{{url('/admin/taxonomies/project')}}">Progetti</a> </li>
-                      <li><a href="{{url('admin/taxonomies/processing')}}">Lavorazioni</a> </li>
-                    </ul>
-                  </li>
-                  <li><a href="{{url('/admin/taxonomies/payments')}}">Pagamenti</a> </li>
-                </ul>
-              </li>
-              <li>
-              <a>Vendita<span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li class="sub_menu"><a href="{{url('/admin/tassonomie/pacchetti')}}">Pacchetti</a> </li>
-                <li><a>Optional<span class="fa fa-chevron-down"></span></a>
-                  <ul class="nav child_menu">
-                    <li><a href="{{url('/admin/taxonomies/optional')}}">Optional</a>
-                    <li><a href="{{url('/show-provincie')}}">Indici Costo Vita</a> </li>
-                  </ul>
-                </li>
-                </li>
-                <li><a href="{{url('/admin/tassonomie/sconti')}}">Sconti</a> </li>
-                <li><a href="{{url('/admin/tassonomie/scontibonus')}}">Sconti Bonus</a> </li>
-                <li><a href="{{url('admin/tassonomie/dipartimenti')}}">Dipartimenti</a></li>
-                 <li><a href="{{url('/taxation')}}"> Taxation </a></li>
-              </ul>
-              </li>
-            </ul>
-            </li>
-            <li><a><img src="{{asset('images/ADMIN_AVVISI.svg')}}" alt="Avvisi" class="menu-icon" > <span>Avvisi</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li><a href="{{url('/admin/shownotification')}}">Notifiche</a></li>
-                <li><a>Alert<span class="fa fa-chevron-down"></span></a>
-                  <ul class="nav child_menu">
-                    <li><a href="{{url('/admin/alert')}}">Alert</a></li>
-                    <li><a href="{{url('/admin/alert/tipo')}}">Alert Tipo</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
           
-            <li><a href="javascript:void(0);"><i class="fa fa-newspaper-o"></i> Newsletter</a></li>            
-            <li><a><img src="{{asset('images/ADMIN_QUIZ.svg')}}" alt="Quiz Pacchetto" class="menu-icon" > <span> {{trans('messages.keyword_quiz')}} </span> <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu">
-                                        <li><a href="{{url('/admin/quiz')}}">{{trans('messages.keyword_demo')}}</a></li>
-	                                    <li><a href="{{url('/admin/quizpackage')}}"> <span> Quiz Pacchetto</span> </a></li>
-                                    </ul>
-                                </li>
-              <li><a><i class="fa fa-cog" aria-hidden="true"></i> <span>Settings</span> <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu">
-							            <li><a href="{{url('/admin/language')}}"> Languages & Phases </a></li>
-							            <li><a href="{{url('/admin/menu')}}">{{trans("messages.keyword_menu")}} </a></li>
-                                    </ul>
-                                </li>
+            <li><a href="{{url('/admin')}}"><i class="fa fa-wrench"></i> Global settings</a>
+        </li>
 
-          </ul>
+    <?php
+
+        $module = DB::table('modulo')
+          ->where('modulo_sub', null)
+          ->where('type', 2)
+          ->get();
+
+        foreach ($module as $module) {
+
+          $modulo = ucfirst(strtolower($module->modulo));
+
+          $submodule = DB::table('modulo')
+            ->where('modulo_sub', $module->id)
+            ->get();
+    ?>  
+        <li>
+        
+          <a> <img src="{{asset('images/'.$module->image)}}" alt="Tassonomie" class="menu-icon" > 
+
+           <span> 
+
+            {{$modulo}}
+
+            </span> <span class="fa fa-chevron-down"></span></a>
+                              
+          <ul class="nav child_menu">
+    <?php
+          if ($submodule) {
+            foreach ($submodule as $submodule) {
+              $subsubmodule = DB::table('modulo')
+                ->where('modulo_subsub', $submodule->id)
+                ->get();
+
+          if (empty($subsubmodule) && $submodule->modulo_subsub == 0) {
+    ?>
+          <li><a href="{{url("$submodule->modulo_link")}}">{{$submodule->modulo}}</a></li>
+    <?php
+          }
+
+          if (!empty($subsubmodule)) {
+    ?>
+            <li><a href="{{url("$submodule->modulo_link")}}" >{{$submodule->modulo}}<span class="fa fa-chaevron-down"></span></a>
+              <ul class="nav child_menu">
+    <?php
+            foreach ($subsubmodule as $subsubmodule1) {
+    ?>
+            <li>
+            <a href="{{url("$subsubmodule1->modulo_link")}}">{{$subsubmodule1->modulo}}</a>
+            </li>
+
+    <?php
+           }
+    ?>
+              </ul>    
+            </li>
+    <?php
+            }
+        }
+    ?> 
+              </ul>
+            </li>
+    <?php
+            }
+        }
+    ?>
         </div>
-      </div>
-      <!-- /sidebar menu --> 
+
+    </div>
+
+      <!-- /sidebar menu -->
+
       <script type="text/javascript">
         
             function requestFullScreen() {
