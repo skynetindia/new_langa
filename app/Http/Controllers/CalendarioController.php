@@ -189,7 +189,7 @@ class CalendarioController extends Controller
 
                 } // end if 
                 else {
-dd("else");
+
                     foreach ($ruolo as $role) {
 
                         $getdept = DB::table('users')
@@ -234,62 +234,73 @@ dd("else");
 
     
 	public function update(Request $request, Event $event)
-	{
-		$this->authorize('modify', $event);
-            $this->validate($request, [
-            'giorno' => 'required',
-            'giornoFine' => 'required',
-            'ente' => 'required',
-            'giornoFine' => 'required',
-			'dove' => 'required',
-            'titolo' => 'required|max:255',
-            'dettagli' => 'max:500',
-            'sh' => 'required',
-            'eh' => 'required',
-        ]);
-        
-        $giorno = substr($request->giorno, 0 , 2);
-        $mese = substr($request->giorno, 3 , 2);
-        $anno = substr($request->giorno, 6, 4);
-        $giornoFine = substr($request->giornoFine, 0, 2);
-        $meseFine = substr($request->giornoFine, 3, 2);
-        $annoFine = substr($request->giornoFine, 6, 4);
-		
-		$ente = DB::table('corporations')
-					->where('id', $request->ente)
-					->first();
-		
-		$evento = DB::table('events')
-					->where('id', $event->id)
-					->first();
-		
-		DB::table('notifiche')
-				->where('id', $evento->id_notifica)
-				->delete();
-		
-		DB::table('events')
-			->where('id', $event->id)
-			->update(array(
-				'id_ente' => $request->ente,
-			    'ente' => $ente->nomeazienda,
-                                'giorno' => $giorno,
-                                'giornoFine' => $giornoFine,
-                                'mese' => $mese,
-                                'meseFine' => $meseFine,
-                                'anno' => $anno,
-                                'annoFine' => $annoFine,
-				'privato' => $request->privato,
-				'sh' => $request->sh,
-				'eh' => $request->eh,
-				'notifica' => $request->notifica,
-				'id_notifica' => 0,
-				'titolo' => $request->titolo,
-				'privato' => $request->privato,
-				'dove' => $request->dove,
-				'dettagli' => $request->dettagli,
-			));
-		return redirect('/calendario/0');
+	{        
+       
+            $this->authorize('modify', $event);
+            
+                $this->validate($request, [
+                'giorno' => 'required',
+                'ente' => 'required',
+                'titolo' => 'required|max:255',
+                'dettagli' => 'max:500',
+            ]);
+            
+            $date=explode('-',$request->giorno);
+            $sdate=strtotime($date[0]);
+            $edate=strtotime($date[1]);
+          
+            $mese= date('m',$sdate);
+            $giorno = date('d',$sdate);
+            $anno = date('Y',$sdate);
+            $sh = date('h:i:s a',$sdate);
+            
+            $meseFine= date('m',$edate);
+            $giornoFine = date('d',$edate);
+            $annoFine = date('Y',$edate);
+            $eh = date('h:i:s a',$edate);
+            $ente = DB::table('corporations')
+                        ->where('id', $request->ente)
+                        ->first();
+    		
+    		$ente = DB::table('corporations')
+    					->where('id', $request->ente)
+    					->first();
+    		
+    		$evento = DB::table('events')
+    					->where('id', $event->id)
+    					->first();
+    		
+    		DB::table('notifiche')
+    				->where('id', $evento->id_notifica)
+    				->delete();
+    		
+    		DB::table('events')
+    			->where('id', $event->id)
+    			->update(array(
+    				'id_ente' => $request->ente,
+    			    'ente' => $ente->nomeazienda,
+                                    'giorno' => $giorno,
+                                    'giornoFine' => $giornoFine,
+                                    'mese' => $mese,
+                                    'meseFine' => $meseFine,
+                                    'anno' => $anno,
+                                    'annoFine' => $annoFine,
+    				'privato' => $request->privato,
+    				'sh' => $request->sh,
+    				'eh' => $request->eh,
+    				'notifica' => $request->notifica,
+    				'id_notifica' => 0,
+    				'titolo' => $request->titolo,
+    				'privato' => $request->privato,
+    				'dove' => $request->dove,
+    				'dettagli' => $request->dettagli,
+    			));
+    		return redirect('/calendario/0');
+
+            
+       
 	}
+
 	
 	public function edit(Request $request, Event $event)
 	{
@@ -316,18 +327,16 @@ dd("else");
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, Event $event)
     {
+
+    
         $validator = Validator::make($request->all(), [
             'giorno' => 'required',
-            // 'giornoFine' => 'required',
             'ente' => 'required',
-            // 'giornoFine' => 'required',
             'titolo' => 'required|max:255',
             'dettagli' => 'max:500',
 			'dove' => 'required'
-            // 'sh' => 'required',
-            // 'eh' => 'required',
         ]);
         
         if($validator->fails()) {
@@ -360,7 +369,7 @@ dd("else");
             'dipartimento' => $request->user()->dipartimento,
 			'ente' => $ente->nomeazienda,
             'giorno' => $giorno,
-            // 'giornoDate' => $giorno,
+            'user_id' => $request->user()->id,
             'giornoFine' => $giornoFine,
             'mese' => $mese,
             'meseFine' => $meseFine,

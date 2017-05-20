@@ -359,7 +359,7 @@ td
 			<div class="modal-body">
 
         		<!-- Start form to add a new event -->
-        		<form action="{{ url('/calendario/add') }}" method="post">
+        		<form action="{{ url('/calendario/add') }}" method="post" id="eventform">
         			{{ csrf_field() }}
                                 @include('common.errors')
 						<div class="col-md-12">
@@ -480,7 +480,7 @@ td
 
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 
-        		<h3 class="modal-title" id="modalTitle">Nuovo ente</h3>
+        		<h3 class="modal-title" id="modalTitle">{{ trans('messages.keyword_newente') }} </h3>
 
 			</div>
 
@@ -492,7 +492,7 @@ td
 
 				</form>
 
-        		<form action="{{ url('/enti/store/') }}" method="post" id="nuovoente">
+        		<form action="{{ url('/enti/store/') }}" method="post" name="nuovoente" id="nuovoente">
 
         			{{ csrf_field() }}
 
@@ -514,7 +514,7 @@ td
 
         			<div class="form-group">
 
-        				<label for="nomeazienda" class="control-label">Nome azienda <p style="color:#f37f0d;display:inline">(*)</p></label> 
+        				<label for="nomeazienda" class="control-label"> {{ trans('messages.keyword_compname') }} <p style="color:#f37f0d;display:inline">(*)</p></label> 
 
         				<input value="{{ old('nomeazienda') }}" type="text" name="nomeazienda" id="nomeazienda" class="form-control">
 
@@ -522,7 +522,7 @@ td
 
 					<div class="form-group">
 
-        				<label for="nomereferente" class="control-label">Referente azienda <p style="color:#f37f0d;display:inline">(*)</p></label> 
+        				<label for="nomereferente" class="control-label"> {{ trans('messages.keyword_refname') }}  <p style="color:#f37f0d;display:inline">(*)</p></label> 
 
         				<input value="{{ old('nomereferente') }}" type="text" name="nomereferente" id="nomereferente" class="form-control">
 
@@ -530,7 +530,7 @@ td
 
 					<div class="form-group">
 
-        				<label for="telefonoazienda" class="control-label">Telefono azienda <p style="color:#f37f0d;display:inline">(*)</p></label> 
+        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }}
 
         				<input value="{{ old('telefonoazienda') }}" type="text" name="telefonoazienda" id="telefonoazienda" class="form-control">
 
@@ -538,7 +538,7 @@ td
 
 					<div class="form-group">
 
-        				<label for="email" class="control-label">Email <p style="color:#f37f0d;display:inline">(*)</p></label> 
+        				<label for="email" class="control-label">{{ trans('messages.keyword_email') }} <p style="color:#f37f0d;display:inline">(*)</p></label> 
 
         				<input value="{{ old('email') }}" type="email" name="email" id="email" class="form-control">
 
@@ -546,7 +546,7 @@ td
 
 					<div class="form-group">
 
-                                            <label for="indirizzo" class="control-label">Indirizzo <p style="color:#f37f0d;display:inline">(*)</p></label> 
+                                            <label for="indirizzo" class="control-label">{{ trans('messages.keyword_address') }} <p style="color:#f37f0d;display:inline">(*)</p></label> 
 
         				<input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text"
 
@@ -556,25 +556,25 @@ td
 
 						  <input type="radio" name="type" id="changetype-all" checked="checked">
 
-						  <label for="changetype-all">All</label>
+						  <label for="changetype-all">{{ trans('messages.keyword_all') }}</label>
 
 
 
 						  <input type="radio" name="type" id="changetype-establishment">
 
-						  <label for="changetype-establishment">Aziende</label>
+						  <label for="changetype-establishment">{{ trans('messages.keyword_companies') }}</label>
 
 
 
 						  <input type="radio" name="type" id="changetype-address">
 
-						  <label for="changetype-address">Indirizzi</label>
+						  <label for="changetype-address">{{ trans('messages.keyword_ addresses') }}</label>
 
 
 
 						  <input type="radio" name="type" id="changetype-geocode">
 
-						  <label for="changetype-geocode">CAP</label>
+						  <label for="changetype-geocode">{{ trans('messages.keyword_cap') }}</label>
 
                                                 </div>
 
@@ -586,7 +586,7 @@ td
 
                                                 <div class="form-group">
 
-                                                    <br>  <label for="responsabilelanga">Responsabile LANGA <p style="color:#f37f0d;display:inline">(*)</p></label>
+                                                    <br>  <label for="responsabilelanga">{{ trans('messages.keyword_responsible') }} LANGA <p style="color:#f37f0d;display:inline">(*)</p></label>
 
                                                 <select title="Responsabile associato a questo ente" name="responsabilelanga" id="responsabilelanga" class="form-control" onchange="trovaTelefono()">
 
@@ -600,7 +600,7 @@ td
 
                                                 </select>
 
-                                                    <br><label for="telefonoresponsabile">Telefono responsabile Langa <p style="color:#f37f0d;display:inline">(*)</p></label>
+                                                    <br><label for="telefonoresponsabile">{{ trans('messages.responsiblephone') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
                                                 <input value="{{ old('telefonoresponsabile') }}" class="form-control" type="text" name="telefonoresponsabile" id="telefonoresponsabile" placeholder="Telefono responsabile Langa"><br>
 
@@ -672,7 +672,7 @@ td
 
         			<div class="modal-footer">
 
-        				<a onclick="aggiungiEnte()" class="btn btn-warning">Aggiungi</a>
+        				<a onclick="aggiungiEnte()" class="btn btn-warning">{{ trans('messages.keyword_add') }}</a>
 
       				</div>
 
@@ -1107,6 +1107,7 @@ function mostraEventi(giorno) {
 			titolo.appendChild(testoTitolo);
 		}
 		
+
 		var utente = document.createElement("div");
 		var testoUtente = document.createTextNode(eventiDaStampare[i]["utente"]);
 		utente.appendChild(testoUtente);
@@ -1115,50 +1116,64 @@ function mostraEventi(giorno) {
 		var testoDove = document.createTextNode(eventiDaStampare[i]["dove"]);
 		dove.appendChild(testoDove);
 		
-		/* geo Location form */
-		var geolocationForm = document.createElement("form");
-		geolocationForm.action = "";
-		/* geo Location form button */
-		var geolocationbutton = document.createElement("button");
-		geolocationbutton.onclick = function(e) {e.preventDefault();};
-		geolocationbutton.type = 'button';
-		geolocationbutton.className = 'btn btn-warning geolocationbutton';
-		geolocationbutton.innerHTML = 'Vai';
-		
-		var geolocationBox = document.createElement("input");
-		geolocationBox.type='text';
-		geolocationBox.id='geolocationPlaces';
-		
-		geolocationBox.className='geolocationbox form-control';
-		geolocationBox.onclick = function(e) {e.preventDefault();};
-		var elimina = document.createElement("a");
-		elimina.href = "{{url('/calendario/delete/event/')}}" + '/' + eventiDaStampare[i]["id"];
-		elimina.className="elimina";
-		elimina.onclick = function(e) {check = confirm("{{ trans('messages.keyword_suredeleteevent') }} "); if(!check) e.preventDefault();};
-		elimina.className = "btn btn-danger btn-sm elimina";
-		var tastoElimina = document.createElement("span");
-		tastoElimina.className = "fa fa-eraser";
-		elimina.appendChild(tastoElimina);
-		
-		striscia.appendChild(orario);
-		striscia.appendChild(ente);
-		striscia.appendChild(dove);
-		striscia.appendChild(titolo);
-		striscia.appendChild(utente);
-		striscia.appendChild(elimina);
-		geolocationForm.appendChild(geolocationBox);
-		geolocationForm.appendChild(geolocationbutton);
-		
-		striscia.appendChild(geolocationForm);
+        /* geo Location form */
+        var geolocationForm = document.createElement("form");
+        geolocationForm.action = "http://maps.google.com/maps";
+        geolocationForm.onsubmit = "punto()";   
+        geolocationForm.method = "get";
+        geolocationForm.target = "new";
+        
+        /* geo Location form button */
+        var geolocationbutton = document.createElement("button");
+        /*geolocationbutton.onclick = function(e) {e.preventDefault();};*/
+        geolocationbutton.type = 'submit';
+        geolocationbutton.className = 'btn btn-warning geolocationbutton';
+        geolocationbutton.innerHTML = '{{ trans('messages.keyword_go') }}';
+    
+        
+        var geolocationBox = document.createElement("input");
+        geolocationBox.type='text';
+        geolocationBox.name='saddr';
+        geolocationBox.id='geolocationPlaces';
+        
+        var geolocationEventAddr = document.createElement("input");
+        geolocationEventAddr.type='hidden';
+        geolocationEventAddr.name='daddr';
+        geolocationEventAddr.value = eventiDaStampare[i]["dove"];
+        geolocationEventAddr.id='geolocationEventAddress';
+        
+        
+        geolocationBox.className='geolocationbox form-control';
+        geolocationBox.onclick = function(e) {e.preventDefault();};
+        var elimina = document.createElement("a");
+        elimina.href = "{{url('/calendario/delete/event/')}}" + '/' + eventiDaStampare[i]["id"];
+        elimina.className="elimina";
+        elimina.onclick = function(e) {check = confirm("Sei sicuro di voler eliminare questo evento?"); if(!check) e.preventDefault();};
+        elimina.className = "btn btn-danger btn-sm elimina";
+        var tastoElimina = document.createElement("span");
+        tastoElimina.className = "fa fa-eraser";
+        elimina.appendChild(tastoElimina);
+        
+        striscia.appendChild(orario);
+        striscia.appendChild(ente);
+        striscia.appendChild(dove);
+        striscia.appendChild(titolo);
+        striscia.appendChild(utente);
+        striscia.appendChild(elimina);
+        geolocationForm.appendChild(geolocationBox);
+        geolocationForm.appendChild(geolocationEventAddr);      
+        geolocationForm.appendChild(geolocationbutton);
+        
+        striscia.appendChild(geolocationForm);
 
-		link.appendChild(striscia);
-		content.append(link);
-		k++;
-	}
+        link.appendChild(striscia);
+        content.append(link);
+        k++;
+    }
 	
 	if(k == 0) {
 		var el = document.createElement("h3");
-		var testo = document.createTextNode("Nessun evento per questo Giorno");
+		var testo = document.createTextNode("{{ trans('messages.keyword_noeventsforthisday') }}");
 		el.appendChild(testo);
 		content.append(el);	
 	}	
@@ -1179,6 +1194,87 @@ function mostraEventi(giorno) {
                 alert(mesg);
             });
         });*/
+</script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+      $("#eventform").validate({            
+            rules: {
+                titolo: {
+                    required: true
+                },
+                dettagli: {
+                    required: true                    
+                },
+                giorno: {
+                    required: true
+                },
+                ente: {
+                    required: true
+                },
+                dove: {
+                    required: true
+                }
+            },
+            messages: {
+                titolo: {
+                    required: "{{trans('messages.keyword_enterobject')}}"
+                },
+                dettagli: {
+                    required: "{{trans('messages.keyword_entergendetails')}}"
+                },
+                giorno: {
+                    required: "{{trans('messages.keyword_selectgiorno')}}"
+                },
+                ente: {
+                    required: "{{trans('messages.keyword_selectente')}}"
+                },
+                dove: {
+                    required: "{{trans('messages.keyword_enterdove')}}"
+                }
+            }
+
+        });
+
+      $("#nuovoente").validate({            
+            rules: {
+                nomeazienda: {
+                    required: true
+                },
+                nomereferente: {
+                    required: true                    
+                },
+                email: {
+                    required: true
+                },
+                responsabilelanga: {
+                    required: true
+                },
+                telefonoresponsabile: {
+                    required: true
+                }
+            },
+            messages: {
+                nomeazienda: {
+                    required: "{{trans('messages.keyword_please_enter_company_name')}}"
+                },
+                nomereferente: {
+                    required: "{{trans('messages.keyword_please_enter_reference_name')}}"
+                },
+                email: {
+                    required: "{{trans('messages.keyword_enteremail')}}"
+                },
+                responsabilelanga: {
+                    required: "{{trans('messages.keyword_enterresponsablelanga')}}"
+                },
+                telefonoresponsabile: {
+                    required: "{{trans('messages.keyword_entertelefonoresponsable')}}"
+                }
+            }
+
+        });
+  });
+
 </script>
 
 @endsection
