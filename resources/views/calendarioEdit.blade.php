@@ -7,6 +7,8 @@
 
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
@@ -21,10 +23,9 @@
 
 <link href="http://easy.langa.tv/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<link rel="stylesheet" href="{{asset('public/css/select2.min.css')}}"> 
-
-
 <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+<link rel="stylesheet" href="{{asset('public/css/select2.min.css')}}"> 
 
 
 <style>
@@ -182,7 +183,8 @@ td
             <h3 class="modal-title" id="modalTitle"> {{ trans('messages.keyword_editevent') }} </h3>
       </div>   
       <div class="modal-body">
-        
+          
+
             <!-- Start form to modify an event -->
             @include('common.errors')
             <form action="{{ url('/calendario/update/event/' . $event->id) }}" method="post" id="eventeditform" name="eventeditform">
@@ -191,9 +193,9 @@ td
                                 @include('common.errors')
                     <div class="col-md-12">
                     <div class="form-group col-md-10">
-                <label for="ente" class="control-label">{{ trans('messages.keyword_entity') }}  </label>
+                <label for="ente" class="control-label">{{ trans('messages.keyword_entity') }} <p style="color:#f37f0d;display:inline">(*)</p> </label>
             <select name="ente" id="ente" class="js-example-basic-single form-control" style="width:100%">
-                                                    <option selected></option>
+          <option selected></option>
             @foreach($enti as $ente)
                             @if($ente->id == $event->id_ente)
                                 <option selected value="{{$ente->id}}">{{$ente->nomeazienda}} | {{$ente->nomereferente}}</option>
@@ -214,7 +216,7 @@ td
             <div class="col-md-12">
                         <div class="col-md-5">                               
                         <div class="form-group">
-                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }} </label>
+                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }} <p style="color:#f37f0d;display:inline">(*)</p> </label>
                             <input value=" {{ $event->titolo }}" type="text" name="titolo" id="titolo" class="form-control" placeholder=" {{ trans('messages.keyword_appointmenttodiscuss') }} ">
                         </div>
     
@@ -222,7 +224,7 @@ td
                             <input value="{{ $event->dove }}" type="text" name="dove" id="dove" class="form-control" placeholder=" {{ trans('messages.keyword_appointmentaddress') }} ">                      
                         </div>                    
                         <div class="form-group">
-                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} </label>
+                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} <p style="color:#f37f0d;display:inline">(*)</p> </label>
                             <textarea rows="4" name="dettagli" id="dettagli" class="form-control" placeholder="{{ trans('messages.keyword_generalinformation') }}"> {{ $event->dettagli }}</textarea>
                         </div>
                         </div>
@@ -250,7 +252,7 @@ td
                     <div class="col-md-12">
                         <div class="col-md-6">                      
                              <h4> {{ trans('messages.keyword_schedule') }} </h4>                 
-                        <label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} </label> 
+                        <label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} <p style="color:#f37f0d;display:inline">(*)</p> </label> 
                         <input value="{{ old('giorno') }}" type="text" name="giorno" id="giorno" class="form-control">
                                     <script>
                                     $("#giorno").daterangepicker({
@@ -272,12 +274,10 @@ td
                                     <br>
                                 </div>
                                 </div>
+                            </fieldset>
+                        </div>
 
-                                
-                                
-                    </fieldset>
-                                        </div>
-
+                  <div id="map"></div>
 
               <div class="modal-footer">
                 <input type="submit" class="btn btn-primary" value=" {{ trans('messages.keyword_save&exit') }} ">
@@ -289,27 +289,40 @@ td
   </div>
 </div>
 
-
-
  </script>
 
+<!-- <script src="{{ asset('public/scripts/jquery.min.js') }}"></script> -->
+
+
 <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script> -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places" async defer></script>
+<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places" async defer></script> -->
+
+
+      
+<script>
+function conferma(e) {
+  var confirmation = confirm("Sei sicuro?") ;
+    if (!confirmation)
+        e.preventDefault();
+  return confirmation ;
+}
+setTimeout(function(){
+  $('#editEvent').modal('show');
+    initMap2();
+}, 100);
+
+$('body').bind('click', function() {
+  setTimeout(function(){
+  $('#editEvent').modal('show');
+    initMap2();
+}, 1000);
+});
+
+
+</script>
 
 
 <script>
-
-      // This example requires the Places library. Include the libraries=places
-
-      // parameter when you first load the API. For example:
-
-      // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
-
-  /*$('#newEvent').on('shown.bs.modal', function(){
-    
-    initMap2();
-    });*/
-
 
       function initMap() {
 
@@ -470,15 +483,6 @@ td
 
     <script>
 
-//     function aggiungiEvento() {
-//   $( "#editEvent" ).modal();
-//     $('#editEvent').on('shown.bs.modal', function(){
-//       initMap2();
-//     });
-// } 
-
-
-  //AIzaSyAL_rtMv03GNmWgYfQkcGPPOsQ43LGun-0
 
  function initMap2() {
 
@@ -496,7 +500,7 @@ td
         var image = "{{asset('public/marker.png')}}";
         var infowindow = new google.maps.InfoWindow();
         var marker = new google.maps.Marker({
-          icon: image,
+          icon: image,  
           map: map,
           draggable: true,
           animation: google.maps.Animation.DROP,
@@ -562,35 +566,18 @@ td
             autocomplete.setTypes(types);
           });
         }
-        setupClickListener('changetype-all', []);
-        setupClickListener('changetype-address', ['address']);
-        setupClickListener('changetype-establishment', ['establishment']);
-        setupClickListener('changetype-geocode', ['geocode']);
+        // setupClickListener('changetype-all', []);
+        // setupClickListener('changetype-address', ['address']);
+        // setupClickListener('changetype-establishment', ['establishment']);
+        // setupClickListener('changetype-geocode', ['geocode']);
       }
     //AIzaSyAL_rtMv03GNmWgYfQkcGPPOsQ43LGun-0
     </script>
 
-<script>
-function conferma(e) {
-  var confirmation = confirm("Sei sicuro?") ;
-    if (!confirmation)
-        e.preventDefault();
-  return confirmation ;
-}
-setTimeout(function(){
-  $('#editEvent').modal('show');
-    initMap2();
-}, 100);
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script> -->
 
-$('body').bind('click', function() {
-  setTimeout(function(){
-  $('#editEvent').modal('show');
-    initMap2();
-}, 1000);
-});
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places" async defer></script>
 
-
-</script>
 
 
 <script type="text/javascript">

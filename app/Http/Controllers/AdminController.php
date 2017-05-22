@@ -2006,10 +2006,11 @@ class AdminController extends Controller
                         ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Menu deleted successfully!</div>');
     }
 
-    public function storemenu(Request $request) {
+     public function storemenu(Request $request) {
+
         $validator = Validator::make($request->all(), [
                     'manuname' => 'required',
-                   /* 'menulink' => 'required',*/
+                    'menulink' => 'required',
                     'menuclass' => 'required',
         ]);
 
@@ -2018,6 +2019,24 @@ class AdminController extends Controller
                             ->withInput()
                             ->withErrors($validator);
         }
+
+        
+        $nome = "";
+
+        if ($request->image != null) {
+            // Memorizzo l'immagine nella cartella public/imagesavealpha
+            Storage::put(
+
+                    'images/' . $request->file('image')->getClientOriginalName(), file_get_contents($request->file('image')->getRealPath())
+            );
+
+            $nome = $request->file('image')->getClientOriginalName();
+        } else {
+            // Imposto l'immagine di default
+            $nome = "mancalogo.jpg";
+        }
+
+
         $status = $this->checkurl($request->menulink);
             DB::table('modulo')->insert(
                     ['modulo' => $request->manuname,
@@ -2027,6 +2046,10 @@ class AdminController extends Controller
                         'modulo_class' => $request->menuclass,
                         'menu_active' => $status,
                         'dipartimento' => $request->deparments,
+                        'image' => $nome,
+	                	'type' => $request->menutype,
+	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
+	                	'backpriority' => isset($request->backpriority) ? $request->backpriority : ''
                     ]
             );
 
@@ -2132,6 +2155,7 @@ class AdminController extends Controller
     }
 
     public function menuupdate(Request $request) {
+
         $validator = Validator::make($request->all(), [
                     'manuname' => 'required',
                     'menulink' => 'required',
@@ -2144,6 +2168,23 @@ class AdminController extends Controller
                             ->withErrors($validator);
         }
 
+    	$nome = "";
+
+        if ($request->image != null) {
+            // Memorizzo l'immagine nella cartella public/imagesavealpha
+            Storage::put(
+
+                    'images/' . $request->file('image')->getClientOriginalName(), file_get_contents($request->file('image')->getRealPath())
+            );
+
+            $nome = $request->file('image')->getClientOriginalName();
+        } else {
+            // Imposto l'immagine di default
+            $nome = "mancalogo.jpg";
+        }
+
+        
+
         //module sub sub menu
         if ($request->submenu != '') {
             $status = $this->checkurl($request->menulink);
@@ -2155,7 +2196,11 @@ class AdminController extends Controller
                         'modulo_subsub' => $request->submenu,
                         'modulo_link' => $request->menulink,
                         'modulo_class' => "",
-                        'menu_active' => $status
+                        'menu_active' => $status,
+                        'image' => $nome,
+	                	'type' => $request->menutype,
+	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
+	                	'backpriority' => isset($request->backpriority) ? $request->backpriority : ''
             ));
         } elseif ($request->parentmenu != "") {
             //module sub menu
@@ -2170,6 +2215,10 @@ class AdminController extends Controller
                         'modulo_link' => $request->menulink,
                         'modulo_class' => "",
                         'menu_active' => $status,
+                        'image' => $nome,
+	                	'type' => $request->menutype,
+	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
+	                	'backpriority' => isset($request->backpriority) ? $request->backpriority : ''
             ));
         } else {
             //module parent menu
@@ -2182,10 +2231,15 @@ class AdminController extends Controller
                         'modulo_sub' => $request->parentmenu,
                         'modulo_link' => $request->menulink,
                         'modulo_class' => $request->menuclass,
-                        'menu_active' => $status));
+                        'menu_active' => $status,
+                        'image' => $nome,
+	                	'type' => $request->menutype,
+	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
+	                	'backpriority' => isset($request->backpriority) ? $request->backpriority : ''
+                	));
         }
         return Redirect::back()
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Menu updated successfully!</div>');
+        	->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Menu updated successfully!</div>');
     }
     /* ==================================== Menu section END ======================================== */  
 

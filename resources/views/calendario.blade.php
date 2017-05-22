@@ -50,13 +50,19 @@ li label {
     color: white;
 }
 </style>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
+
 <script type="text/javascript" src="http://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+
 <script type="text/javascript" src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+
 <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
 
 
@@ -364,7 +370,7 @@ td
                                 @include('common.errors')
 						<div class="col-md-12">
                          <div class="form-group col-md-10">
-        				<label for="ente" class="control-label">{{ trans('messages.keyword_entity') }} </label>
+        				<label for="ente" class="control-label">{{ trans('messages.keyword_entity') }} <p style="color:#f37f0d;display:inline">(*)</p> </label>
 						<select name="ente" id="ente" class="js-example-basic-single form-control" style="width:100%">
 						@foreach($enti as $ente)
                                                 @if(!empty(Session::get('error_code')) && Session::get('error_code') == 5)
@@ -384,15 +390,15 @@ td
            			<div class="col-md-12">
 						<div class="col-md-5">                               
                         <div class="form-group">
-                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }} </label>
+                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }} <p style="color:#f37f0d;display:inline">(*)</p> </label>
                             <input value="{{ old('titolo') }}" type="text" name="titolo" id="titolo" class="form-control" placeholder="{{ trans('messages.keyword_appointmenttodiscuss') }} ">
                         </div>
     
-                        <div class="form-group">        				
+                        <div class="form-group">         				
                             <input value="{{ old('dove') }}" type="text" name="dove" id="dove" class="form-control" placeholder="{{ trans('messages.keyword_appointmentaddress') }} ">                      
                         </div>                    
                         <div class="form-group">
-                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} </label>
+                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
                             <textarea rows="4" name="dettagli" id="dettagli" class="form-control" placeholder="{{ trans('messages.keyword_generalinformation') }} ">{{ old('dettagli') }}</textarea>
                         </div>
                     	</div>
@@ -418,7 +424,7 @@ td
 					<div class="col-md-12">
 						<div class="col-md-6">						
                              <h4> {{ trans('messages.keyword_schedule') }} </h4>                 
-        				<label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} </label> 
+        				<label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} <p style="color:#f37f0d;display:inline">(*)</p> </label> 
         				<input value="{{ old('giorno') }}" type="text" name="giorno" id="giorno" class="form-control">
                                     <script>
                                     $("#giorno").daterangepicker({
@@ -530,7 +536,7 @@ td
 
 					<div class="form-group">
 
-        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }}
+        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }} <p style="color:#f37f0d;display:inline">(*)</p>
 
         				<input value="{{ old('telefonoazienda') }}" type="text" name="telefonoazienda" id="telefonoazienda" class="form-control">
 
@@ -576,97 +582,95 @@ td
 
 						  <label for="changetype-geocode">{{ trans('messages.keyword_cap') }}</label>
 
-                                                </div>
+              </div>
 
-						
-
-                                                </div>
+              </div>
 
 						<div id="map"></div>
 
-                                                <div class="form-group">
+                <div class="form-group">
 
-                                                    <br>  <label for="responsabilelanga">{{ trans('messages.keyword_responsible') }} LANGA <p style="color:#f37f0d;display:inline">(*)</p></label>
+                    <br>  <label for="responsabilelanga">{{ trans('messages.keyword_responsible') }} LANGA <p style="color:#f37f0d;display:inline">(*)</p></label>
 
-                                                <select title="Responsabile associato a questo ente" name="responsabilelanga" id="responsabilelanga" class="form-control" onchange="trovaTelefono()">
+                <select title="Responsabile associato a questo ente" name="responsabilelanga" id="responsabilelanga" class="form-control" onchange="trovaTelefono()">
 
-                                                        <option></option>
+                        <option></option>
 
-                                                        @for($i = 1; $i < count($utenti); $i++)
+                        @for($i = 1; $i < count($utenti); $i++)
 
-                                                        <option>{{ $utenti[$i]->name }}</option>
+                        <option>{{ $utenti[$i]->name }}</option>
 
-                                                        @endfor
+                        @endfor
 
-                                                </select>
+                </select>
 
-                                                    <br><label for="telefonoresponsabile">{{ trans('messages.responsiblephone') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
+                    <br><label for="telefonoresponsabile">{{ trans('messages.responsiblephone') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
 
-                                                <input value="{{ old('telefonoresponsabile') }}" class="form-control" type="text" name="telefonoresponsabile" id="telefonoresponsabile" placeholder="Telefono responsabile Langa"><br>
+                <input value="{{ old('telefonoresponsabile') }}" class="form-control" type="text" name="telefonoresponsabile" id="telefonoresponsabile" placeholder="Telefono responsabile Langa"><br>
 
-                                                <script>
+                <script>
 
-                                                var cellulari = ["<?php
+                var cellulari = ["<?php
 
-                                                        for($i=1;$i<count($utenti);$i++) {
+                        for($i=1;$i<count($utenti);$i++) {
 
-                                                                if($i == count($utenti) - 1)
+                                if($i == count($utenti) - 1)
 
-                                                                        echo $utenti[$i]->cellulare . "\"";
+                                        echo $utenti[$i]->cellulare . "\"";
 
-                                                                else
+                                else
 
-                                                                        echo $utenti[$i]->cellulare . "\",\"";
+                                        echo $utenti[$i]->cellulare . "\",\"";
 
-                                                        }
+                        }
 
-                                                ?>];
+                ?>];
 
-                                                var nomi = ["<?php
+                var nomi = ["<?php
 
-                                                        for($i=1;$i<count($utenti);$i++) {
+                        for($i=1;$i<count($utenti);$i++) {
 
-                                                                if($i == count($utenti) - 1)
+                                if($i == count($utenti) - 1)
 
-                                                                        echo $utenti[$i]->name . "\"";
+                                        echo $utenti[$i]->name . "\"";
 
-                                                                else
+                                else
 
-                                                                        echo $utenti[$i]->name . "\",\"";
+                                        echo $utenti[$i]->name . "\",\"";
 
-                                                        }
+                        }
 
-                                                ?>];
+                ?>];
 
 
 
-                                                function trovaTelefono() {
+                function trovaTelefono() {
 
-                                                        var k;
+                        var k;
 
-                                                        var nome = $( "#responsabilelanga option:selected" ).text();
+                        var nome = $( "#responsabilelanga option:selected" ).text();
 
-                                                        console.log(nome);
+                        console.log(nome);
 
-                                                        for(var i = 0; i < <?php echo count($utenti)-1;?>;i++) {
+                        for(var i = 0; i < <?php echo count($utenti)-1;?>;i++) {
 
-                                                                if(nomi[i] == nome) {
+                                if(nomi[i] == nome) {
 
-                                                                        k = i;
+                                        k = i;
 
-                                                                        break;
+                                        break;
 
-                                                                }
+                                }
 
-                                                        }
+                        }
 
-                                                        $('#telefonoresponsabile').val(cellulari[k]);
+                        $('#telefonoresponsabile').val(cellulari[k]);
 
-                                                }
+                }
 
-                                        </script>
+              </script>
 
-                                    </div>
+          </div>
 
         			</div>
 
@@ -765,18 +769,6 @@ function nuovoEnte() {
 </script>
 
 <script>
-
-      // This example requires the Places library. Include the libraries=places
-
-      // parameter when you first load the API. For example:
-
-      // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
-
-	/*$('#newEvent').on('shown.bs.modal', function(){
-		
-	  initMap2();
-    });*/
-
 
       function initMap() {
 
@@ -1148,7 +1140,7 @@ function mostraEventi(giorno) {
         var elimina = document.createElement("a");
         elimina.href = "{{url('/calendario/delete/event/')}}" + '/' + eventiDaStampare[i]["id"];
         elimina.className="elimina";
-        elimina.onclick = function(e) {check = confirm("Sei sicuro di voler eliminare questo evento?"); if(!check) e.preventDefault();};
+        elimina.onclick = function(e) {check = confirm("{{ trans('messages.keyword_suredeleteevent') }} "); if(!check) e.preventDefault();};
         elimina.className = "btn btn-danger btn-sm elimina";
         var tastoElimina = document.createElement("span");
         tastoElimina.className = "fa fa-eraser";
@@ -1244,14 +1236,22 @@ $(document).ready(function() {
                 nomereferente: {
                     required: true                    
                 },
+                telefonoazienda: {
+                  required: true,
+                  digits: true,
+                  rangelength: [9, 12]
+                },
                 email: {
-                    required: true
+                    required: true,
+                    email: true
                 },
                 responsabilelanga: {
                     required: true
                 },
                 telefonoresponsabile: {
-                    required: true
+                  required: true,
+                  digits: true,
+                  rangelength: [9, 12]
                 }
             },
             messages: {
@@ -1261,6 +1261,10 @@ $(document).ready(function() {
                 nomereferente: {
                     required: "{{trans('messages.keyword_please_enter_reference_name')}}"
                 },
+                telefonoazienda: {
+                    required: "{{trans('messages.keyword_please_enter_telephone')}}",
+                    digits: "{{trans('messages.keyword_only_digit')}}"
+                },
                 email: {
                     required: "{{trans('messages.keyword_enteremail')}}"
                 },
@@ -1268,7 +1272,8 @@ $(document).ready(function() {
                     required: "{{trans('messages.keyword_enterresponsablelanga')}}"
                 },
                 telefonoresponsabile: {
-                    required: "{{trans('messages.keyword_entertelefonoresponsable')}}"
+                    required: "{{trans('messages.keyword_entertelefonoresponsable')}}",
+                    digits: "{{trans('messages.keyword_only_digit')}}"
                 }
             }
 

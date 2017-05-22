@@ -410,28 +410,31 @@ class CorporationController extends Controller
 			$nome = "mancalogo.jpg";
 		}
 		
-        $corp = $request->user()->corporations()->create([
+        // $corp = $request->user()->corporations()->create([
+
+    	$corp =  DB::table('corporations')->insert([ 
+
             'nomeazienda' => $request->nomeazienda,
             'nomereferente' => $request->nomereferente,
-            'settore' => $request->settore,
-            'piva' => $request->piva,
-            'cf' => $request->cf,
+            'settore' => isset($request->settore) ? $request->settore : '',
+            'piva' => isset($request->piva) ? $request->piva : '',
+            'cf' => isset($request->cf) ? $request->cf : '',
             'telefonoazienda' => $request->telefonoazienda,
-            'cellulareazienda' => $request->cellulareazienda,
+            'cellulareazienda' => isset($request->cellulareazienda) ? $request->cellulareazienda : '',
 			'emailsecondaria' => $request->emailsecondaria,
 			'sedelegale' => $request->sedelegale,
 			'indirizzospedizione' => $request->indirizzospedizione,
 			/*'privato' => $request->privato,*/
-            'fax' => $request->fax,
+            'fax' => isset($request->fax) ? $request->fax : '',
             'email' => $request->email,
 			'logo' => $nome,
-            'iban' => $request->iban,
-			'swift'=>$request->swift,
+            'iban' => isset($request->iban) ? $request->iban : '',
+			'swift'=> isset($request->swift) ? $request->swift : '',
             /*'noteenti' => $request->noteenti,*/
            /* 'indirizzo' => $request->indirizzo,*/
 			'responsabilelanga' => $request->responsabilelanga,
 			'telefonoresponsabile' => $request->telefonoresponsabile,
-			'skype_id'=>$request->skype_id,
+			'skype_id'=> isset($request->skype_id) ? $request->skype_id : '',
         ]);
 		
 		// Memorizza i partecipanti al progetto

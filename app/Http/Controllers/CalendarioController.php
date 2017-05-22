@@ -329,8 +329,6 @@ class CalendarioController extends Controller
      */
     public function store(Request $request, Event $event)
     {
-
-    
         $validator = Validator::make($request->all(), [
             'giorno' => 'required',
             'ente' => 'required',
