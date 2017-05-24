@@ -81,40 +81,40 @@ li label {
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
 
 <!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
 
 <div class="row">
     <div class="col-md-12">
-        <h1> {{ trans('messages.keyword_projectlist') }} </h1><hr>        
+        <h1>Elenco Progetti</h1><hr>        
     </div>
 </div>
 
 <a href="{{url('/progetti/add')}}" id="modifica" style="display:inline;">
 
-<button class="btn btn-warning" type="button" name="update" title=" {{ trans('messages.keyword_addnewproject') }} "><i class="fa fa-plus"></i></button>
+<button class="btn btn-warning" type="button" name="update" title="Aggiungi - aggiungi un nuovo progetto"><i class="fa fa-plus"></i></button>
 
 </a>
 <br><br>
 @if(isset($miei))
 <a id="miei" href="{{url('/progetti/miei')}}" style="display:inline;">
-<button class="button button2" type="button" name="miei" title=" {{ trans('messages.keyword_myfilterproject') }} " style="background-color:#337AB7;color:#ffffff"> {{ trans('messages.keyword_my') }} </button>
+<button class="button button2" type="button" name="miei" title="Miei - Filtra i tuoi progetti" style="background-color:#337AB7;color:#ffffff">Miei</button>
 </a>
 <a id="tutti" href="{{url('/progetti')}}" style="display:inline;">
-<button class="button button3" type="button" name="tutti" title="{{ trans('messages.keyword_allshowpojects') }}">{{ trans('messages.keyword_all') }}</button>
+<button class="button button3" type="button" name="tutti" title="Tutti - Mostra tutti i progetti">Tutti</button>
 </a>
 @else
 <a id="miei" href="{{url('/progetti/miei')}}" style="display:inline;">
-<button class="button button2" type="button" name="miei" title="{{ trans('messages.keyword_myfilterproject') }}">{{ trans('messages.keyword_my') }}</button>
+<button class="button button2" type="button" name="miei" title="Miei - Filtra i tuoi progetti">Miei</button>
 </a>
 <a id="tutti" href="{{url('/progetti')}}" style="display:inline;">
-<button class="button button3" type="button" name="tutti" title="{{ trans('messages.keyword_allshowpojects') }}" style="background-color:#D9534F;color:#ffffff">{{ trans('messages.keyword_all') }}</button>
+<button class="button button3" type="button" name="tutti" title="Tutti - Mostra tutti i progetti" style="background-color:#D9534F;color:#ffffff">Tutti</button>
 </a>
 @endif
 <!-- Fine filtraggio miei/tutti -->
 <div class="btn-group" style="display:inline">
 <a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
 
-<button class="btn btn-primary" type="button" name="update" title="{{ trans('messages.keyword_edit_last_selected_project') }}"><i class="fa fa-pencil"></i></button>
+<button class="btn btn-primary" type="button" name="update" title="Modifica - Modifica l'ultimo progetto selezionato"><i class="fa fa-pencil"></i></button>
 
 </a>
 
@@ -122,24 +122,24 @@ li label {
 
 <a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
 
-<button class="btn btn-info" type="button" name="duplicate" title="{{ trans('messages.keyword_duplicates_selected_quotes') }}"><i class="fa fa-files-o"></i></button>
+<button class="btn btn-info" type="button" name="duplicate" title="Duplica - Duplica i preventivi selezionati"><i class="fa fa-files-o"></i></button>
 
 </a>    
 <a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title="{{ trans('messages.keyword_delete_selected_project') }}"><i class="fa fa-trash"></i></button>
+<button class="btn btn-danger" type="button" name="remove" title="Elimina - Elimina i preventivi selezionati"><i class="fa fa-trash"></i></button>
 </a>
 </div>
 <br><br>
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php if(isset($miei)) echo url('progetti/miei/json'); else echo url('/progetti/json');?>" data-classes="table table-bordered" id="table">
         <thead>
-            <th data-field="codice" data-sortable="true"> {{ trans('messages.keyword_noproject') }}
-            <th data-field="ente" data-sortable="true"> {{ trans('messages.keyword_entity') }} 
-            <th data-field="nomeprogetto" data-sortable="true"> {{ trans('messages.keyword_projectname') }} 
-            <th data-field="da" data-sortable="true"> {{ trans('messages.keyword_from') }} 
-            <th data-field="datainizio" data-sortable="true"> {{ trans('messages.keyword_startdate') }} 
-            <th data-field="datafine" data-sortable="true"> {{ trans('messages.keyword_enddate') }} 
-            <th data-field="progresso" data-sortable="true"> {{ trans('messages.keyword_progress') }} 
-            <th data-field="statoemotivo" data-sortable="true"> {{ trans('messages.keyword_emotional_state') }}
+            <th data-field="codice" data-sortable="true">n° progetto
+            <th data-field="ente" data-sortable="true">Ente
+            <th data-field="nomeprogetto" data-sortable="true">Nome progetto
+            <th data-field="da" data-sortable="true">Da
+            <th data-field="datainizio" data-sortable="true">Data inizio
+            <th data-field="datafine" data-sortable="true">Data fine
+            <th data-field="progresso" data-sortable="true">Progresso
+            <th data-field="statoemotivo" data-sortable="true">Stato emotivo
         </thead>
     </table>
 
@@ -171,7 +171,7 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 
 
 
-function check() { return confirm(" {{ trans('messages.keyword_sure') }} " + n + " {{ trans('messages.keyword_projects') }}?"); }
+function check() { return confirm("Sei sicuro di voler eliminare: " + n + " progetti?"); }
 function multipleAction(act) {
 	var link = document.createElement("a");
 	var clickEvent = new MouseEvent("click", {
