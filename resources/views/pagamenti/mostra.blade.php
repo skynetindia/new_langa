@@ -1,14 +1,6 @@
 @extends('layouts.app')
 @section('content')
 
-@if(!empty(Session::get('msg')))
-    <script>
-    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
-    document.write(msg);
-    </script>
-@endif
-
-@include('common.errors')
 <style>
 tr:hover {
 	background: #f39538;
@@ -36,44 +28,55 @@ li label {
 <!-- Latest compiled and minified Locales -->
 <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
 
-<h1> {{ trans('messages.keyword_list_invoices') }} </h1><hr>
 
+
+<h1> {{ trans('messages.keyword_add_invoice') }} </h1><hr>
+
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
+
+@include('common.errors')
+
+<a href="{{url('/pagamenti/tranche/add') . '/' . $idfattura}}" id="modifica" style="display:inline;">
+<button class="btn btn-warning" type="button" title=" {{ trans('messages.keyword_add_tranche_arrangement') }} "><i class="fa fa-plus"></i></button>
+</a>
+
+<br><br>
 <div class="btn-group">
 <a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-<button class="btn btn-primary" type="button" name="update" title="{{ trans('messages.keyword_edit_last_selected_format') }} "><i class="fa fa-pencil"></i></button>
+<button class="btn btn-primary" type="button" name="update" title=" {{ trans('messages.keyword_edit_last_selected_format') }} "><i class="fa fa-pencil"></i></button>
 </a>
 <a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
-<button class="btn btn-info" type="button" name="duplicate" title="{{ trans('messages.keyword_duplicates_selected_layouts') }}"><i class="fa fa-files-o"></i></button>
+<button class="btn btn-info" type="button" name="duplicate" title=" {{ trans('messages.keyword_duplicates_selected_layouts') }} "><i class="fa fa-files-o"></i></button>
 </a>    
 <a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title="{{ trans('messages.keyword_delete_last_selected_lauout') }} "><i class="fa fa-trash"></i></button>
+<button class="btn btn-danger" type="button" name="remove" title=" {{ trans('messages.keyword_delete_last_selected_lauout') }} "><i class="fa fa-trash"></i></button>
 </a>
 <a id="pdf" onclick="multipleAction('pdf');" style="display:inline;">
 <button class="btn" type="button" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} "><i class="fa fa-file-pdf-o"></i></button>
 </a>
 </div>
 <br><br>
-    <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/tranche/json');?>" data-classes="table table-bordered" id="table">
+    <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/tranche/json') . '/id/' . $idfattura;?>" data-classes="table table-bordered" id="table">
         <thead>
-            <th data-field="id" data-sortable="true"> 
-            {{ trans('messages.keyword_noprovision') }} 
+            <th data-field="id" data-sortable="true"> {{ trans('messages.keyword_noprovision') }} 
             <th data-field="idfattura" data-sortable="true"> 
-            {{ trans('messages.keyword_invoicenumber') }} 
+            {{ trans('messages.keyword_invoicenumber') }}             
             <th data-field="ente" data-sortable="true"> 
-            {{ trans('messages.keyword_entity') }}
-            <th data-field="nomequadro" data-sortable="true"> 
-            {{ trans('messages.keyword_picturename') }} 
+            {{ trans('messages.keyword_entity') }} 
             <th data-field="tipo" data-sortable="true"> 
-            {{ trans('messages.keyword_types') }} 
-            <th data-field="datainserimento" data-sortable="true"> 
-            {{ trans('messages.keyword_inserting') }} 
-            <th data-field="datascadenza" data-sortable="true"> 
-            {{ trans('messages.keyword_deadline') }} 
+            {{ trans('messages.keyword_type') }} 
+            <th data-field="datainserimento" data-sortable="true"> {{ trans('messages.keyword_inserting') }} 
+            <th data-field="datascadenza" data-sortable="true"> {{ trans('messages.keyword_deadline') }} 
             <th data-field="percentuale" data-sortable="true">%
             <th data-field="dapagare" data-sortable="true"> 
-            {{ trans('messages.keyword_topay') }} 
+            {{ trans('messages.keyword_keyword_topay') }} 
             <th data-field="statoemotivo" data-sortable="true"> 
-            {{ trans('messages.keyword_emotional_state') }} 
+            {{ trans('messages.keyword_emotional_state') }}
         </thead>
     </table>
 
@@ -84,7 +87,6 @@ var n = 0;
 
 $('#table').on('click-row.bs.table', function (row, tr, el) {
 	var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
-	//console.log(/\d+/.exec($(el[0]).children()[1].innerHTML));
 	if (!selezione[cod]) {
 		$(el[0]).addClass("selected");
 		selezione[cod] = cod;

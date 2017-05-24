@@ -1,223 +1,23 @@
 @extends('layouts.app')
-
 @section('content')
-
-
-<style type="text/css">
-
-body{
-  background-color: #f0f0f0;
-}
-
-
-.progress{
-  max-width:1000px;
-  margin: 40px auto;
-}
-
-
-/* STYLES FOR PROGRESSBARS */
-
-.progress-radial, .progress-radial * {
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  box-sizing: content-box;
-}
-
-/* -------------------------------------
- * Bar container
- * ------------------------------------- */
-.progress-radial {
-  float: left;
-  margin-right: 4%;
-  position: relative;
-  width: 20%;
-  border-radius: 50%;
-}
-.progress-radial:first-child {
-  margin-top: 5%;
-  margin-left: 35%;
-}
-/* -------------------------------------
- * Optional centered circle w/text
- * ------------------------------------- */
-.progress-radial .overlay {
-  position: absolute;
-  width: 80%;
-  background-color: #f0f0f0;
-  border-radius: 50%;
-  font-size: 14px;
-    top:50%;
-    left:50%;
-    -webkit-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-}
-
-.progress-radial .overlay p{
-    position: absolute;
-    line-height: 40px;
-    text-align: center;
-    width: 100%;
-    top:50%;
-    margin-top: -20px;
-}
-
-/* -------------------------------------
- * Mixin for progress-% class
- * ------------------------------------- */
-.progress-0 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(0deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(90deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-5 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(342deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(108deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-10 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(324deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(126deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-15 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(306deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(144deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-20 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(288deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(162deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-25 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-30 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(252deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(198deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-35 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(234deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(216deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-40 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(216deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(234deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-45 {
-  background-image: -webkit-linear-gradient(0deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(198deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #f0f0f0 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(252deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-50 {
-  background-image: -webkit-linear-gradient(180deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(-90deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-55 {
-  background-image: -webkit-linear-gradient(162deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(-72deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-60 {
-  background-image: -webkit-linear-gradient(144deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(-54deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-65 {
-  background-image: -webkit-linear-gradient(126deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(-36deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-70 {
-  background-image: -webkit-linear-gradient(108deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(-18deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-75 {
-  background-image: -webkit-linear-gradient(90deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(0deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-80 {
-  background-image: -webkit-linear-gradient(72deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(18deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-85 {
-  background-image: -webkit-linear-gradient(54deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(36deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-90 {
-  background-image: -webkit-linear-gradient(36deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(54deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-95 {
-  background-image: -webkit-linear-gradient(18deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(72deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-.progress-100 {
-  background-image: -webkit-linear-gradient(0deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), -webkit-linear-gradient(180deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-  background-image: linear-gradient(90deg, #38b16b 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0)), linear-gradient(270deg, #38b16b 50%, #f0f0f0 50%, #f0f0f0);
-}
-
-</style>
-
-
-
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-
 <link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
-
 <script type="text/javascript" src="{{asset('public/scripts/dropzone.js')}}"></script>
+<link href="{{asset('build/css/circle.css')}}" rel="stylesheet" />
 
 <!-- Radar chart -->
-
 <!-- <script type="text/javascript" src="http://gc.kis.v2.scr.kaspersky-labs.com/971CFF9C-4385-024E-BA20-CB806B914BAF/main.js" charset="UTF-8"></script> -->
-
-<!-- <script src="http://d3js.org/d3.v3.min.js"></script> -->
-
-<!-- <script src="{{asset('public/scripts/RadarChart.js')}}"></script> -->
-
+ <script src="http://d3js.org/d3.v3.min.js"></script> 
+ <script src="{{asset('public/scripts/RadarChart.js')}}"></script> 
 <!-- end radar chart js -->
-
 <style>
-
-tr:hover td {
-
-    background: #f2ba81;
-
-}
-
-body {
-  overflow: hidden;
-  margin: 0;
-  font-size: 14px;
-  font-family: "Helvetica Neue", Helvetica;
-}
-
 #chart {
   position: absolute;
-  top: 50px;
-  left: 100px;
+  top: 30px;
+  left: 50px;
 }	
-
-
 </style>
 
 <script type="text/javascript">
@@ -241,80 +41,65 @@ body {
     </script>
 @endif
 
-
-
 @include('common.errors')
 
 <?php echo Form::open(array('url' => '/progetti/modify/project/' . $progetto->id, 'files' => true)) ?>
+    <?php $mediaCode = date('dmyhis');?>
+    <input type="hidden" name="mediaCode" id="mediaCode" value="{{$mediaCode}}" />
 	{{ csrf_field() }}
 	@if(isset($dapreventivo))
     	@if($dapreventivo==1)
         	<input name="dapreventivo" value="{{$idpreventivo}}" type="hidden">
         @endif
     @endif
-
-
 <div class="row">
 <div class="col-md-12">
-	<h1> {{ trans('messages.keyword_editproject') }} <?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?></h1><hr>
+	<h1>{{trans('messages.keyword_editproject')}} <?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?></h1><hr>
 </div>
 		<div class="col-md-8">
-
-
     	    	<script>
-				var $j = jQuery.noConflict();
+				/*var $ = jQuery.noConflict();
     	    		var clickEvent = new MouseEvent("click", {
 					    "view": window,
 					    "bubbles": true,
 					    "cancelable": false
 					});
-    	    		$j('#prev').on("change", function() {
-    	    			var id = $j("#prev").val();
+    	    		$('#prev').on("change", function() {
+    	    			var id = $("#prev").val();
     	    			var link = document.createElement("a");
     	    			link.href = "{{ url('/progetti/add') }}" + '/' + id;
 						link.dispatchEvent(clickEvent);
     	    		});
-    	    	</script>
-
-
-            <label for="preventivo">{{ trans('messages.keyword_noproject') }}
+					*/
+    	</script>
+            <label for="preventivo">{{trans('messages.keyword_noproject')}}
 				<input type="text" disabled value="<?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?>" class="form-control">
 			</label>
-
-			<div class="btn-group">
-            	<?php
-           		
+			<div class="btn-group"><?php           		
 				$link_prev = url('/preventivi/pdf/quote/') . '/'.  $progetto->id_preventivo;
-
 				$link_prev_noprezzi = url('/preventivi/noprezzi/pdf/quote/') . '/'.  $progetto->id_preventivo;
-				?>
-        		    
+				?>        		    
     		</div>
-
 			<a id="pdf" style="display:inline;">
-
-			<button class="btn" type="button" name="pdf" title="PDF - Generale il PDF dei preventivi selezionati"><i class="fa fa-file-pdf-o"></i></button>
-
+			<button class="btn" type="button" name="pdf" title="{{trans('messages.keyword_pdf')}}"><i class="fa fa-file-pdf-o"></i></button>
 			</a>
 
-    			<a href="#" class="btn btn-warning">{{ trans('messages.keyword_goallentity') }}</a>
+    			<a href="#" class="btn btn-warning">{{trans('messages.keyword_goallentity')}}</a>
 
-    			<a href="#" class="btn btn-warning">{{ trans('messages.keyword_onlinereview') }} </a>
+    			<a href="#" class="btn btn-warning">{{trans('messages.keyword_onlinereview')}}</a>
     		
-				<br><label for="nomeprogetto">{{ trans('messages.keyword_projectname') }}<p style="color:#f37f0d;display:inline">(*)</p></label>
-        		<input value="{{ $progetto->nomeprogetto }}" class="form-control" type="textarea" name="nomeprogetto" id="nomeprogetto" placeholder="{{ trans('messages.keyword_enterprojectname') }}"><br>
-				<label for="lavorazioni">{{ trans('messages.keyword_processing') }}</label><br>
-
+				<br><label for="nomeprogetto">{{trans('messages.keyword_projectname')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+        		<input value="{{ $progetto->nomeprogetto }}" class="form-control" type="textarea" name="nomeprogetto" id="nomeprogetto" placeholder="{{trans('messages.keyword_projectname')}}"><br>
+				<label for="lavorazioni">{{trans('messages.keyword_processing')}}</label><br>
 	                <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiLavorazione"><i class="fa fa-plus"></i></a>
 	                <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminaLavorazione"><i class="fa fa-eraser"></i></a>
-
                 <div class="table-responsive">
 	            <table class="table table-bordered">
 	                <thead>
 	                   <th>#</th>
-	                    <th>{{ trans('messages.keyword_subject_state') }}</th>
-	                    <th>{{ trans('messages.keyword_description') }}</th>	          
-	                    <th>% {{ trans('messages.keyword_of_completion') }}</th>
+	                    <th>{{trans('messages.keyword_subject_state')}}</th>
+	                    <th>{{trans('messages.keyword_description')}}</th>	          
+	                    <th>% {{trans('messages.keyword_of_completion')}}</th>
 	                </thead>
 	                <tbody id="lavorazioni">
 	                	<?php $p = 0; ?>
@@ -325,48 +110,83 @@ body {
 	                            </td>
                             <td>
                                 <input type="text" name="ric[]" value="<?php echo $partecipante->nome; ?>" class="form-control">
-                                <select class="form-control"
-                                	<option>Coding</option>
-                                	<option>Eating</option>        	
+                                <select class="form-control" name="completato[]">
+								@foreach($oggettostato as $key => $oggettostatoval)
+                                	<option value="{{$oggettostatoval->id}}" <?php if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato ) { echo 'selected';}?>>{{ $oggettostatoval->nome }}</option>
+                                 @endforeach
                                 </select>
-
                             </td>
-
                             <td>
-                                <textarea class="form-control" name="descrizione"></textarea>
+                                <textarea class="form-control" name="descrizione[]">{{$partecipante->descrizione}}</textarea>
                             </td>
-
                            <td>
+                           <div class="c100 <?php if(isset($partecipante->completamento) && $partecipante->completamento != ""){ echo 'p'.$partecipante->completamento;} else { echo 'p0';}?> small boxs counter_<?php echo $partecipante->id;?>" data-name="counter_<?php echo $partecipante->id;?>">
+                            <span><p id="percent-value_<?php echo $partecipante->id;?>"><?php if(isset($partecipante->completamento) && $partecipante->completamento != ""){ echo $partecipante->completamento;} else { echo '0';}?></p></span>
+                            <input type="hidden" class="hoverhidden" value="0" id="hoverover_<?php echo $partecipante->id;?>">
+                            <input type="hidden" value="<?php if(isset($partecipante->completamento) && $partecipante->completamento != ""){ echo $partecipante->completamento;} else { echo '0';}?>" class="completepercent" name="percentvalue[]" id="percentvalue_<?php echo $partecipante->id;?>">
+                            <div class="slice">
+                                <div class="bar"></div>
+                                <div class="fill"></div>
+                            </div>
+                        </div>
                            		
-                       		<!-- <section class="progress"> -->
-  	
-							  <div class="progress-radial progress-70 setsize" style="width:60px;height:60px;"> 
+                       		<!-- <section class="progress"> -->  	
+							<?php /*  <div class="progress-radial progress-70 setsize" style="width:60px;height:60px;"> 
 							    <div class="overlay setsize">
 							      <p>70%</p>
 							    </div>
-							  </div>
-
+							  </div>*/?>
 							<!-- </section> -->
-
                            </td>
-	                          
-	                           
 	                            <script>
-	                                $j('.selezione').on("click", function() {
-                				selezioneLavorazioni[nLav] = $j(this).parent().parent();
+	                                $('.selezione').on("click", function() {
+                				selezioneLavorazioni[nLav] = $(this).parent().parent();
 				                nLav++;
                 			});
-                			$j('#impedisc<?php echo $p; ?>').bind("click", function() {
+                			$('#impedisc<?php echo $p; ?>').bind("click", function() {
                 				this.blur();
                 				this.value = "<?php echo $partecipante->programmato ?>";
-                			});
-                			
-                			<?php $p++; ?>
+                			});                			
+                			<?php $p++; ?>							
+							<?php /*var box=$(".box_<?php echo $partecipante->id;?>");
+							var bar=$(".box_<?php echo $partecipante->id;?> .bar");
+							var boxCenter=[box.offset().left+box.width()/2, box.offset().top+box.height()/2];
+							
+							$('.box_<?php echo $partecipante->id;?>').mousemove(function(e){								
+								if( $("#hoverover_<?php echo $partecipante->id;?>").val()==0) 
+								{   
+									$old=$("#percent-value_<?php echo $partecipante->id;?>").text();
+									per=0;    
+									var angle = Math.atan2(e.pageX- boxCenter[0],- (e.pageY- boxCenter[1]) )*(180/Math.PI);	    
+									if(angle<0)	{
+										//console.log(angle,"intial");
+										angle=180+(180 + angle);
+										//console.log(angle,"final");
+									}
+									per=(angle/360)*100;
+									per=parseInt(Math.round(per/2) *2);
+									$("#percent-value_<?php echo $partecipante->id;?>").html(per);
+									box.removeClass('p'+$old);
+									box.addClass('p'+per);
+								}
+							   // box.css({ "-webkit-transform": 'rotate(' + angle + 'deg)'});    
+							   // box.css({ '-moz-transform': 'rotate(' + angle + 'deg)'});
+							   // bar.css({ 'transform': 'rotate(' + angle + 'deg)'});
+								
+							});
+							
+							$('.box_<?php echo $partecipante->id;?>').click(function(e){
+								//alert('hii');
+								if( $("#hoverover_<?php echo $partecipante->id;?>").val()==0) 
+								$("#hoverover_<?php echo $partecipante->id;?>").val(1);
+								else
+							  $("#hoverover_<?php echo $partecipante->id;?>").val(0);
+							});*/?>
 	                            </script>
 	                        </tr>
 	                    @endforeach
 	                </tbody>
-	                <script>
+	                <script>					
 	                    var selezioneLavorazioni = [];
 	                    var nLav = 0;
 	                    var kLav = 0;
@@ -387,7 +207,7 @@ body {
                 			this.blur();
                 			this.value = test;
                 		}
-	            $j('#aggiungiLavorazione').on("click", function() {
+	            $('#aggiungiLavorazione').on("click", function() {
 	                        var tabella = document.getElementById("lavorazioni");
                 			var tr = document.createElement("tr");
                 			var data = document.createElement("td");
@@ -402,15 +222,28 @@ body {
                 			var compl = document.createElement("td");
                 			select1.name = "completato[]";
                 			select1.className = "form-control";
-                			var array = ["Coding", "Sleeping", "Eating"];
+							var oggettostato = '';
+							<?php	
+							$oggettostatoption = '';						
+							foreach($oggettostato as $key => $oggettostatoval){
+								if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato ) { 
+									$oggettostatoption .='<option value="'.$oggettostatoval->id.'" selected>'.$oggettostatoval->nome.'</option>';
+								}
+								else {
+                               		$oggettostatoption .='<option value="'.$oggettostatoval->id.'">'.$oggettostatoval->nome.'</option>';
+								}
+							}
+							?>
+							select1.innerHTML = '<?php echo $oggettostatoption; ?>';
+                			//var array = ["Coding", "Sleeping", "Eating"];
                 			compl.appendChild(select1);
                 			
-                			for(var i = 0; i < array.length; i++) {
+                			/*for(var i = 0; i < array.length; i++) {
                 				var option = document.createElement("option");
                 				option.value = i;
                 				option.text = array[i];
                 				select1.appendChild(option);
-                			}
+                			}*/
                 			
                 			var select = document.createElement("select");
                 			
@@ -429,35 +262,34 @@ body {
             			input.className = "form-control";
             			input.value = vecchiaData;
             			data.appendChild(input);
-
-					var desc = document.createElement("td");
-
+						var desc = document.createElement("td");
             			var descrizione = document.createElement("textarea");
                         // descrizione.type = "textarea";
                         descrizione.className = "form-control";
-                        descrizione.name = "descrizione";
+                        descrizione.name = "descrizione[]";
                         desc.appendChild(descrizione);
-
+						
                     var progress = document.createElement("td");
-
         			var circles = document.createElement("div");
-                    	circles.className = "progress-radial progress-70 setsize";   
-                    	circles.setAttribute("style", "width:60px;height:60px;");
+                    	circles.className = "c100 p0 small boxs counter_"+kLav ;
+						circles.setAttribute('data-name', 'counter_'+kLav)  
+						circles.innerHTML = '<span><p id="percent-value_'+kLav+'">0</p></span><input type="hidden" class="hoverhidden" value="0" id="hoverover_'+kLav+'"><input type="hidden" class="completepercent" value="0" name="percentvalue[]" id="percentvalue_'+kLav+'"><div class="slice"><div class="bar"></div><div class="fill"></div></div>';
+
+                    /*//circles.setAttribute("style", "width:60px;height:60px;");
                     var setsize = document.createElement("div");
                     	setsize.className = "overlay setsize"; 
                    	var p = document.createElement("p");
-                   		p.innerHTML="70%";
+                   		p.innerHTML="70%";**/
 
 
                     progress.appendChild(circles);
-                    circles.appendChild(setsize);
-                    setsize.appendChild(p);
+                   // circles.appendChild(setsize);
+                   // setsize.appendChild(p);
                     
-                  
             		var appunti = document.createElement("td");	
 
             			var input = document.createElement("input");
-                			input.placeholder = "{{ trans('messages.keyword_writehere') }}";
+                			input.placeholder = "{{trans('messages.keyword_writehere')}}";
                 			input.name = "ric[]";
                 			input.className = "form-control";
                 			input.id = "editable" + kLav;
@@ -490,14 +322,15 @@ body {
                 			*/
                 			select.name = "alle[]";
                 			tabella.appendChild(tr);
-                			$j("#datepicker" + kLav).datepicker();
-                			$j('.selezione').on("click", function() {
-                				selezioneLavorazioni[nLav] = $j(this).parent().parent();
+                			//$("#datepicker" + kLav).datepicker();
+                			$('.selezione').on("click", function() {
+                				selezioneLavorazioni[nLav] = $(this).parent().parent();
 				                nLav++;
 							});
-                			$j('#impedisci' + kLav).bind("click", impedisciModifica);
+                			$('#impedisci' + kLav).bind("click", impedisciModifica);
                 			kLav++;
-
+							progressmove();
+							
               	var jq = jQuery.noConflict();
 
 			  	jq(".setsize").each(function() {
@@ -507,37 +340,92 @@ body {
 			    jq(".setsize").each(function() {
 			        jq(this).height(jq(this).width());
 			    });
+				
+				
         });
-	                    $j('#eliminaLavorazione').on("click", function() {
+	                    $('#eliminaLavorazione').on("click", function() {
 	                       for(var i = 0; i < nLav; i++) {
 	                           selezioneLavorazioni[i].remove();
 	                       }
 	                       nLav = 0;
 	                    });
+						if($(".boxs").length>0)
+							progressmove();							
+						function progressmove(){
+							var box=$(".boxs");
+							var bar=$(".boxs .bar");
+							//var boxCenter=[box.offset().left+box.width()/2, box.offset().top+box.height()/2];
+							
+							box.mousemove(function(e){
+								$class=$(this).data('name');
+								
+								$this=$('.'+$class);
+								var boxCenter=[$this.offset().left+$this.width()/2, $this.offset().top+$this.height()/2];
+								var hoverid = $this.find('p').attr('id');
+								var percenid = $this.find('.hoverhidden').attr('id');
+								var completepercent = $this.find('.completepercent').attr('id');
+								
+
+								if( $this.find("#"+percenid).val()==0) 
+								{   
+									$old=$this.find("#"+hoverid).text();
+									per=0;    
+									var angle = Math.atan2(e.pageX- boxCenter[0],- (e.pageY- boxCenter[1]) )*(180/Math.PI);	    
+									if(angle<0)	{
+										angle=180+(180 + angle);
+									}
+									per=(angle/360)*100;
+									per=parseInt(Math.round(per/2) *2);
+									$this.find("#"+hoverid).html(per);
+									$this.removeClass('p'+$old);
+									$this.addClass('p'+per);
+								}
+							   // box.css({ "-webkit-transform": 'rotate(' + angle + 'deg)'});    
+							   // box.css({ '-moz-transform': 'rotate(' + angle + 'deg)'});
+							   // bar.css({ 'transform': 'rotate(' + angle + 'deg)'});
+								
+							});
+							
+							$('.boxs').on('click',function(e){
+								  $(this).off('click');
+								$class=$(this).data('name');
+								
+								$this=$('.'+$class);
+								var hoverid = $this.find('p').attr('id');
+								var percenid = $this.find('.hoverhidden').attr('id');
+								var completepercent = $this.find('.completepercent').attr('id');
+								
+								var percomp = $this.find("#"+hoverid).text();
+								$("#"+completepercent).val(percomp);
+								//console.log($this.find("#"+percenid).val());
+								if( $this.find("#"+percenid).val()==0) 
+									$this.find("#"+percenid).val(1);
+								else
+								  $this.find("#"+percenid).val(0);
+							});
+						}
+
 	                </script>
 	            </table>
             </div>
-
-<div class="col-md-2" style="padding-top:10px;padding-bottom:10px;">
-
-	<button onclick="mostra2()" type="submit" class="btn btn-warning">{{ trans('messages.keyword_save') }}</button>
-
-</div>
+            <div class="col-md-2" style="padding-top:10px;padding-bottom:10px;">
+	           <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+            </div>
 		</div>
 
 
 		<div class="col-md-4">
-         	<label for="statoemotivo">{{ trans('messages.keyword_emotional_state') }}</label>
+         	<label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
                 <select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
                     <!-- statoemotivoselezionato -->
                     <option style="background-color:white"></option>
                     @if($statoemotivoselezionato!=null)
                         @foreach($statiemotivi as $statoemotivo)
-                            <option @if($statoemotivo->id == $statoemotivoselezionato->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+                            <option @if($statoemotivo->id == $progetto->emotion_stat_id) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{$statoemotivo->name}}</option>
                         @endforeach
                     @else
                         @foreach($statiemotivi as $statoemotivo)
-                            <option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+                            <option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{$statoemotivo->name}}</option>
                         @endforeach
                     @endif
                 </select>
@@ -545,74 +433,63 @@ body {
                 <script>
                 var yourSelect = document.getElementById( "statoemotivo" );
                     document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
-                $j('#statoemotivo').on("change", function() {
+                $('#statoemotivo').on("change", function() {
                     var yourSelect = document.getElementById( "statoemotivo" );
                     document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
                 });
                 </script>
            	<div class="col-md-6">
-            <label for="preventivo">{{ trans('messages.keyword_starttime') }} </label>
+            <label for="preventivo">{{trans('messages.keyword_starttime')}}</label>
         		
-        		    <input value="{{ $progetto->datainizio }}" class="form-control" type="text" name="datainizio" id="datainizio" placeholder="{{ trans('messages.keyword_startdate') }} ">
+        		    <input value="{{ $progetto->datainizio }}" class="form-control" type="text" name="datainizio" id="datainizio" placeholder="{{trans('messages.keyword_starttime')}}">
        		</div>
        		<div class="col-md-6">
-       		<label for="preventivo">{{ trans('messages.keyword_endtime') }} </label>
-        		    <input value="{{ $progetto->datafine }}" class="form-control" type="text" name="datafine" id="datafine" placeholder="{{ trans('messages.keyword_enddate') }} ">
+       		<label for="preventivo">{{trans('messages.keyword_endtime')}}</label>
+        		    <input value="{{ $progetto->datafine }}" class="form-control" type="text" name="datafine" id="datafine" placeholder="{{trans('messages.keyword_endtime')}}">
         	</div>
         		    <script>
-					  $j( function() {
-					    $j( "#slider-range-max" ).slider({
+					  /*$( function() {
+					    $( "#slider-range-max" ).slider({
 					      range: "max",
 					      min: 0,
 					      max: 100,
 					      value: {{$progetto->progresso}},
 					      slide: function( event, ui ) {
-					        $j( "#amount" ).val( ui.value );
+					        $( "#amount" ).val( ui.value );
 					      }
 					    });
-					    $j( "#amount" ).val( $j( "#slider-range-max" ).slider( "value" ) );
+					    $( "#amount" ).val( $( "#slider-range-max" ).slider( "value" ) );
 					  } );
-  					</script>
-        		    
-        		    <script>
-        		    $j.datepicker.setDefaults(
-                        $j.extend(
+  					*/
+        		    $.datepicker.setDefaults(
+                        $.extend(
                             {'dateFormat':'dd/mm/yy'},
-                            $j.datepicker.regional['nl']
+                            $.datepicker.regional['nl']
                         )
                     );
-        		    $j('#datainizio').datepicker();
-        		    $j('#datafine').datepicker();
+        		    $('#datainizio').datepicker();
+        		    $('#datafine').datepicker();					
         		    </script>
         	<br>
-
-        <!-- 	<div class="col-md-12" style="display: none;">
-        	<br> <b> Grafico progetto1 </b>
-        		<div id="body">
+         	<div class="col-md-12" style="display:;">
+        	<br> <b> {{trans('messages.keyword_project_graph')}} </b>
+        		<div id="body" style="width:100%;min-height:300px;">
 				  <div id="chart"></div>
 			    </div>			    
-        	</div> -->
-
+        	</div><br />
 			<div class="col-md-12">
-				<br><label for="preventivo">{{ trans('messages.keyword_sensitivedata') }} 
-        </label>
-				<br>
-	                <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiNote"><i class="fa fa-plus"></i></a>
-
+				<br><label for="preventivo">{{trans('messages.keyword_sensitivedata')}}:</label>
+				<br><a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiNote"><i class="fa fa-plus"></i></a>
 	                <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminaNote"><i class="fa fa-eraser"></i></a>
-
 	        	<br>
 	        </div>
 		            <table class="table table-striped table-bordered">
-
 		                <thead>
-
 		                    <th>#</th>
-		                    <th>{{ trans('messages.keyword_url') }}</th>
-		                    <th>{{ trans('messages.keyword_user') }}</th>
-                        <th>{{ trans('messages.keyword_password') }}</th>                         
+		                    <th>{{trans('messages.keyword_url')}}</th>
+		                    <th>{{trans('messages.keyword_user')}}</th>
+                            <th>{{trans('messages.keyword_password')}}</th>                         
 		                </thead>
-
 		                <tbody id="noteprivate">
                         <?php $k = 0; ?>
 							@foreach($noteprivate as $nota)
@@ -633,20 +510,16 @@ body {
 		                            	<input id="datepicker<?php echo $k;?>" type="text" name="scad[]" class="form-control" value="{{$nota->scadenza}}">
 		                            </td> -->
 		                            <script>
-										$j("#datepicker<?php echo $k; ?>").datepicker();<?php $k++; ?>
-		                                $j('.selezione').on("click", function() {
-	        				                selezioneServizi[nServ] = $j(this).parent().parent();
+										$("#datepicker<?php echo $k; ?>").datepicker();<?php $k++; ?>
+		                                $('.selezione').on("click", function() {
+	        				                selezioneServizi[nServ] = $(this).parent().parent();
 	        				                nServ++;
 			                	        });
 		                            </script>
 		                        </tr>
 	                    	@endforeach
 		                </tbody>
-
-		                <script>
-
-		                
-
+		                <script>                
 		                    var selezioneServizi = [];
 
 		                    var nServ = 0;
@@ -654,7 +527,7 @@ body {
 							var kServ = <?php echo $k; ?>;
 
 
-		                    $j('#aggiungiNote').on("click", function() {
+		                    $('#aggiungiNote').on("click", function() {
 
 		                       var tab = document.getElementById("noteprivate");
 
@@ -722,19 +595,19 @@ body {
 
 		                        tab.appendChild(tr);
 
-		                        $j('.selezione').on("click", function() {
+		                        $('.selezione').on("click", function() {
 
-					                selezioneServizi[nServ] = $j(this).parent().parent();
+					                selezioneServizi[nServ] = $(this).parent().parent();
 
 					                nServ++;
 
 			                	});
 								
-								$j("#datepicker" + kServ).datepicker();
+								$("#datepicker" + kServ).datepicker();
 
 		                    });
 
-		                    $j('#eliminaNote').on("click", function() {
+		                    $('#eliminaNote').on("click", function() {
 
 		                       for(var i = 0; i < nServ; i++) {
 
@@ -763,39 +636,38 @@ body {
         		<label for="noteprivate">Note private del tecnico</label><a onclick="mostra()" id="mostra"> <i class="fa fa-eye"></i></a>
         	    <textarea id="noteenti" style="background-color:#f39538;color:#ffffff" rows="2" title="Note nascoste, clicca l'occhio per mostrare" class="form-control" name="noteprivate" placeholder="Inserisci note tecniche relative al progetto"></textarea> -->
 				<script>
-				$j('#notetecniche').on("click", function() {
+				$('#notetecniche').on("click", function() {
 					this.blur();
 				});
 				
 				var testo = "<?php echo $progetto->noteprivate; ?>";
 				var testoPrivato = "<?php echo $progetto->notetecniche; ?>";
 				function mostra() {
-					if($j('#noteenti').val()) {
-						testo = $j('#noteenti').val();
-						$j('#noteenti').val("");
+					if($('#noteenti').val()) {
+						testo = $('#noteenti').val();
+						$('#noteenti').val("");
 					} else {
-						$j('#noteenti').val(testo);
+						$('#noteenti').val(testo);
 						testo = "";
 					}
 				}
 				function mostraPrivate() {
-					if($j('#notetecniche').val()) {
+					if($('#notetecniche').val()) {
 						testoPrivato = $('#notetecniche').val();
-						$j('#notetecniche').val("");
+						$('#notetecniche').val("");
 					} else {
-						$j('#notetecniche').val(testoPrivato);
+						$('#notetecniche').val(testoPrivato);
 						testoPrivato = "";
 					}
 				}
 				function mostra2() {
-					if(!$j('#noteenti').val()) {
-						$j('#noteenti').val(testo);
-						$j('#notetecniche').val(testoPrivato);
+					if(!$('#noteenti').val()) {
+						$('#noteenti').val(testo);
+						$('#notetecniche').val(testoPrivato);
 					}
 				}
 				</script>
-				<br>
-				
+				<br>				
         		</div>
 				<!-- <br>
 				<label for="datisensibili">Dati sensibili</label><br>
@@ -819,8 +691,8 @@ body {
 	                                <textarea name="dati[]" class="form-control"><?php echo $dato->dettagli; ?></textarea>
 	                            </td>
 	                            <script>
-	                                $j('.selezione').on("click", function() {
-        				                selezioneFile2[nDati] = $j(this).parent().parent();
+	                                $('.selezione').on("click", function() {
+        				                selezioneFile2[nDati] = $(this).parent().parent();
         				                nDati++;
 		                	        });
 	                            </script>
@@ -831,7 +703,7 @@ body {
 	                    var selezioneFile2 = [];
 	                    var nDati = 0;
 	                    var kDati = 0;
-	                    $j('#aggiungiDati').on("click", function() {
+	                    $('#aggiungiDati').on("click", function() {
 	                        var tab = document.getElementById("datisensibili");
 	                        var tr = document.createElement("tr");
 	                        var check = document.createElement("td");
@@ -848,27 +720,25 @@ body {
 	                        tr.appendChild(check);
 	                        tr.appendChild(td);
 	                        tab.appendChild(tr);
-	                        $j('.selezione').on("click", function() {
-				                selezioneFile2[nDati] = $j(this).parent().parent();
+	                        $('.selezione').on("click", function() {
+				                selezioneFile2[nDati] = $(this).parent().parent();
 				                nDati++;
 		                	});
 	                    });
-	                    $j('#eliminaDati').on("click", function() {
+	                    $('#eliminaDati').on("click", function() {
 	                       for(var i = 0; i < nDati; i++) {
 	                           selezioneFile2[i].remove();
 	                       }
 	                       nDati = 0;
 	                    });
 	                </script>
-	            </table> -->
-				
+	            </table> -->				
 			<!-- <label for="files">Files</label><br>
-
             	<?php
-					$json_files = json_decode(json_encode($files), true);
+					$son_files = json_decode(json_encode($files), true);
 					$isNew = false;
-					if(!empty($json_files)) {
-						if(is_null($json_files[0]['id_preventivo'])) {
+					if(!empty($son_files)) {
+						if(is_null($son_files[0]['id_preventivo'])) {
 							$isNew = true;
 						}
 					} else {
@@ -882,7 +752,7 @@ body {
                 @else
                     <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiFile"><i class="fa fa-plus"></i></a>
                     <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminaFile"><i class="fa fa-eraser"></i></a>
-                    <input type="hidden" name="salvafiles" value="{{$json_files[0]['id_preventivo']}}">
+                    <input type="hidden" name="salvafiles" value="{{$son_files[0]['id_preventivo']}}">
                 @endif
 	        <br>
 
@@ -899,7 +769,7 @@ body {
 	                    var selezioneFile = [];
 	                    var nFile = 0;
 	                    var kFile = 0;
-	                    $j('#aggiungiFile').on("click", function() {
+	                    $('#aggiungiFile').on("click", function() {
 	                        var tab = document.getElementById("files");
 	                        var tr = document.createElement("tr");
 	                        var check = document.createElement("td");
@@ -917,12 +787,12 @@ body {
 	                        tr.appendChild(check);
 	                  		tr.appendChild(nomeFile);
 	                        tab.appendChild(tr);
-	                        $j('.selezione').on("click", function() {
-				                selezioneFile[nFile] = $j(this).parent().parent();
+	                        $('.selezione').on("click", function() {
+				                selezioneFile[nFile] = $(this).parent().parent();
 				                nFile++;
 		                	});
 	                    });
-	                    $j('#eliminaFile').on("click", function() {
+	                    $('#eliminaFile').on("click", function() {
 	                       for(var i = 0; i < nFile; i++) {
 	                           selezioneFile[i].remove();
 	                       }
@@ -973,8 +843,8 @@ body {
 	                                @endforeach
 	                            </td>
 	                            <script>
-	                                $j('.selezione').on("click", function() {
-				                selezione[n] = $j(this).parent().parent();
+	                                $('.selezione').on("click", function() {
+				                selezione[n] = $(this).parent().parent();
 				                n++;
 		                	});
 	                            </script>
@@ -985,7 +855,7 @@ body {
 	                    var selezione = [];
 	                    var n = 0;
 	                    var k = 0;
-	                    $j('#aggiungiPartecipante').on("click", function() {
+	                    $('#aggiungiPartecipante').on("click", function() {
 	                        var tab = document.getElementById("partecipanti");
 	                        var tr = document.createElement("tr");
 	                        var check = document.createElement("td");
@@ -997,11 +867,11 @@ body {
 	                        k++;
 	                        var td = document.createElement("td");
 	                        var td1 = document.createElement("td");
-	                        var nomeUtente = document.createTextNode($j("#utenti option:selected").text());
+	                        var nomeUtente = document.createTextNode($("#utenti option:selected").text());
 	                        var idUtente = document.createElement("input");
 	                        idUtente.type = "text";
 	                        idUtente.className = "form-control";
-	                        idUtente.value = $j("#utenti option:selected").val();
+	                        idUtente.value = $("#utenti option:selected").val();
 	                        idUtente.name = "partecipanti[]";
 	                        td.appendChild(nomeUtente);
 	                        td1.appendChild(idUtente);
@@ -1009,12 +879,12 @@ body {
 	                        tr.appendChild(td1);
 	                        tr.appendChild(td);
 	                        tab.appendChild(tr);
-	                        $j('.selezione').on("click", function() {
-				                selezione[n] = $j(this).parent().parent();
+	                        $('.selezione').on("click", function() {
+				                selezione[n] = $(this).parent().parent();
 				                n++;
 		                	});
 	                    });
-	                    $j('#elimina').on("click", function() {
+	                    $('#elimina').on("click", function() {
 	                       for(var i = 0; i < n; i++) {
 	                           selezione[i].remove();
 	                       }
@@ -1022,100 +892,187 @@ body {
 	                    });
 	                </script>
 	            </table> -->
-
-	            <table class="table table-striped table-bordered">	                
-	                <tbody id="files">
-	                </tbody>
-	                <script>
-	                var $j = jQuery.noConflict();
-	                    var selezione = [];
-	                    var nFile = 0;
-	                    var kFile = 0;
-	                    $j('#aggiungiFile').on("click", function() {
-	                        var tab = document.getElementById("files");
-	                        var tr = document.createElement("tr");
-	                        var check = document.createElement("td");
-	                        var checkbox = document.createElement("input");
-	                        checkbox.type = "checkbox";
-	                        checkbox.className = "selezione";
-	                        check.appendChild(checkbox);
-	                        kFile++;
-	                        var td = document.createElement("td");
-	                        var fileInput = document.createElement("input");
-	                        fileInput.type = "file";
-	                        fileInput.className = "form-control";
-	                        fileInput.name = "filee[]";
-	                        td.appendChild(fileInput);
-	                        tr.appendChild(check);
-	                        tr.appendChild(td);
-	                        tab.appendChild(tr);
-	                        $j('.selezione').on("click", function() {
-				                selezione[nFile] = $j(this).parent().parent();
-				                nFile++;
-		                	});
-	                    });
-	                    $j('#eliminaFile').on("click", function() {
-	                       for(var i = 0; i < nFile; i++) {
-	                           selezione[i].remove();
-	                       }
-	                       nFile = 0;
-	                    });
-	                </script>
-	            </table>
-
   <?php echo Form::close(); ?> 
-
-    <?php $mediaCode = date('dmyhis');?>
-
-        <!-- <div class="pull-right col-md-4">
+         <div class="pull-right col-md-4">
          
           <div class="col-md-12">
-          <label for="scansione">Select file</label><br>
-        <div class="image_upload_div">
-                <?php echo Form::open(array('url' => 'progetti/add/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
+          <label for="scansione">{{trans('messages.keyword_selectfile')}}</label><br>
+        <div class="image_upload_div"><?php echo Form::open(array('url' => 'progetti/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
                   {{ csrf_field() }}
                   </form>       
         </div>
- -->
         <script>
-        var url = '<?php echo url('progetti/add/getfiles/'.$mediaCode); ?>';
+        var url = '<?php echo url('progetti/getfiles/'.$mediaCode); ?>';
         Dropzone.autoDiscover = false;
-        $j(".dropzone").each(function() {
-          $j(this).dropzone({
+        $(".dropzone").each(function() {
+          $(this).dropzone({
           complete: function(file) {
             if (file.status == "success") {
-               $j.ajax({url: url, success: function(result){
-                  $j("#files").html(result);
-              $j(".dz-preview").remove();
-              $j(".dz-message").show();
+               $.ajax({url: url, success: function(result){
+                  $("#files").html(result);
+              $(".dz-preview").remove();
+              $(".dz-message").show();
               }});
             }
           }
           });
         });
         function deleteQuoteFile(id){
-          var urlD = '<?php echo url('/progetti/add/deletefiles/'); ?>/'+id;
-            $j.ajax({url: urlD, success: function(result){
-              $j(".quoteFile_"+id).remove();
+          var urlD = '<?php echo url('/progetti/deletefiles/'); ?>/'+id;
+            $.ajax({url: urlD, success: function(result){
+              $(".quoteFile_"+id).remove();
               }});
         }
-                </script>
-
-
+        function updateType(typeid,fileid){
+            var urlD = '<?php echo url('/progetti/updatefiletype'); ?>/'+typeid+'/'+fileid;
+                $.ajax({url: urlD, success: function(result){                
+                }});
+        }
+        </script>
+        <table class="table table-striped table-bordered">
+            <tbody><?php
+                    if(isset($progetto->id) && isset($projectmediafiles)){
+                    foreach($projectmediafiles as $prev) {
+                $imagPath = url('/storage/app/images/projects/'.$prev->name);
+                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
+                $html .='<tr class="quoteFile_'.$prev->id.'"><td>';
+                $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();                           
+                foreach($utente_file as $key => $val){
+                    $check = '';
+                    if($val->ruolo_id == $prev->type){
+                        $check = 'checked';
+                    }
+                    $html .=' <input type="radio" name="rdUtente_'.$prev->id.'"  '.$check.' id="rdUtente_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /> '.$val->nome_ruolo;
+                }
+                echo $html .='</td></tr>';
+            }
+                    }
+                    ?></tbody>                  
+                    <tbody id="files">
+                    </tbody>
+                    <script>
+                    var $ = jQuery.noConflict();
+                        var selezione = [];
+                        var nFile = 0;
+                        var kFile = 0;
+                        $('#aggiungiFile').on("click", function() {
+                            var tab = document.getElementById("files");
+                            var tr = document.createElement("tr");
+                            var check = document.createElement("td");
+                            var checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.className = "selezione";
+                            check.appendChild(checkbox);
+                            kFile++;
+                            var td = document.createElement("td");
+                            var fileInput = document.createElement("input");
+                            fileInput.type = "file";
+                            fileInput.className = "form-control";
+                            fileInput.name = "filee[]";
+                            td.appendChild(fileInput);
+                            tr.appendChild(check);
+                            tr.appendChild(td);
+                            tab.appendChild(tr);
+                            $('.selezione').on("click", function() {
+                                selezione[nFile] = $(this).parent().parent();
+                                nFile++;
+                            });
+                        });
+                        $('#eliminaFile').on("click", function() {
+                           for(var i = 0; i < nFile; i++) {
+                               selezione[i].remove();
+                           }
+                           nFile = 0;
+                        });
+                    </script>
+                </table>
 	            </div>
-
             </div>
-
 <!-- 
 	            </table> -->
 		</div>
 	</div>
-
 		</div>
 	</div>
-
 </div><!-- /row -->
+<script>
+var w = 250,
+	h = 250;
+var colorscale = d3.scale.category10();
+//Legend titles
+var LegendOptions = [];
+<?php $value=0.10;?>
+//value1=parseFloat(value1) + 0.1;
+counter=0;
+//Data
+var d = [
+		  [
+		  @foreach($chartdetails as $key => $oggettostatoval)		 
+			{axis:"{{ $oggettostatoval->nome }}",value:{{($oggettostatoval->completedPercentage/100)}}},
+			@endforeach
+		  ]
+		];
+//Options for the Radar chart, other than default
+var mycfg = {
+  w: w,
+  h: h,
+  maxValue: 1.0,
+  levels: 10,
+  ExtraWidthX: 100
+}
 
-<!-- <script src="{{asset('public/scripts/RadarChartscript.js')}}"></script> -->
+//Call function to draw the Radar chart
+//Will expect that data is in %'s
+RadarChart.draw("#chart", d, mycfg);
 
+////////////////////////////////////////////
+/////////// Initiate legend ////////////////
+////////////////////////////////////////////
+
+var svg = d3.select('#body')
+	.selectAll('svg')
+	.append('svg')
+	.attr("width", w+250)
+	.attr("height", h)
+
+//Create the title for the legend
+/*var text = svg.append("text")
+	.attr("class", "title")
+	.attr('transform', 'translate(90,0)') 
+	.attr("x", w - 60)
+	.attr("y", 10)
+	.attr("font-size", "12px")
+	.attr("fill", "#404040")
+	.text("What % of owners use a specific service in a week");*/
+		
+//Initiate Legend	
+var legend = svg.append("g")
+	.attr("class", "legend")
+	.attr("height", 200)
+	.attr("width", 200)
+	.attr('transform', 'translate(90,20)') 
+	;
+	//Create colour squares
+	legend.selectAll('rect')
+	  .data(LegendOptions)
+	  .enter()
+	  .append("rect")
+	  .attr("x", w - 65)
+	  .attr("y", function(d, i){ return i * 20;})
+	  .attr("width", 10)
+	  .attr("height", 10)
+	  .style("fill", function(d, i){ return colorscale(i);})
+	  ;
+	//Create text next to squares
+	legend.selectAll('text')
+	  .data(LegendOptions)
+	  .enter()
+	  .append("text")
+	  .attr("x", w - 52)
+	  .attr("y", function(d, i){ return i * 20 + 9;})
+	  .attr("font-size", "11px")
+	  .attr("fill", "#737373")
+	  .text(function(d) { return d; })
+	  ;	
+</script>
 @endsection

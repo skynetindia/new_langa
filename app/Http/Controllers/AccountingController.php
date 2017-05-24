@@ -29,7 +29,7 @@ class AccountingController extends Controller
 	
 	public function elencotranche(Request $request)
 	{
-		if ($request->user()->id === 0 || $request->user()->dipartimento === "AMMINISTRAZIONE")
+		if ($request->user()->id === 0 || $request->user()->dipartimento === 1)
 			return view('pagamenti.elencotranche');
 		else
 			return redirect('/unauthorized');
@@ -91,15 +91,16 @@ class AccountingController extends Controller
 	public function modificatranche(Request $request)
 	{
 		$tranche = DB::table('tranche')
-					->where('id', $request->id)
-					->first();
+			->where('id', $request->id)
+			->first();
+
 		return view('pagamenti.modificatranche', [
 			'tranche' => $tranche,
 			'utenti' => DB::table('users')
-							->get(),
+				->get(),
 			'enti' => DB::table('corporations')
-							->orderBy('id', 'asc')
-							->get(),
+				->orderBy('id', 'asc')
+				->get(),
 			'statiemotivi' => DB::table('statiemotivipagamenti')
 				->get(),
 			'statoemotivoselezionato' => DB::table('statipagamenti')
@@ -303,21 +304,17 @@ class AccountingController extends Controller
     	return $accounting->user_id === $user->id;
 	}
 
-	public function aggiornatranche(Request $request)
+	public function salvatranche(Request $request)
 	{
 		$validator = Validator::make($request->all(), [
-			'datainserimento' => 'required',
+			'DA' => 'required',
+			'A' => 'required',
 			'datascadenza' => 'required',
 			'percentuale' => 'required',
-			'dettagli' => 'max:1000',
-			'DA' => 'max:1000',
-			'A' => 'max:1000',
-			'idfattura' => 'max:30',
-			'indirizzospedizione' => 'max:1000',
-			'base' => 'max:100',
-			'modalita' => 'max:100',
-			'iban' => 'max:100',
-        ]);        
+			'emissione' => 'required',
+			'tipofattura' => 'required',
+			'base' => 'required',
+        ]);
         
         if($validator->fails()) {
             return Redirect::back()
@@ -339,6 +336,167 @@ class AccountingController extends Controller
 			$elenco = DB::table('corporationtypes')
 						->where('id_ente', $ente->id)
 						->get();
+			// Variabile per contenere gli sconto assegnati a quell'ente
+			$sconti = [];
+			// Per tutti i tipi assegnati a quell'ente
+			for($i = 0; $i < count($elenco); $i++) {
+				$sc = DB::table('entisconti')
+							->where('id_sconto', $elenco[$i]->id_tipo)
+							->first();
+				if($sc)
+				$sconto = DB::table('sconti')
+							->where('id', $sc->id_sconto)
+							->first();
+				if(isset($sconto))		
+				$sconti[] = $sconto->sconto;
+			}
+			$max = 0;
+			for($i = 0; $i < count($sconti); $i++) {
+				if($max < $sconti[$i])
+					$max = $sconti[$i];
+			}
+			$scontoagente_max = $max;
+			// Sconto bonus
+			$elenco = DB::table('entiscontibonus')
+						->where('id_tipo', $request->user()->id)
+						->get();
+			$sconti = [];
+			for($i = 0; $i < count($elenco); $i++) {
+				$sconto = DB::table('scontibonus')
+							->where('id', $elenco[$i]->id_sconto)
+							->first();
+				if($sconto)
+				$scontibonus[] = $sconto->sconto;
+			}
+			$max = 0;
+			for($i = 0; $i < count($scontibonus); $i++) {
+				if($max < $scontibonus[$i])
+					$max = $scontibonus[$i];
+			}
+			$scontobonus_max = $max;
+			for($i = 0; $i < count($scontoagente); $i++) {
+				if($scontoagente[$i] > $scontoagente_max) {
+					return Redirect::back()
+						->withInput()
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Non ti è permesso imporre uno sconto agente maggiore a ' . $scontoagente_max . '</h4></div>');
+				} else if($scontobonus[$i] > $scontobonus_max) {
+					return Redirect::back()
+						->withInput()
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Non ti è permesso imporre uno sconto bonus maggiore a ' . $scontobonus_max . '</h4></div>');	
+				}
+			}
+		}
+					  
+		if($request->tipofattura == 0) {
+			$tipofattura = "FATTURA DI VENDITA";	
+		} else {
+			$tipofattura = "NOTA DI CREDITO";	
+		}
+		
+		$tranche = DB::table('tranche')->insertGetId([
+                        'user_id' => $request->user()->id,
+                        'id_disposizione' => $request->id_disposizione,
+						'tipo' => $request->tipo,
+						'datainserimento' => isset($request->datainserimento) ? $request->datainserimento : '',
+						'datascadenza' => $request->datascadenza,
+						'percentuale' => $request->percentuale,
+						'dettagli' => isset($request->dettagli) ? $request->dettagli : '',
+						'frequenza' => $request->frequenza,
+						'DA' => $request->DA,
+						'A' => $request->A,
+						'idfattura' => $request->idfattura,
+						'emissione' => $request->emissione,
+						'indirizzospedizione' => $request->indirizzospedizione,
+						'privato' => $request->privato,
+						'testoimporto' => $request->importo_nopercentuale,
+						'base' => $request->base,
+						'modalita' => $request->modalita,
+						'tipofattura' => $tipofattura,
+						'iban' => isset($request->iban) ? $request->iban : '',
+						'peso' => isset($request->peso) ? $request->peso : '',
+						'netto' => $request->netto,
+						'scontoaggiuntivo' => $request->scontoaggiuntivo,
+						'imponibile' => $request->imponibile,
+						'prezzoiva' => $request->prezzoiva,
+						'percentualeiva' => $request->percentualeiva,
+						'dapagare' => $request->dapagare,
+                      ]);
+					  
+		if($request->statoemotivo!=null) {
+			// Memorizzo lo stato emotivo
+			$tipo = DB::table('statiemotivipagamenti')
+				->where('name', $request->statoemotivo)
+				->first();
+			DB::table('statipagamenti')->insert([
+				'id_pagamento' => $tranche,
+				'id_tipo' => $tipo->id,
+			]);
+		}
+		
+		// Salvo il corpo fattura
+		if(isset($request->ordine)) {
+			$ordine = $request->ordine;
+			$descrizione = $request->desc;
+			$qt = $request->qt;
+			$subtotale = $request->subtotale;
+			$scontoagente = isset($request->scontoagente) ? $request->scontoagente : 0;
+			$scontobonus = $request->scontobonus;
+			$prezzonetto = $request->prezzonetto;
+			$iva = $request->iva;
+			for($i = 0; $i < count($ordine); $i++) {
+				DB::table('corpofattura')->insert([
+					'id_tranche' => $tranche,
+					'ordine' => $ordine[$i],
+					'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : 0,
+					'qta' => isset($qt[$i]) ? $qt[$i] : 0,
+					'subtotale' => isset($subtotale[$i]) ? $subtotale[$i] : 0,
+					'scontoagente' => isset($scontoagente[$i]) ? $scontoagente[$i] : 0 ,
+					'scontobonus' => $scontobonus[$i],
+					'netto' => isset($prezzonetto[$i]) ? $prezzonetto[$i] : 0,
+					'percentualeiva' => isset($iva[$i]) ? $iva[$i] : 0,
+				]);
+			}
+		}
+					  
+		return redirect('/pagamenti/mostra/accounting/' . $request->id_disposizione)
+                        ->with('error_code', 5)
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_addsuccessmsg').'!</h4></div>');
+	}
+
+
+	public function aggiornatranche(Request $request)
+	{
+		$validator = Validator::make($request->all(), [			
+			'DA' => 'required',
+			'A' => 'required',
+			'datascadenza' => 'required',
+			'percentuale' => 'required',
+			'emissione' => 'required',
+			'tipofattura' => 'required',
+			'base' => 'required'
+        ]);        
+        
+        if($validator->fails()) {
+            return Redirect::back()
+                ->withInput()
+                ->with('error_code', 6)
+                ->withErrors($validator);
+        }
+		
+		// Controllo lo sconto e lo sconto bonus
+		if(isset($request->ordine)) {
+			$scontoagente = isset($request->scontoagente) ? $request->scontoagente : 0;
+			$scontobonus = $request->scontobonus;
+			$scontibonus = [];
+			// Seleziono l'ente relativo alla utenza in uso
+			$ente = DB::table('corporations')
+						->where('id', $request->user()->id_ente)
+						->first();
+	
+			$elenco = DB::table('corporationtypes')
+						->where('id_ente', $ente->id)
+						->get();
+
 			// Variabile per contenere gli sconto assegnati a quell'ente
 			$sconti = [];
 			// Per tutti i tipi assegnati a quell'ente
@@ -381,11 +539,11 @@ class AccountingController extends Controller
 				if($scontoagente[$i] > $scontoagente_max) {
 					return Redirect::back()
 						->withInput()
-                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Non ti è permesso imporre uno sconto agente maggiore a ' . $scontoagente_max . '</h4></div>');
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_arenotallowed_impose_agent_discount').' ' . $scontoagente_max . '</h4></div>');
 				} else if($scontobonus[$i] > $scontobonus_max) {
 					return Redirect::back()
 						->withInput()
-                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Non ti è permesso imporre uno sconto bonus maggiore a ' . $scontobonus_max . '</h4></div>');	
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_arenotallowed_impose_bonus').' ' . $scontobonus_max . '</h4></div>');	
 				}
 			}
 		}
@@ -413,7 +571,7 @@ class AccountingController extends Controller
 			->update(array(
             	'user_id' => $request->user()->id,
 				'tipo' => $request->tipo,
-				'datainserimento' => $request->datainserimento,
+				'datainserimento' => isset($request->datainserimento) ? $request->datainserimento : '',
 				'datascadenza' => $request->datascadenza,
 				'percentuale' => $request->percentuale,
 				'dettagli' => $request->dettagli,
@@ -454,31 +612,404 @@ class AccountingController extends Controller
 				]);
 		}
 		
+
 		// Aggiorno il corpo fattura
 		if(isset($request->ordine)) {
 			$ordine = $request->ordine;
 			$descrizione = $request->desc;
 			$qt = $request->qt;
 			$subtotale = $request->subtotale;
-			$scontoagente = $request->scontoagente;
+			$scontoagente = isset($request->scontoagente) ? $request->scontoagente : 0;
 			$prezzonetto = $request->prezzonetto;
 			$iva = $request->iva;
 			for($i = 0; $i < count($ordine); $i++) {
 				DB::table('corpofattura')->insert([
 					'id_tranche' => $request->id,
-					'ordine' => $ordine[$i],
-					'descrizione' => $descrizione[$i],
-					'qta' => $qt[$i],
-					'subtotale' => $subtotale[$i],
-					'scontoagente' => $scontoagente[$i],
-					'netto' => $prezzonetto[$i],
-					'percentualeiva' => $iva[$i],
+					'ordine' => $ordine[$i],					
+					'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : '',
+					'qta' => isset($qt[$i]) ? $qt[$i] : '',
+					'subtotale' => isset($subtotale[$i]) ? $subtotale[$i] : '',
+					'scontoagente' => isset($request->scontoagente[$i]) ? $request->scontoagente[$i] : 0,
+					'netto' => isset($request->prezzonetto[$i]) ? $request->prezzonetto[$i] : 0,
+					'percentualeiva' => isset($request->iva[$i]) ? $request->iva[$i] : 0,
 				]);
 			}
 		}
 					  
 		return redirect('/pagamenti/mostra/accounting/' . $iddisposizione->id_disposizione)
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Disposizione modificata correttamente!</h4></div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_modified_layout_correctly').' !</h4></div>');
 	}
+
+	public function mostradisposizione(Request $request, Accounting $accounting)
+	{
+
+		$this->authorize('mostra', $accounting);
+
+		return view('pagamenti.mostra', [
+			'idfattura' => $accounting->id
+		]);
+	}
+
+	public function aggiungitranche(Request $request)
+    {
+        return $this->aggiungi($request);
+    }
+
+    public function aggiungi(Request $request)
+    {
+		if ($request->user()->id === 0 || $request->user()->dipartimento !== "TECNICO") {
+			 
+			 $disposizione = DB::table('accountings')
+			 				->where('id', $request->id)
+							->first();
+
+			 $progetto = DB::table('projects')
+			 				->where('id', $disposizione->id_progetto)
+							->first();
+
+			 $preventivo = DB::table('quotes')
+			 				->where('id', $progetto->id_preventivo)
+							->first();
+			 if($preventivo) {
+				$corpofattura = DB::table('optional_preventivi')
+					->where('id_preventivo', $preventivo->id)
+					->get();
+				$ordine = $preventivo->id;
+				$anno = $preventivo->anno;
+				$prev = DB::table('quotes')->where('id', $preventivo->id)->first();
+				$sconto = $prev->scontoagente;
+				$scontobonus = $prev->scontobonus;
+			 } else {
+			 	$ordine = null;
+				$anno = null;
+				$corpofattura = null;
+				$sconto = null;
+				$scontobonus = null;
+			 }
+             return view('pagamenti.aggiungitranche', [
+				'utenti' => DB::table('users')
+							->get(),
+				'progetti' => $this->progetti->forUser2($request->user()), 
+				'enti' => DB::table('corporations')
+							->orderBy('id', 'asc')
+							->get(),
+				'idfattura' => $request->id,
+				'statiemotivi' => DB::table('statiemotivipagamenti')
+									->get(),
+				'preventiviconfermati' => DB::table('quotes')
+            					->where('legameprogetto', 1)
+								->having('usato', '=', 0)
+            					->get(),
+				'corpofattura' => $corpofattura,
+				'ordine' => $ordine,
+				'anno' => $anno,
+				'sconto' => $sconto,
+				'scontobonus' => $scontobonus
+        	]);
+        } else {
+			return view('errors.403');
+		}
+    }
+
+    public function getjsontranche(Request $request)
+	{
+		$tranche = DB::table('tranche')
+			->where('id_disposizione', $request->id)
+			->get();
+			
+		foreach($tranche as $tr) {
+			if($tr->is_deleted == 0)
+				$tranche_return[] = $tr;	
+		}
+		$this->compilaTranche($tranche_return);
+		return json_encode($tranche_return);
+	}
+
+	public function compilaTranche(&$tranche)
+	{
+		foreach($tranche as $tra) {
+			if($tra->tipo == 1) {
+				$tra->tipo = "Rinnovo";
+			} else {
+				$tra->tipo = "Pagamento";
+			}
+			$tra->ente = DB::table('corporations')
+				->where('id', $tra->A)
+				->first()->nomeazienda;
+			// Compilo lo stato emotivo
+			$stato = DB::table('statipagamenti')
+						->where('id_pagamento', $tra->id)
+						->first();
+			if($stato) {
+				$statoemotivo = DB::table('statiemotivipagamenti')
+								->where('id', $stato->id_tipo)
+								->first();
+						
+				$tra->statoemotivo = $statoemotivo->name;
+			}
+		}
+	}
+
+	public function fileupload(Request $request){
 	
+		Storage::put(
+				'images/invoice/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
+		);
+		
+		$nome = $request->file('file')->getClientOriginalName();			
+			DB::table('media_files')->insert([
+			'name' => $nome,
+			'code' => $request->code,
+			'master_type' => 3,
+			'master_id' => isset($request->idtranche) ? $request->idtranche : 0
+		]);					
+	}
+
+	public function fileget(Request $request){
+		
+		if(isset($request->quote_id)){
+			$updateData = DB::table('media_files')->where('quote_id', $request->quote_id)->get();										
+		}
+		else {
+			$updateData = DB::table('media_files')->where('code', $request->code)->get();				
+		}
+					
+		foreach($updateData as $prev) {
+			$imagPath = url('/storage/app/images/invoice/'.$prev->name);
+			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
+			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
+			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
+			foreach($utente_file as $key => $val){
+				$html .=' <input type="radio" name="rdUtente_'.$prev->id.'" id="rdUtente_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /> '.$val->nome_ruolo;
+			}
+			echo $html .='</td></tr>';
+		}
+		exit;			
+	}
+
+	public function filedelete(Request $request){
+		
+	    $response = DB::table('media_files')->where('id', $request->id)->delete();
+		if($response){
+			echo 'success';
+		}
+		else {
+			echo 'fail';
+		}
+		exit;
+	}
+
+	public function filetypeupdate(Request $request){
+
+	 	$response = DB::table('media_files')
+			->where('id', $request->fileid)
+			->update(array('type' => $request->typeid));	    
+		if($response){
+			echo 'success';
+		}
+		else {
+			echo 'fail';
+		}
+		exit;
+	}
+
+	public function duplicatranche(Request $request)
+	{
+		$tranche = DB::table('tranche')
+					->where('id', $request->id)
+					->first();
+					
+		$id = DB::table('tranche')->insertGetId([
+            'user_id' => $request->user()->id,
+            'id_disposizione' => $tranche->id_disposizione,
+			'tipo' => $tranche->tipo,
+			'datainserimento' => $tranche->datainserimento,
+			'datascadenza' => $tranche->datascadenza,
+			'percentuale' => $tranche->percentuale,
+			'dettagli' => $tranche->dettagli,
+			'frequenza' => $tranche->frequenza,
+			'DA' => $tranche->DA,
+			'A' => $tranche->A,
+			'idfattura' => $tranche->idfattura,
+			'emissione' => $tranche->emissione,
+			'indirizzospedizione' => $tranche->indirizzospedizione,
+			'privato' => $tranche->privato,
+			'base' => $tranche->base,
+			'modalita' => $tranche->modalita,
+			'iban' => $tranche->iban,
+			'peso' => $tranche->peso,
+			'netto' => $tranche->netto,
+			'scontoaggiuntivo' => $tranche->scontoaggiuntivo,
+			'imponibile' => $tranche->imponibile,
+			'prezzoiva' => $tranche->prezzoiva,
+			'percentualeiva' => $tranche->percentualeiva,
+			'dapagare' => $tranche->dapagare,
+        ]);
+		
+		$items = DB::table('corpofattura')
+            ->where('id_tranche', $request->id)
+            ->get();
+
+        foreach($items as $item) {
+            DB::table('corpofattura')->insert([
+				'id_tranche' => $id,
+				'ordine' => $item->ordine,
+				'descrizione' => $item->descrizione,
+				'qta' => $item->qta,
+				'subtotale' => $item->subtotale,
+				'scontoagente' => $item->scontoagente,
+				'scontobonus' => $item->scontobonus,
+				'netto' => $item->netto,
+				'percentualeiva' => $item->percentualeiva
+			]);
+        }
+
+		return Redirect::back()
+                       ->with('error_code', 5)
+                       ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_duplicatesuccessmsg').' !</h4></div>');
+	}
+
+
+	public function eliminatranche(Request $request)
+	{
+        DB::table('tranche')
+			->where('id', $request->id)
+			->update(array(
+				'is_deleted' => 1	
+		));
+		
+		return Redirect::back()
+                        ->with('error_code', 5)
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_deletesuccessmsg').' !</h4></div>');
+	}
+
+
+// ========================================================================================
+// 									Provisions Functions
+// ========================================================================================
+	
+	public function index(Request $request)
+	{
+
+		if ($request->user()->id === 0 || $request->user()->dipartimento !== 3) {
+		
+            return view('pagamenti.main', [
+				'progetti' => $this->progetti->forUser2($request->user()), 
+				'dipartimenti' => DB::table('departments')->get(),
+				'quadri' => DB::table('accountings')->get()
+			]);
+        } else {
+        	
+			return view('errors.403');
+		}
+	}
+
+	public function getjson(Request $request)
+	{
+		$pagamenti = $this->pagamenti->forUser($request->user());
+		$this->compila($pagamenti);
+		return json_encode($pagamenti);
+	}
+
+	public function compila(&$pagamenti)
+	{
+		foreach($pagamenti as $pagamento) {
+			$progetto = DB::table('projects')
+				->get();
+			foreach($progetto as $prog) {
+				if($prog->id == $pagamento->id_progetto) {
+					$pagamento->id_progetto = $prog->nomeprogetto;
+					if($prog->id_ente != null)
+						$pagamento->ente = DB::table('corporations')
+							->where('id', $prog->id_ente)
+							->first()->nomeazienda;
+					break;
+				}	
+			}
+		}
+	}
+
+	public function creadisposizione(Request $request)
+	{
+		$validator = Validator::make($request->all(), [
+            'nomeprogetto' => 'required|max:50',
+            'idprogetto' => 'required'
+        ]);        
+        
+        if($validator->fails()) {
+            return Redirect::back()
+                ->withInput()
+                ->with('error_code', 6)
+                ->withErrors($validator);
+        }
+		
+		$progetto = DB::table('accountings')->insertGetId([
+                        'user_id' => $request->user()->id,
+                        'nomeprogetto' => $request->nomeprogetto,
+						'id_progetto' => $request->idprogetto,
+                      ]);
+					  
+		return Redirect::back()
+            ->with('error_code', 5)
+            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_addsuccessmsg').'!</h4></div>');
+	}
+
+
+	public function modificadisposizione(Request $request, Accounting $accounting)
+	{
+		$this->authorize('modify', $accounting);
+       
+		$validator = Validator::make($request->all(), [
+            'nomeprogetto' => 'required|max:50',
+        ]);
+        
+        
+        if($validator->fails()) {
+            return Redirect::back()
+                ->withInput()
+                ->with('error_code', 6)
+                ->withErrors($validator);
+        }
+		
+        DB::table('accountings')
+			->where('id', $accounting->id)
+			->update(array(
+				'nomeprogetto' => $request->nomeprogetto,
+				'id_progetto' => $request->idprogetto,
+        	));
+		
+		return Redirect::back()
+                        ->with('error_code', 5)
+                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_editsuccessmsg').' !</h4></div>');
+	}
+
+	public function duplicadisposizione(Request $request, Accounting $accounting)
+	{
+		$this->authorize('duplicate', $accounting);
+        
+        DB::table('accountings')->insert([
+            'user_id' => $request->user()->id,
+            'nomeprogetto' => $accounting->nomeprogetto,
+			'id_progetto' => $accounting->idprogetto,
+        ]);
+		
+		return Redirect::back()
+                        ->with('error_code', 5)
+                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_duplicatesuccessmsg').'!</h4></div>');
+	}
+
+	public function destroydisposizione(Request $request, Accounting $accounting)
+	{
+		$this->authorize('destroy', $accounting);
+		
+		DB::table('tranche')
+			->where('id_disposizione', $accounting->id)
+			->delete();
+		
+		$accounting->delete();
+		
+		return Redirect::back()
+                        ->with('error_code', 5)
+                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_deletesuccessmsg').'!</h4></div>');
+	}
 }

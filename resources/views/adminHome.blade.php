@@ -34,17 +34,18 @@
       
       <!-- sidebar menu -->
       <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-        <div class="menu_section">
-          <ul class="nav side-menu">
-          
-            <li><a href="{{url('/admin')}}"><i class="fa fa-wrench"></i> Global settings</a>
-        </li>
 
-    <?php
+      <div class="menu_section">
+      
+      <ul class="nav side-menu">
 
+        <li><a href="{{url('/admin')}}"><i class="fa fa-wrench"></i> Impostazioni globali </a>
+        </li><?php
         $module = DB::table('modulo')
           ->where('modulo_sub', null)
           ->where('type', 2)
+          ->orderBy('backpriority')
+          ->orderBy('id')
           ->get();
 
         foreach ($module as $module) {
@@ -54,42 +55,80 @@
           $submodule = DB::table('modulo')
             ->where('modulo_sub', $module->id)
             ->get();
-    ?>  
+          
+          if($submodule->isEmpty()){  ?>
+
+          <li><a <?php if(isset($module->modulo_link)) { ?> href="<?php echo url("$module->modulo_link"); ?>" <?php } ?>> <img src="{{asset('storage/app/images/'.$module->image)}}"  class="menu-icon" >  {{ $module->modulo }} </a></li>
+
+        <?php  } else { ?>  
+
         <li>
         
-          <a> <img src="{{asset('images/'.$module->image)}}" alt="Tassonomie" class="menu-icon" > 
+          <a> <img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" > 
 
-           <span> 
-
-            {{$modulo}}
-
-            </span> <span class="fa fa-chevron-down"></span></a>
+           <span> {{$modulo}} </span> <span class="fa fa-chevron-down"></span></a>
                               
           <ul class="nav child_menu">
     <?php
           if ($submodule) {
+
             foreach ($submodule as $submodule) {
+
               $subsubmodule = DB::table('modulo')
-                ->where('modulo_subsub', $submodule->id)
+                ->where('modulo_sub', $submodule->id)
                 ->get();
 
-          if (empty($subsubmodule) && $submodule->modulo_subsub == 0) {
-    ?>
+          if ($subsubmodule->isEmpty()) { 
+    ?>    
           <li><a href="{{url("$submodule->modulo_link")}}">{{$submodule->modulo}}</a></li>
     <?php
           }
 
-          if (!empty($subsubmodule)) {
+          else {
     ?>
-            <li><a href="{{url("$submodule->modulo_link")}}" >{{$submodule->modulo}}<span class="fa fa-chaevron-down"></span></a>
+            <li><a <?php if(!empty($submodule->modulo_link)) { ?> href="<?php echo url("$submodule->modulo_link"); ?>" <?php } ?> >
+             <span> {{$submodule->modulo}} </span>
+
+            <span class="fa fa-chevron-down"></span>             
+
+           </a>
               <ul class="nav child_menu">
     <?php
             foreach ($subsubmodule as $subsubmodule1) {
-    ?>
-            <li>
-            <a href="{{url("$subsubmodule1->modulo_link")}}">{{$subsubmodule1->modulo}}</a>
-            </li>
+    ?>          
+                <?php $nextmodule = DB::table('modulo')
+                      ->where('modulo_sub', $subsubmodule1->id)
+                      ->get();
 
+                      if ($nextmodule->isEmpty()) {  ?>
+
+                     <li>
+                      <a href="{{url("$subsubmodule1->modulo_link")}}">{{$subsubmodule1->modulo}}</a>
+                      </li>
+
+                <?php } else { ?>
+                        
+                       <li>
+                          <a <?php if(!empty($subsubmodule1->modulo_link)) { ?> href="<?php echo url("$subsubmodule1->modulo_link"); ?>" <?php } ?> >
+                           <span> {{$subsubmodule1->modulo}} </span>
+                            <span class="fa fa-chevron-down"></span>           
+                          </a>
+                        
+                        <ul class="nav child_menu">
+                    
+                <?php foreach ($nextmodule as $nextmodule) { ?>
+                        
+                        <li>
+                          <a href="{{url("$nextmodule->modulo_link")}}">{{$nextmodule->modulo}}</a>
+                        </li>
+
+                <?php } ?>
+                      
+                        </ul>
+                        
+                        </li>
+
+                <?php } ?>
     <?php
            }
     ?>
@@ -102,8 +141,9 @@
               </ul>
             </li>
     <?php
-            }
+          }
         }
+      }
     ?>
         </div>
 
@@ -215,8 +255,8 @@
 <!-- jQuery validation js --> 
 <script src="{{ url('public/scripts/jquery.validate.min.js')}}"></script> 
 
-<!-- Custom Theme Scripts --> 
-<!-- <script src="{{asset('build/js/custom.min.js')}}"></script> --> 
+<!-- Custom Theme Scripts -->
+<!-- <script src="{{asset('build/js/custom.min.js')}}"></script> -->
 
 <script src="{{asset('/build/js/custom.js')}}"></script>
 </body>

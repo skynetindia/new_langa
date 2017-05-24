@@ -88,13 +88,34 @@
 </h1><hr>
 <br>
 
-<form action="{{url("/menu/update/$menu->id")}}" method="post">
+<form action="{{url("/menu/update/$menu->id")}}" method="post"  enctype="multipart/form-data">
     {{ csrf_field() }}
     <div class="col-md-12">
 
         <div class="col-md-3"><label for="manuname">{{trans('messages.keyword_menu_name')}}</label>
             <input name="manuname" id="manuname" placeholder="{{trans('messages.keyword_menu_name')}}" class="form-control hasDatepicker" value="{{$menu->modulo}}" type="text"><br></div>
+
+
         <div class="col-md-3">
+            <label for="menutype"> Type: </label>
+            <select name="menutype" id="menutype" class="js-example-basic-single form-control">
+                
+                <option value=""> -- select -- </option>
+                
+                @if($menu->type == 1)
+                <option value="1" selected="selected"> Front-End </option>
+                <option value="2" > Back-End </option>
+                @else
+                <option value="1" > Front-End </option>
+                <option value="2" selected="selected"> Back-End </option>
+                @endif
+                
+
+            </select>        
+        </div>
+
+
+        <div class="col-md-3" id="parent" style="display: none">
             <label for="parentmenu">{{trans('messages.keyword_parent')}}</label>
             <select name="parentmenu" id="parentmenu" class="js-example-basic-single form-control">
                 <option value="">{{trans('messages.keyword_select_parent')}}</option>
@@ -107,6 +128,9 @@
                 @endforeach
             </select>        
         </div>
+
+
+
         <div class="col-md-3" id="optionsub">
             <label for="submenu">Sub Menu</label>
             <select name="submenu" id="submenu" class="js-example-basic-single form-control">                          
@@ -121,6 +145,11 @@
             <input name="menulink" id="menulink" placeholder="{{trans('messages.keyword_menu_link')}}" class="form-control hasDatepicker" value="{{$menu->modulo_link}}" type="text"><br></div>
         <div class="col-md-3"><label for="menuclass">{{trans('messages.keyword_menu_class')}}</label>
             <input name="menuclass" id="menuclass" placeholder="{{trans('messages.keyword_menu_class')}}" class="form-control hasDatepicker" value="{{$menu->modulo_class}}" type="text"><br></div>
+
+        <div class="col-md-3"><label for="manuname"> Menu Image </label>
+            <input name="image" id="image" class="form-control hasDatepicker" value="" type="file"><br>
+        </div>
+ 
     </div>
     <div class="col-md-12">
         <div class="col-md-3"><button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button></div>
@@ -208,6 +237,45 @@
         }
     }
 
+
+    $("#menutype").change(function () {
+        
+        if ($("#menutype").val()) {
+
+            url = "{{ url('/menu/parentmenu') }}" + '/' + $("#menutype").val();
+            
+            $.ajax({
+
+                type: "GET",
+                url: url,
+
+                success: function (data, textStatus, jqXHR) {
+                    
+                    var submenu = jQuery.parseJSON(data);
+                    if (submenu != "") {
+                        $("#parentmenu").children().remove();
+                        $("#parentmenu").append($("<option></option>").attr("value", "").text('Select parentmenu'));
+                        $.each(submenu, function (key, value) {
+                            $("#parentmenu").append($("<option></option>").attr("value", value.id).text(value.modulo));
+                        });
+                        $("#parent").css("display", "block");
+                    } else {
+                        $("#parentmenu").children().remove();
+                        $("#parent").css("display", "none");
+                    }
+                },
+                error: function (data) {
+                    alert("error");
+                }
+            });
+        } 
+        else {
+            $("#parentmenu").children().remove();
+            $("#parent").css("display", "none");
+        }
+
+        // $("#parent").css("display", "block");
+    });
 
 
     $("#parentmenu").change(function () {

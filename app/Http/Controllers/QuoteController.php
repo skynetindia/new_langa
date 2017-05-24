@@ -90,7 +90,7 @@ class QuoteController extends Controller
 					'images/quote/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
 			);
 			$nome = $request->file('file')->getClientOriginalName();			
-				DB::table('citazione_file')->insert([
+				DB::table('media_files')->insert([
 				'name' => $nome,
 				'code' => $request->code,
 			]);					
@@ -107,10 +107,10 @@ class QuoteController extends Controller
             }*/
 			
 			if(isset($request->quote_id)){
-				$updateData = DB::table('citazione_file')->where('quote_id', $request->quote_id)->get();										
+				$updateData = DB::table('media_files')->where('quote_id', $request->quote_id)->get();										
 			}
 			else {
-				$updateData = DB::table('citazione_file')->where('code', $request->code)->get();				
+				$updateData = DB::table('media_files')->where('code', $request->code)->get();				
 			}
 						
 			foreach($updateData as $prev) {
@@ -120,7 +120,7 @@ class QuoteController extends Controller
 				$utente_file = DB::table('ruolo_utente')->select('*')->get();							
 				foreach($utente_file as $key => $val){
 					if($request->user()->dipartimento == $val->ruolo_id){
-						$response = DB::table('citazione_file')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
+						$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
 						$html .=' <input type="radio" checked="checked" name="rdUtente_'.$prev->id.'" id="rdUtente_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /> '.$val->nome_ruolo;
 					}
 					else {
@@ -139,7 +139,7 @@ class QuoteController extends Controller
 							->withInput()
 							->withErrors($validator);
 		}*/
-	    $response = DB::table('citazione_file')->where('id', $request->id)->delete();
+	    $response = DB::table('media_files')->where('id', $request->id)->delete();
 		if($response){
 			echo 'success';
 		}
@@ -156,7 +156,7 @@ class QuoteController extends Controller
 							->withErrors($validator);
 							
 		}*/
-	 	$response = DB::table('citazione_file')
+	 	$response = DB::table('media_files')
 			->where('id', $request->id)
 			->update(array('type' => $request->typeid));	    
 		if($response){
@@ -458,9 +458,10 @@ class QuoteController extends Controller
 					'id_preventivo' => $nuovopreventivo->id
 				]);
 			}
+			
 		}		
 		/* Update Quote Id in Media files Paras */
-			DB::table('citazione_file')
+			DB::table('media_files')
 			->where('code', $request->mediaCode)
 			->update(array('quote_id' => $nuovopreventivo->id));
 		/* Update Quote Id in Media files */
@@ -478,7 +479,7 @@ class QuoteController extends Controller
 								->select('*')
 								->where('id', $quote->id)
 								->first(),
-			'quotefiles' => DB::table('citazione_file')
+			'quotefiles' => DB::table('media_files')
 								->select('*')
 								->where('quote_id', $quote->id)
 								->get(),								
@@ -736,7 +737,7 @@ class QuoteController extends Controller
 			}
 		}
 		/* Update Quote Id in Media files Paras */
-			DB::table('citazione_file')
+			DB::table('media_files')
 			->where('code', $request->mediaCode)
 			->update(array('quote_id' => $quote->id));
 		/* Update Quote Id in Media files */

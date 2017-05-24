@@ -24,30 +24,120 @@
 </h1><hr>
 <br>
 <?php if(isset($menu->id)) {
-    ?><form action="{{url("/menu/update/$menu->id")}}" method="post" id="frmmenu"><?php
+    ?><form action="{{url("/menu/update/$menu->id")}}" method="post" id="frmmenu" enctype="multipart/form-data"><?php
 }
 else {
-    ?><form action="{{url('/menu/store')}}" method="post" id="frmmenu"><?php
+    ?><form action="{{url('/menu/store')}}" method="post" id="frmmenu" enctype="multipart/form-data"><?php
 }
 ?>
     {{ csrf_field() }}
     <div class="col-md-12">
         <div class="col-md-3"><label for="manuname">{{trans('messages.keyword_menu_name')}}</label>
             <input name="manuname" id="manuname" placeholder="{{trans('messages.keyword_menu_name')}}" class="form-control hasDatepicker" value="{{isset($menu->modulo) ? $menu->modulo : old('manuname')}}" type="text"><br></div>
+
         <div class="col-md-3">
+            <label for="menutype"> Type: </label>
+            <select name="menutype" id="menutype" class="js-example-basic-single form-control">
+                
+                <option value=""> -- select -- </option>
+                
+                @if(isset($menu->type))
+                    <option value="1" <?php if($menu->type == 1){ ?> selected="selected" <?php } ?>> Front-End </option>
+                    <option value="2" <?php if($menu->type == 2){ ?> selected="selected" <?php } ?>> Back-End </option>
+                @else
+                    <option value="1" > Front-End </option>
+                    <option value="2" > Back-End </option>
+                @endif                
+
+            </select>        
+        </div>
+
+        <script type="text/javascript">
+            
+            $( document ).ready(function() {
+                
+                if ($("#menutype").val()) {
+
+                    url = "{{ url('/menu/parentmenu') }}" + '/' + $("#menutype").val();
+                    
+                    $.ajax({
+
+                        type: "GET",
+                        url: url,
+
+                        success: function (data, textStatus, jqXHR) {
+                            
+                            var submenu = jQuery.parseJSON(data);
+
+                            if (submenu != "") {
+
+                                $("#parentmenu").children().remove();
+                                $("#parentmenu").append($("<option></option>").attr("value", "").text('Select parentmenu'));
+
+                                $.each(submenu, function (key, value) {
+
+                                    var selected = "<?php echo isset($menu->modulo_sub) ? $menu->modulo_sub : '0' ;?>";
+                                    
+                                    if(selected == value.id){
+
+                                        $("#parentmenu").append($("<option selected></option>").attr("value", value.id).text(value.modulo));
+                                        if(value.modulo_sub == '0' || value.modulo_sub == null){
+                                            $("#parent").val(selected);
+                                        }
+                                        else {
+                                            $("#parent").val(value.modulo_sub);                               
+                                        }                            
+                                    } else {
+                                        $("#parentmenu").append($("<option></option>").attr("value", value.id).text(value.modulo));
+                                        
+                                    }
+
+                                });
+
+
+                                // $.each(submenu, function (key, value) {
+                                //     $("#parentmenu").append($("<option></option>").attr("value", value.id).text(value.modulo));
+                                // });
+
+
+                                $("#parent").css("display", "block");
+                            } else {
+                                $("#parentmenu").children().remove();
+                                $("#parent").css("display", "none");
+                            }
+                        },
+
+                        error: function (data) {
+                            alert("error");
+                        }
+                    });
+                } 
+                else {
+                    $("#parentmenu").children().remove();
+                    $("#parent").css("display", "none");
+                }
+
+            });
+
+        </script>
+
+        <div class="col-md-3" id="parent" style="display: none">
             <label for="parentmenu">{{trans('messages.keyword_parent')}}</label>
             <select name="parentmenu" id="parentmenu" class="js-example-basic-single form-control">
                 <option value="">{{trans('messages.keyword_select_parent')}}</option>
                 @foreach($parent as $par)                
                 <?php 
-                /*if(isset($menu->modulo_sub) && $menu->modulo_sub != null && $menu->modulo_sub != '0'){
-                    $isParenmenu = $menu = DB::table("modulo")->select('*')->where('id',$menu->modulo_sub)->first(); 
-                } */
-                ?><option value="{{$par->id}}" >{{$par->modulo}} </option>
+                    if(isset($menu->modulo) == $par->modulo){
+                ?>
+               <option value="{{$par->id}}" selected="selected">{{$par->modulo}} </option>
+               <?php } else { ?>
+               <option value="{{$par->id}}" >{{$par->modulo}} </option>
+              <?php  }
+            ?>
                 @endforeach
             </select>        
         </div>
-        <div class="col-md-3" id="optionsub">
+        <div class="col-md-3" id="optionsub" style="display: none">
             <label for="submenu">Sub Menu</label>
             <select name="submenu" id="submenu" class="js-example-basic-single form-control"></select>
         </div>
@@ -55,6 +145,7 @@ else {
     //$(".js-example-basic-single").select2();
         </script>
     </div>
+
     <div class="col-md-12">
         <div class="col-md-3"><label for="menulink">{{trans('messages.keyword_menu_link')}}</label>
             <input name="menulink" id="menulink" placeholder="{{trans('messages.keyword_menu_link')}}" class="form-control hasDatepicker" value="{{isset($menu->modulo_link) ? $menu->modulo_link : old('menulink')}}" type="text"><br></div>
@@ -69,11 +160,36 @@ else {
             @endforeach
             </select>
         </div>
+
+        <div class="col-md-3"><label for="manuname"> Menu Image </label>
+            <input name="image" id="image" class="form-control hasDatepicker" value="" type="file"><br>
+        </div>
+
     </div>
+
+    <div class="col-md-12">
+        
+        <div class="col-md-3" id="frontorder" style="display: none;">
+        <label for="order" > Front Menu Priority  </label>
+            <input name="frontpriority" id="frontpriority" class="form-control hasDatepicker" 
+            value="{{isset($menu->frontpriority) ? $menu->frontpriority : old('frontpriority')}}" type="text"><br>
+        </div>
+
+        <div class="col-md-3" id="backorder" style="display: none;">
+        <label for="order" > Back Menu Priority  </label>
+            <input name="backpriority" id="backpriority"  class="form-control hasDatepicker" 
+            value="{{isset($menu->backpriority) ? $menu->backpriority : old('priority')}}" type="text"><br>
+        </div>
+
+    </div>
+    
+
     <div class="col-md-12">
         <div class="col-md-3"><button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button></div>
     </div>
+
 </form>
+
 <script>
     var selezione = [];
     var indici = [];
@@ -109,14 +225,29 @@ else {
                 url: url,
                 success: function (data, textStatus, jqXHR) {
                     var submenu = jQuery.parseJSON(data);
-                    if (submenu != "") {
+                    if (submenu != "") {                        
                         $("#submenu").children().remove();
                         $("#submenu").append($("<option></option>").attr("value", "").text('Select submenu'));
-                        $.each(submenu, function (key, value) {
-                            $("#submenu").append($("<option></option>").attr("value", value.id).text(value.modulo));
+                        $.each(submenu, function (key, value) {                            
+                            if(value != ""){
+                                var optionsname ="";  
+                                $.each(submenu, function (key1, value1) {
+                                  if(value.modulo_sub == value1.id){
+                                    optionsname = value1.modulo;                                    
+                                  }
+                                });
+                                if(optionsname != ""){
+                                    optionsname = optionsname+' -> '+value.modulo;                                
+                                }
+                                else {
+                                    optionsname = value.modulo;                                   
+                                }
+                                $("#submenu").append($("<option></option>").attr("value", value.id).text(optionsname));
+                            }
                         });
                         $("#optionsub").css("display", "block");
-                    } else {
+                    } 
+                    else {
                         $("#submenu").children().remove();
                         $("#optionsub").css("display", "none");
                     }
@@ -132,7 +263,74 @@ else {
         }
     });
     // A $( document ).ready() block.
-    $(document).ready(function () {        
+    $(document).ready(function () {  
+
+        var val = $("#menutype").val();
+
+        if(val == 1){          
+
+            $("#frontorder").css("display", "block");
+            $("#backorder").css("display", "none");
+        }
+
+        if(val == 2){            
+            $("#frontorder").css("display", "none");
+            $("#backorder").css("display", "block");
+        }
+
+     $("#menutype").change(function () { 
+
+        var val = $("#menutype").val();
+
+        if(val == 1){          
+
+            $("#frontorder").css("display", "block");
+            $("#backorder").css("display", "none");
+        }
+
+        if(val == 2){            
+            $("#frontorder").css("display", "none");
+            $("#backorder").css("display", "block");
+        }      
+        
+        if ($("#menutype").val()) {
+
+            url = "{{ url('/menu/parentmenu') }}" + '/' + $("#menutype").val();
+            
+            $.ajax({
+
+                type: "GET",
+                url: url,
+
+                success: function (data, textStatus, jqXHR) {
+                    
+                    var submenu = jQuery.parseJSON(data);
+                    if (submenu != "") {
+                        $("#parentmenu").children().remove();
+                        $("#parentmenu").append($("<option></option>").attr("value", "").text('Select parentmenu'));
+                        $.each(submenu, function (key, value) {
+                            $("#parentmenu").append($("<option></option>").attr("value", value.id).text(value.modulo));
+                        });
+                        $("#parent").css("display", "block");
+                    } else {
+                        $("#parentmenu").children().remove();
+                        $("#parent").css("display", "none");
+                    }
+                },
+                error: function (data) {
+                    alert("error");
+                }
+            });
+        } 
+        else {
+            $("#parentmenu").children().remove();
+            $("#parent").css("display", "none");
+        }
+
+        // $("#parent").css("display", "block");
+    });
+
+
         var parenmenuid = '0';
         if ($("#parentmenu").val()) {
               parenmenuid = $("#parentmenu").val();
@@ -146,6 +344,7 @@ else {
                 if (submenu != "") {
                     $("#submenu").children().remove();
                     $("#submenu").append($("<option></option>").attr("value", "").text('Select submenu'));
+                    
                     $.each(submenu, function (key, value) {
                         var selected = "<?php echo isset($menu->modulo_sub) ? $menu->modulo_sub : '0' ;?>";
                         //var parentSelected = '0';                       
@@ -163,10 +362,8 @@ else {
                             
                         }
                         
-
-                        
                     });
-                    $("#optionsub").css("display", "block");
+                    // $("#optionsub").css("display", "block");
                 } else {
                     $("#submenu").children().remove();
                     $("#optionsub").css("display", "none");
@@ -185,29 +382,24 @@ else {
 </script>
 <script type="text/javascript">
 $(document).ready(function() {
+
+
       $("#frmmenu").validate({            
             rules: {
                 manuname: {
                     required: true,
                     maxlength: 35
-                },/*,
-                menulink: {
-                    required: true                    
-                },*/
-                menuclass: {
-                    required: true,
-                    maxlength: 10
+                },
+                menutype : {
+                    required: true
                 }
             },
             messages: {
                 manuname: {
                     required: "{{trans('messages.keyword_please_enter_menu_name')}}"
-                },/*,
-                menulink: {
-                    required: "{{trans('messages.keyword_please_enter_menu_link')}}"
-                },*/
-                menuclass: {
-                    required: "{{trans('messages.keyword_please_enter_menu_class')}}"
+                },
+                menutype: {
+                    required: "{{trans('messages.keyword_please_select_menu_type')}}"
                 }
             }
 
@@ -215,6 +407,5 @@ $(document).ready(function() {
   });
 
 </script>
-
 
 @endsection

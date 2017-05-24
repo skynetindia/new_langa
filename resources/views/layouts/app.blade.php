@@ -34,107 +34,126 @@
     <div class="left_col scroll-view">
       <div class="navbar nav_title"> <a href="{{url('/')}}" class="site_title md"><img src="{{asset('images/LOGO-Easy-LANGA.svg')}}" alt="Easy Langa" class="img" > </a>
       	<a href="{{url('/')}}" class="site_title sm"><img src="{{asset('images/easy-logo.svg')}}" alt="Easy Langa" class="img" > </a>
-       </div>
-      <br>
-      
+       </div>       
+      <br>      
       <!-- sidebar menu -->
       <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-        <div class="menu_section"> <br>
-          <br>
-          <br>
-          <h3>Primario</h3>
-          <ul class="nav side-menu">
-            <li><a href="{{url('/')}}"><img src="{{asset('images/BACHECA.svg')}}" alt="Bacheca" class="menu-icon" > <span>Bacheca</span></a> </li>
-            <li><a><img src="{{asset('images/ENTI.svg')}}" alt="Enti" class="menu-icon" > <span>Enti</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li><a href="{{url('/enti/myenti')}}">Miei</a></li>
-                <li><a href="{{url('/enti')}}">Tutti</a></li>
+      <div class="menu_section">
+      <br><br><br><h3>Primario</h3>
+      <ul class="nav side-menu">
+      <li><a href="{{url('/')}}"><img src="{{url('images/BACHECA.svg')}}" alt="Bacheca" class="menu-icon"> Bacheca</a>
+      </li><?php
+        $module = DB::table('modulo')
+          ->where('modulo_sub', null)
+          ->where('type', 1)
+          ->orderBy('frontpriority')
+          ->orderBy('id')
+          ->get();
+
+        foreach ($module as $module) {
+          $modulo = ucfirst(strtolower($module->modulo));
+          $submodule = DB::table('modulo')
+            ->where('modulo_sub', $module->id)
+            ->get();
+        
+          if( $module->modulo == "STATISTICHE"){ ?>
+            <br>
+            <h3>Secondario</h3>
+            <br>
+
+          <?php }
+
+      if($submodule->isEmpty()){  ?>
+         <?php if ( $module->modulo == "MAPPE" ) { ?>
+         <li>
+         <a><img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" >{{ $module->modulo }}
+            <span class="fa fa-chevron-down"></span>
+          </a> 
+            <ul class="nav child_menu">
+                <div class="container-fluid col-md-12" style="background:#2A3F54;color:#ffffff">
+                      <form action="http://maps.google.com/maps" onsubmit="punto()" method="get" target="new">
+                          <div>
+                            <div class="col-md-12">
+                              <div class="col-md-6">
+                                  <br><br><input style="display:inline" class="form-control" style="color:#000000;max-width:250px;" type="text" name="saddr" placeholder="Da">
+                              </div>
+                              <br>
+                              <div class="col-md-6">
+                                  <br><input style="display:inline" class="form-control" style="color:#000000;max-width:250px;" type="text" name="daddr" placeholder="A">
+                              </div>
+                              <div class="col-md-12">
+                                  <input style="display:inline" type="hidden" id="prova" name="daddr">
+                                  <br><input style="display:inline;background:#f37f0d; color:#ffffff;" class="form-control" type="submit" value="Go"><br><br><br>
+                              </div>
+                          </div>
+                      </div>
+                  </form>     
+              </div>
               </ul>
             </li>
-            <li><a><img src="{{asset('images/CALENDARIO.svg')}}" alt="Calendario" class="menu-icon" > <span>Calendario</span> <span class="fa fa-chevron-down"></span></a>
+
+          <?php } else {  ?>
+             <li><a href="<?php if(isset($module->modulo_link)) { echo url("$module->modulo_link"); } ?>"> <img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" > 
+            {{ $module->modulo }} <?php } ?>
+          </a> </li>       
+
+        <?php  } else {  ?>  
+
+        <li>
+          <a ><img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" > {{$modulo}} 
+            <span class="fa fa-chevron-down"></span>
+          </a>                                  
+          
+          <ul class="nav child_menu">
+    <?php
+          if ($submodule) {
+            foreach ($submodule as $submodule) {
+
+              $subsubmodule = DB::table('modulo')
+                ->where('modulo_sub', $submodule->id)
+                ->get();
+              
+          if ($subsubmodule->isEmpty()) { 
+    ?>    
+          <li><a href="{{url("$submodule->modulo_link")}}">{{$submodule->modulo}}</a></li>
+    <?php
+          }
+
+          else {
+    ?>
+            <li><a <?php if(!empty($submodule->modulo_link)) { ?> href="<?php echo url("$submodule->modulo_link"); ?>" <?php } ?> >{{$submodule->modulo}} <span class="fa fa-chevron-down"> </span> </a>
               <ul class="nav child_menu">
-                <li><a href="{{url('/calendario/0')}}">Miei</a></li>
-                <li><a href="{{url('/calendario/1')}}">Tutti</a></li>
+    <?php
+            foreach ($subsubmodule as $subsubmodule1) {
+    ?>
+            <li>
+            <a href="{{url("$subsubmodule1->modulo_link")}}">{{$subsubmodule1->modulo}}</a>
+            </li>
+
+    <?php
+           }
+    ?>
+              </ul>    
+            </li>
+    <?php
+            }
+        }
+    ?> 
               </ul>
             </li>
-            <li><a><img src="{{asset('images/PREVENTIVI.svg')}}" alt="Preventivi" class="menu-icon" > <span>Preventivi</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li class="sub_menu"><a href="{{url('/estimates/my')}}">Miei</a> </li>
-                <li><a href="{{url('/estimates')}}">Tutti</a> </li>
-              </ul>
-            </li>
-            <li><a><img src="{{asset('images/PROGETTI.svg')}}" alt="Progetti" class="menu-icon" > <span> Progetti</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li><a href="{{url('/progetti/miei')}}">Miei</a></li>
-                <li><a href="{{url('/progetti')}}">Tutti</a></li>
-              </ul>
-            </li>
-            <li><a><img src="{{asset('images/CONTABILITA.svg')}}" alt="Contabilità" class="menu-icon" > <span>Contabilità</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li><a href="{{url('/pagamenti')}}"> Disposizioni</a>
-                <li><a href="{{url('/pagamenti/tranche/elenco')}}">Fatture</a> </li>
-                <li><a>Metodi<span class="fa fa-chevron-down"></span></a>
-                  <ul class="nav child_menu">
-                    <li><a href="{{url('/pagamenti/coordinate')}}">Coordinate bancarie</a> </li>
-                    <li><a href="{{url('/onworking')}}">PayPal <span class="label label-warning pull-right">In corso...</span></a> </li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li><a><img src="{{asset('images/MAILISTICA.svg')}}" alt="Mailistica" class="menu-icon" > <span>Mailistica</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li><a href="{{url('/onworking')}}">Ufficiale <span class="label label-warning pull-right">In corso...</span></a></li>
-                <li><a href="{{url('/newsletter')}}">Newsletter</a></li>
-              </ul>
-            </li>
-          </ul>
+    <?php
+            }
+        }
+
+      }
+    ?>
         </div>
-        <div class="menu_section">
-          <h3>Secondario</h3>
-          <ul class="nav side-menu">
-            <li><a><img src="{{asset('images/STATISTICHE.svg')}}" alt="Statistiche" class="menu-icon" > <span>Statistiche</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li><a href="{{url('/statistiche/economiche')}}">Economiche</a>
-                <li><a href="{{url('/onworking')}}">Accessi <span class="label label-warning pull-right">In corso...</span></a> </li>
-              </ul>
-            </li>
-            <li><a><img src="{{asset('images/INFO.svg')}}" alt="Info" class="menu-icon" > <span> Info</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li><a href="{{url('/contatti')}}">Contatti</a>
-                <li><a href="{{url('/faq')}}">FAQ's</a>
-                <li><a href="{{url('/changelog')}}">Versioni Easy</a>
-                <li><a href="{{url('/onworking')}}">Acquisti <span class="label label-warning pull-right">In corso...</span></a> </li>
-              </ul>
-            </li>
-            <li><a><img src="{{asset('images/MAPPE.svg')}}" alt="Mappe" class="menu-icon" > <span> Mappe</span> <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <div class="container-fluid col-md-12 side-menu-map">
-                  <form action="http://maps.google.com/maps" onsubmit="punto()" method="get" target="new">
-                    <div class="col-md-12">
-                    <div class="form-group col-md-6">
-                          <input class="form-control" type="text" name="saddr" placeholder="Da">
-                        </div>
-                        <div class="form-group  col-md-6">
-                          <input class="form-control" type="text" name="daddr" placeholder="A">
-                        </div>
-                        <div class="form-group col-md-12">
-                          <input type="hidden" id="prova" name="daddr">
-                          <input class="form-control" type="submit" value="Go">
-                        </div>
-                    </div>
-                  </form>
-                </div>
-              </ul>
-            </li>
-            
-            <!-- change Segnalazioni href  -->
-            
-            <li><a href="{{url('/valutaci')}}"><img src="{{asset('images/SEGNALAZIONI.svg')}}" alt="Segnalazioni" class="menu-icon" > <span>Segnalazioni</span></a> </li>
-          </ul>
-        </div>
-      </div>
-      
-      <!-- /sidebar menu --> 
+
+    </div>
+
+      <!-- /sidebar menu -->
+
+
       <script type="text/javascript">
         
             function toggleFullScreen() {
@@ -162,9 +181,14 @@
             </script> 
       
       <!-- /menu footer buttons -->
-      <div class="sidebar-footer hidden-small"> <a href="{{url('/')}}" data-toggle="tooltip" data-placement="top" title="Home"> <span class="fa fa-home" aria-hidden="true"> </span> </a> <a href="http://www.client.easy.langa.tv/" target=_"blank" data-toggle="tooltip" data-placement="top" title="Client LANGA"> <span class="fa fa-th-large" aria-hidden="true"></span> </a> <a href="http://www.reseller.easy.langa.tv/" target=_"blank" data-toggle="tooltip" data-placement="top" title="Reseller LANGA"> <span class="fa fa-th" aria-hidden="true"></span> </a> <a href="http://www.betaeasy.langa.tv/" target="_blank" data-toggle="tooltip" data-placement="top" title="Easy Beta"> β</span> </a>
+      <div class="sidebar-footer hidden-small"> <a href="{{url('/')}}" data-toggle="tooltip" data-placement="top" title="Home"> <span class="fa fa-home" aria-hidden="true"> </span> </a> <a href="http://www.client.easy.langa.tv/" target=_"blank" data-toggle="tooltip" data-placement="top" title="Client LANGA"> <span class="fa fa-th-large" aria-hidden="true"></span> </a> <a href="http://www.reseller.easy.langa.tv/" target=_"blank" data-toggle="tooltip" data-placement="top" title="Reseller LANGA"> <span class="fa fa-th" aria-hidden="true"></span> </a> <a href="http://www.betaeasy.langa.tv/" target="_blank" data-toggle="tooltip" data-placement="top" title="Easy Beta"><span> β</span> </a>
+      
+      
         <hr>
         <a href="{{url('/profilo')}}" data-toggle="tooltip" data-placement="top" title="Profilo"> <span class="fa fa-user" aria-hidden="true"> </span>  </a> <a onclick="toggleFullScreen();" data-toggle="tooltip" data-placement="top" title="FullScreen"> <span class="fa fa-arrows-alt" aria-hidden="true"></span> </a> <a href="{{url('/cestino')}}" data-toggle="tooltip" data-placement="top" title="Cestino"> <span class="fa fa-trash" aria-hidden="true"></span> </a> <a href="{{url('/logout')}}" data-toggle="tooltip" data-placement="top" title="Logout"> <span class="fa fa-sign-out" aria-hidden="true"></span> </a> </div>
+        
+        
+        
       <!-- /menu footer buttons --> 
     </div>
   </div>
@@ -617,7 +641,7 @@
 
     <!-- Notification -->
 
-    <div class="row">
+    <?php /*?><div class="row">
     	
     <?php
 			$userId = Auth::id();
@@ -664,7 +688,7 @@
 
   <?php  } ?>
 
-    </div>
+    </div><?php */?>
 
 
     <div class="row tile_count">
@@ -676,12 +700,13 @@
   <!-- footer content -->
   <footer>
     <div class="pull-right">
-      <p><small>2016 © Easy <strong>LANGA</strong> da e per <a href="http://www.langa.tv/"><strong>LANGA Group</strong></small><small><a href="http://easy.langa.tv/changelog"> versione 1.04</small></small></p>
-      </a> </div>
+      <p><small>2016 © Easy <strong>LANGA</strong> da e per <a href="http://www.langa.tv/"><strong>LANGA Group</strong></a></small><small><a href="http://easy.langa.tv/changelog"> versione 1.04  </a></small></p>
+     </div>
     <div class="clearfix"></div>
-    </div>
+   <!-- </div>-->
   </footer>
   <!-- /footer content --> 
+</div>
 </div>
 
 <!-- jQuery --> 

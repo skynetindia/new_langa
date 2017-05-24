@@ -371,7 +371,8 @@ class HomeController extends Controller {
         // Aggiorno l'immagine memorizzandola con un nome univoco                   
       	    $validator = Validator::make($request->all(), [
                     'name' => 'required|max:20',                                        
-                    'email' => 'required|max:255|unique:users,email,'.$request->user_id.',id',                    
+                    /*'email' => 'required|max:255|unique:users,email,'.$request->login_user_id.',id',*/                    
+                    'email' => 'required|max:255',                    
                     'sconto' => 'numeric',
                     'sconto_bonus' => 'numeric',
                     'rendita' => 'numeric',
@@ -379,14 +380,21 @@ class HomeController extends Controller {
                     'password' => 'max:64',
                     'logo' => 'image|max:2000'                    
                 ]);  
-               
+            
                 if ($validator->fails()) {
                     return Redirect::back()
                         ->withInput()
                         ->withErrors($validator);
                 }                
 
-                $oldDetails = DB::table('users')->where('id',$request->user_id)->first();
+                $CheckemailExistt = DB::table('users')->where('email',$request->email)->where('id','!=',$request->login_user_id)->count();
+                if($CheckemailExistt > 0){
+                    return Redirect::back()
+                        ->with('msg', '<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Email already exist!</div>');
+                }
+
+
+                $oldDetails = DB::table('users')->where('id',$request->login_user_id)->first();
                 /*$queries = DB::getQueryLog();
                 $last_query = end($queries);
                 print_r($last_query);
@@ -405,7 +413,7 @@ class HomeController extends Controller {
 
 
                DB::table('users')
-                ->where('id', $request->user_id)
+                ->where('id', $request->login_user_id)
                 ->update(array(
                 'name' => $request->name,
                 'email' => $request->email,                
@@ -416,8 +424,9 @@ class HomeController extends Controller {
                 'rendita_reseller' => (isset($request->rendita_reseller))? $request->rendita_reseller : $oldDetails->rendita_reseller,
                 'is_internal_profile' => (isset($request->is_internal_profile))? $request->is_internal_profile : $oldDetails->is_internal_profile,                
                 'logo' => $nome
-               ));        
-            return Redirect::back();
+               ));                    
+            return Redirect::back()
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_profile_updated_successfully').'</div>');
     }
     public function aggiungilink(Request $request) {
         $validator = Validator::make($request->all(), [

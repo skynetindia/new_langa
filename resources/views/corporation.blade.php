@@ -1,73 +1,20 @@
 @extends('layouts.app')
-@section('content')
-<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+@section('content') 
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script> 
 <!-- Latest compiled and minified CSS -->
 <link href="{{asset('/build/css/bootstrap-table.min.css')}}" rel="stylesheet">
-<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">-->
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">--> 
 
-<!-- Latest compiled and minified JavaScript -->
-<script src="{{asset('/build/js/bootstrap-table.min.js')}}"></script>
-<!--<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>-->
+<!-- Latest compiled and minified JavaScript --> 
+<script src="{{asset('/build/js/bootstrap-table.min.js')}}"></script> 
+<!--<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>--> 
 
-<!-- Latest compiled and minified Locales -->
-<script src="{{asset('/build/js/bootstrap-table-it-IT.min.js')}}"></script>
+<!-- Latest compiled and minified Locales --> 
+<script src="{{asset('/build/js/bootstrap-table-it-IT.min.js')}}"></script> 
 <!--<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>-->
 
-<h1>Enti</h1><hr>
-<style>
-tr:hover {
-	background: #f39538;
-}
-.selected {
-	font-weight: bold;
-	font-size: 16px;
-}
-th {
-	cursor: pointer;
-}
-li label {
-	padding-left: 10px;
-}
-.button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 3px 15px;
-    padding-bottom: 6px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 4px;
-}
-.button2 { /* blue */
-    background-color: white;
-    color: black;
-    border: 2px solid #337ab7;
-}
-
-.button2:hover {
-    background-color: #337ab7;
-    color: white;
-}
-
-.button3 { /* red */
-    background-color: white;
-    color: black;
-    border: 2px solid #d9534f;
-}
-
-.button3:hover {
-    background-color: #d9534f;
-    color: white;
-}
-</style>
-
-
+<h1>Enti</h1>
+<hr>
 <script>
     
     
@@ -81,70 +28,44 @@ li label {
 </script>
 <?php $loginuser = collect($loginuser)->toArray();?>
 @if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
-<form action="{{ url('/enti/add/') }}" method="post" style="display:inline;">
-{{ csrf_field() }}
-<button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo ente"><i class="fa fa-plus"></i></button>
+<form action="{{ url('/enti/add/') }}" method="post">
+  {{ csrf_field() }}
+  <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo ente"><i class="fa fa-plus"></i></button>
 </form>
-@endif
-<!-- Inizio filtraggio miei/tutti -->
+@endif 
+<!-- Inizio filtraggio miei/tutti --> 
 
-@if(isset($miei))
-<a id="miei" href="{{url('/enti/miei')}}" style="display:inline;">
-<button class="button button2" type="button" name="miei" title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>" style="background-color:#337AB7;color:#ffffff">{{trans('messages.keyword_my')}}</button>
-</a>
-<a id="tutti" href="{{url('/enti')}}" style="display:inline;">
-<button class="button button3" type="button" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>">{{trans('messages.keyword_all')}}</button>
-</a>
-@else
-<a id="miei" href="{{url('/enti/miei')}}" style="display:inline;">
-<button class="button button2" type="button" name="miei" title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>">{{trans('messages.keyword_my')}}</button>
-</a>
-<a id="tutti" href="{{url('/enti')}}" style="display:inline;">
-<button class="button button3" type="button" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>" style="background-color:#D9534F;color:#ffffff">{{trans('messages.keyword_my')}}</button>
-</a>
-@endif
-<!-- Fine filtraggio miei/tutti -->
+@if(isset($miei)) <a id="miei" class="button button2" href="{{url('/enti/myenti')}}" name="miei" title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>">{{trans('messages.keyword_my')}}</a>
+<a id="tutti" href="{{url('/enti')}}"  class="button button3" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>">{{trans('messages.keyword_all')}}</a> 
+@else 
+<a id="miei" class="button button2" href="{{url('/enti/miei')}}" name="miei"  title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>">{{trans('messages.keyword_my')}}</a>
+<a id="tutti" class="button button3" href="{{url('/enti')}}" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>">{{trans('messages.keyword_my')}}</a> 
+@endif 
+<!-- Fine filtraggio miei/tutti --> 
 @if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
-<div class="btn-group">
 
-<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-<button class="btn btn-primary" type="button" name="update" title="<?php echo trans('messages.keyword_edit_-_edit_the_last_selected_entities');?>"><i class="fa fa-pencil"></i></button>
-</a>
-
-<a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
-<button class="btn btn-info" type="button" name="duplicate" title="<?php echo trans('messages.keyword_duplicate_-_duplicates_selected_entities');?>"><i class="fa fa-files-o"></i></button>
-</a>
-
-<a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title="<?php echo trans('messages.keyword_delete_-_delete_selected_entities') ?>"><i class="fa fa-trash"></i></button>
-</a>
-
-<a id="newclient" onclick="multipleAction('newclient');" style="display:inline;">
-<button class="btn btn-warning" type="button" name="newclient" title="<?php echo trans('messages.keyword_create_send_credentials_for_the_customer_entity');?>">{{trans('messages.keyword_new_client')}}</button>
-</a>
-</div>
-
-<div class="skype-call">
-<a id="call" href="#">
-<button class="btn btn-warning" type="button" name="call" title="skype "><img src="../images/phone-call.png" alt="skype call"/></button>
-</a>
-</div>
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="<?php echo trans('messages.keyword_edit_-_edit_the_last_selected_entities');?>"><i class="fa fa-pencil"></i></a>
+<a id="duplicate" onclick="multipleAction('duplicate');" class="btn btn-info" name="duplicate" title="<?php echo trans('messages.keyword_duplicate_-_duplicates_selected_entities');?>"><i class="fa fa-files-o"></i></a> 
+<a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="<?php echo trans('messages.keyword_delete_-_delete_selected_entities') ?>"> <i class="fa fa-trash"></i></a>
+<a id="newclient" onclick="multipleAction('newclient');" class="btn btn-warning" name="newclient" title="<?php echo trans('messages.keyword_create_send_credentials_for_the_customer_entity');?>">{{trans('messages.keyword_new_client')}}  </a> 
+  <div class="space10"></div>
+<div class="skype-call"> <a id="call" href="#" class="btn btn-warning"  title="skype "><img src="../images/phone-call.png" alt="skype call"/> Skype call</a> </div>
+<div class="space30"></div>
 @endif
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php if(isset($miei)) echo url('enti/myenti/json'); else echo url('/enti/json');?>" data-classes="table table-bordered" id="table">
-<thead>
-<th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
-<th data-field="nomeazienda" data-sortable="true">{{trans('messages.keyword_company_name')}}</th>
-<th data-field="nomereferente" data-sortable="true">{{trans('messages.keyword_company_name')}}</th>
-<th data-field="settore" data-sortable="true">{{trans('messages.keyword_sector')}}</th>
-<th data-field="telefonoazienda" data-sortable="true">{{trans('messages.keyword_telephone_company')}}</th>
-<th data-field="email" data-sortable="true">{{trans('messages.keyword_email')}}</th>
-<th data-field="indirizzo" data-sortable="true">{{trans('messages.keyword_address')}}</th>
-<th data-field="responsabilelanga" data-sortable="true">{{trans('messages.keyword_responsible')}} LANGA</th>
-<th data-field="statoemotivo" data-sortable="true">{{trans('messages.keyword_emotional_state')}}</th>
-<th data-field="tipo" data-sortable="true">{{trans('messages.keyword_guy')}}</th>
-</thead>
+  <thead>
+  <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
+    <th data-field="nomeazienda" data-sortable="true">{{trans('messages.keyword_company_name')}}</th>
+    <th data-field="nomereferente" data-sortable="true">{{trans('messages.keyword_company_name')}}</th>
+    <th data-field="settore" data-sortable="true">{{trans('messages.keyword_sector')}}</th>
+    <th data-field="telefonoazienda" data-sortable="true">{{trans('messages.keyword_telephone_company')}}</th>
+    <th data-field="email" data-sortable="true">{{trans('messages.keyword_email')}}</th>
+    <th data-field="indirizzo" data-sortable="true">{{trans('messages.keyword_address')}}</th>
+    <th data-field="responsabilelanga" data-sortable="true">{{trans('messages.keyword_responsible')}} LANGA</th>
+    <th data-field="statoemotivo" data-sortable="true">{{trans('messages.keyword_emotional_state')}}</th>
+    <th data-field="tipo" data-sortable="true">{{trans('messages.keyword_guy')}}</th>
+      </thead>
 </table>
-
 <script>
 var selezione = [];
 var indici = [];
@@ -260,8 +181,5 @@ function multipleAction(act) {
 		}
 }
 
-</script>
-
-
-
+</script> 
 @endsection

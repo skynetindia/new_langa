@@ -123,6 +123,9 @@ Route::get('users/json', 'AdminController@getjsonusers');
 Route::get('/admin/modify/utente/{utente?}', 'AdminController@modificautente');
 // store user details
 Route::post('/admin/update/utente/{utente?}', 'AdminController@aggiornautente');
+//Delete user
+Route::get('/admin/destroy/utente/{utente}', 'AdminController@destroyutente');
+
 // get role permission
 Route::get('/admin/role/permission/{ruolo_id?}', 'AdminController@rolepermission');
 
@@ -206,6 +209,7 @@ Route::get('/admin/taxonomies/json', 'AdminController@getjson');
 //Dynamic Menu
 Route::get('/admin/menu', 'AdminController@menu');
 Route::any('/menu/add', 'AdminController@menuadd');
+Route::get('/menu/parentmenu/{parent}', 'AdminController@parentmenu');
 Route::get('/menu/submenu/{parent}', 'AdminController@submenu');
 Route::post('/menu/store', 'AdminController@storemenu');
 Route::get('/menu/json', 'AdminController@menujson');
@@ -237,29 +241,6 @@ Route::post('/admin/update/tipo', 'AdminController@alerttipoUpdate');
 Route::get('/admin/delete/tipo/{id_tipo}', 'AdminController@alerttipodelete');
 // send alert to users
 Route::get('/send-alert', 'AdminController@sendalert');
-
-// ========================================================================================
-// 									Notification Route		
-// ========================================================================================		
-// user send notification		
-Route::get('/send-notification', 'AdminController@sendnotification');		
-// detail notification		
-Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');		
-// detail notification json		
-Route::get('/notifica/detail/json/{id?}', 'AdminController@detailnotificationjson');		
-// add notification		
-Route::get('/admin/notification/{id?}', 'AdminController@addadminnotification');		
-// user read notification		
-Route::get('/notification/user-read', 'AdminController@userreadnotification');		
-// make comment in notification		
-Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');		
-// show all notification		
-Route::get('/notifiche', 'HomeController@mostranotifiche');		
-// get list of notifications 		
-Route::get('/notifiche/json', 'HomeController@getjsonnotifiche');		
-// delete notification		
-Route::get('/notifiche/delete/{id}', 'HomeController@cancellanotifica');	
-
 
 // Deparments
 Route::get('admin/tassonomie/dipartimenti', 'AdminController@dipartimenti');
@@ -345,11 +326,6 @@ Route::get('/alert/make-comment', 'AdminController@alertmakecomment');
 // get citi list by state id
 Route::get('/cities/{id}','CommonController@getCityList');
 
-	// download csv		
-Route::get('/download/csv','CommonController@downloadcsv');		
-// upload csv		
-Route::post('/upload/csv','CommonController@uploadcsv');
-
 // ========================================================================================
 
 // cleint sign up form
@@ -369,27 +345,105 @@ Route::get('/notification/json', 'AdminController@getnotificationjson');
 Route::get('/notification/enti/json', 
 	'AdminController@getentinotificationjson');
 
-// // add notification
-// Route::get('/admin/notification/{id?}', 
-// 	'AdminController@addadminnotification');
+// add notification
+Route::get('/admin/notification/{id?}', 
+	'AdminController@addadminnotification');
 
 Route::get('/notification/delete/{id}', 'AdminController@deletenotification');
 
 // store notification
 Route::post('/admin/notification/store/{id?}', 'AdminController@storeadminnotification');
 
-// // detail notification
-// Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');
+// detail notification
+Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');
 
 // make comment in notification
-// Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');
+Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');
 
-// // user read notification
-// Route::get('/notification/user-read', 'AdminController@userreadnotification');
+// user read notification
+Route::get('/notification/user-read', 'AdminController@userreadnotification');
 
 
 // make comment in role wised notification
 Route::get('/note_role/make-comment', 'AdminController@notemakecomment');
 // role wised read notification
 Route::get('/note_role/user-read', 'AdminController@userreadnote');
+
+/* ================================ Login Activity Admin ============================= */
+// show list of users
+Route::get('/admin/loginactivity', 'AdminController@activitylogs');
+// get users list json
+Route::get('loginactivity/json', 'AdminController@getjsonactivitylogs');
+Route::get('/admin/loginactivity/delete/{id}', 'AdminController@deleteActivitylogs');
+
+/* ================================= Calendar Route ================================== */
+
+Route::get('/calendario/{tipo}', 'CalendarioController@index');
+Route::get('/calendario/show/{tipo}/day/{day}/month/{month}/year/{year}', 'CalendarioController@show');
+Route::post('/calendario/add', 'CalendarioController@store');
+Route::get('/calendario/delete/event/{event}', 'CalendarioController@destroy');
+Route::get('/calendario/edit/event/{event}', 'CalendarioController@edit');
+Route::post('/calendario/update/event/{event}', 'CalendarioController@update');
+
+/* ================================= Project Route =================================================*/
+// Progetti
+// Aggiungi nuovo progetto
+Route::get('/progetti', 'ProjectController@index');
+Route::get('/progetti/miei', 'ProjectController@miei');
+Route::get('/progetti/add', 'ProjectController@aggiungi');
+// Salva il nuovo progetto
+Route::post('/progetti/store', 'ProjectController@store');
+Route::get('/progetti/delete/project/{project}', 'ProjectController@destroy');
+Route::get('/progetti/duplicate/project/{project}', 'ProjectController@duplicate');
+Route::get('/progetti/modify/project/{project}', 'ProjectController@modify');
+Route::post('/progetti/modify/project/{project}', 'ProjectController@update');
+Route::get('/progetti/files/{project}', 'ProjectController@vedifiles');
+Route::get('/progetti/files/elimina/{project}', 'ProjectController@eliminafile');
+Route::get('/progetti/add/{id}', 'ProjectController@creadapreventivo');
+Route::get('progetti/miei/json', 'ProjectController@getJsonMiei');
+Route::get('progetti/json', 'ProjectController@getjson');
+
+
+Route::get('/progetti/files/{id}', 'ProjectController@filequote');
+Route::post('/progetti/uploadfiles/{code}', 'ProjectController@fileupload');
+Route::get('/progetti/getfiles/{code}', 'ProjectController@fileget');
+Route::get('/progetti/deletefiles/{id}', 'ProjectController@filedelete');
+Route::get('/progetti/updatefiletype/{typeid}/{id}', 'ProjectController@filetypeupdate');
+Route::get('/progetti/getdefaultfiles/{quote_id}', 'ProjectController@fileget');
+
+
+/* ================================ Invoice Route ====================================== */
+// show list of invoices
+Route::get('/pagamenti/tranche/elenco', 'AccountingController@elencotranche');
+// get invoices in json 
+Route::get('/pagamenti/tranche/json', 'AccountingController@getjsontuttetranche');
+// show invoice modification page
+Route::get('/pagamenti/tranche/modifica/{id}', 'AccountingController@modificatranche');
+// update invoice modification page
+Route::post('/pagamenti/tranche/update/{id}', 'AccountingController@aggiornatranche');
+// generate pdf for invoice
+Route::get('/pagamenti/tranche/pdf/{id}', 'AccountingController@generapdftranche');
+// show list of invoices for selected element
+Route::get('/pagamenti/mostra/accounting/{accounting}', 'AccountingController@mostradisposizione');
+// get invoices in json for selected element
+Route::get('/pagamenti/tranche/json/id/{id}', 'AccountingController@getjsontranche');
+// add invoices for selected element
+Route::get('/pagamenti/tranche/add/{id}', 'AccountingController@aggiungitranche');
+// store invoice details
+Route::post('/pagamenti/tranche/store', 'AccountingController@salvatranche');
+// delete invoicea
+Route::get('/pagamenti/tranche/delete/{id}', 'AccountingController@eliminatranche');
+// copy invoices
+Route::get('/pagamenti/tranche/duplicate/{id}', 'AccountingController@duplicatranche');
+// upload files for invoices
+Route::post('/add/fatture/uploadfiles/{code}', 'AccountingController@fileupload');
+// display uploaded file for invoices
+Route::get('/add/fatture/getfiles/{code}', 'AccountingController@fileget');
+// delete invoice's uploaded file
+Route::get('/add/fatture/deletefiles/{id}', 'AccountingController@filedelete');
+// update invoice's uploaded file
+Route::get('/add/fatture/updatefiletype/{typeid}/{fileid}', 'AccountingController@filetypeupdate');
+
+
+
 
