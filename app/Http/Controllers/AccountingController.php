@@ -77,9 +77,10 @@ class AccountingController extends Controller
 								->where('id', $stato->id_tipo)
 								->first();
 						
-				$tra->statoemotivo = $statoemotivo->name;
+				$tra->statoemotivo = '<span style="color:'.$statoemotivo->color.'">'.$statoemotivo->name.'</span>';			
+				
 			}
-			if ($user->id === 0 || $user->dipartimento === "AMMINISTRAZIONE") {
+			if ($user->id === 0 || $user->dipartimento === 1) {
             	$elenco_tranche[] = $tra;
         	} else if($user->id == $tra->user_id) {
 				$elenco_tranche[] = $tra;	
@@ -113,8 +114,9 @@ class AccountingController extends Controller
 	{
 		$idtranche = $request->id;
 		$tranche = DB::table('tranche')
-							->where('id', $idtranche)
-							->first();
+			->where('id', $idtranche)
+			->first();
+
 		$user = $request->user();
 		
 		if(!$this->hasPower($user, $tranche)) {
@@ -283,6 +285,9 @@ class AccountingController extends Controller
 		$this->stampatesto($pdf, 178, -13, $tranche->dapagare, 24, 'L', 1, 'Nexa', 'B', 8);
 		$id_perfile = substr($tranche->idfattura, 0, 5) . '-' . substr($tranche->idfattura, 6);
 		$pdf->Output($id_perfile . '_' . $disposizione->nomeprogetto . '_LANGA Group' . '.pdf', 'I');
+
+		$logs = 'Generate pdf for Invoice -> ( Invoice ID: '. $request->id . ')';
+		//storelogs($request->user()->id, $logs);
 	}
 
 	public function stampaTesto(&$pdf, $x, $y, $testo, $larghezza, $allineamento, $spessore, $family, $type, $size)
@@ -378,11 +383,11 @@ class AccountingController extends Controller
 				if($scontoagente[$i] > $scontoagente_max) {
 					return Redirect::back()
 						->withInput()
-                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Non ti è permesso imporre uno sconto agente maggiore a ' . $scontoagente_max . '</h4></div>');
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Non ti è permesso imporre uno sconto agente maggiore a ' . $scontoagente_max . '</div>');
 				} else if($scontobonus[$i] > $scontobonus_max) {
 					return Redirect::back()
 						->withInput()
-                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Non ti è permesso imporre uno sconto bonus maggiore a ' . $scontobonus_max . '</h4></div>');	
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Non ti è permesso imporre uno sconto bonus maggiore a ' . $scontobonus_max . '</div>');	
 				}
 			}
 		}
@@ -404,24 +409,27 @@ class AccountingController extends Controller
 						'frequenza' => $request->frequenza,
 						'DA' => $request->DA,
 						'A' => $request->A,
-						'idfattura' => $request->idfattura,
+						'idfattura' => isset($request->idfattura) ? $request->idfattura : '',
 						'emissione' => $request->emissione,
 						'indirizzospedizione' => $request->indirizzospedizione,
 						'privato' => $request->privato,
 						'testoimporto' => $request->importo_nopercentuale,
 						'base' => $request->base,
-						'modalita' => $request->modalita,
+						'modalita' => isset($request->modalita) ? $request->modalita : '',
 						'tipofattura' => $tipofattura,
 						'iban' => isset($request->iban) ? $request->iban : '',
 						'peso' => isset($request->peso) ? $request->peso : '',
-						'netto' => $request->netto,
-						'scontoaggiuntivo' => $request->scontoaggiuntivo,
-						'imponibile' => $request->imponibile,
-						'prezzoiva' => $request->prezzoiva,
-						'percentualeiva' => $request->percentualeiva,
-						'dapagare' => $request->dapagare,
+						'netto' => isset($request->netto) ? $request->netto : '',
+						'scontoaggiuntivo' => isset($request->scontoaggiuntivo) ? $request->scontoaggiuntivo : '',
+						'imponibile' => isset($request->imponibile) ? $request->imponibile : '',
+						'prezzoiva' => isset($request->prezzoiva) ? $request->prezzoiva : '',
+						'percentualeiva' => isset($request->percentualeiva) ? $request->percentualeiva : '',
+						'dapagare' => isset($request->dapagare) ? $request->dapagare : '',
                       ]);
-					  
+		
+		$logs = 'Add New Invoice -> ( Invoice ID: '. $tranche . ')';
+		//storelogs($request->user()->id, $logs);
+
 		if($request->statoemotivo!=null) {
 			// Memorizzo lo stato emotivo
 			$tipo = DB::table('statiemotivipagamenti')
@@ -435,7 +443,7 @@ class AccountingController extends Controller
 		
 		// Salvo il corpo fattura
 		if(isset($request->ordine)) {
-			$ordine = $request->ordine;
+			$ordine = isset($request->ordine) ? $request->ordine : 0;
 			$descrizione = $request->desc;
 			$qt = $request->qt;
 			$subtotale = $request->subtotale;
@@ -460,7 +468,7 @@ class AccountingController extends Controller
 					  
 		return redirect('/pagamenti/mostra/accounting/' . $request->id_disposizione)
                         ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_addsuccessmsg').'!</h4></div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').'!</div>');
 	}
 
 
@@ -539,11 +547,11 @@ class AccountingController extends Controller
 				if($scontoagente[$i] > $scontoagente_max) {
 					return Redirect::back()
 						->withInput()
-                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_arenotallowed_impose_agent_discount').' ' . $scontoagente_max . '</h4></div>');
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_arenotallowed_impose_agent_discount').' ' . $scontoagente_max . '</div>');
 				} else if($scontobonus[$i] > $scontobonus_max) {
 					return Redirect::back()
 						->withInput()
-                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_arenotallowed_impose_bonus').' ' . $scontobonus_max . '</h4></div>');	
+                        ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_arenotallowed_impose_bonus').' ' . $scontobonus_max . '</div>');	
 				}
 			}
 		}
@@ -597,6 +605,11 @@ class AccountingController extends Controller
 				'dapagare' => $request->dapagare,
         ));
 		
+
+		$logs = 'Update Invoice -> ( Invoice ID: '. $request->id . ')';
+		//storelogs($request->user()->id, $logs);
+
+
 		if($request->statoemotivo!=null) {
 			// Aggiorno lo stato emotivo
 			$tipo = DB::table('statiemotivipagamenti')
@@ -637,7 +650,7 @@ class AccountingController extends Controller
 		}
 					  
 		return redirect('/pagamenti/mostra/accounting/' . $iddisposizione->id_disposizione)
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_modified_layout_correctly').' !</h4></div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_modified_layout_correctly').' !</div>');
 	}
 
 	public function mostradisposizione(Request $request, Accounting $accounting)
@@ -846,6 +859,10 @@ class AccountingController extends Controller
 			'dapagare' => $tranche->dapagare,
         ]);
 		
+
+		$logs = 'Copy(Duplicate) Invoice -> ( Invoice ID: '. $id . ')';
+		//storelogs($request->user()->id, $logs);
+
 		$items = DB::table('corpofattura')
             ->where('id_tranche', $request->id)
             ->get();
@@ -866,7 +883,7 @@ class AccountingController extends Controller
 
 		return Redirect::back()
                        ->with('error_code', 5)
-                       ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_duplicatesuccessmsg').' !</h4></div>');
+                       ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_duplicatesuccessmsg').' !</div>');
 	}
 
 
@@ -876,17 +893,18 @@ class AccountingController extends Controller
 			->where('id', $request->id)
 			->update(array(
 				'is_deleted' => 1	
-		));
-		
+		));		
+
+		$logs = 'Delete Invoice -> ( Invoice ID: '. $request->id . ')';
+		//storelogs($request->user()->id, $logs);
+
 		return Redirect::back()
-                        ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_deletesuccessmsg').' !</h4></div>');
+            ->with('error_code', 5)
+            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' !</div>');
 	}
 
 
-// ========================================================================================
-// 									Provisions Functions
-// ========================================================================================
+	/* =========================  Provisions Functions ========================= */
 	
 	public function index(Request $request)
 	{
@@ -948,10 +966,13 @@ class AccountingController extends Controller
                         'nomeprogetto' => $request->nomeprogetto,
 						'id_progetto' => $request->idprogetto,
                       ]);
-					  
+		
+		$logs = 'Add New Provision -> ( Provision ID: '. $progetto . ')';
+		//storelogs($request->user()->id, $logs);
+
 		return Redirect::back()
             ->with('error_code', 5)
-            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_addsuccessmsg').'!</h4></div>');
+            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_addsuccessmsg').'!</div>');
 	}
 
 
@@ -977,25 +998,31 @@ class AccountingController extends Controller
 				'nomeprogetto' => $request->nomeprogetto,
 				'id_progetto' => $request->idprogetto,
         	));
+
+        $logs = 'Update Provision -> ( Provision ID: '. $accounting->id . ')';
+		//storelogs($request->user()->id, $logs);
 		
 		return Redirect::back()
                         ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> '.trans('messages.keyword_editsuccessmsg').' !</h4></div>');
+                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' !</div>');
 	}
 
 	public function duplicadisposizione(Request $request, Accounting $accounting)
 	{
 		$this->authorize('duplicate', $accounting);
         
-        DB::table('accountings')->insert([
+        $did = DB::table('accountings')->insertGetId([
             'user_id' => $request->user()->id,
             'nomeprogetto' => $accounting->nomeprogetto,
 			'id_progetto' => $accounting->idprogetto,
         ]);
 		
+		$logs = 'Copy(Duplicate) Disposal -> ( Disposal ID: '. $did . ')';
+		//storelogs($request->user()->id, $logs);
+
 		return Redirect::back()
-                        ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_duplicatesuccessmsg').'!</h4></div>');
+            ->with('error_code', 5)
+            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_duplicatesuccessmsg').'!</div>');
 	}
 
 	public function destroydisposizione(Request $request, Accounting $accounting)
@@ -1008,8 +1035,343 @@ class AccountingController extends Controller
 		
 		$accounting->delete();
 		
+		$logs = 'Delete Disposal -> ( Disposal ID: '. $accounting->id . ')';
+		//storelogs($request->user()->id, $logs);
+
 		return Redirect::back()
-                        ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_deletesuccessmsg').'!</h4></div>');
+	        ->with('error_code', 5)
+	        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_deletesuccessmsg').'!</div>');
+	}
+
+	public function mostracoordinate(Request $request){
+		
+		return view('pagamenti.coordinate');	
+	}
+
+
+	/* =========================  Stat Functions ========================= */
+
+	public function mostrastatistiche(Request $request)
+	{
+		$request->anno = date('Y');
+		$request->tipo = 0;
+		return $this->statisticheeconomiche($request);
+	}
+
+	public function statisticheeconomiche(Request $request)
+	{
+		if ($request->user()->id === 0 || $request->user()->dipartimento === 1) {
+
+			$guadagno = [];
+			$ricavi = [];
+			$spese = [];
+
+			$this->compilaSpese($spese, $request->anno);
+			$this->compilaRicavi($ricavi, $request->anno, $request->tipo);
+			$this->calcolaGuadagno($guadagno, $ricavi, $spese);
+
+			return view('statistiche', [
+				'guadagno' => $guadagno,
+				'ricavi' => $ricavi,
+				'spese' => $spese,
+				'anno' => $request->anno,
+				'tipo' => $request->tipo
+			]);
+
+
+		} else
+			return redirect('/unauthorized');
+	}
+
+	public function compilaSpese(&$spese, $anno)
+	{
+		for($i = 1; $i <= 12; $i++) {
+			if($i < 10)
+				$i = '0' . $i;
+			
+			$spese[] = $this->calcola($this->query($i, $anno));
+		}
+	}
+
+	public function query($mese, $anno)
+	{	
+		$spese = DB::table('costi')->get();		
+		$spese_array = [];
+		foreach($spese as $spesa) {
+			// gg/mm/aaaa 
+			$spesa_mese = substr($spesa->datainserimento, 3, 2);			
+			$spesa_anno = substr($spesa->datainserimento, 6, 4);
+			if($spesa_mese == $mese && $spesa_anno == $anno)
+				$spese_array[] = $spesa->costo;
+		}
+				
+		return $spese_array;
+	}
+
+	public function calcola($spese)
+	{		
+		$totale = 0;
+		for($i = 0; $i < count($spese); $i++)
+			$totale += $spese[$i];
+
+		return $totale;	
+	}
+
+
+	// ==================  date  ====================================== // 
+	// ==================  date  ====================================== // 
+	// ==================  date  ====================================== // 
+
+	public function statisticheeconomichedate(Request $request)
+	{	
+
+		$request->date = str_replace("-", "/", $request->date);
+
+		if ($request->user()->id === 0 || $request->user()->dipartimento === 1) {
+
+			$guadagno = [];
+			$ricavi = [];
+			$spese = [];
+
+			$request->tipo = 0;
+			$this->compilaSpeseDate($spese, $request->date);
+			$this->compilaRicaviDate($ricavi, $request->date, $request->tipo);
+			$this->calcolaGuadagnoDate($guadagno, $ricavi, $spese);
+			// dd($spese);
+			return view('statistiche', [
+				'guadagno' => $guadagno,
+				'ricavi' => $ricavi,
+				'spese' => $spese,
+				'anno' => $request->anno,
+				'tipo' => $request->tipo
+			]);
+		} else
+			return redirect('/unauthorized');
+	}
+
+	public function compilaSpeseDate(&$spese, $anno)
+	{	
+		for($i = 1; $i <= 12; $i++) {
+			if($i < 10)
+				$i = '0' . $i;
+			$spese[] = $this->calcolaDate($this->queryDate($i, $anno));
+		}
+	}
+
+	public function calcolaDate($spese)
+	{		
+		$totale = 0;
+		for($i = 0; $i < count($spese); $i++)
+			$totale += $spese[$i];
+
+		return $totale;	
+	}
+
+	public function queryDate($mese, $anno)
+	{	
+		$fromdate = substr($anno, 0, 10);
+		$todate = substr($anno, 22, 10);
+
+		$spese = DB::table('costi')
+			->whereBetween('datainserimento', [$fromdate, $todate])
+			->get();		
+		
+		$spese_array = [];
+	
+		foreach($spese as $spesa) {		
+			$spese_array[] = $spesa->costo;			
+		}
+
+		return $spese_array;
+	}
+
+	public function compilaRicaviDate(&$ricavi, $anno, $tipo)
+	{
+		for($i = 1; $i <= 12; $i++) {
+			if($i < 10)
+				$i = '0' . $i;
+			$ricavi[] = $this->calcolaRicaviDate($this->queryRicaviDate($i, $anno, $tipo));
+		}		
+	}
+
+	public function queryRicaviDate($mese, $anno, $tipo)
+	{
+		$fromdate = substr($anno, 0, 10);
+		$todate = substr($anno, 22, 10);
+
+		$ricavi = DB::table('tranche')
+			->whereBetween('datainserimento', [$fromdate, $todate])
+			->where('privato', 0)
+			->get();
+		
+		$ricavi_array = [];
+		$utenti = DB::table('users')
+				->where('is_delete', 0)
+				->get();
+		
+		foreach($ricavi as $ricavo) {	
+
+			for($i = 0; $i < count($utenti); $i++) {
+				if($utenti[$i]->id == $ricavo->user_id) {
+					if($utenti[$i]->dipartimento === 2) {
+						$ricavo->imponibile *= -1;
+					}
+					break;	
+				}	
+			}
+			
+			$ricavi_array[] = $ricavo->imponibile;
+		}
+		
+		return $ricavi_array;
+	}
+
+	public function calcolaRicaviDate($spese)
+	{
+		$totale = 0;
+		for($i = 0; $i < count($spese); $i++)
+			$totale += $spese[$i];
+
+		return $totale;	
+	}
+
+	public function calcolaGuadagnoDate(&$guadagno, $ricavi, $spese)
+	{		
+		for($i = 0; $i < 12; $i++) {
+			$guadagno[] = $ricavi[$i] + $spese[$i];
+		}	
+	}
+	
+	// ==================  End date  ====================================== // 
+	// ==================  End date  ====================================== // 
+	// ==================  End date  ====================================== // 
+
+	
+
+	public function compilaRicavi(&$ricavi, $anno, $tipo)
+	{
+		for($i = 1; $i <= 12; $i++) {
+			if($i < 10)
+				$i = '0' . $i;
+			$ricavi[] = $this->calcolaRicavi($this->queryRicavi($i, $anno, $tipo));
+		}
+	}
+
+	public function queryRicavi($mese, $anno, $tipo)
+	{
+		$ricavi = DB::table('tranche')
+					->where('privato', 0)
+					->get();
+		$ricavi_array = [];
+		$utenti = DB::table('users')->get();
+		foreach($ricavi as $ricavo) {
+			// gg/mm/aaaa
+			if($tipo == 1) {
+				$ricavo_mese = substr($ricavo->datascadenza, 3, 2);
+				$ricavo_anno = substr($ricavo->datascadenza, 6, 4);
+			} else {
+				$ricavo_mese = substr($ricavo->datainserimento, 3, 2);
+				$ricavo_anno = substr($ricavo->datainserimento, 6, 4);
+			}
+			// Controllo se chi ha fatto la tranche è un commerciale,
+			// se sì, allora devo contara il ricavo come una spesa (-)
+			for($i = 0; $i < count($utenti); $i++) {
+				if($utenti[$i]->id == $ricavo->user_id) {
+					if($utenti[$i]->dipartimento === "COMMERCIALE") {
+						$ricavo->imponibile *= -1;
+					}
+					break;	
+				}	
+			}
+			if($ricavo_mese == $mese && $ricavo_anno == $anno)
+				$ricavi_array[] = $ricavo->imponibile;
+		}
+		return $ricavi_array;
+	}
+
+	public function calcolaRicavi($spese)
+	{
+		$totale = 0;
+		for($i = 0; $i < count($spese); $i++)
+			$totale += $spese[$i];
+		return $totale;	
+	}
+
+	public function calcolaGuadagno(&$guadagno, $ricavi, $spese)
+	{		
+		for($i = 0; $i < 12; $i++) {
+			$guadagno[] = $ricavi[$i] + $spese[$i];
+		}	
+	}
+
+	public function getjsoncosti(Request $request)
+	{
+		$costi = DB::table('costi')->get();
+		$costi = $this->aggiungiNomeEnte($costi, $request->user());
+		return json_encode($costi);
+	}
+
+	public function aggiungiNomeEnte(&$costi, $user)
+	{
+		$elenco_costi = [];
+		foreach($costi as $costo) {
+			$ente = DB::table('corporations')
+							->where('id', $costo->id_ente)
+							->first();
+			$costo->ente = $ente->nomeazienda;
+			if ($user->id === 0 || $user->dipartimento === "AMMINISTRAZIONE") {
+            	$elenco_costi[] = $costo;
+        	} else if($user->id == $tra->user_id) {
+				$elenco_costi[] = $costo;	
+			}
+		}
+		return $elenco_costi;
+	}
+
+	public function modificacosto(Request $request)
+	{
+		$costo = DB::table('costi')
+					->where('id', $request->id)
+					->first();
+		return view('modificacosto', [
+			'costo' => $costo,
+			'enti' => DB::table('corporations')->get()
+		]);	
+	}
+
+	public function aggiornacosto(Request $request)
+	{		
+		$validator = Validator::make($request->all(), [
+            'oggetto' => 'required',
+            'costo' => 'required',
+            'datainserimento' => 'required'
+        ]);
+        
+        if($validator->fails()) {
+            return Redirect::back()
+	            ->withInput()
+	            ->withErrors($validator);
+        }
+
+		DB::table('costi')
+			->where('id', $request->id)
+			->update(array(
+				'oggetto' => $request->oggetto,
+				'costo' => $request->costo,
+				'datainserimento' => $request->datainserimento,
+				'id_ente' => $request->ente
+			));
+		return Redirect::back()
+			->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_editsuccessmsg').'!</div>');
+	}
+
+	public function destroycosto(Request $request)
+	{
+		DB::table('costi')
+			->where('id', $request->id)
+			->delete();
+
+		return Redirect::back()
+			->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_deletesuccessmsg').'!</div>');
 	}
 }

@@ -10,21 +10,23 @@ use Redirect;
 use App\Quote;
 use DB;
 use Storage;
+use Vsmoraes\Pdf\Pdf;
 
 use App\PDF\QuotationPDF;
 use App\PDF\QuotationPDFNoPrezzi;
 
 
-class QuoteController extends Controller
+class QuoteControllerpdf extends Controller
 {
 	protected $quotes;
 	protected $corporations;
 	
-	public function __construct(QuoteRepository $quotes, CorporationRepository $corporations)
+	public function __construct(QuoteRepository $quotes, CorporationRepository $corporations,Pdf $pdf)
 	{
 		$this->middleware('auth');
 		$this->quotes = $quotes;		
 		$this->corporations = $corporations;
+		$this->pdf = $pdf;
 	}
 	
 	public function filequote(Request $request) {
@@ -303,11 +305,11 @@ class QuoteController extends Controller
 			if($scontoagente > $scontoagente_max) {
 				return Redirect::back()
 					->withInput()
-					->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.	keyword_major_agent_discount_estimate_validation').' '.$scontoagente_max . '</div>');
+					->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.	keyword_major_agent_discount_estimate_validation').' '.$scontoagente_max . '</h4></div>');
 			} else if($scontobonus > $scontobonus_max) {
 				return Redirect::back()
 					->withInput()
-					->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.	keyword_major_agent_discount_estimate_validation') .' ' .$scontobonus_max . '</div>');	
+					->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.	keyword_major_agent_discount_estimate_validation') .' ' .$scontobonus_max . '</h4></div>');	
 			}
 		
 			// $nuovopreventivo = $request->user()->quotes()->create([
@@ -445,7 +447,7 @@ class QuoteController extends Controller
 			/* Update Quote Id in Media files */
 		
 			return redirect('/estimates/modify/quote/' . $nuovopreventivo)
-				->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_quotation_created_correctly').'</div>');
+				->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_quotation_created_correctly').'</h4></div>');
 	}
 	
 	// Mostro la pagina di modifica di un preventivo
@@ -565,11 +567,11 @@ class QuoteController extends Controller
 		if($scontoagente > $scontoagente_max) {
 					return Redirect::back()
 						->withInput()
-						->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_major_agent_discount_estimate_validation').' '.$scontoagente_max . '</div>');
+						->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_major_agent_discount_estimate_validation').' '.$scontoagente_max . '</h4></div>');
 		} else if($scontobonus > $scontobonus_max) {
 					return Redirect::back()
 						->withInput()
-						->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_major_agent_discount_estimate_validation').' '. $scontobonus_max . '</div>');	
+						->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_major_agent_discount_estimate_validation').' '. $scontobonus_max . '</h4></div>');	
 		}
 		
 		DB::table('notifiche')
@@ -724,25 +726,21 @@ class QuoteController extends Controller
 			->update(array('master_id' => $quote->id));
 
 		return Redirect::back()
-				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_estimated_edited_correctly').'</div>');
+				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_estimated_edited_correctly').'</h4></div>');
 	}
 	
 	// Elimina un preventivo
 	public function deleteEstimates(Request $request, Quote $quote)
 	{
 		$this->authorize('destroy', $quote);
-
 		DB::table('quotes')
 			->where('id', $quote->id)
 			->update(array(
 				'is_deleted' => 1
 		));
 		
-		$logs = 'Delete Quote -> ( Quote ID: '. $quote->id . ')';
-		//storelogs($request->user()->id, $logs);
-
 		return Redirect::back()
-				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_quote_deleted_correctly').'</div>');
+				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_quote_deleted_correctly').'</h4></div>');
 	}
 	
 	public function eliminaoptionaldalprev(Request $request, Quote $quote)
@@ -751,7 +749,7 @@ class QuoteController extends Controller
 			->where('id', $request->id)
 			->delete();
 			return Redirect::back()
-				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_optional_deleted_correctly').'</div>');
+				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_optional_deleted_correctly').'</h4></div>');
 	}
 	
 	public function eliminaoptional(Request $request, Quote $quote)
@@ -796,7 +794,7 @@ class QuoteController extends Controller
 			  'Ciclicita' => isset($Ciclicita[$i]) ? $Ciclicita[$i] : ""
 			]);
 		  }		
-		return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.	keyword_optional_modified_correctly').'</div>');
+		return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.	keyword_optional_modified_correctly').'</h4></div>');
 	}
 	
 	public function duplicatEstimates(Request $request, Quote $quote)
@@ -826,9 +824,6 @@ class QuoteController extends Controller
 			'lineebianche' => $quote->lineebianche
 		]);
 
-		$logs = 'Copy(Duplicate) Quote -> ( Quote ID: '. $id . ')';
-		//storelogs($request->user()->id, $logs);
-
 		$items = DB::table('optional_preventivi')
 			->where('id_preventivo', $quote->id)
 			->get();
@@ -848,7 +843,7 @@ class QuoteController extends Controller
 		}
 
 		return Redirect::back()
-				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_duplicate_quote_correctly').'</div>');
+				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_duplicate_quote_correctly').'</h4></div>');
 	}
 	
 	// PDF	
@@ -876,10 +871,31 @@ class QuoteController extends Controller
 	
 	public function pdf(Request $request, Quote $quote)
 	{
-	
+		$preventivo = DB::table('quotes')->where('id', $quote->id)->first();		
+		$ente = DB::table('corporations')->where('id', $preventivo->idente)->first();
+		$utente = DB::table('users')->where('id', $preventivo->user_id)->first();
+		$responsabile = DB::table('users')->where('name', $ente->responsabilelanga)->first();
+		$ente_DA = array();
+		if(isset($utente->id_ente)){
+			$ente_DA = DB::table('corporations')->where('id', $utente->id_ente)->first();
+		}
+		$ownerDepartments = DB::table('departments')->where('id', $preventivo->dipartimento)->first();
+		$optional_preventivi = DB::table('optional_preventivi')->where('id_preventivo', $preventivo->id)->get();
+
+	 	$html = view('pdf.quotation', [
+			'preventivo' =>$preventivo,										
+			'ente' => $ente,
+			'utente' => $utente,
+			'ente_DA' => $ente_DA,
+			'owner'=>$ownerDepartments,
+			'responsabile'=>$responsabile,
+			'optional_preventivi'=>$optional_preventivi])->render();	 	
+        return $this->pdf
+            ->load($html)
+            ->show();
+
 		// Prendo i dati del preventivo
-		$this->authorize('visualizzapdf', $quote);
-		
+		/*$this->authorize('visualizzapdf', $quote);
 		$preventivo = DB::table('quotes')
 						->where('id', $quote->id)
 						->first();
@@ -896,13 +912,12 @@ class QuoteController extends Controller
 					->where('id', $utente->id_ente)
 					->first();
 		//}
-					
+						
 		$pdf = new QuotationPDF($preventivo, $ente, $ente_DA,$utente);
 		$pdf->AddFont('Nexa', '', 'NexaLight.php');
 		$pdf->AddFont('Nexa', 'B', 'NexaBold.php');
-		//$pdf->writePdf();
+		//$pdf->writePdf();*/
 		
-		$logs = 'Generate pdf for Quote -> ( Quote ID: '. $quote->id .')';
-		//storelogs($request->user()->id, $logs);
+		
 	}
 }

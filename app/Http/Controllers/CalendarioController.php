@@ -295,6 +295,10 @@ class CalendarioController extends Controller
     				'dove' => $request->dove,
     				'dettagli' => $request->dettagli,
     			));
+
+            $logs = 'Update Event -> ( Event ID: '. $event->id . ')';
+            //storelogs($request->user()->id, $logs);
+
     		return redirect('/calendario/0');
 
             
@@ -362,7 +366,7 @@ class CalendarioController extends Controller
 		
         // $evento = $request->user()->events()->create([
 
-        $evento = DB::table('events')->insert([        
+        $evento = DB::table('events')->insertGetID([        
             'name' => $request->user()->name,
             'dipartimento' => $request->user()->dipartimento,
 			'ente' => $ente->nomeazienda,
@@ -384,6 +388,9 @@ class CalendarioController extends Controller
 			'dove' => $request->dove
         ]);
 		
+        $logs = 'Add New Event -> ( Event ID: '. $evento . ')';
+        //storelogs($request->user()->id, $logs);
+
 		$user = DB::table('corporations')
 					->where('id', $ente->id)
 					->first();

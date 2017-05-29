@@ -174,7 +174,7 @@ class ProjectController extends Controller
                         ->get(),
             'preventiviconfermati' => DB::table('quotes')->where('legameprogetto', 1)->get(),
 			'statiemotivi' => DB::table('statiemotiviprogetti')->get(),
-			'oggettostato' => DB::table('Oggettostato')->where('is_deleted', '0')->get(),
+			'oggettostato' => DB::table('oggettostato')->where('is_deleted', '0')->get(),
         ]);
     }
     
@@ -198,12 +198,16 @@ class ProjectController extends Controller
                         'nomeprogetto' => $request->nomeprogetto,
                         'notetecniche' => $request->notetecniche,
                         'noteprivate' => $request->noteprivate,
-                        'datainizio' => $request->datainizio,
-                        'datafine' => $request->datafine,
+                        'datainizio' => isset($request->datainizio) ? $request->datainizio : '',
+                        'datafine' => isset($request->datafine) ? $request->datafine : '',
                         'progresso' => isset($request->progresso) ? $request->progresso : '0',
 						'statoemotivo' => $request->statoemotivo,
-						'emotion_stat_id' => $request->statoemotivo
+						'emotion_stat_id' => isset($request->statoemotivo) ? $request->statoemotivo : 0
                       ]);
+
+        $logs = 'Add New Project -> ( Project ID: '. $progetto . ')';
+		//storelogs($request->user()->id, $logs);
+
 		/* DB::table('projects')->where('id', $project->id)
         ->update(array(
                         'nomeprogetto' => $request->nomeprogetto,
@@ -331,16 +335,20 @@ class ProjectController extends Controller
 			->update(array(
             	'is_deleted' => 1
 		));		
+
+		$logs = 'Delete Project -> ( Project ID: '. $project->id . ')';
+		//storelogs($request->user()->id, $logs);
+
 		return Redirect::back()
-                        ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_project_deleted_correctly').'</div>');
+            ->with('error_code', 5)
+            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_project_deleted_correctly').'</div>');
     }
     
     public function duplicate(Request $request, Project $project)
     {
         $this->authorize('duplicate', $project);
         
-        DB::table('projects')->insert([
+        $pid = DB::table('projects')->insertGetId([
             'user_id' => $request->user()->id,
             'nomeprogetto' => $project->nomeprogetto,
             'notetecniche' => $project->notetecniche,
@@ -350,9 +358,12 @@ class ProjectController extends Controller
             'progresso' => $project->progresso
         ]);
 		
+		$logs = 'Copy(Duplicate) Project -> ( Project ID: '. $pid . ')';
+		//storelogs($request->user()->id, $logs);
+
 		return Redirect::back()
-                        ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_project_duplicated_correctly').'</div>');
+            ->with('error_code', 5)
+            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_project_duplicated_correctly').'</div>');
     }
     
     public function modify(Request $request, Project $project)
@@ -383,7 +394,7 @@ class ProjectController extends Controller
             'noteprivate' => DB::table('progetti_noteprivate')
             					->where('id_progetto', $project->id)
             					->get(),
-			'oggettostato' => DB::table('Oggettostato')
+			'oggettostato' => DB::table('oggettostato')
 			    ->where('is_deleted', '0')
 			    ->get(),
 			 'chartdetails'=> DB::select("select `oggettostato`.*, `progetti_lavorazioni`.`completamento` as `completedPercentage` from `oggettostato` left join `progetti_lavorazioni` on `oggettostato`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $project->id"),
@@ -454,6 +465,9 @@ class ProjectController extends Controller
 						'statoemotivo' => $request->statoemotivo,
 						'emotion_stat_id' => $request->statoemotivo
                       ));
+
+        $logs = 'Update Project -> ( Project ID: '. $project->id . ')';
+		//storelogs($request->user()->id, $logs);
 		
 		/*if($request->statoemotivo!=null) {
 			// Aggiorno lo stato emotivo
@@ -613,7 +627,7 @@ class ProjectController extends Controller
 
 		return redirect("/progetti/modify/project/$project->id")
                         ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.	keyword_project_edited_correctly').'</div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_project_edited_correctly').'</div>');
     }
     
     public function creadapreventivo(Request $request)
@@ -675,7 +689,7 @@ class ProjectController extends Controller
             					->get(),
 			'dapreventivo' => 1,
 			'idpreventivo' => $request->id,
-			'oggettostato' => DB::table('Oggettostato')
+			'oggettostato' => DB::table('oggettostato')
 			    ->where('is_deleted', '0')
 			    ->get(),			   
 			'chartdetails'=> DB::select("select `oggettostato`.*, `progetti_lavorazioni`.`completamento` as `completedPercentage` from `oggettostato` left join `progetti_lavorazioni` on `oggettostato`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $nuovoprogetto"),

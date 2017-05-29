@@ -1,8 +1,17 @@
 <?php
+	/*This function is used to store the log details of login user */
+	function storelogs($userID,$logs){
+		DB::table('member_activity_log')->insert(array(
+					'user_id' => $userID,
+					'logs' => $logs,
+					'ip_address' => \Request::ip(),
+					'log_date' => date('Y-m-d H:i:s') //
+
+		));
+
+	}
+
 /* Here Create the unique function that used anywhere in site */
-function demohelper(){
-	return 'resds';
-}
 	function replace_charcter($replaceValue = array(),$content){
 		$htmlcontent = $content;
 		foreach($replaceValue as $key => $val){

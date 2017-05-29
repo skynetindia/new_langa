@@ -153,7 +153,7 @@ class AdminController extends Controller
 				}
 				/* Store the log details */
 				$logs = 'Update Langauge -> (ID:'.$request->languageid.')';
-				storelogs($request->user()->id,$logs);
+				/*storelogs($request->user()->id,$logs);*/
 
 				return Redirect::back()
 								->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language updated successfully!</div>');
@@ -250,13 +250,18 @@ class AdminController extends Controller
 	
 	public function addtranslation(Request $request){
 		if(isset($request->id)){
+			$NextRecord = DB::select(DB::raw("select * from language_transalation where id = (select min(id) from language_transalation where code ='en' AND id > $request->id)"));
+			$language_transalation = DB::table('language_transalation')->where('id',$request->id)->first();
 			return view('modify_language_translation', 
-			['language_transalation' => DB::table('language_transalation')->where('id',$request->id)->first(),
-			'language' => DB::table('languages')->where('is_deleted','0')->get()]);
+			['language_transalation' => $language_transalation,
+			'language_selected' => DB::table('languages')->where('code',$language_transalation->code)->first(),
+			'language' => DB::table('languages')->where('is_deleted','0')->get(),
+			'NextRecord' => $NextRecord]);
 		}
 		else {
 			return view('modify_language_translation',
-			['language' => DB::table('languages')->where('is_deleted','0')->get()]);
+			['language' => DB::table('languages')->where('is_deleted','0')->get(),
+			'language_selected' => DB::table('languages')->where('code','en')->first()]);
 		}
 	}
 
@@ -339,8 +344,7 @@ class AdminController extends Controller
 	public function updatetranslation(Request $request){
 		$validator = Validator::make($request->all(), [
 				'keyword_title' => 'required'
-			]);			
-
+			]);	
             if($validator->fails()) {
                 return Redirect::back()
                                 ->withInput()
@@ -367,9 +371,14 @@ class AdminController extends Controller
 			}		
 		}
 		$this->writelanguagefile();
-		return Redirect::back()
+		if($request->hdSaveType == '1' && isset($request->nextrecordid) && $request->nextrecordid != ''){
+			return redirect('/admin/modify/languagetranslation/'.$request->nextrecordid)->with('error_code', 5)->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language updated successfully!</div>');
+		}
+		else {
+			return Redirect::back()
                         ->with('error_code', 5)
                         ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language updated successfully!</div>');
+        }
 		
 	}
 	
@@ -2044,7 +2053,8 @@ class AdminController extends Controller
 
         $validator = Validator::make($request->all(), [
                     'manuname' => 'required',
-                    'image'=>'required|mimes:jpeg,jpg,png,svg|max:1000'
+                    'image'=>'required|mimes:jpeg,jpg,png,svg|max:1000',
+                    'menutype' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -2067,20 +2077,46 @@ class AdminController extends Controller
 
 
         $status = $this->checkurl($request->menulink);
-            DB::table('modulo')->insert(
-                    ['modulo' => $request->manuname,
-                        'phase_key' => 'keyword_'.str_replace(" ","_",strtolower($request->manuname)),
-                        'modulo_sub' => (isset($request->submenu) && $request->submenu != "") ? $request->submenu : $request->parentmenu,                        
-                        'modulo_link' => isset($request->menulink) ? $request->menulink : '',
-                        'modulo_class' => $request->menuclass,
-                        'menu_active' => $status,
-                        'dipartimento' => $request->deparments,
-                        'image' => $nome,
-	                	'type' => $request->menutype,
-	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
-	                	'backpriority' => isset($request->backpriority) ? $request->backpriority : ''
-                    ]
-            );
+            $phase_key = 'keyword_'.str_replace(" ","_",strtolower($request->manuname));
+
+            DB::table('modulo')->insert([	
+            	'modulo' => $request->manuname,
+                'phase_key' => $phase_key,
+                'modulo_sub' => (isset($request->submenu) && $request->submenu != "") ? $request->submenu : $request->parentmenu,                        
+                'modulo_link' => isset($request->menulink) ? $request->menulink : '',
+                'modulo_class' => $request->menuclass,
+                'menu_active' => $status,
+                'dipartimento' => $request->deparments,
+                'image' => $nome,
+            	'type' => $request->menutype,
+            	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
+            	'backpriority' => isset($request->backpriority) ? $request->backpriority : ''
+                ]);
+
+
+            $arrLanguages =  DB::table('languages')
+                        ->select('*')
+                        ->where('is_deleted', 0)                        
+                        ->get();		
+
+			$collection = collect($arrLanguages);		
+			$arrLanguages = $collection->toArray();
+			
+			foreach($arrLanguages as $key => $val){	
+
+				$language_value = str_replace(" ","_",strtolower($request->manuname));
+
+				DB::table('language_transalation')->insert([
+					'language_key' => $phase_key,
+					'language_label' =>$language_value,
+					'language_value' => $request->manuname,					
+					'code' => $val->code
+				]);
+					
+			}
+			
+			$this->writelanguagefile();
+
 
        /* if ($request->submenu != '') {
             $status = $this->checkurl($request->menulink);
@@ -2117,7 +2153,7 @@ class AdminController extends Controller
             );
         }*/
         return redirect('/admin/menu/')
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>New menu addedd successfully!</div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_addsuccessmsg').'!</div>');
         //$keyword_key = 'keyword_'.str_replace(" ","_",strtolower($request['keyword_title']));                       
     }
 
@@ -2186,10 +2222,12 @@ class AdminController extends Controller
             } else {
                 $modulo[$key]->dipartimento = 'All';
             }
+            $val->type = ($val->type == '1') ? 'Front' : 'Backend';
             if ($val->menu_active == 0) {
-                $modulo[$key]->menu_active = 'Inactive';
-            } else {
                 $modulo[$key]->menu_active = 'Active';
+            }
+            else {
+                $modulo[$key]->menu_active = 'Inactive';
             }
         }
         echo json_encode($modulo);
@@ -2198,7 +2236,8 @@ class AdminController extends Controller
     public function menuupdate(Request $request) {
         $validator = Validator::make($request->all(), [
                     'manuname' => 'required',
-                    'image'=>'mimes:jpeg,jpg,png,svg|max:1000'
+                    'image'=>'mimes:jpeg,jpg,png,svg|max:1000',
+                    'menutype' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -2225,8 +2264,7 @@ class AdminController extends Controller
             $status = $this->checkurl($request->menulink);
             DB::table('modulo')->where('id', $request->id)->
                     update(array(
-                        'modulo' => $request->manuname,
-                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo' => $request->manuname,                        
                         'modulo_sub' => $request->parentmenu,
                         'modulo_subsub' => $request->submenu,
                         'modulo_link' => isset($request->menulink) ? $request->menulink : '',
@@ -2243,8 +2281,7 @@ class AdminController extends Controller
             DB::table('modulo')
                     ->where('id', $request->id)
                     ->update(array(
-                        'modulo' => $request->manuname,
-                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo' => $request->manuname,                       
                         'modulo_sub' => $request->parentmenu,
                         'modulo_subsub' => 0,
                         'modulo_link' => isset($request->menulink) ? $request->menulink : '',
@@ -2255,14 +2292,14 @@ class AdminController extends Controller
 	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
 	                	'backpriority' => isset($request->backpriority) ? $request->backpriority : ''
             ));
-        } else {
+        } 
+        else {
             //module parent menu
             $status = $this->checkurl($request->menulink);
             DB::table('modulo')
                     ->where('id', $request->id)
                     ->update(array(
-                        'modulo' => strtoupper($request->manuname),
-                        'phase_key' => "keyword_" . $request->manuname,
+                        'modulo' => $request->manuname,                        
                         'modulo_sub' => $request->parentmenu,
                         'modulo_link' => isset($request->menulink) ? $request->menulink : '',
                         'modulo_class' => $request->menuclass,
@@ -2274,7 +2311,7 @@ class AdminController extends Controller
                 	));
         }
         return Redirect::back()
-        	->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Menu updated successfully!</div>');
+        	->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_editsuccessmsg').'</div>');
     }
     /* ==================================== Menu section END ======================================== */  
 
@@ -3572,14 +3609,14 @@ class AdminController extends Controller
             $r = '';
             foreach($role_values as $role) {
 
-                if(in_array($role->ruolo_id, $ruolo)){
-					$r .= '<div class="round-checkbox">';
+                 if(in_array($role->ruolo_id, $ruolo)){
+					$r .= '<div class="round-checkbox manual_radio">';
 					$r .= '<input name="ruolo" disabled="disabled" checked id="ruolo_'.$role->ruolo_id.'_id_M" value="'.$role->ruolo_id.'" type="checkbox">';
 					$r .= '<label for="ruolo_'.$role->ruolo_id.'_id_M">'.$role->nome_ruolo.'</label>';
-					$r .= '</div></div>';
+					$r .= '<div class="check"><div class="inside"></div></div></div>';
                     /*$r .= "<input type='checkbox' name='ruolo' id='ruolo' value='$role->ruolo_id' disabled='disabled' checked /> $role->nome_ruolo ";*/
                 } else {
-					$r .= '<div class="round-checkbox">';
+					$r .= '<div class="round-checkbox manual_radio">';
 					$r .= '<input name="ruolo" disabled="disabled" id="ruolo_'.$role->ruolo_id.'_id_M" value="'.$role->ruolo_id.'" type="checkbox">';
 					$r .= '<label for="ruolo_'.$role->ruolo_id.'_id_M">'.$role->nome_ruolo.'</label>';
 					$r .= '<div class="check"><div class="inside"></div></div></div>';

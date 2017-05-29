@@ -70,10 +70,10 @@ class CorporationController extends Controller
 				$m->to($corporation->email, $corporation->email)->subject($subject);
 				$m->cc("amministrazione@langa.tv");
 			  });*/
-	  		  return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_client_created_send_credentials').'</h4></div>');
+	  		  return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_client_created_send_credentials').'</div>');
 		 }
 		 else {
-		    return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_client_already_exist').'</h4></div>');
+		    return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_client_already_exist').'</div>');
 
 		 }
 
@@ -144,7 +144,7 @@ class CorporationController extends Controller
 			'telefonoresponsabile' => $corporation->telefonoresponsabile,
         ]);
                 return Redirect::back()
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_entity_duplicate_successfully').'</h4></div>');
+                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_entity_duplicate_successfully').'</div>');
 	
         }
 	
@@ -182,6 +182,7 @@ class CorporationController extends Controller
 
            Storage::put('images/'.$nome,file_get_contents($request->file('logo')->getRealPath()));
 		}
+
 		if($request->cliente == 0) {
 			DB::table('clienti')
 				->where('id', $corporation->id_cliente)
@@ -220,6 +221,9 @@ class CorporationController extends Controller
 				'skype_id'=>$request->skype_id,
 			));
 		
+		$logs = 'Update Entity -> ( Entity ID: '. $corporation->id . ')';
+		//storelogs($request->user()->id, $logs);
+
 		DB::table('enti_partecipanti')->where(
 			'id_ente', $corporation->id
 		)
@@ -351,7 +355,7 @@ class CorporationController extends Controller
 				->delete();
 		}
                 return Redirect::back()
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_entity_updated_successfully').'</h4></div>');
+                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_entity_updated_successfully').'</div>');
                 
                 }       
 	
@@ -365,7 +369,7 @@ class CorporationController extends Controller
 		  ));
 	
 		return Redirect::back()
-		  ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_entity_deleted_successfully').'</h4></div>');
+		  ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_entity_deleted_successfully').'</div>');
 	}
 	
 	public function store(Request $request)
@@ -412,30 +416,29 @@ class CorporationController extends Controller
 		
         // $corp = $request->user()->corporations()->create([
 
-    	$corp =  DB::table('corporations')->insert([ 
-
+    	$corp =  DB::table('corporations')->insertGetId([ 
             'nomeazienda' => $request->nomeazienda,
             'nomereferente' => $request->nomereferente,
             'settore' => isset($request->settore) ? $request->settore : '',
             'piva' => isset($request->piva) ? $request->piva : '',
             'cf' => isset($request->cf) ? $request->cf : '',
-            'telefonoazienda' => $request->telefonoazienda,
+            'telefonoazienda' => isset($request->telefonoazienda) ? $request->telefonoazienda : '',
             'cellulareazienda' => isset($request->cellulareazienda) ? $request->cellulareazienda : '',
 			'emailsecondaria' => $request->emailsecondaria,
 			'sedelegale' => $request->sedelegale,
 			'indirizzospedizione' => $request->indirizzospedizione,
-			/*'privato' => $request->privato,*/
             'fax' => isset($request->fax) ? $request->fax : '',
             'email' => $request->email,
 			'logo' => $nome,
             'iban' => isset($request->iban) ? $request->iban : '',
 			'swift'=> isset($request->swift) ? $request->swift : '',
-            /*'noteenti' => $request->noteenti,*/
-           /* 'indirizzo' => $request->indirizzo,*/
 			'responsabilelanga' => $request->responsabilelanga,
-			'telefonoresponsabile' => $request->telefonoresponsabile,
+			'telefonoresponsabile' => isset($request->telefonoresponsabile) ? $request->telefonoresponsabile : '',
 			'skype_id'=> isset($request->skype_id) ? $request->skype_id : '',
         ]);
+		
+		$logs = 'Add New Entity -> ( Entity ID: '. $corp . ')';
+		//storelogs($request->user()->id, $logs);
 		
 		// Memorizza i partecipanti al progetto
         if(isset($request->partecipanti)) {			
@@ -531,7 +534,7 @@ class CorporationController extends Controller
 
 		return Redirect::back()
                         ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>'.trans('messages.keyword_ente_added_successfully').'</h4></div>');
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_ente_added_successfully').'</div>');
     }
 	
 	

@@ -311,7 +311,7 @@ Route::get('/estimates/files/{id}', 'QuoteController@filequote');
 Route::post('/estimates/modify/quote/uploadfiles/{code}', 'QuoteController@fileupload');
 Route::get('/estimates/modify/quote/getfiles/{code}', 'QuoteController@fileget');
 Route::get('/estimates/modify/quote/deletefiles/{id}', 'QuoteController@filedelete');
-Route::get('/estimates/modify/quote/updatefiletype/{typeid}/{id}', 'QuoteController@filetypeupdate');
+Route::get('/estimates/modify/quote/updatefiletype/{typeid}/{fileid}', 'QuoteController@filetypeupdate');
 Route::get('/estimates/modify/quote/getdefaultfiles/{quote_id}', 'QuoteController@fileget');
 // user read alert
 Route::get('/alert/user-read', 'AdminController@userreadalert');
@@ -412,7 +412,8 @@ Route::get('/progetti/updatefiletype/{typeid}/{id}', 'ProjectController@filetype
 Route::get('/progetti/getdefaultfiles/{quote_id}', 'ProjectController@fileget');
 
 
-/* ================================ Invoice Route ====================================== */
+/* =============================== Invoice Route =============================== */
+
 // show list of invoices
 Route::get('/pagamenti/tranche/elenco', 'AccountingController@elencotranche');
 // get invoices in json 
@@ -445,5 +446,30 @@ Route::get('/add/fatture/deletefiles/{id}', 'AccountingController@filedelete');
 Route::get('/add/fatture/updatefiletype/{typeid}/{fileid}', 'AccountingController@filetypeupdate');
 
 
+/* =============================== Provisions Route =============================== */
+
+// show list of provisions of projects
+Route::get('/pagamenti', 'AccountingController@index');
+// get provisions of projects in json
+Route::get('/pagamenti/json', 'AccountingController@getjson');
+//
+Route::post('/pagamenti/store', 'AccountingController@creadisposizione');
+//
+Route::post('/pagamenti/modifica/accounting/{accounting}', 'AccountingController@modificadisposizione');
+//
+Route::get('/pagamenti/duplicate/accounting/{accounting}', 'AccountingController@duplicadisposizione');
+//
+Route::get('/pagamenti/delete/accounting/{accounting}', 'AccountingController@destroydisposizione');
+//
 
 
+/* =============================== Method Route =============================== */
+
+// show information banking services
+Route::get('/pagamenti/coordinate', 'AccountingController@mostracoordinate');
+
+
+/* =============================== Info section Route =============================== */
+Route::get('/contatti', 'HomeController@mostracontatti');
+Route::get('/faq', 'HomeController@mostrafaq');
+Route::get('/changelog', 'HomeController@mostrachangelog');
