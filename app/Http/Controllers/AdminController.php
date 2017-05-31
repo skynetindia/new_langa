@@ -250,13 +250,17 @@ class AdminController extends Controller
 	
 	public function addtranslation(Request $request){
 		if(isset($request->id)){
-			$NextRecord = DB::select(DB::raw("select * from language_transalation where id = (select min(id) from language_transalation where code ='en' AND id > $request->id)"));
 			$language_transalation = DB::table('language_transalation')->where('id',$request->id)->first();
+
+			$NextRecord = DB::select(DB::raw("select * from language_transalation where id = (select min(id) from language_transalation where code = '$language_transalation->code' AND id > $request->id)"));
+			$PreviouseRecord = DB::select(DB::raw("select * from language_transalation where id = (select max(id) from language_transalation where code ='$language_transalation->code' AND id < $request->id)"));
+			
 			return view('modify_language_translation', 
 			['language_transalation' => $language_transalation,
 			'language_selected' => DB::table('languages')->where('code',$language_transalation->code)->first(),
 			'language' => DB::table('languages')->where('is_deleted','0')->get(),
-			'NextRecord' => $NextRecord]);
+			'NextRecord' => $NextRecord,
+			'PreviouseRecord' => $PreviouseRecord]);
 		}
 		else {
 			return view('modify_language_translation',
@@ -305,8 +309,10 @@ class AdminController extends Controller
                         ->select('*')
                         ->where('id', '!=', 0)                        
                         ->get();		
-		$collection = collect($arrLanguages);
-		$arrLanguages = $collection->toArray();
+		$collection = collect($arrLanguages);		
+		$arrLanguages = $collection->toArray();		
+		/*$numItems = count($arrLanguages);
+		$i = 0;*/
 		foreach($arrLanguages as $key => $val){
 			$path = './resources/lang/'.$val->code;
 			if(!is_dir($path)) {
@@ -338,7 +344,7 @@ class AdminController extends Controller
 				$fp = fopen($file,"wb");
 				fwrite($fp,$content);
 				fclose($fp);		
-			}
+			}			
 		}
 	}
 	public function updatetranslation(Request $request){
@@ -371,8 +377,9 @@ class AdminController extends Controller
 			}		
 		}
 		$this->writelanguagefile();
-		if($request->hdSaveType == '1' && isset($request->nextrecordid) && $request->nextrecordid != ''){
-			return redirect('/admin/modify/languagetranslation/'.$request->nextrecordid)->with('error_code', 5)->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language updated successfully!</div>');
+		if($request->hdSaveType != '0' && isset($request->nextrecordid) && $request->nextrecordid != ''){
+			$moveRecordid = ($request->hdSaveType == 1) ? $request->nextrecordid : $request->previouserecordid; 
+			return redirect('/admin/modify/languagetranslation/'.$moveRecordid)->with('error_code', 5)->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Language updated successfully!</div>');
 		}
 		else {
 			return Redirect::back()
@@ -1158,34 +1165,29 @@ class AdminController extends Controller
   
                 $permessi = json_encode(null);
             }
-                   
-            if($nome_ruolo) {
-
-                $ruolo_utente =  DB::table('ruolo_utente')
-                    ->where('ruolo_id', $nome_ruolo)
-                    ->update(array('permessi' => $permessi));
- 
-                return Redirect::back()
-                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> permessi updated succesfully..!</div>');
-            } else {
-
-                $validator = Validator::make($request->all(), [
+                
+            $validator = Validator::make($request->all(), [
                     'new_ruolo' => 'required'
-                ]);
-
-                if ($validator->fails()) {
+             ]);   
+            if ($validator->fails()) {
 
                     return Redirect::back()
                         ->withInput()
                         ->withErrors($validator);
                 }
-
-                $new_ruolo = $request->input('new_ruolo');
-
+             $new_ruolo = $request->input('new_ruolo');
+            if($nome_ruolo) {
+                $ruolo_utente =  DB::table('ruolo_utente')
+                    ->where('ruolo_id', $nome_ruolo)
+                    ->update(array('permessi' => $permessi,'nome_ruolo'=>$new_ruolo));
+ 
+                return Redirect::back()
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> permessi updated succesfully..!</div>');
+            } else {
+                
                 DB::table('ruolo_utente')->insert(        
                     ['nome_ruolo' => $new_ruolo, 'permessi' => $permessi ]
-                    );
- 
+                    ); 
                 return Redirect::back()
                     ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> Role Add succesfully..!</div>');
             }

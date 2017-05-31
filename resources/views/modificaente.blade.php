@@ -14,93 +14,19 @@
 <!--<link href="{{asset('build/js/jquery.datetimepicker.min.css')}}" rel="stylesheet">
 <script src="{{asset('build/js/jquery.datetimepicker.full.js')}}"></script>-->
 
+<div class="header-left-same">
+<div class="header-svg text-left">
+	<img src="http://betaeasy.langa.tv/images/HEADER1-LT_ENTITY.svg" alt="header image">
+</div>
+<div class="float-right">
 <h1><?php echo (isset($action) && $action=='add') ? trans('messages.keyword_add_entity') : trans('messages.keyword_edit_entity'); ?></h1><hr>
+</div>
+</div>
+
+<div class="clearfix"></div>
+
 <?php $loginuser = collect($loginuser)->toArray();?>
-<style>
-table tr td {
-	text-align:left;
-	
-}
-.table-editable {
-  position: relative;
-}
-.table-editable .glyphicon {
-  font-size: 20px;
-}
 
-.table-remove {
-  color: #700;
-  cursor: pointer;
-}
-.table-remove:hover {
-  color: #f00;
-}
-
-.table-up, .table-down {
-  color: #007;
-  cursor: pointer;
-}
-.table-up:hover, .table-down:hover {
-  color: #00f;
-}
-
-.table-add {
-  color: #070;
-  cursor: pointer;
-  position: absolute;
-  top: 8px;
-  right: 0;
-}
-.table-add:hover {
-  color: #0b0;
-}
-
-      #map {
-        height: 100%;
-		height: 400px;
-      }
-      .controls {
-        margin-top: 10px;
-        border: 1px solid transparent;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        height: 32px;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      }
-
-      #pac-input {
-        background-color: #fff;
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-        margin-left: 12px;
-        padding: 0 11px 0 13px;
-        text-overflow: ellipsis;
-        width: 300px;
-      }
-
-      #pac-input:focus {
-        border-color: #4d90fe;
-      }
-
-      .pac-container {
-        font-family: Roboto;
-      }
-
-      #type-selector {
-        color: #fff;
-        background-color: #4d90fe;
-        padding: 5px 11px 0px 11px;
-      }
-
-      #type-selector label {
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-      }
-</style>
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -109,10 +35,11 @@ table tr td {
 @endif
 @include('common.errors')
 @if(isset($corp->logo))
+<div class="row">
 <div class="container-fluid col-md-10">
-	<div style="display:inline">
- 	<img src="{{url('/storage/app/images/').'/'.$corp->logo}}" style="max-width:100px; max-height:100px;display:inline"></img><h4 style="display:inline">  {{trans('messages.keyword_code')}}: {{$corp->id}}</h4>
-    <hr>
+	<div class="inline profile-user">
+ 	<img src="{{url('/storage/app/images/').'/'.$corp->logo}}" class="img-responsive" ></img><h4 class="inline">  {{trans('messages.keyword_code')}}: {{$corp->id}}</h4>
+
 	</div>
 </div>
 <div class="col-md-2 top-right-btn"  >
@@ -120,6 +47,9 @@ table tr td {
 		<button onclick="mostra2()" id="btnSubmiTop" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
 		@endif
 	</div>
+</div>    
+        <hr>
+    
 @endif
 <?php /*<div class="container-fluid col-md-12" style="background:#2a3f54;color:#ffffff"><br>
 	<form action="http://maps.google.com/maps" onsubmit="punto()" method="get" target="new">
@@ -151,21 +81,21 @@ else {
        
 	<!-- inizio chiamata -->
   <div class="row">
-	<div class="col-md-12" style="padding-top:10px;">
+	<div class="col-md-12 tpbtm10">
 		<h4>{{trans('messages.keyword_note')}} ({{trans('messages.keyword_conversations')}}, {{trans('messages.keyword_costs')}}, {{trans('messages.keyword_notes')}},..)</h4>
 		<a id="creaNuovaChiamata" class="btn btn-warning" name="create" title="Crea nuovo"><i class="fa fa-plus"></i></a>
-		<a class="btn btn-danger" id="removeNote"  name="remove" title="Elimina"><i class="fa fa-eraser"></i></a>
-		<div class="table-editable" style="padding-top:10px">
+		<a class="btn btn-danger" id="removeNote"  name="remove" title="Elimina"><i class="fa fa-trash"></i></a>
+		<div class="table-editable tpbtm10">
 			<table class="table table-striped table-bordered">
 			<thead>
-				<th>#
-				<th>{{trans('messages.keyword_user')}}
-                <th>{{trans('messages.keyword_notes')}}
-                <th>{{trans('messages.keyword_date')}}
-                <th>{{trans('messages.keyword_bank')}}
-                <th>{{trans('messages.keyword_case')}}
-                <th>{{trans('messages.keyword_frequency')}}
-                <th>{{trans('messages.keyword_notifications')}}                
+				<th>#</th>
+				<th>{{trans('messages.keyword_user')}}</th>
+                <th>{{trans('messages.keyword_notes')}}</th>
+                <th>{{trans('messages.keyword_date')}}</th>
+                <th>{{trans('messages.keyword_bank')}}</th>
+                <th>{{trans('messages.keyword_case')}}</th>
+                <th>{{trans('messages.keyword_frequency')}}</th>
+                <th>{{trans('messages.keyword_notifications')}}</th>               
 				<?php /*<th>Ricontattare il giorno
 				<th>Alle
 				<th>Data inserimento*/?>
@@ -185,7 +115,8 @@ else {
 					@foreach($actionmessages as $i => $actionmessages)
 						<tr>
 						<td>
-							<input type="checkbox" class="selezione_note">
+							<input type="checkbox" id="<?php echo 'checkNo'.$i;?>" class="selezione_note">
+							<label for="<?php echo 'checkNo'.$i;?>"></label>
 						</td>
                         <td><select class="form-control" id="utenti<?php echo $i; ?>"  name="utente[]"  class="form-control" >
                         @if(isset($action) && $action == 'add')
@@ -285,7 +216,7 @@ else {
 			/*lenght = $j('#tb').length();*/
 			var count = $j('#tb').children('tr').length;
 			var tr = '<tr>';
-			var td = '<td><input type="checkbox" id="checkNu'+count+'" class="selezione_note"></td>';
+			var td = '<td><input type="checkbox" id="checkNu'+count+'" class="selezione_note"><label for="checkNu'+count+'">  </label></td>';
 				td +='<td><select class="form-control" id="utenti'+count+'" name="utente[]"  class="form-control">';
                 td +='<?php 
 				        if(isset($action) && $action == 'add'){
@@ -407,7 +338,7 @@ else {
 	<!-- colonna a sinistra -->
   <div class="row">
 	<div class="col-md-4">
-		<br><label for="nomeazienda">{{trans('messages.keyword_company_name')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<label for="nomeazienda">{{trans('messages.keyword_company_name')}} <span class="required">(*)</span></label>
 		<input value="{{ isset($corp->nomeazienda) ? $corp->nomeazienda : ""}}" class="form-control" type="text" name="nomeazienda" id="nomeazienda" placeholder="{{trans('messages.keyword_company_name')}}"><br>
 		<label for="piva">{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}</label>
 		<input value="{{isset($corp->piva) ? $corp->piva : ""}}" class="form-control" type="text" name="piva" id="piva" placeholder="{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}"><br>
@@ -421,7 +352,7 @@ else {
 		
 	</div>
      <div class="col-md-8">
-	<div class=""><strong>{{trans('messages.keyword_address')}} <p style="color:#f37f0d;display:inline">(*)</p></strong><br>
+	<div class=""><label>{{trans('messages.keyword_address')}} <span class="required">(*)</span></label><br>
 	 <input value="{{ isset($corp->indirizzo) ? $corp->indirizzo : old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text"
         placeholder="{{trans('messages.keyword_enter_an_address')}} (*)">
     <div id="type-selector" class="controls">
@@ -443,23 +374,23 @@ else {
 	<!-- colonna centrale -->
     <div class="row">
 	<div class="col-md-6">
-		<br><label for="nomereferente">{{trans('messages.keyword_reference_name')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<br><label for="nomereferente">{{trans('messages.keyword_reference_name')}} <span class="required">(*)</span></label>
 		<input value="{{ isset($corp->nomereferente) ? $corp->nomereferente : ""}}" class="form-control" type="text" name="nomereferente" id="nomereferente" placeholder="{{trans('messages.keyword_reference_name')}}"><br>
 		<label for="cf">{{trans('messages.keyword_credit_card')}} </label>
 		<input value="{{isset($corp->cf) ? $corp->cf : ""}}" class="form-control" type="text" name="cf" id="cf" placeholder="{{trans('messages.keyword_credit_card')}}"><br>
 		<label for="fax">Fax</label>
 		<input value="{{isset($corp->fax) ? $corp->fax :""}}" class="form-control" type="text" name="fax" id="fax" placeholder="Fax"><br>
 		<label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
-		<select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
+		<select name="statoemotivo" class="form-control" id="statoemotivo">
 			<!-- selectedemotionState -->
-			<option style="background-color:white"></option>
+			<option></option>
 			@if($selectedemotionState!=null)
 				@foreach($emotionState as $statoemotivo)
-					<option @if($statoemotivo->id == $selectedemotionState->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+					<option @if($statoemotivo->id == $selectedemotionState->id_tipo) selected @endif style="" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
 				@endforeach
 			@else
 				@foreach($emotionState as $statoemotivo)
-					<option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+					<option  value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
 				@endforeach
 			@endif
 		</select>
@@ -478,9 +409,9 @@ else {
 		<br><datalist id="settori"></datalist>
 		<label for="settore">{{trans('messages.keyword_sector')}}</label>
 		<input value="{{isset($corp->settore) ? $corp->settore : old('settore')}}" list="settori" class="form-control" type="text" id="settore" name="settore" placeholder="{{trans('messages.keyword_seek_an_industry')}}"><br>
-		<label for="telefonoazienda">{{trans('messages.keyword_primary_phone')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<label for="telefonoazienda">{{trans('messages.keyword_primary_phone')}} <span class="required">(*)</span></label>
 		<input value="{{ isset($corp->telefonoazienda) ? $corp->telefonoazienda : old('telefonoazienda')}}" class="form-control" type="text" name="telefonoazienda" id="telefonoazienda" placeholder="{{trans('messages.keyword_primary_phone')}}"><br>
-		<label for="email">{{trans('messages.keyword_primary_email')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+		<label for="email">{{trans('messages.keyword_primary_email')}} <span class="required">(*)</span></label>
 		<input value="{{isset($corp->email) ? $corp->email : old('email')}}" class="form-control" type="email" name="email" id="email" placeholder="{{trans('messages.keyword_notification_email')}}"><br>
 		<label for="emailsecondaria">{{trans('messages.keyword_secondary_email')}}</label>
 		<input value="{{isset($corp->emailsecondaria) ? $corp->emailsecondaria : old('emailsecondaria')}}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="{{trans('messages.keyword_secondary_email')}}"><br>
@@ -525,7 +456,7 @@ else {
 	<label for="{{trans('messages.keyword_logo')}}">{{trans('messages.keyword_logo')}}</label>
 	<?php echo Form::file('logo', ['class' => 'form-control']); ?><br>
     
-    <label for="responsabilelanga">{{trans('messages.keyword_responsible')}} LANGA <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label for="responsabilelanga">{{trans('messages.keyword_responsible')}} LANGA <span class="required">(*)</span></label>
 		<select title="{{trans('messages.keyword_responsible_associated_body')}}" name="responsabilelanga" id="responsabilelanga" class="form-control"  onchange="trovaTelefono()">
 			<option></option>
 			@for($i = 1; $i < count($users); $i++)
@@ -588,7 +519,10 @@ else {
 		
 	<div class="col-md-6">
      		<br><label for="partecipanti">{{trans('messages.keyword_participants')}}</label><br>
-	        <div class="col-md-12">
+	        
+              <div class="row">
+            <div class="col-md-12">
+            	  <div class="row">
 	            <div class="col-xs-6">
 	                <select class="form-control" id="utenti">
                 	    @foreach($users as $utente)
@@ -597,10 +531,12 @@ else {
         	        </select>
 	            </div>
 	            <div class="col-xs-6">
-	                <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiPartecipante"><i class="fa fa-plus"></i></a>
-	                <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="elimina"><i class="fa fa-eraser"></i></a>
+	                <a class="btn btn-warning" id="aggiungiPartecipante"><i class="fa fa-plus"></i></a>
+	                <a class="btn btn-danger"  id="elimina"><i class="fa fa-trash"></i></a>
 	            </div>
 	        </div><br>
+         
+            <div class="row">
 	        <div class="col-md-12">
 	            <table class="table table-striped table-bordered">
 	                <thead>
@@ -609,11 +545,12 @@ else {
 	                    <th>{{trans('messages.keyword_user')}}</th>
                         <th>{{trans('messages.keyword_notifications')}}</th>
 	                </thead>
-	                <tbody id="partecipanti">
+	                <tbody id="partecipanti"><?php $ip = 0;?>
 						@foreach($participant as $partecipante)
 	                        <tr>
 	                            <td>
-	                                <input type="checkbox" class="selezione">
+	                                <input type="checkbox" id="partecipantichk_<?php echo $partecipante->id_user.$ip;?>" class="selezione">
+	                                <label for="partecipantichk_<?php echo $partecipante->id_user.$ip;?>"></label>
 	                            </td>
 	                            <td>
 	                                <input type="text" name="partecipanti[]" readonly value="<?php echo $partecipante->id_user; ?>" class="form-control">
@@ -638,7 +575,7 @@ else {
 				                n++;
 		                	});
 	                            </script>
-	                        </tr>
+	                        </tr><?php $ip++;?>
 	                    @endforeach
 	                </tbody>
 
@@ -651,9 +588,15 @@ else {
 	                        var tr = document.createElement("tr");
 	                        var check = document.createElement("td");
 	                        var checkbox = document.createElement("input");
+	                        checkbox.id = "partecipantichk"+$j("#utenti option:selected").val()+k;
+	                         var checkboxlabel = document.createElement("label");
+	                        checkboxlabel.for = "partecipantichk"+$j("#utenti option:selected").val()+k;
+							checkboxlabel.setAttribute('for', "partecipantichk"+$j("#utenti option:selected").val()+k);
 	                        checkbox.type = "checkbox";
 	                        checkbox.className = "selezione";
+	                       
 	                        check.appendChild(checkbox);
+	                        check.appendChild(checkboxlabel);
 	                        k++;
 	                        var td = document.createElement("td");
 	                        var td1 = document.createElement("td");
@@ -664,12 +607,13 @@ else {
 							idNotificheDiv.className='switch';
 							
 							var idNotificheLabel = document.createElement("label");
-							idNotificheLabel.for = "partecipantiNotifiche_"+$j("#utenti option:selected").val()+"";
+							idNotificheLabel.for = "partecipantiNotifiche_"+$j("#utenti option:selected").val()+k;
+							idNotificheLabel.setAttribute('for', "partecipantiNotifiche_"+$j("#utenti option:selected").val()+k);
 							var idNotifiche = document.createElement("input");
 	                        idNotifiche.type = "checkbox";	                        
 	                        idNotifiche.value = '1';
 	                        idNotifiche.name = "partecipantiNotifiche["+$j("#utenti option:selected").val()+"]";
-							idNotifiche.id = "partecipantiNotifiche_"+$j("#utenti option:selected").val()+"";
+							idNotifiche.id = "partecipantiNotifiche_"+$j("#utenti option:selected").val()+k;
 							idNotificheDiv.appendChild(idNotifiche);
 							idNotificheDiv.appendChild(idNotificheLabel);
 					 		/*var idNotificheHidden = document.createElement("input");
@@ -706,9 +650,9 @@ else {
 	                    });
 	                </script>
 	            </table>
-	        </div>
+	        </div></div>
             </div></div></div>
-        </div>
+        </div></div></div>
       <!-- /partecipanti -->
 
 <script>
@@ -907,13 +851,19 @@ else {
             <!-- FINE COSTI -->
 			
  </div><?php */?>
- <div class="col-md-6" style="padding-top:10px;padding-bottom:10px;">
+ <div class="col-md-6 tpbtm10">
  </div>
-<div class="col-md-6" style="padding-top:10px;padding-bottom:10px;text-align:right">
+<div class="col-md-6 tpbtm10 text-right">
 		@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
 		<button onclick="mostra2()" id="btnSubmitEnti" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
 		@endif
 	</div>
+    
+    
+<div class="footer-svg">
+  <img src="http://betaeasy.langa.tv/images/FOOTER3-ORIZZONTAL_ENTITY.svg" alt="footer enti image">
+</div>
+
 <?php echo Form::close(); ?>
 <script>
 function punto() {
@@ -1089,6 +1039,6 @@ xhr.send();
 	<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&sensor=false&libraries=places&callback=initMap"
         async defer></script>-->
 	<!--AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI -->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script>
-
+	<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script>-->
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&libraries=places&callback=initMap" async defer></script>
 @endsection

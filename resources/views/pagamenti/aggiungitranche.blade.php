@@ -411,7 +411,8 @@
 		});
 		</script>
 		<br>
-		  <label for="privato"> {{ trans('messages.keyword_hide_stats') }} <span class="fa fa-eye-slash" title="{{ trans('messages.keyword_ifso') }} "></span>
+		  <label for="privato"> {{ trans('messages.keyword_hide_stats') }} </label> 
+		  <span class="fa fa-eye-slash" title="{{ trans('messages.keyword_ifso') }} "></span>
             <select class="form-control" name="privato">
             	<option value="0" selected>{{ trans('messages.keyword_no') }} </option>
                 <option value="1"> {{ trans('messages.keyword_yes') }} </option>

@@ -1,84 +1,23 @@
 @extends('adminHome')
-@section('page')
-<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+@section('page') 
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script> 
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
-<!-- Latest compiled and minified Locales -->
+<!-- Latest compiled and minified JavaScript --> 
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script> 
+<!-- Latest compiled and minified Locales --> 
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
-<h1>Langauge Phases : {{ $language->name }}  </h1><hr>
-<style>
-tr:hover {
-	background: #f39538;
-}
-.selected {
-	font-weight: bold;
-	font-size: 16px;
-}
-th {
-	cursor: pointer;
-}
-li label {
-	padding-left: 10px;
-}
-.button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 3px 15px;
-    padding-bottom: 6px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 4px;
-}
-.button2 { /* blue */
-    background-color: white;
-    color: black;
-    border: 2px solid #337ab7;
-}
-
-.button2:hover {
-    background-color: #337ab7;
-    color: white;
-}
-
-.button3 { /* red */
-    background-color: white;
-    color: black;
-    border: 2px solid #d9534f;
-}
-
-.button3:hover {
-    background-color: #d9534f;
-    color: white;
-}
-</style>
-
-
+<h1>{{trans('messages.keyword_language_phrases')}} : {{ $language->name }} </h1>
+<hr>
 <script>
-    
-    
 @if(!empty(Session::get('msg')))
-
-
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
     document.write(msg);
-
 @endif
 </script>
-
-<form action="{{ url('/admin/add/languagetranslation') }}" method="post" style="display:inline;">
-{{ csrf_field() }}
-<button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo ente"><i class="fa fa-plus"></i></button>
+<form action="{{ url('/admin/add/languagetranslation') }}" method="post" >
+  {{ csrf_field() }}
+  <button class="btn btn-warning" type="submit" name="create" title=""><i class="fa fa-plus"></i></button>
 </form>
 <!-- Inizio filtraggio miei/tutti -->
 <?php /*@if(isset($miei))
@@ -97,29 +36,20 @@ li label {
 </a>
 @endif */?>
 <!-- Fine filtraggio miei/tutti -->
-<div class="btn-group">
-
-<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-<button class="btn btn-primary" type="button" name="update" title="Modifica - Modifica l'ultimo ente selezionato"><i class="fa fa-pencil"></i></button>
-</a>
-
-<?php /*<a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="Modifica - Modifica l'ultimo ente selezionato"><i class="fa fa-pencil"></i>  </a>
+  <?php /*<a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
 <button class="btn btn-info" type="button" name="duplicate" title="Duplica - Duplica gli enti selezionati"><i class="fa fa-files-o"></i></button>
 </a>*/?>
-
-<a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="fa fa-trash"></i></button>
-</a>
-</div><br>
+  <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="fa fa-trash"></i></a> 
 
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php  echo url('admin/languagetranslation/json').'/'.$code;?>" data-classes="table table-bordered" id="table">
-<thead>
-<th data-field="id" data-sortable="true">n° ente</th>
-<th data-field="language_label" data-sortable="true">Language Label</th>
-<th data-field="language_value" data-sortable="true">Language Phase</th>
-</thead>
+  <thead>
+  <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
+    <th data-field="language_label" data-sortable="true">{{trans('messages.keyword_language_label')}}</th>
+    <th data-field="language_value" data-sortable="true">{{trans('messages.keyword_language_phase')}}</th>
+    <th data-field="language_key" data-sortable="true">{{trans('messages.keyword_phrase_key')}}</th>
+      </thead>
 </table>
-
 <script>
 var selezione = [];
 var indici = [];
@@ -150,7 +80,7 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 
 function check() {
 
-	return confirm("Are you sure delete: " + n + " phase?");
+	return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}}: " + n + " {{trans('messages.keyword_language_phrases')}}?");
 }
 function multipleAction(act) {
 	var link = document.createElement("a");
@@ -229,8 +159,5 @@ function multipleAction(act) {
 		}
 }
 
-</script>
-
-
-
+</script> 
 @endsection

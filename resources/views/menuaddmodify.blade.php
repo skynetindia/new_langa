@@ -121,7 +121,7 @@ else {
 
         </script>
 
-        <div class="col-md-3" id="parent" style="display: none">
+        <div class="col-md-3 displaynone" id="parent">
             <label for="parentmenu">{{trans('messages.keyword_parent')}}</label>
             <select name="parentmenu" id="parentmenu" class="js-example-basic-single form-control">
                 <option value="">{{trans('messages.keyword_select_parent')}}</option>
@@ -137,7 +137,7 @@ else {
                 @endforeach
             </select>        
         </div>
-        <div class="col-md-3" id="optionsub" style="display: none">
+        <div class="col-md-3 displaynone" id="optionsub">
             <label for="submenu">Sub Menu</label>
             <select name="submenu" id="submenu" class="js-example-basic-single form-control"></select>
         </div>
@@ -169,13 +169,13 @@ else {
 
     <div class="col-md-12">
         
-        <div class="col-md-3" id="frontorder" style="display: none;">
+        <div class="col-md-3 displaynone" id="frontorder">
         <label for="order" > Front Menu Priority  </label>
             <input name="frontpriority" id="frontpriority" class="form-control hasDatepicker" 
             value="{{isset($menu->frontpriority) ? $menu->frontpriority : old('frontpriority')}}" type="text"><br>
         </div>
 
-        <div class="col-md-3" id="backorder" style="display: none;">
+        <div class="col-md-3 displaynone" id="backorder">
         <label for="order" > Back Menu Priority  </label>
             <input name="backpriority" id="backpriority"  class="form-control hasDatepicker" 
             value="{{isset($menu->backpriority) ? $menu->backpriority : old('priority')}}" type="text"><br>

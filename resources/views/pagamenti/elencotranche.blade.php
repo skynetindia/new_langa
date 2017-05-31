@@ -9,21 +9,7 @@
 @endif
 
 @include('common.errors')
-<style>
-tr:hover {
-	background: #f39538;
-}
-.selected {
-	font-weight: bold;
-	font-size: 16px;
-}
-th {
-	cursor: pointer;
-}
-li label {
-	padding-left: 10px;
-}
-</style>
+
 
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 
@@ -36,23 +22,33 @@ li label {
 <!-- Latest compiled and minified Locales -->
 <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
 
-<h1> {{ trans('messages.keyword_list_invoices') }} </h1><hr>
-
-<div class="btn-group">
-<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-<button class="btn btn-primary" type="button" name="update" title="{{ trans('messages.keyword_edit_last_selected_format') }} "><i class="fa fa-pencil"></i></button>
-</a>
-<a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
-<button class="btn btn-info" type="button" name="duplicate" title="{{ trans('messages.keyword_duplicates_selected_layouts') }}"><i class="fa fa-files-o"></i></button>
-</a>    
-<a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title="{{ trans('messages.keyword_delete_last_selected_lauout') }} "><i class="fa fa-trash"></i></button>
-</a>
-<a id="pdf" onclick="multipleAction('pdf');" style="display:inline;">
-<button class="btn" type="button" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} "><i class="fa fa-file-pdf-o"></i></button>
-</a>
+<div class="header-lst-img">
+	<div class="header-svg text-left float-left">
+        <img src="http://betaeasy.langa.tv/images/HEADER1_LT_ACCOUNTING.svg" alt="header image">
+    </div>
+    <div class="float-right text-right">
+    	<h1> {{ trans('messages.keyword_list_invoices') }} </h1><hr>
+        <div class="btn-group">
+            <a onclick="multipleAction('modify');" id="modifica" class="btn btn-warning" name="update" title="{{ trans('messages.keyword_edit_last_selected_format') }} ">
+				<i class="fa fa-pencil"></i>
+            </a>
+            <a id="duplicate" onclick="multipleAction('duplicate');" class="btn btn-info" name="duplicate" title="{{ trans('messages.keyword_duplicates_selected_layouts') }}">
+				<i class="fa fa-files-o"></i>
+            </a>    
+            <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="{{ trans('messages.keyword_delete_last_selected_lauout') }} ">
+				<i class="fa fa-trash"></i>
+            </a>
+            <a id="pdf" onclick="multipleAction('pdf');" class="btn" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} ">
+				<i class="fa fa-file-pdf-o"></i>
+            </a>
+        </div>
+    </div>
 </div>
-<br><br>
+
+<div class="clearfix"></div>
+<div class="height20"></div>
+
+
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/tranche/json');?>" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="id" data-sortable="true"> 
@@ -181,6 +177,9 @@ function multipleAction(act) {
 
 </script>
 
+<div class="footer-svg">
+  <img src="http://betaeasy.langa.tv/images/FOOTER2_RB_ACCOUNTING.svg" alt="footer enti image">
+</div>
 
 
 @endsection

@@ -1,12 +1,9 @@
 @extends('layouts.app')
 @section('content')
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-<style>tr:hover td {
-    background: #f2ba81;
-}</style>
+
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
 <h1> {{ trans('messages.keyword_editinvoice') }} <?php if(!$tranche->idfattura) echo "#0000/" . date('y'); else echo $tranche->idfattura; ?></h1><hr>
 
@@ -22,6 +19,20 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
  <link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
 <script type="text/javascript" src="{{asset('public/scripts/dropzone.js')}}"></script>
+
+
+<div class="header-lst-img">
+	<div class="header-svg text-left float-left">
+        <img src="{{trans('messages.images/HEADER1_LT_ACCOUNTING.svg')}}" alt="header image">
+    </div>
+    <div class="float-right text-right">
+    	<h1> {{ trans('messages.keyword_editinvoice') }} <?php if(!$tranche->idfattura) echo "#0000/" . date('y'); else echo $tranche->idfattura; ?></h1><hr>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+<div class="height20"></div>
+
 
 @include('common.errors')
 <form action="{{url('/pagamenti/tranche/update') . '/' . $tranche->id}}" method="post" name="edit_fattura" id="edit_fattura">
@@ -58,10 +69,16 @@
 								link.dispatchEvent(clickEvent);
     	    				});
     	    			</script></label>
-						<label for="preventivo"> {{ trans('messages.keyword_project') }}  <input type="text" disabled value=":cod/anno" class="form-control"></label>
-                        <a href="{{ url('/pagamenti/tranche/pdf') . '/' . $tranche->id }}" style="text-decoration:none;background:#DDDDDD" target="new" class="btn" type="button"><i class="fa fa-file-pdf-o"></i></a>
+						
+                        <div class="modificatranshe-blade-pagamenti-head">
+                        <label for="preventivo"> {{ trans('messages.keyword_project') }}  <input type="text" disabled value=":cod/anno" class="form-control"></label>
+                        <a href="{{ url('/pagamenti/tranche/pdf') . '/' . $tranche->id }}"  target="new" class="btn" type="button"><i class="fa fa-file-pdf-o"></i></a>
+                        </div>
+                        
 			<h4> {{ trans('messages.keyword_invoice_header') }} </h4>
-			<div class="col-md-12">
+			
+            
+            <div class="row">
 			<div class="col-md-3">
 	<!-- colonna a sinistra -->
 	    <label for="sedelegaleente"> {{ trans('messages.keyword_registered_office_from') }} </label>
@@ -169,14 +186,22 @@
 		
 	</div>
 	</div>
+    
+    
+   
+    
+    
 			<h4> {{ trans('messages.keyword_invoice_body') }} </h4>
 			
+            <div class="row">
 	        <div class="col-md-12">
             		<!-- <a target="new" href="{{url('/pagamenti/tranche/corpofattura') . '/' . $tranche->id}}" class="btn btn-info" style="color:#ffffff;text-decoration: none" title="Vedi Corpo fattura esistenti"><i class="fa fa-info"></i></a> -->
-	                <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiCorpo"><i class="fa fa-plus"></i></a>
-	                <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminaCorpo"><i class="fa fa-eraser"></i></a>
-	        </div><br>
-	    	<table class="table table-striped">
+	                <a class="btn btn-warning" id="aggiungiCorpo"><i class="fa fa-plus"></i></a>
+	                <a class="btn btn-danger" id="eliminaCorpo"><i class="fa fa-trash"></i></a>
+	        </div>
+            </div>
+            <div class="height10"></div>
+	    	<table class="table table-bordered">
 	    		<thead>
 	    			<th>#</th>
 	    			<th> {{ trans('messages.keyword_references') }} </th>
@@ -298,8 +323,8 @@
 	                    });
 	                </script>
 	    	</table>
-			<h4> {{ trans('messages.keyword_base_invoice') }} </h4><a onclick="calcola()" style="text-decoration:none" class="" title=" {{ trans('messages.keyword_assembled_compilation') }} "><br>{{ trans('messages.keyword_click') }}  <i class="fa fa-info"></i> {{ trans('messages.keyword_for_compilation') }} </i></a>
-	   	<table class="table table-striped">
+			<h4> {{ trans('messages.keyword_base_invoice') }} </h4><a onclick="calcola()"  class="" title=" {{ trans('messages.keyword_assembled_compilation') }} "><br>{{ trans('messages.keyword_click') }}  <i class="fa fa-info"></i> {{ trans('messages.keyword_for_compilation') }} </i></a>
+	   	<table class="table table-bordered">
 	   		<thead>
 	   			
 	   			<th> {{ trans('messages.keyword_network') }} </th>
@@ -358,14 +383,18 @@
 				</script>
 	   		</tbody>
 	   	</table>
-	   	<div class="col-md-2" style="padding-top:20px;padding-bottom:10px;">
+	<div class="row">
+    <div class="col-md-2">
 		<input onclick="mostra2()" type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_save') }}">
 	</div>
+    </div>
 </form>
 	</div>
 	<div class="col-md-4">
+    	<div class="clearfix"></div>
+        <div class="height10"></div>
 		<label for="statoemotivo"> {{ trans('messages.keyword_emotional_state') }} </label>
-		<select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
+		<select name="statoemotivo" class="form-control" id="statoemotivo" >
 			<!-- statoemotivoselezionato -->
 			@if($statoemotivoselezionato!=null)
 				@foreach($statiemotivi as $statoemotivo)
@@ -386,7 +415,8 @@
 		});
 		</script>
 		<br>
-		 <label for="privato"> {{ trans('messages.keyword_hide_stats') }}  <i class="fa fa-eye-slash" title="{{ trans('messages.keyword_ifso') }} "></i>
+		 <label for="privato"> {{ trans('messages.keyword_hide_stats') }} </label>
+		  <i class="fa fa-eye-slash" title="{{ trans('messages.keyword_ifso') }} "></i>
             <select class="form-control" name="privato">
             	@if($tranche->privato == 0)
                     <option value="0" selected> {{ trans('messages.keyword_no') }} </option>
@@ -396,7 +426,7 @@
                     <option value="1" selected> {{ trans('messages.keyword_yes') }} </option>
                 @endif
             </select>
-
+			<br/>
 			<label for="tipo"> {{ trans('messages.keyword_type') }} </label>
 		    <select name="tipo" id="tipo" class="form-control">
             	@if($tranche->tipo == 1)
@@ -412,7 +442,7 @@
 		    <input value="{{$tranche->frequenza}}" id="frequ" name="frequenza" class="form-control" placeholder="Frequenza">
 		</div> -->
         
-			<br><label for="percentuale">% {{ trans('messages.keyword_total_amount') }}  <p style="color:#f37f0d;display:inline">(*)</p></label>
+			<br><label for="percentuale">% {{ trans('messages.keyword_total_amount') }}  <span class="required">(*)</span> </label>
 			<input id="percentuale" name="percentuale" class="form-control" value="{{$tranche->percentuale}}" placeholder="{{ trans('messages.keyword_description') }} % ">
             <div id="percentualediv">
 		    <br><label for="frequ"> {{ trans('messages.keyword_amount') }} </label>
@@ -444,7 +474,7 @@
 				test();
 			});
 			</script>
-			<br><label for="datascadenza"> {{ trans('messages.keyword_expiry_date_invoice') }}  <p style="color:#f37f0d;display:inline">(*)</p></label><br>
+			<br><label for="datascadenza"> {{ trans('messages.keyword_expiry_date_invoice') }} <span class="required">(*)</span> </label><br>
 		    <input value="{{$tranche->datascadenza}}" class="form-control" name="datascadenza" id="datascadenza"></input><br>
            
 			  <script>
@@ -467,9 +497,12 @@
 </form>          	
           	<?php $mediaCode = date('dmyhis');?>
 
+			<div class="row">
           	<div class="col-md-12">
-	        <label for="scansione"> {{ trans('messages.keyword_attach_administrative_file') }} </label><br>
-	        <br>
+            <div class="bg-white image-upload-box">
+	        <label for="scansione"> {{ trans('messages.keyword_attach_administrative_file') }} </label>
+            
+            <div class="row">
 	        <div class="col-md-12">
 
             	<div class="image_upload_div">
@@ -514,13 +547,13 @@
 				}				
 			
                 </script>
-
+			<div class="set-height">
 	            <table class="table table-striped table-bordered">	                
 	                <tbody><?php
 					if(isset($preventivo->id) && isset($quotefiles)){
 					foreach($quotefiles as $prev) {
 				$imagPath = url('/storage/app/images/quote/'.$prev->name);
-				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
+				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a></td></tr>';
 				$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 				$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();							
 				foreach($utente_file as $key => $val){
@@ -528,7 +561,9 @@
 					if($val->ruolo_id == $prev->type){
 						$check = 'checked';
 					}
-					$html .=' <input type="radio" name="rdUtente_'.$prev->id.'"  '.$check.' id="rdUtente_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /> '.$val->nome_ruolo;
+					$html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$val->nome_ruolo.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+
+					/*$html .=' <input type="radio" name="rdUtente_'.$prev->id.'"  '.$check.' id="rdUtente_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /> '.$val->nome_ruolo;*/
 				}
 				echo $html .='</td></tr>';
 			}
@@ -572,14 +607,25 @@
 	                       nFile = 0;
 	                    });
 	                </script>
-	            </table><hr>
+	            </table>
+                </div>
+                <hr>
 	            </div>
+			</div>
 
+
+            </div>
+            </div>
             </div>
 		
 	</div>
 </div>
 
+
+
+<div class="footer-svg">
+  <img src="http://betaeasy.langa.tv/images/FOOTER2_RB_ACCOUNTING.svg" alt="footer enti image">
+</div>
 
 <script type="text/javascript">
 $(document).ready(function() {

@@ -1,66 +1,49 @@
 @extends('layouts.app')
 @section('content')
-
-<style>
-tr:hover {
-	background: #f39538;
-}
-.selected {
-	font-weight: bold;
-	font-size: 16px;
-}
-th {
-	cursor: pointer;
-}
-li label {
-	padding-left: 10px;
-}
-</style>
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-
 <!-- Latest compiled and minified JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
 <!-- Latest compiled and minified Locales -->
 <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
-
-
-
-<h1> {{ trans('messages.keyword_add_invoice') }} </h1><hr>
-
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
     document.write(msg);
     </script>
 @endif
-
 @include('common.errors')
+<div class="header-lst-img">
+    <div class="header-svg text-left float-left">
+        <img src="{{url('images/HEADER1_LT_ACCOUNTING.svg')}}" alt="header image">
+    </div>
+    <div class="float-right text-right">
+        <h1> {{ trans('messages.keyword_add_invoice') }} </h1><hr>            
+        <a href="{{url('/pagamenti/tranche/add') . '/' . $idfattura}}" id="modifica" class="btn btn-warning" title=" {{ trans('messages.keyword_add_tranche_arrangement') }} ">
+			<i class="fa fa-plus"></i>
+		</a>
 
-<a href="{{url('/pagamenti/tranche/add') . '/' . $idfattura}}" id="modifica" style="display:inline;">
-<button class="btn btn-warning" type="button" title=" {{ trans('messages.keyword_add_tranche_arrangement') }} "><i class="fa fa-plus"></i></button>
-</a>
-
-<br><br>
-<div class="btn-group">
-<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-<button class="btn btn-primary" type="button" name="update" title=" {{ trans('messages.keyword_edit_last_selected_format') }} "><i class="fa fa-pencil"></i></button>
-</a>
-<a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
-<button class="btn btn-info" type="button" name="duplicate" title=" {{ trans('messages.keyword_duplicates_selected_layouts') }} "><i class="fa fa-files-o"></i></button>
-</a>    
-<a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title=" {{ trans('messages.keyword_delete_last_selected_lauout') }} "><i class="fa fa-trash"></i></button>
-</a>
-<a id="pdf" onclick="multipleAction('pdf');" style="display:inline;">
-<button class="btn" type="button" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} "><i class="fa fa-file-pdf-o"></i></button>
-</a>
+        <div class="btn-group">
+        <a onclick="multipleAction('modify');" id="modifica"  class="btn btn-warning" title=" {{ trans('messages.keyword_edit_last_selected_format') }} ">
+            <i class="fa fa-pencil"></i>
+        </a>
+        <a id="duplicate" onclick="multipleAction('duplicate');"  class="btn btn-info" title=" {{ trans('messages.keyword_duplicates_selected_layouts') }} ">
+            <i class="fa fa-files-o"></i>
+        </a>    
+        <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title=" {{ trans('messages.keyword_delete_last_selected_lauout') }} ">
+            <i class="fa fa-trash"></i>
+        </a>
+        <a id="pdf" onclick="multipleAction('pdf');"  class="btn" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} ">
+            <i class="fa fa-file-pdf-o"></i>
+        </a>
+        </div>
+    </div>
 </div>
-<br><br>
+
+<div class="clearfix"></div>
+<div class="height20"></div>
+
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/tranche/json') . '/id/' . $idfattura;?>" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="id" data-sortable="true"> {{ trans('messages.keyword_noprovision') }} 
@@ -79,6 +62,10 @@ li label {
             {{ trans('messages.keyword_emotional_state') }}
         </thead>
     </table>
+<div class="footer-svg">
+  <img src="{{url('images/FOOTER2_RB_ACCOUNTING.svg')}}" alt="footer enti image">
+</div>
+
 
 <script>
 var selezione = [];
@@ -88,6 +75,7 @@ var n = 0;
 $('#table').on('click-row.bs.table', function (row, tr, el) {
 	var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
 	if (!selezione[cod]) {
+        $('#table tr.selected').removeClass("selected");       
 		$(el[0]).addClass("selected");
 		selezione[cod] = cod;
 		indici[n] = cod;
@@ -103,6 +91,11 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 			}
 		}
 		n--;
+        $('#table tr.selected').removeClass("selected");       
+        $(el[0]).addClass("selected");
+        selezione[cod] = cod;
+        indici[n] = cod;
+        n++;
 	}
 });
 

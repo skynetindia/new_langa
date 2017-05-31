@@ -277,32 +277,44 @@ class HomeController extends Controller {
         return Redirect::back();
     }
 
+    /* Error message send to  */
     public function segnalazionerrore(Request $request) {
         $user = $request->user();
         if ($request->screen != null) {
+            $validator = Validator::make($request->all(), [
+                    'screen'=>'mimes:jpeg,jpg,png|max:2000'
+                ]);
+             if ($validator->fails()) {
+                return Redirect::back()
+                                ->withInput()
+                                ->withErrors($validator);
+            }
             // Salvo lo screen con un nome unico
             $nome = time() . uniqid() . '-' . '-screen';
             Storage::put(
                     'images/' . $nome, file_get_contents($request->file('screen')->getRealPath())
             );
-
             $url = url('/storage/app/images') . '/' . $nome;
-        } else
+        } 
+        else { 
             $url = null;
+        }
         if (isset($request->love)) {
             Mail::send('layouts.emailringraziamento', ['user' => $request->user(), 'love' => $request->love, 'screen' => $url], function ($m) use ($user) {
                 $m->from($user->email, 'Valutazione');
-                $m->to('gestione.langa@gmail.com')->cc('easy@langa.tv')->subject('VALUTAZIONE IN EASY LANGA');
+                 $m->to('developer5@mailinator.com')->cc('developer6@mailinator.com')->subject("{{trans('messages.keyword_easy_language_assessment')}}");
+               /* $m->to('gestione.langa@gmail.com')->cc('easy@langa.tv')->subject('VALUTAZIONE IN EASY LANGA');*/
             });
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Grazie per aver valutato Easy, ricordati che senza il tuo supporto Easy non sarebbe quello che è ora</h4></div>');
+                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_error_notification_messages_saven').'</div>');
         } else {
             Mail::send('errors.bug', ['user' => $request->user(), 'url' => $request->posizione, 'errore' => $request->errore, 'screen' => $url], function ($m) use ($user) {
                 $m->from($user->email, 'Errore');
-                $m->to('gestione.langa@gmail.com')->cc('easy@langa.tv')->subject('ERRORE IN EASY LANGA');
+                //$m->to('gestione.langa@gmail.com')->cc('easy@langa.tv')->subject('ERRORE IN EASY LANGA');
+                $m->to('developer5@mailinator.com')->cc('developer6@mailinator.com')->subject("{{trans('messages.keyword_errore_in_easy_langa')}}");
             });
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4>Grazie per aver segnalato questo errore, scusaci per il disagio</h4></div>');
+                            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_error_notification_messages_eight').'</div>');
         }
     }
 

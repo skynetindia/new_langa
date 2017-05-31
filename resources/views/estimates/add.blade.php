@@ -7,16 +7,22 @@
 <link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
 <script type="text/javascript" src="{{asset('public/scripts/dropzone.js')}}"></script>
 
-<style>
-tr:hover td {
-    background: #f2ba81;
-}
-.selected {
-    background: #f37f0d;
-}
-</style>
+
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
-<h1>{{trans('messages.keyword_add_quote')}}</h1><hr>
+
+
+<div class="add-blade-estimate">
+
+<div class="header-right">
+	<div class="float-left">
+    	<h1>{{trans('messages.keyword_add_quote')}}</h1><hr>
+    </div>
+    <div class="header-svg">
+         <img src="http://betaeasy.langa.tv/images/HEADER2-RT_QUOTES.svg" alt="header image">
+    </div>
+</div>
+
+
 
 @if(!empty(Session::get('msg')))
     <script>
@@ -25,6 +31,8 @@ tr:hover td {
     </script>
 @endif
 @include('common.errors')
+
+
 
 <div class="row">
   <div class="col-md-8">
@@ -66,24 +74,25 @@ tr:hover td {
                 </div>
         </div>
 
-        <div class="col-md-12">
-    <h4>{{trans('messages.keyword_packages_and_optional')}}</h4><hr>
-    <div class="col-md-4">
-        <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="add"><i class="fa fa-plus"></i></a>
-        <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="delete"><i class="fa fa-eraser"></i></a>
+        <div class="row">
+	 <div class="col-md-12"><h4>{{trans('messages.keyword_packages_and_optional')}}</h4><hr></div>
+    <div class="col-md-2">
+    	  <div class="space20"></div>
+        <a class="btn btn-warning"  id="add"><i class="fa fa-plus"></i></a>
+        <a class="btn btn-danger"  id="delete"><i class="fa fa-trash"></i></a>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-5">
             <label>{{trans('messages.keyword_list_of_packages')}}</label>
-        <select style="display:inline" id="pacchetti" class="js-example-basic-single form-control">
+        <select id="pacchetti" class="js-example-basic-single form-control">
             <option></option>
             @foreach($pacchetti as $pacchetto)
                 <option value="{{$pacchetto->id}}">{{$pacchetto->label}}</option>
             @endforeach
         </select>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-5">
             <label>{{trans('messages.keyword_optional_list')}}</label>
-        <select style="display:inline" id="optional" class="js-example-basic-single form-control">
+        <select id="optional" class="js-example-basic-single form-control">
             <option></option>
             @foreach($optional as $opt)
                 <option value="{{$opt->id}}">{{$opt->label}}</option>
@@ -132,11 +141,14 @@ tr:hover td {
                                     var tr = document.createElement("tr");
                                     // Checkbox
                                     var checkbox = document.createElement("input");
+                                    var checkboxLabel = document.createElement("label");                                        
+                                    checkboxLabel.setAttribute('for', "checkNuL"+k+j);
                                     checkbox.type = "checkbox";
                                     checkbox.className = "selezione";
+                                    checkbox.id = "checkNuL"+k+j;
                                     var td = document.createElement("td");
-									
-                                    td.appendChild(checkbox);
+                                     td.appendChild(checkbox);
+                                    td.appendChild(checkboxLabel);
                                     
                                     /*var ordine = document.createElement("input");
                                     ordine.type = "number";
@@ -264,14 +276,20 @@ tr:hover td {
                                     ciclicita.appendChild(document.createTextNode(" 1 A. "));
 
 
-                                        // Asterisca
+                                    // Asterisca
+                                    var compl = document.createElement("td");
+                                    var checkdiv = document.createElement("div");
+                                    checkdiv.className = "switch";
                                     var check = document.createElement("input");
                                     check.type = "checkbox";
-                                    var compl = document.createElement("td");
                                     check.name = "ast[]";
-                                    compl.appendChild(check);
-                                    //tr.appendChild(tdAst);
-                                    
+                                    check.id = "ast"+count;
+                                    var checkLabel = document.createElement("label");
+                                    checkLabel.for="ast"+count;
+                                    checkLabel.setAttribute('for', "ast"+count);
+                                    checkdiv.appendChild(check);
+                                    checkdiv.appendChild(checkLabel);                                   
+                                    compl.appendChild(checkdiv);
                                     
                                     
                                     tr.appendChild(td);
@@ -307,10 +325,15 @@ tr:hover td {
                     // Checkbox
 
                     var checkbox = document.createElement("input");
+                    var checkboxlabel = document.createElement("label");
+                    checkboxlabel.setAttribute('for', "ast"+k);
                     checkbox.type = "checkbox";
                     checkbox.className = "selezione";
+                    checkbox.id = "ast"+k;
                     var td = document.createElement("td");
                     td.appendChild(checkbox);
+                    td.appendChild(checkboxlabel);                    
+
                     tr.appendChild(td);
                     var ordine = document.createElement("input");
                                     ordine.type = "number";
@@ -424,11 +447,20 @@ tr:hover td {
                     tr.appendChild(ciclicita);
 
                     // Asterisca
+                    var checkdiv = document.createElement("div");
+                    checkdiv.className = "switch";
                     var check = document.createElement("input");
                     check.type = "checkbox";
-                    var tdAst = document.createElement("td");
                     check.name = "ast[]";
-                    tdAst.appendChild(check);
+                    check.id = "ast"+count;
+                    var checkLabel = document.createElement("label");
+                    checkLabel.for="ast"+count;
+                    checkLabel.setAttribute('for', "ast"+count);
+                    checkdiv.appendChild(check);
+                    checkdiv.appendChild(checkLabel);
+                    
+                    var tdAst = document.createElement("td");
+                    tdAst.appendChild(checkdiv);
                     tr.appendChild(tdAst);
                     // Aggiungo la nuova riga
                     tabella.appendChild(tr); 
@@ -441,12 +473,19 @@ tr:hover td {
         $('#add').on("click", function() {
             // Aggiungo una riga vuota
             var tr = document.createElement("tr");
-            // Checkbox
+            var count = j('#tabella').children('tr').length;
+            // Checkbox            
             var checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.className = "selezione";
+            checkbox.id = "checkNu"+count;
+            var checkboxlabel = document.createElement("label");
+            checkboxlabel.for = "checkNu"+count;
+            checkboxlabel.setAttribute('for', "checkNu"+count);
+
             var td = document.createElement("td");
             td.appendChild(checkbox);
+            td.appendChild(checkboxlabel);
             tr.appendChild(td);
             // Codice
             var codice = document.createElement("td");
@@ -553,11 +592,20 @@ tr:hover td {
             tr.appendChild(ciclicita_optional);
 
             // Asterisca
+            var checkdiv = document.createElement("div");
+            checkdiv.className = "switch";
             var check = document.createElement("input");
             check.type = "checkbox";
-            var tdAst = document.createElement("td");
             check.name = "ast[]";
-            tdAst.appendChild(check);
+            check.id = "ast"+count;
+            var checkLabel = document.createElement("label");
+            checkLabel.for="ast"+count;
+            checkLabel.setAttribute('for', "ast"+count);
+            checkdiv.appendChild(check);
+            checkdiv.appendChild(checkLabel);
+
+            var tdAst = document.createElement("td");
+            tdAst.appendChild(checkdiv);           
             tr.appendChild(tdAst);
             // Aggiungo la nuova riga
             tabella.appendChild(tr);  
@@ -611,13 +659,13 @@ tr:hover td {
     </script>
 
         </div>
-        <div class="col-md-12">
+        <div class="row">
             <div class="col-md-4">
                 <label for="considerazioni">{{trans('messages.keyword_considerations')}}</label>
     <textarea id="considerazioni" name="considerazioni" placeholder="{{trans('messages.keyword_budget_considerations')}}" class="form-control">{{old('considerazioni')}}</textarea><br>
                 <label for="valenza">{{trans('messages.keyword_valenza')}}</label>
     <input value="{{old('valenza')}}" type="text" id="valenza" name="valenza" placeholder="{{trans('messages.keyword_valency_of_the_budget')}}" class="form-control"><br>
-                <label for="scontoagente">{{trans('messages.keyword_agent_discount')}} <p style="color:#f37f0d;display:inline">(%)</p></label>
+                <label for="scontoagente">{{trans('messages.keyword_agent_discount')}} <span class="required">(%)</span></label>
     <input value="{{old('scontoagente')}}" type="number" step=any id="scontoagente" name="scontoagente" placeholder="{{trans('messages.keyword_agent_discount_-_calculated_on_the_total')}}" class="form-control" title="{{trans('messages.keyword_maximum_discount_attributable')}}"><br>
                 
             </div>
@@ -626,14 +674,14 @@ tr:hover td {
     <textarea id="noteimportanti" name="noteimportanti" placeholder="{{trans('messages.keyword_important_notes')}}" class="form-control">{{old('noteimportanti')}}</textarea><br>
                 <label for="finelavori">{{trans('messages.keyword_end_date_works')}}</label>
     <input value="{{old('finelavori')}}" type="text" id="finelavori" name="finelavori" placeholder="{{trans('messages.keyword_date_expected_end_of_work')}}" class="form-control"><br>
-                <label for="scontobonus">{{trans('messages.keyword_agent_discount_discount')}} <p style="color:#f37f0d;display:inline">(%)</p></label>
+                <label for="scontobonus">{{trans('messages.keyword_agent_discount_discount')}} <span class="required">(%)</span></label>
     <input value="{{old('scontobonus')}}" type="number" step=any id="scontobonus" name="scontobonus" placeholder="{{trans('messages.keyword_calculated_on_the_total_already_discounted')}}" class="form-control" title="% {{trans('messages.keyword_discounted_by_the_retailer')}}"><br>
             </div>
             <div class="col-md-4">
                 <label for="metodo">{{trans('messages.keyword_payment_method')}}</label>
                 <br>
-                 <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="addpay"><i class="fa fa-plus"></i></a>
-                <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="deletepay"><i class="fa fa-eraser"></i></a>
+                 <a class="btn btn-warning" id="addpay"><i class="fa fa-plus"></i></a>
+                <a class="btn btn-danger" id="deletepay"><i class="fa fa-trash"></i></a>
                 
     <div id="paymethod"><table class="table table-striped table-bordered">                   
                     <tbody id="filespay">
@@ -649,9 +697,14 @@ tr:hover td {
                             var tr = document.createElement("tr");
                             var check = document.createElement("td");
                             var checkbox = document.createElement("input");
+                            var checkboxLabelpay = document.createElement("label");
+                            checkboxLabelpay.setAttribute('for', "payment"+kFile3);
                             checkbox.type = "checkbox";
                             checkbox.className = "selezione";
+                            checkbox.id = "payment"+kFile3;
                             check.appendChild(checkbox);
+                            check.appendChild(checkboxLabelpay);
+
                             kFile3++;
                             var td = document.createElement("td");
                             var dataInput = document.createElement("input");
@@ -716,7 +769,7 @@ tr:hover td {
         });
         
         function check() {
-            return confirm("{{trans('messages.keyword_sure')}} " + n + " {{trans('messages.keyword_packages')}}/optional?");
+            return confirm("Sei sicuro di voler eliminare: " + n + " pacchetti/optional?");
         }
         
         j('#deletepay').on("click", function() {
@@ -732,18 +785,20 @@ tr:hover td {
                     </script>
                 </table></div>
   
-                <label for="subtotale">{{trans('messages.keyword_total')}}  <p style="color:#f37f0d;display:inline">(€)</p><a onclick="calcola()" style="text-decoration:none" class="" title="{{trans('messages.keyword_assembled_compilation')}}">{{trans('messages.keyword_click')}} <i class="fa fa-info"></i> {{trans('messages.keyword_for_compilation')}}</a></label>
+  <div class="height30"></div>
+  
+                <label for="subtotale">Totale <span class="required">(€)</span><a onclick="calcola()"  class="" title="{{trans('messages.keyword_assembled_compilation')}}">{{trans('messages.keyword_click')}} <i class="fa fa-info"></i> {{trans('messages.keyword_for_compilation')}}</a></label>
     <input value="{{old('subtotale')}}" step=any type="number" id="subtotale" name="subtotale" placeholder="{{trans('messages.keyword_initial_price')}}" class="form-control" title="{{trans('messages.keyword_initial_value_calculated_individual_packages')}}"><br>
-    <label for="totale">{{trans('messages.keyword_discounted_total')}} <p style="color:#f37f0d;display:inline">(€)</p></label>
+    <label for="totale">{{trans('messages.keyword_discounted_total')}} <span class="required">(€)</span></label>
     <input value="{{old('totale')}}" type="number" step=any id="totale" name="totale" placeholder="{{trans('messages.keyword_discounted_total')}} " class="form-control" title="{{trans('messages.keyword_discounted_value_or_overwritten_value')}}"><br>
             </div>
         </div>
-        <div class="col-md-12">
+        <div class="row">
             <div class="col-md-4">                
-                <label for="totaledapagare">{{trans('messages.keyword_to_pay')}} <p style="color:#f37f0d;display:inline">(€)</p></label>
-    <input value="{{old('totaledapagare')}}" type="number" step=any id="totaledapagare" name="totaledapagare" placeholder="{{trans('messages.keyword_total_price_to_be_paid')}} class="form-control" title="{{trans('messages.keyword_value_to_be_entered_for_any_rounding')}}"><br>
+                <label for="totaledapagare">{{trans('messages.keyword_to_pay')}}<span class="required">(€)</span></label>
+    <input value="{{old('totaledapagare')}}" type="number" step=any id="totaledapagare" name="totaledapagare" placeholder="{{trans('messages.keyword_total_price_to_be_paid')}}" class="form-control" title="{{trans('messages.keyword_value_to_be_entered_for_any_rounding')}}"><br>
             </div>
-            <div class="col-md-4" style="display: none">
+            <div class="col-md-4 none">
                 <label for="lineebianche">{{trans('messages.keyword_number_of_lines')}}</label>
                 <input value="{{old('lineebianche')}}" type="number" id="lineebianche" name="lineebianche" placeholder="{{trans('messages.keyword_number_of_lines')}}" class="form-control" title="{{trans('messages.keyword_enter_how_many_lines_page_of_the_quote')}}">
     <script>
@@ -768,7 +823,7 @@ tr:hover td {
             </div>
             <!--<div class="col-md-4">
                 <label for="noteintestazione">Note private relative al preventivo</label><a onclick="mostra()" id="mostra"> <i class="fa fa-eye"></i></a>   
-    <textarea style="background-color:#f39538;color:#ffffff" rows="2" title="Note nascoste, clicca l'occhio per mostrare" class="form-control nascondi" name="noteintestazione" id="noteenti" placeholder="Inserisci note commerciali del preventivo"></textarea><br>
+    <textarea rows="2" title="Note nascoste, clicca l'occhio per mostrare" class="form-control nascondi" name="noteintestazione" id="noteenti" placeholder="Inserisci note commerciali del preventivo"></textarea><br>
             </div>-->
             <script>
         function calcola() {
@@ -793,20 +848,24 @@ tr:hover td {
         }
       </script>
         </div>
+        
+	<div class="row">
         <div class="col-md-6">
-    <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
-</div>
+            <button onclick="mostra2()" type="submit" class="btn btn-warning">Salva</button>
+        </div>
+	</div>
+
         </form>
     </div>
     <div class="col-md-4">
     
 
-        <label for="statoemotivo"> {{trans('messages.keyword_emo')}}</label>
-        <select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
+        <label for="statoemotivo">Stato emotivo</label>
+        <select name="statoemotivo" class="form-control" id="statoemotivo" >
             <!-- statoemotivoselezionato -->
      
                 @foreach($statiemotivi as $statoemotivo)
-                    <option style="background-color:{{$statoemotivo->color}};color:#ffffff" <?php if(old('statoemotivo')==$statoemotivo->name){ echo 'selected'; }?> value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+                    <option  <?php if(old('statoemotivo')==$statoemotivo->name){ echo 'selected'; }?> style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
                 @endforeach
      
         </select>
@@ -821,13 +880,16 @@ tr:hover td {
         });
         </script>
 
+		<div class="row">
             <div class="col-md-12">
-            <label for="scansione">{{trans('messages.keyword_attachment')}} </label><br>
+            	<div class="bg-white modifica-blade-estimate-upload">
+            <label for="scansione">Allega file amministrativo (Scansione preventivo, contratto, ...)</label>
             <br>
+            <div class="row">
             <div class="col-md-12">
                 <div class="image_upload_div">
-                <?php echo Form::open(array('ussrl' => '/estimates/modify/quote/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
-{{ csrf_field() }}ss
+                <?php echo Form::open(array('url' => '/estimates/modify/quote/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
+{{ csrf_field() }}
                 </form>             
                 </div><script>
                 var url = '<?php echo url('/estimates/modify/quote/getfiles/'.$mediaCode); ?>';
@@ -866,12 +928,13 @@ tr:hover td {
                         }});
                         <?php } */?>
                 </script>
+                <div class="set-height">
                 <table class="table table-striped table-bordered">                  
                     <tbody><?php
                     if(isset($preventivo->id) && isset($quotefiles)){
                     foreach($quotefiles as $prev) {
                 $imagPath = url('/storage/app/images/quote/'.$prev->name);
-                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
+                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
                 $html .='<tr class="quoteFile_'.$prev->id.'"><td>';
                 $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();                           
                 foreach($utente_file as $key => $val){
@@ -923,10 +986,14 @@ tr:hover td {
                            nFile = 0;
                         });
                     </script>
-                </table><hr>
+                </table></div><hr>
                 </div>
-
+				</div>
             </div>
+            </div>
+            
+            </div>
+            
             <!-- fase 3 -->
 <?php /*?>            <div class="col-md-12"><label for="notecontrattuali">Note private per il tecnico</label><a onclick="mostraTecnico()" id="mostra"> <i class="fa fa-eye"></i></a>  
                 <textarea style="background-color:#f39538;color:#ffffff" rows="2" name="notetecniche" id="notetecniche" placeholder="Inserisci note tecniche accordate verbalmente/scritte a mano sul preventivo" title="Note nascoste, clicca l'occhio per mostrare" class="form-control">{{$preventivo->notetecniche}}</textarea><br>
@@ -1014,6 +1081,14 @@ tr:hover td {
         
     </div>
 </div>
+
+</div>
+
+
+<div class="footer-svg">
+  <img src="http://betaeasy.langa.tv/images/FOOTER3-ORIZZONTAL_QUOTES.svg" alt="avvisi">
+</div>
+
 <script>
 
     

@@ -473,3 +473,46 @@ Route::get('/pagamenti/coordinate', 'AccountingController@mostracoordinate');
 Route::get('/contatti', 'HomeController@mostracontatti');
 Route::get('/faq', 'HomeController@mostrafaq');
 Route::get('/changelog', 'HomeController@mostrachangelog');
+Route::get('/valutaci', function () {
+    return view('layouts.valutaci');
+});
+Route::post('/valutaci/store', 'HomeController@segnalazionerrore');
+
+/* =============================== Quiz Route =============================== */
+// show quiz start page
+Route::get('/quiz', 'QuizController@index');
+// step one
+Route::get('/quiz/stepone', 'QuizController@stepone');
+// store step one details
+Route::post('/storeStepone', 'QuizController@storestepone');
+// get old ente details
+Route::post('/oldente', 'QuizController@oldente');
+// add new ente details
+Route::post('/newente', 'QuizController@newente');
+// step two
+Route::get('/quiz/steptwo/{id}', 'QuizController@steptwo');
+// get details
+Route::get('quiz/getDetails', 'QuizController@getQuizDetails');
+// store step two details
+Route::post('quiz/saveDetails', 'QuizController@saveRatDetails');
+// step three
+Route::get('/quiz/stepthree/{id}', 'QuizController@stepthree');
+// store step three details
+Route::post('/storeStepthree', 'QuizController@storeStepthree');
+// quiz step four
+Route::get('/quiz/stepfour/{id}', 'QuizController@stepfour');
+// store quiz step four data
+Route::post('/storeStepfour', 'QuizController@storestepfour');
+// quiz step five
+Route::get('/quiz/stepfive/{id}', 'QuizController@stepfive');
+// store quiz step five details
+Route::post('/storeStepfive', 'QuizController@storestepfive');
+// file viewer
+Route::any('/fileviewer/{src}/{type}', 'QuizController@fileviewer');
+// upload file step five
+Route::post('/stepfive/uploadfiles/{code}', 'QuizController@fileupload');
+// get file step five
+Route::get('/stepfive/getfiles/{code}', 'QuizController@fileget');
+// delete file step five
+Route::get('/stepfive/deletefiles/{id}', 'QuizController@filedelete');
+

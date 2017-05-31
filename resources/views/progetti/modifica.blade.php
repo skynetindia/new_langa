@@ -12,13 +12,7 @@
  <script src="http://d3js.org/d3.v3.min.js"></script> 
  <script src="{{asset('public/scripts/RadarChart.js')}}"></script> 
 <!-- end radar chart js -->
-<style>
-#chart {
-  position: absolute;
-  top: 30px;
-  left: 50px;
-}	
-</style>
+
 
 <script type="text/javascript">
 	$( document ).ready(function() {
@@ -32,8 +26,6 @@
 	    });
 	});
 </script>
-
-
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -42,6 +34,19 @@
 @endif
 
 @include('common.errors')
+
+<div class="progetti-header">
+	<div class="header-svg float-left">
+        <img src="{{url('images/HEADER1_LT_PROJECT.svg')}}" alt="header image">
+    </div>
+    
+    <div class="header-svg float-right">
+        <img src="{{url('images/HEADER1_RT_PROJECT.svg')}}" alt="header image">
+    </div>
+</div>
+
+<div class="clearfix"></div>
+<div class="height20"></div>
 
 <?php echo Form::open(array('url' => '/progetti/modify/project/' . $progetto->id, 'files' => true)) ?>
     <?php $mediaCode = date('dmyhis');?>
@@ -80,19 +85,22 @@
 				$link_prev_noprezzi = url('/preventivi/noprezzi/pdf/quote/') . '/'.  $progetto->id_preventivo;
 				?>        		    
     		</div>
-			<a id="pdf" style="display:inline;">
-			<button class="btn" type="button" name="pdf" title="{{trans('messages.keyword_pdf')}}"><i class="fa fa-file-pdf-o"></i></button>
-			</a>
-
+            
+            	<div class="modifica-blade-progetto">
+                    <a id="pdf" class="btn">
+                            <i class="fa fa-file-pdf-o"></i>
+                    </a>
     			<a href="#" class="btn btn-warning">{{trans('messages.keyword_goallentity')}}</a>
-
-    			<a href="#" class="btn btn-warning">{{trans('messages.keyword_onlinereview')}}</a>
+					<div class="float-right">
+    				<a href="#" class="btn btn-warning">{{trans('messages.keyword_onlinereview')}}</a>
+                	</div>
+                </div>
     		
-				<br><label for="nomeprogetto">{{trans('messages.keyword_projectname')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+				<br><label for="nomeprogetto">{{trans('messages.keyword_projectname')}} <span class="required">(*)</span></label>
         		<input value="{{ $progetto->nomeprogetto }}" class="form-control" type="textarea" name="nomeprogetto" id="nomeprogetto" placeholder="{{trans('messages.keyword_projectname')}}"><br>
 				<label for="lavorazioni">{{trans('messages.keyword_processing')}}</label><br>
-	                <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiLavorazione"><i class="fa fa-plus"></i></a>
-	                <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminaLavorazione"><i class="fa fa-eraser"></i></a>
+	                <a class="btn btn-warning"  id="aggiungiLavorazione"><i class="fa fa-plus"></i></a>
+	                <a class="btn btn-danger" id="eliminaLavorazione"><i class="fa fa-trash"></i></a>
                 <div class="table-responsive">
 	            <table class="table table-bordered">
 	                <thead>
@@ -106,10 +114,11 @@
 	                    @foreach($lavorazioni as $partecipante)
 	                        <tr>
 	                            <td>
-	                                <input type="checkbox" class="selezione">
+	                                <input type="checkbox" id="checkNuL{{$p}}" class="selezione"><label for="checkNuL{{$p}}"></label>
 	                            </td>
                             <td>
                                 <input type="text" name="ric[]" value="<?php echo $partecipante->nome; ?>" class="form-control">
+                                <hr>
                                 <select class="form-control" name="completato[]">
 								@foreach($oggettostato as $key => $oggettostatoval)
                                 	<option value="{{$oggettostatoval->id}}" <?php if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato ) { echo 'selected';}?>>{{ $oggettostatoval->nome }}</option>
@@ -208,17 +217,21 @@
                 			this.value = test;
                 		}
 	            $('#aggiungiLavorazione').on("click", function() {
+                    var countlavorazioni = $('#lavorazioni').children('tr').length;
 	                        var tabella = document.getElementById("lavorazioni");
                 			var tr = document.createElement("tr");
                 			var data = document.createElement("td");
                 			var ora = document.createElement("td");
                 			var check = document.createElement("input");
+                            var checkboxLabel = document.createElement("label");                                        
+                            checkboxLabel.setAttribute('for', "checkNuL"+countlavorazioni);
                 			var checkbox = document.createElement("td");
                 			check.type = "checkbox";
                 			check.className = "selezione";
+                            check.id = "checkNuL"+countlavorazioni;
 
                 			var select1 = document.createElement("select");
-
+                            var hr = document.createElement("hr");
                 			var compl = document.createElement("td");
                 			select1.name = "completato[]";
                 			select1.className = "form-control";
@@ -297,13 +310,14 @@
 
                 			var ric = document.createElement("td");
                 			checkbox.appendChild(check);
+                            checkbox.appendChild(checkboxLabel);
                 			tr.appendChild(checkbox);
-                			tr.appendChild(input);
-                			// tr.appendChild(desc);
-
-                			select.className = "form-control";
-                			ora.appendChild(select);
-                			tr.appendChild(select1);
+                			
+                            ora.appendChild(input);
+                            ora.appendChild(hr);                  
+                            ora.appendChild(select1);                			
+                			tr.appendChild(ora);
+                            select.className = "form-control";                      
                 			// tr.appendChild(compl);
                 			tr.appendChild(desc);
                 			tr.appendChild(progress);
@@ -408,24 +422,24 @@
 	                </script>
 	            </table>
             </div>
-            <div class="col-md-2" style="padding-top:10px;padding-bottom:10px;">
+           <div class="row"> <div class="col-md-2" >
 	           <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
-            </div>
+            </div></div>
 		</div>
 
 
 		<div class="col-md-4">
          	<label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
-                <select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
+                <select name="statoemotivo" class="form-control" id="statoemotivo">
                     <!-- statoemotivoselezionato -->
-                    <option style="background-color:white"></option>
+                    <option></option>
                     @if($statoemotivoselezionato!=null)
                         @foreach($statiemotivi as $statoemotivo)
                             <option @if($statoemotivo->id == $progetto->emotion_stat_id) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{$statoemotivo->name}}</option>
                         @endforeach
                     @else
                         @foreach($statiemotivi as $statoemotivo)
-                            <option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{$statoemotivo->name}}</option>
+                            <option value="{{$statoemotivo->id}}" style="background-color:{{$statoemotivo->color}};color:#ffffff" >{{$statoemotivo->name}}</option>
                         @endforeach
                     @endif
                 </select>
@@ -438,15 +452,18 @@
                     document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
                 });
                 </script>
-           	<div class="col-md-6">
-            <label for="preventivo">{{trans('messages.keyword_starttime')}}</label>
-        		
-        		    <input value="{{ $progetto->datainizio }}" class="form-control" type="text" name="datainizio" id="datainizio" placeholder="{{trans('messages.keyword_starttime')}}">
-       		</div>
-       		<div class="col-md-6">
-       		<label for="preventivo">{{trans('messages.keyword_endtime')}}</label>
-        		    <input value="{{ $progetto->datafine }}" class="form-control" type="text" name="datafine" id="datafine" placeholder="{{trans('messages.keyword_endtime')}}">
-        	</div>
+			<div class="row">            	
+                <div class="col-md-6">
+                <label for="preventivo">{{trans('messages.keyword_starttime')}}</label>
+                    
+                        <input value="{{ $progetto->datainizio }}" class="form-control" type="text" name="datainizio" id="datainizio" placeholder="{{trans('messages.keyword_starttime')}}">
+                </div>
+                <div class="col-md-6">
+                <label for="preventivo">{{trans('messages.keyword_endtime')}}</label>
+                        <input value="{{ $progetto->datafine }}" class="form-control" type="text" name="datafine" id="datafine" placeholder="{{trans('messages.keyword_endtime')}}">
+                </div>
+            </div>
+            
         		    <script>
 					  /*$( function() {
 					    $( "#slider-range-max" ).slider({
@@ -471,18 +488,23 @@
         		    $('#datafine').datepicker();					
         		    </script>
         	<br>
-         	<div class="col-md-12" style="display:;">
-        	<br> <b> {{trans('messages.keyword_project_graph')}} </b>
-        		<div id="body" style="width:100%;min-height:300px;">
+         	<div class="row">
+            <div class="col-md-12">
+            	  <div class="bg-white image-upload-box">
+        	<label> {{trans('messages.keyword_project_graph')}}</label><br> <br> 
+        		<div id="body">
 				  <div id="chart"></div>
 			    </div>			    
+                </div>
         	</div><br />
 			<div class="col-md-12">
 				<br><label for="preventivo">{{trans('messages.keyword_sensitivedata')}}:</label>
-				<br><a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiNote"><i class="fa fa-plus"></i></a>
-	                <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminaNote"><i class="fa fa-eraser"></i></a>
+				<br><a class="btn btn-warning" id="aggiungiNote"><i class="fa fa-plus"></i></a>
+	                <a class="btn btn-danger"  id="eliminaNote"><i class="fa fa-trash"></i></a>
 	        	<br>
 	        </div>
+            </div>
+            <div class="set-height250">
 		            <table class="table table-striped table-bordered">
 		                <thead>
 		                    <th>#</th>
@@ -495,7 +517,7 @@
 							@foreach($noteprivate as $nota)
 		                        <tr>
 		                            <td>
-		                                <input type="checkbox" class="selezione">
+		                                <input type="checkbox" id="Sensitiv{{$k}}" class="selezione"><label for="Sensitiv{{$k}}"></label>
 		                            </td>
 		                            <td>
 		                                <input name="nome[]" class="form-control" value="{{$nota->nome}}">
@@ -528,7 +550,7 @@
 
 
 		                    $('#aggiungiNote').on("click", function() {
-
+                                var countnoteprivate = $('#noteprivate').children('tr').length;
 		                       var tab = document.getElementById("noteprivate");
 
 		                        var tr = document.createElement("tr");
@@ -540,8 +562,13 @@
 		                        checkbox.type = "checkbox";
 
 		                        checkbox.className = "selezione";
+                                checkbox.id = "Sensitiv"+countnoteprivate;
+                                var checkboxlabel = document.createElement("label");
+                                checkboxlabel.for = "Sensitiv"+countnoteprivate;
+                                checkboxlabel.setAttribute('for', "Sensitiv"+countnoteprivate);
 
 		                        check.appendChild(checkbox);
+                                check.appendChild(checkboxlabel);
 
 		                        kServ++;
 
@@ -622,6 +649,7 @@
 		                </script>
 
 		            </table>
+                    </div>
                     
                    <!--  <p>
   						<label for="progresso">Progresso del progetto </label>
@@ -894,8 +922,9 @@
 	            </table> -->
   <?php echo Form::close(); ?> 
          <div class="pull-right col-md-4">
-         
+         <div class="row">
           <div class="col-md-12">
+          	<div class="bg-white image-upload-box">
           <label for="scansione">{{trans('messages.keyword_selectfile')}}</label><br>
         <div class="image_upload_div"><?php echo Form::open(array('url' => 'progetti/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
                   {{ csrf_field() }}
@@ -929,12 +958,13 @@
                 }});
         }
         </script>
+        <div class="set-height">
         <table class="table table-striped table-bordered">
             <tbody><?php
                     if(isset($progetto->id) && isset($projectmediafiles)){
                     foreach($projectmediafiles as $prev) {
                 $imagPath = url('/storage/app/images/projects/'.$prev->name);
-                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
+                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a></td></tr>';
                 $html .='<tr class="quoteFile_'.$prev->id.'"><td>';
                 $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();                           
                 foreach($utente_file as $key => $val){
@@ -942,7 +972,7 @@
                     if($val->ruolo_id == $prev->type){
                         $check = 'checked';
                     }
-                    $html .=' <input type="radio" name="rdUtente_'.$prev->id.'"  '.$check.' id="rdUtente_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /> '.$val->nome_ruolo;
+                    $html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$val->nome_ruolo.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
                 }
                 echo $html .='</td></tr>';
             }
@@ -986,15 +1016,28 @@
                         });
                     </script>
                 </table>
+                </div>
 	            </div>
+                </div>
+                </div>
             </div>
 <!-- 
 	            </table> -->
 		</div>
+        
+        <div class="footer-svg">
+      <img src="{{url('images/FOOTER3_ORIZZONTAL_PROJECT.svg')}}" alt="ORIZZONTAL PROJECT">
+    </div>
+        
 	</div>
 		</div>
 	</div>
+        
 </div><!-- /row -->
+
+
+
+
 <script>
 var w = 250,
 	h = 250;

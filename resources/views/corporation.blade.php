@@ -13,17 +13,18 @@
 <script src="{{asset('/build/js/bootstrap-table-it-IT.min.js')}}"></script> 
 <!--<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>-->
 
+<div class="corporation-blade">
+<div class="header-svg text-left float-left">
+	<img src="http://betaeasy.langa.tv/images/HEADER1-LT_ENTITY.svg" alt="header image">
+</div>
+
+<div class="float-right">
 <h1>Enti</h1>
 <hr>
 <script>
-    
-    
 @if(!empty(Session::get('msg')))
-
-
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
     document.write(msg);
-
 @endif
 </script>
 <?php $loginuser = collect($loginuser)->toArray();?>
@@ -35,21 +36,30 @@
 @endif 
 <!-- Inizio filtraggio miei/tutti --> 
 
+<div class="inner-btn">
 @if(isset($miei)) <a id="miei" class="button button2" href="{{url('/enti/myenti')}}" name="miei" title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>">{{trans('messages.keyword_my')}}</a>
 <a id="tutti" href="{{url('/enti')}}"  class="button button3" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>">{{trans('messages.keyword_all')}}</a> 
 @else 
-<a id="miei" class="button button2" href="{{url('/enti/miei')}}" name="miei"  title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>">{{trans('messages.keyword_my')}}</a>
-<a id="tutti" class="button button3" href="{{url('/enti')}}" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>">{{trans('messages.keyword_my')}}</a> 
+<a id="miei" class="button button2" href="{{url('/enti/myenti')}}" name="miei"  title="<?php echo trans('messages.keyword_my').' - '.trans('messages.keyword_filter_your_entity'); ?>">{{trans('messages.keyword_my')}}</a>
+<a id="tutti" class="button button3" href="{{url('/enti')}}" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>">{{trans('messages.keyword_all')}}</a> 
 @endif 
 <!-- Fine filtraggio miei/tutti --> 
 @if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
 
-<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="<?php echo trans('messages.keyword_edit_-_edit_the_last_selected_entities');?>"><i class="fa fa-pencil"></i></a>
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-warning" name="update" title="<?php echo trans('messages.keyword_edit_-_edit_the_last_selected_entities');?>"><i class="fa fa-pencil"></i></a>
 <a id="duplicate" onclick="multipleAction('duplicate');" class="btn btn-info" name="duplicate" title="<?php echo trans('messages.keyword_duplicate_-_duplicates_selected_entities');?>"><i class="fa fa-files-o"></i></a> 
 <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="<?php echo trans('messages.keyword_delete_-_delete_selected_entities') ?>"> <i class="fa fa-trash"></i></a>
-<a id="newclient" onclick="multipleAction('newclient');" class="btn btn-warning" name="newclient" title="<?php echo trans('messages.keyword_create_send_credentials_for_the_customer_entity');?>">{{trans('messages.keyword_new_client')}}  </a> 
-  <div class="space10"></div>
 <div class="skype-call"> <a id="call" href="#" class="btn btn-warning"  title="skype "><img src="../images/phone-call.png" alt="skype call"/> Skype call</a> </div>
+</div>
+
+</div>
+</div>
+
+<!--<a id="newclient" onclick="multipleAction('newclient');" class="btn btn-warning" name="newclient" title="<?php echo trans('messages.keyword_create_send_credentials_for_the_customer_entity');?>">{{trans('messages.keyword_new_client')}}  </a> -->
+
+
+  <div class="clearfix"></div>
+
 <div class="space30"></div>
 @endif
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php if(isset($miei)) echo url('enti/myenti/json'); else echo url('/enti/json');?>" data-classes="table table-bordered" id="table">
@@ -66,20 +76,26 @@
     <th data-field="tipo" data-sortable="true">{{trans('messages.keyword_guy')}}</th>
       </thead>
 </table>
+
+
+<div class="footer-svg">
+  <img src="http://betaeasy.langa.tv/images/FOOTER3-ORIZZONTAL_ENTITY.svg" alt="footer enti image">
+</div>
+
 <script>
 var selezione = [];
 var indici = [];
 var n = 0;
 
 $('#table').on('click-row.bs.table', function (row, tr, el) {
-	var cod = $(el[0]).children()[0].innerHTML;
-	if (!selezione[cod]) {
+    var cod = $(el[0]).children()[0].innerHTML;
+	if (!selezione[cod]) {        
+        $('#table tr.selected').removeClass("selected");       
 		$(el[0]).addClass("selected");
 		selezione[cod] = cod;
 		indici[n] = cod;
 		n++;
-
-	} else {
+	} else {        
 		$(el[0]).removeClass("selected");
 		selezione[cod] = undefined;
 		for(var i = 0; i < n; i++) {
@@ -90,6 +106,12 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 			}
 		}
 		n--;
+
+        $('#table tr.selected').removeClass("selected");       
+        $(el[0]).addClass("selected");
+        selezione[cod] = cod;
+        indici[n] = cod;
+        n++;
 	}
 });
 

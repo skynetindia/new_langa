@@ -39,7 +39,7 @@
       
       <ul class="nav side-menu">
 
-        <li><a href="{{url('/admin')}}"><i class="fa fa-wrench"></i> Impostazioni globali </a>
+        <li><a href="{{url('/admin')}}"><i class="fa fa-wrench"></i> {{trans('messages.keyword_globalsettings')}} </a>
         </li><?php
         $module = DB::table('modulo')
           ->where('modulo_sub', null)
@@ -58,7 +58,7 @@
           
           if($submodule->isEmpty()){  ?>
 
-          <li><a <?php if(isset($module->modulo_link)) { ?> href="<?php echo url("$module->modulo_link"); ?>" <?php } ?>> <img src="{{asset('storage/app/images/'.$module->image)}}"  class="menu-icon" >  {{ $module->modulo }} </a></li>
+          <li><a <?php if(isset($module->modulo_link)) { ?> href="<?php echo url("$module->modulo_link"); ?>" <?php } ?>> <img src="{{asset('storage/app/images/'.$module->image)}}"  class="menu-icon">{{ trans('messages.'.$module->phase_key) }}</a></li>
 
         <?php  } else { ?>  
 
@@ -66,7 +66,7 @@
         
           <a> <img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" > 
 
-           <span> {{$modulo}} </span> <span class="fa fa-chevron-down"></span></a>
+           <span> {{ trans('messages.'.$module->phase_key) }} </span> <span class="fa fa-chevron-down"></span></a>
                               
           <ul class="nav child_menu">
     <?php
@@ -79,15 +79,12 @@
                 ->get();
 
           if ($subsubmodule->isEmpty()) { 
-    ?>    
-          <li><a href="{{url("$submodule->modulo_link")}}">{{$submodule->modulo}}</a></li>
-    <?php
+          ?><li><a href="{{url("$submodule->modulo_link")}}">{{ trans('messages.'.$submodule->phase_key) }}</a></li><?php
           }
 
           else {
-    ?>
-            <li><a <?php if(!empty($submodule->modulo_link)) { ?> href="<?php echo url("$submodule->modulo_link"); ?>" <?php } ?> >
-             <span> {{$submodule->modulo}} </span>
+          ?><li><a <?php if(!empty($submodule->modulo_link)) { ?> href="<?php echo url("$submodule->modulo_link"); ?>" <?php } ?> >
+             <span>{{ trans('messages.'.$submodule->phase_key) }} </span>
 
             <span class="fa fa-chevron-down"></span>             
 
@@ -103,28 +100,24 @@
                       if ($nextmodule->isEmpty()) {  ?>
 
                      <li>
-                      <a href="{{url("$subsubmodule1->modulo_link")}}">{{$subsubmodule1->modulo}}</a>
+                      <a href="{{url("$subsubmodule1->modulo_link")}}">{{ trans('messages.'.$subsubmodule1->phase_key) }}</a>
                       </li>
 
                 <?php } else { ?>
                         
                        <li>
                           <a <?php if(!empty($subsubmodule1->modulo_link)) { ?> href="<?php echo url("$subsubmodule1->modulo_link"); ?>" <?php } ?> >
-                           <span> {{$subsubmodule1->modulo}} </span>
+                           <span>{{ trans('messages.'.$subsubmodule1->phase_key) }} </span>
                             <span class="fa fa-chevron-down"></span>           
                           </a>
                         
-                        <ul class="nav child_menu">
-                    
-                <?php foreach ($nextmodule as $nextmodule) { ?>
-                        
-                        <li>
-                          <a href="{{url("$nextmodule->modulo_link")}}">{{$nextmodule->modulo}}</a>
-                        </li>
-
-                <?php } ?>
-                      
-                        </ul>
+                        <ul class="nav child_menu"><?php 
+                        foreach ($nextmodule as $nextmodule) { 
+                          ?><li>
+                          <a href="{{url("$nextmodule->modulo_link")}}">{{ trans('messages.'.$nextmodule->phase_key) }} </a>
+                        </li><?php 
+                        } 
+                        ?></ul>
                         
                         </li>
 
@@ -193,25 +186,77 @@
 							->where('id', $idente->id_ente)
 							->first();	
 				  ?>
-            <img src="http://easy.langa.tv/storage/app/images/<?php if(is_object($logo)) echo $logo->logo; ?>" id="immagineprofilo" alt="">@if (!Auth::guest()) {{Auth::user()->name}} @endif <span class=" fa fa-angle-down"></span> </a>
+            <img src="{{ url('/storage/app/images').'/'}}<?php if(is_object($logo)) echo $logo->logo; ?>" id="immagineprofilo" alt="">@if (!Auth::guest()) {{Auth::user()->name}} @endif <span class=" fa fa-angle-down"></span> </a>
             <ul class="dropdown-menu dropdown-usermenu pull-right">
-                                        <li><a href="{{url('/profilo')}}"> {{trans("messages.keyword_profile")}}</a></li>
-                                        <li>
-                                            <a href="javascript:;">
-                                                <span class="badge bg-red pull-right">{{trans("messages.keyword_admin")}}</span>
-                                                <span>{{trans('messages.keyword_settings')}}</span>
-                                            </a>
-                                        <li><a href="javascript:;">{{trans('messages.keyword_help')}}</a></li>
+                                        <li><a href="{{url('/profilo')}}"><i class="fa fa fa-user pull-right"></i> {{trans("messages.keyword_profile")}}</a></li>
+                                        <li><a href="javascript:;"><i class="fa fa-question pull-right"></i>{{trans('messages.keyword_help')}}</a></li>
+                                        <li class="admin_back_to_site"><a href="{{url('/')}}">{{trans('messages.keyword_back_to_site')}}</a></li>
                                         <li><a href="{{url('/logout')}}"><i class="fa fa-sign-out pull-right"></i> {{trans('messages.keyword_logout')}}</a></li>
                                     </ul>
           </li>
-          <li role="presentation" class="dropdown"> <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-envelope-o"></i> <span class="badge bg-green">6</span> </a>
-            <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
-              <li> <a> <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span> <span> <span>John Smith</span> <span class="time">3 mins ago</span> </span> <span class="message"> Film festivals used to be do-or-die moments for movie makers. They were where... </span> </a> </li>
-              <li>
-                <div class="text-center"> <a> <strong>Vedi notifiche</strong> <i class="fa fa-angle-right"></i> </a> </div>
-              </li>
-            </ul>
+
+        <?php  
+
+          $userId = Auth::id();
+
+          $notifications = DB::table('invia_notifica')
+                ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
+                ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
+                ->where('user_id', $userId)
+                ->orderBy('data_lettura', 'asc')           
+                ->get(); 
+        ?>
+
+
+          <li role="presentation" class="dropdown"> <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-envelope-o"></i> <span class="badge bg-green">
+
+          <?php if(Auth::user()->id === 0) echo '!'; else echo count($notifiche); ?>
+          </span> </a>
+
+          <div id="menu1" class="dropdown-menu list-unstyled msg_list notification-header">
+
+          <?php $count = 0; ?>
+
+            <div class="chkbox-blk">
+                <div class="chkbox"><input type="checkbox" id="notifi1">
+          <label for="notifi1"> notifi1 </label>
+        </div>
+
+            <div class="info"><input type="text"/></div>
+        </div>
+
+        <div class="chkbox-blk">
+
+                <div class="chkbox"><input type="checkbox" id="notifi2">
+          <label for="notifi2"> notifi2 </label>
+        </div>
+
+        @foreach($notifications as $notification)
+          <?php 
+            $date = $notification->created_at; 
+            $date = date_format(new DateTime($date), 'D-m-Y H:i:s'); 
+          ?>
+          <div class="info">
+          <a href="{{url('/notifiche/delete') . '/' . $notification->id}}" onclick="return confirm('{{ trans('messages.keyword_sure_to_disable_notification')}}?')">
+            <span> {{$notification->notification_type}} </span>
+            <span class="time"> {{ $date }} </span>
+            <div class="message"> {{$notification->notification_desc}} </div>
+              </a>
+         </div>
+
+        <?php $count++; ?>
+          @endforeach
+
+        </div>
+
+            <div class="btn-blk">
+                <button class="btn btn-submit">Submit</button>
+            <button class="btn btn-cancel">Cancel</button>
+
+        </div>
+
+        </div>
+           
           </li>
           <li><?php
 				$allLanguages = DB::table('languages')

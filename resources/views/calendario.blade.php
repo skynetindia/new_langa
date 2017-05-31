@@ -1,55 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-.selected {
-	font-weight: bold;
-	font-size: 16px;
-}
-th {
-	cursor: pointer;
-}
-li label {
-	padding-left: 10px;
-}
-.button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 3px 15px;
-    padding-bottom: 6px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 4px;
-}
-.button1 { /* blue */
-    background-color: white;
-    color: black;
-    border: 2px solid #337ab7;
-}
 
-.button1:hover {
-    background-color: #337ab7;
-    color: white;
-}
-
-.button4 { /* red */
-    background-color: white;
-    color: black;
-    border: 2px solid #d9534f;
-}
-
-.button4:hover {
-    background-color: #d9534f;
-    color: white;
-}
-</style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
@@ -65,157 +17,41 @@ li label {
 
 <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
 
+<div class="cale">
 
+<div class="header-right">
+    <div class="float-left">
+        <h1> {{ trans('messages.keyword_calendar') }}</h1>
+        <a class="btn btn-warning" style="color:#ffffff;text-decoration: none" onclick="aggiungiEvento()" title="{{ trans('messages.keyword_addnewevent') }} "><i class="fa fa-plus"></i></a>
 
-<h1> {{ trans('messages.keyword_calendar') }}</h1>
-
-<a class="btn btn-warning" style="color:#ffffff;text-decoration: none" onclick="aggiungiEvento()" title="{{ trans('messages.keyword_addnewevent') }} "><i class="fa fa-plus"></i></a><br>
-
-<a id="miei" href="{{url('/calendario/0')}}" style="display:inline;">
-<button class="button button1" type="button" name="miei" title="{{ trans('messages.keyword_eventfilter') }}" style="background-color:#337AB7;color:#ffffff"> {{ trans('messages.keyword_my') }} </button>
+<a id="miei" class="button button2" href="{{url('/calendario/0')}}" name="miei" title="{{ trans('messages.keyword_eventfilter') }}">
+	{{ trans('messages.keyword_my') }}
 </a>
-<a id="tutti" href="{{url('/calendario/1')}}" style="display:inline;">
-<button class="button button4" type="button" name="tutti" title="{{ trans('messages.keyword_allevent') }} "> {{ trans('messages.keyword_all') }} </button>
+<a id="tutti" class="button button3" href="{{url('/calendario/1')}}"  name="tutti" title="{{ trans('messages.keyword_allevent') }} ">
+ {{ trans('messages.keyword_all') }}
 </a>
+
 
 <hr>
+        
+    </div>
+    
+    <div class="header-svg">
+        <img src="http://betaeasy.langa.tv/images/HEADER2-RT_CALENDAR.svg" alt="header image">
+    </div>
+    
+</div>
+
+
+<div class="clearfix"></div>
 
 
 
-<style>
-* {
-    margin: 0;
-}
-.elimina {
-	position: absolute;
-	text-align:center;
-	top: 50%;
-	left:85%;
-  	transform: translateY(-50%);
-	text-decoration:none;
-}
-.geolocationbox {
-	position: absolute;
-	text-align:center;
-	top: 50%;
-	left:60%;
-  	transform: translateY(-50%);
-	text-decoration:none;
-	width:20%;
-}
-.geolocationbutton {
-	position: absolute;
-	text-align:center;
-	top: 50%;
-	left:80%;
-  	transform: translateY(-50%);
-	text-decoration:none;	
-}
-
-
-
-.orario {
-	font-weight: bold;
-}
-.striscia {
-	padding: 8px;
-	color: #fff;
-	position: relative;
-}
-html, body {
-    height: 100%;
-}
-.wrapper {
-    min-height: 100%;
-    height: auto !important;
-    height: 100%;
-}
-#push {
-    height: auto;
-}
-#con {
-  border: none;
-  height: 2px;
-  width: 2px;
-  float: left;	
-}
-.inline {
-  display:inline;
-  width:200px;
-  height:200px;
-  padding: 5px;
-  margin: auto;
-  border:2px solid white;
-  background-color:#fffff7;
-  -moz-border-radius:1px; /* Firefox */
-  border-radius:1px;
- }
- #map, #map1 {
-  height: 100%;
-  height: 400px;
- }
-
-      .controls {
-        margin-top: 10px;
-        border: 1px solid transparent;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        height: 32px;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      }
-	  
-      #pac-input {
-        background-color: #FFF;
-    z-index: 20;
-    position: fixed;
-    display: inline-block;
-    float: left;
-      }
-.modal {
-    z-index: 20; 
-	padding-top:51px;
-}
-.modal-backdrop {
-    z-index: 10;        
-}
-      #pac-input:focus {
-        border-color: #4d90fe;
-      }
-
-      .pac-container {
-        font-family: Roboto;
-      }
-
-      #type-selector, #type-selector1 {
-        color: #fff;
-        background-color: #4d90fe;
-        padding: 5px 11px 0px 11px;
-
-      }
-
-      #type-selector label, #type-selector1 label{
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-
-	  }
-	  #dove {
-		  width:30%;
-	  }
-td
-{
-    max-width: 10px;
-    max-height: 150px;
-    overflow: hidden;
-}
-</style>
 
 <div class="wrapper">
 <div class="table-responsive">
 
-	<table class="table table-striped table-bordered">
+	<table class="table calender-tbl table-striped table-bordered">
 
 		<tr><td colspan="5">
 
@@ -295,24 +131,24 @@ td
                                 	@if($i >= $event->giorno)
                                     	@if($event->mese == $event->meseFine)
                                         	@if($i <= $event->giornoFine)
-                                    			<td style="background-color:<?php echo $colore; ?>"> • </td>
+                                    			<td class="pointer" style="background-color:<?php echo $colore; ?>"> • </td>
                                                 <?php $event->color = $colore ?>
                                                 <?php $event->utente = (isset($utente->name))?$utente->name:'' ?>
                                             @endif
                                         @else
-                                        	<td style="background-color:<?php echo $colore; ?>"> • </td>
+                                        	<td class="pointer" style="background-color:<?php echo $colore; ?>"> • </td>
                                             <?php $event->color = $colore ?>
                                             <?php $event->utente = (isset($utente->name))?$utente->name:'' ?>
                                         @endif
                                     @endif
                                 @elseif($month == $event->meseFine)
                                 	@if($i <= $event->giornoFine)
-                                    	<td style="background-color:<?php echo $colore; ?>"> • </td>
+                                    	<td class="pointer" style="background-color:<?php echo $colore; ?>"> • </td>
                                         <?php $event->color = $colore ?>
                                         <?php $event->utente = (isset($utente->name))?$utente->name:'' ?>
                                     @endif
                                 @elseif($month > $event->mese && $month < $event->meseFine)
-                                	<td style="background-color:<?php echo $colore; ?>"> • </td>
+                                	<td class="pointer" style="background-color:<?php echo $colore; ?>"> • </td>
                                     <?php $event->color = $colore ?>
                                     <?php $event->utente = (isset($utente->name))?$utente->name:'' ?>
                                 @endif
@@ -336,9 +172,18 @@ td
 
 	</table>
 
+
+
+
+<div class="footer-svg">
+  <img src="http://betaeasy.langa.tv/images/FOOTER3-ORIZZONTAL_CALENDAR.svg" alt="footer enti image">
 </div>
 
-<div id="push" style="display:none">
+
+
+</div>
+
+<div id="push" class="none">
     <div id="content"></div>
 </div>
 <div class="footer">
@@ -368,10 +213,10 @@ td
         		<form action="{{ url('/calendario/add') }}" method="post" id="eventform">
         			{{ csrf_field() }}
                                 @include('common.errors')
-						<div class="col-md-12">
+						<div class="row">
                          <div class="form-group col-md-10">
-        				<label for="ente" class="control-label">{{ trans('messages.keyword_entity') }} <p style="color:#f37f0d;display:inline">(*)</p> </label>
-						<select name="ente" id="ente" class="js-example-basic-single form-control" style="width:100%">
+        				<label for="ente" class="control-label">{{ trans('messages.keyword_entity') }} <span class="required">(*)</span> </label>
+						<select name="ente" id="ente" class="js-example-basic-single form-control">
 						@foreach($enti as $ente)
                                                 @if(!empty(Session::get('error_code')) && Session::get('error_code') == 5)
                                                     <option selected value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}} | {{$ente->nomereferente}}</option>
@@ -383,26 +228,29 @@ td
 									$(".js-example-basic-single").select2();
 								</script>
         			</div>
-					<div class="form-group col-md-2">
+					<div class="form-group col-md-2"> <div class="space25"></div>
 						<a onclick="nuovoEnte()" class="btn btn-warning"> {{ trans('messages.keyword_addente') }} </a>
 					</div>
                     </div>
-           			<div class="col-md-12">
+           			<div class="row">
 						<div class="col-md-5">                               
                         <div class="form-group">
-                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }} <p style="color:#f37f0d;display:inline">(*)</p> </label>
+                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }} <span class="required">(*)</span> </label>
                             <input value="{{ old('titolo') }}" type="text" name="titolo" id="titolo" class="form-control" placeholder="{{ trans('messages.keyword_appointmenttodiscuss') }} ">
                         </div>
     
-                        <div class="form-group">         				
+                        <?php /*<div class="form-group">         				
                             <input value="{{ old('dove') }}" type="text" name="dove" id="dove" class="form-control" placeholder="{{ trans('messages.keyword_appointmentaddress') }} ">                      
-                        </div>                    
+                        </div> */?>                  
                         <div class="form-group">
-                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
+                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} <span class="required">(*)</span></label>
                             <textarea rows="4" name="dettagli" id="dettagli" class="form-control" placeholder="{{ trans('messages.keyword_generalinformation') }} ">{{ old('dettagli') }}</textarea>
                         </div>
                     	</div>
                     	<div class="col-md-7">
+                            <label>{{ trans('messages.keyword_appointmentaddress') }} <span class="required">(*)</span></label><br>
+                            <input value="" id="dove" name="dove" class="controls" type="text" placeholder="{{ trans('messages.keyword_appointmentaddress') }}  (*)">
+
                     	<div id="type-selector1" class="controls1" size="50">
 						  <input type="radio" name="type" id="changetype-all" checked="checked">
 						  <label for="changetype-all"> {{ trans('messages.keyword_all') }} </label>
@@ -418,18 +266,22 @@ td
                         </div>	
     	               
                      </div>
-                     <div class="col-md-12">
+                     <div class="row">
         			<fieldset>
-        			<legend> {{ trans('messages.keyword_schedule') }} </legend>
-					<div class="col-md-12">
+        		 <!--	<legend> {{ trans('messages.keyword_schedule') }} </legend>-->
+			
 						<div class="col-md-6">						
                              <h4> {{ trans('messages.keyword_schedule') }} </h4>                 
-        				<label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} <p style="color:#f37f0d;display:inline">(*)</p> </label> 
-        				<input value="{{ old('giorno') }}" type="text" name="giorno" id="giorno" class="form-control">
+        				<?php /*<label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} <span class="required">(*)</span> </label> */?>
+        				<div class="input-group">
+							  <span class="input-group-addon cal-addon" id="basic-addon1"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                              <input value="{{ old('giorno') }}" type="text" name="giorno" id="giorno" class="form-control">
+                        </div>      
                                     <script>
                                     $("#giorno").daterangepicker({
 									autoApply: true,
 									timePicker: true,
+                                    drops:"up",
 									timePickerIncrement: 30,
 									locale: {
 										format: 'MM/DD/YYYY h:mm A'
@@ -439,14 +291,31 @@ td
                                  </div>   
 								<div class="col-md-6">
                                 <h4>{{ trans('messages.keyword_notification') }}</h4>
-                                <label for="notifica" class="checkbox-inline"> {{ trans('messages.keyword_sendnotification') }} 
-                                <input type="checkbox" class="form-control input-check" name="notifica" id="notifica"></label>                                
-                                 <label for="privato" class="checkbox-inline"> {{ trans('messages.keyword_private') }} 
-                                <input type="checkbox" class="form-control input-check" name="privato" id="privato"></label><br>
+                                
+                                	<div class="row">
+                                    	<div class="col-md-6">
+                                            <div class="caleder-notification">
+                                            	<div class="switch">
+                                                	<span> {{ trans('messages.keyword_sendnotification') }} </span>
+                                               		<input type="checkbox" class="form-control input-check" name="notifica" id="notifica">                              
+                                                    <label for="notifica" class="checkbox-inline"> </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="caleder-notification">
+                                            	<div class="switch">
+                                                 <span> {{ trans('messages.keyword_private') }} </span>
+                                                <input type="checkbox" class="form-control input-check" name="privato" id="privato">
+                                                <label for="privato" class="checkbox-inline"> </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                	</div>
+                                
                                 	<br>
                                 </div>
-                                </div>
-
+                               
                                 
                                 
         			</fieldset>
@@ -502,25 +371,18 @@ td
 
         			{{ csrf_field() }}
 
-                                <input type="text" name="settore" style="display:none">
-
-                                <input type="text" name="piva" style="display:none">
-
-                                <input type="text" name="cf" style="display:none">
-
-                                <input type="text" name="cellulareazienda" style="display:none">
-
-                                <input type="text" name="privato" value="3" style="display:none">
-
-                                <input type="text" name="fax" style="display:none">
-
-                                <input type="text" name="iban" style="display:none">
-
-                                <input type="text" name="noteenti" style="display:none">
+                    <?php /*<input type="text" name="settore">
+                    <input type="text" name="piva" >
+                    <input type="text" name="cf" >
+                    <input type="text" name="cellulareazienda" >
+                    <input type="text" name="privato" value="3">
+                    <input type="text" name="fax" >
+                    <input type="text" name="iban" >
+                    <input type="text" name="noteenti">*/?>
 
         			<div class="form-group">
 
-        				<label for="nomeazienda" class="control-label"> {{ trans('messages.keyword_compname') }} <p style="color:#f37f0d;display:inline">(*)</p></label> 
+        				<label for="nomeazienda" class="control-label"> {{ trans('messages.keyword_compname') }} <span class="required">(*)</span></label> 
 
         				<input value="{{ old('nomeazienda') }}" type="text" name="nomeazienda" id="nomeazienda" class="form-control">
 
@@ -528,7 +390,7 @@ td
 
 					<div class="form-group">
 
-        				<label for="nomereferente" class="control-label"> {{ trans('messages.keyword_refname') }}  <p style="color:#f37f0d;display:inline">(*)</p></label> 
+        				<label for="nomereferente" class="control-label"> {{ trans('messages.keyword_refname') }}  <span class="required">(*)</span></label> 
 
         				<input value="{{ old('nomereferente') }}" type="text" name="nomereferente" id="nomereferente" class="form-control">
 
@@ -536,7 +398,7 @@ td
 
 					<div class="form-group">
 
-        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }} <p style="color:#f37f0d;display:inline">(*)</p>
+        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }} <span class="required">(*)</span>
 
         				<input value="{{ old('telefonoazienda') }}" type="text" name="telefonoazienda" id="telefonoazienda" class="form-control">
 
@@ -544,7 +406,7 @@ td
 
 					<div class="form-group">
 
-        				<label for="email" class="control-label">{{ trans('messages.keyword_email') }} <p style="color:#f37f0d;display:inline">(*)</p></label> 
+        				<label for="email" class="control-label">{{ trans('messages.keyword_email') }} <span class="required">(*)</span></label> 
 
         				<input value="{{ old('email') }}" type="email" name="email" id="email" class="form-control">
 
@@ -552,7 +414,7 @@ td
 
 					<div class="form-group">
 
-                                            <label for="indirizzo" class="control-label">{{ trans('messages.keyword_address') }} <p style="color:#f37f0d;display:inline">(*)</p></label> 
+                                            <label for="indirizzo" class="control-label">{{ trans('messages.keyword_address') }}<span class="required">(*)</span></label> 
 
         				<input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text"
 
@@ -590,7 +452,7 @@ td
 
                 <div class="form-group">
 
-                    <br>  <label for="responsabilelanga">{{ trans('messages.keyword_responsible') }} LANGA <p style="color:#f37f0d;display:inline">(*)</p></label>
+                    <br>  <label for="responsabilelanga">{{ trans('messages.keyword_responsible') }} LANGA <span class="required">(*)</span></label>
 
                 <select title="Responsabile associato a questo ente" name="responsabilelanga" id="responsabilelanga" class="form-control" onchange="trovaTelefono()">
 
@@ -604,7 +466,7 @@ td
 
                 </select>
 
-                    <br><label for="telefonoresponsabile">{{ trans('messages.responsiblephone') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
+                    <br><label for="telefonoresponsabile">{{ trans('messages.responsiblephone') }} <span class="required">(*)</span></label>
 
                 <input value="{{ old('telefonoresponsabile') }}" class="form-control" type="text" name="telefonoresponsabile" id="telefonoresponsabile" placeholder="Telefono responsabile Langa"><br>
 
@@ -680,6 +542,9 @@ td
 
       				</div>
 
+
+
+
         		</form>
 
         		<!-- End form to add a new ente -->
@@ -694,6 +559,8 @@ td
 
 </div>
 
+</div>
+
 <!-- end modal new ente -->
 
 
@@ -701,6 +568,8 @@ td
 
 
 <!-- End of edit event modal --> 
+
+
 
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 

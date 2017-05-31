@@ -774,6 +774,7 @@ class AccountingController extends Controller
 			'name' => $nome,
 			'code' => $request->code,
 			'master_type' => 3,
+			'type'=>$request->user()->dipartimento,
 			'master_id' => isset($request->idtranche) ? $request->idtranche : 0
 		]);					
 	}
@@ -785,15 +786,20 @@ class AccountingController extends Controller
 		}
 		else {
 			$updateData = DB::table('media_files')->where('code', $request->code)->get();				
-		}
-					
+		}					
 		foreach($updateData as $prev) {
 			$imagPath = url('/storage/app/images/invoice/'.$prev->name);
-			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
+			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a></td></tr>';
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
 			foreach($utente_file as $key => $val){
-				$html .=' <input type="radio" name="rdUtente_'.$prev->id.'" id="rdUtente_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /> '.$val->nome_ruolo;
+				if($request->user()->dipartimento == $val->ruolo_id){
+					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
+					$html .=' <div class="cust-radio"><input type="radio" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$val->ruolo_id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+				}
+				else {
+					$html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+				}
 			}
 			echo $html .='</td></tr>';
 		}

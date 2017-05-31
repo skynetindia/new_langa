@@ -15,29 +15,30 @@
 <!-- Latest compiled and minified Locales -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
 <h1>{{trans('messages.keyword_menu')}}</h1><hr>
-<form action="{{ url('/menu/add') }}" method="post" style="display:inline;">
+<form action="{{ url('/menu/add') }}" method="post">
     {{ csrf_field() }}
     <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo preventivo"><i class="fa fa-plus"></i></button>
 </form>
-<div class="btn-group" style="display:inline">
-    <a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-        <button class="btn btn-primary" type="button" name="update" title="Modifica - Modifica l'ultimo preventivo selezionato"><i class="fa fa-pencil"></i></button>
+<div class="btn-group margin-r8">
+    <a class="btn btn-primary" onclick="multipleAction('modify');" id="modifica">
+        <i class="fa fa-pencil"></i>
     </a>
-    <a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-        <button class="btn btn-danger" type="button" name="remove" title="Elimina - Elimina i preventivi selezionati"><i class="fa fa-trash"></i></button>
+    <a class="btn btn-danger" id="delete" onclick="multipleAction('delete');">
+        <i class="fa fa-trash"></i>
     </a>
 </div>
 <br><br>
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('menu/json'); ?>" data-classes="table table-bordered" id="table">
     <thead>
-    <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}
-    <th data-field="modulo" data-sortable="true">{{trans('messages.keyword_menu')}}
-<!--    <th data-field="modulo_sub" data-sortable="true">Sub menu
-    <th data-field="modulo_subsub" data-sortable="true">Menu of Sub menu-->
-    <th data-field="modulo_link" data-sortable="true">{{trans('messages.keyword_menu_link')}}
-    <th data-field="modulo_class" data-sortable="true">{{trans('messages.keyword_menu_class')}}
-    <th data-field="menu_active" data-sortable="true">{{trans('messages.keyword_menu_active')}}
-    <th data-field="dipartimento" data-sortable="true">{{trans('messages.keyword_department')}}
+    <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
+    <th data-field="modulo" data-sortable="true">{{trans('messages.keyword_menu')}}</th>
+<!--    <th data-field="modulo_sub" data-sortable="true">Sub menu</th>
+    <th data-field="modulo_subsub" data-sortable="true">Menu of Sub menu--></th>
+    <th data-field="modulo_link" data-sortable="true">{{trans('messages.keyword_menu_link')}}</th>
+    <th data-field="modulo_class" data-sortable="true">{{trans('messages.keyword_menu_class')}}</th>
+    <th data-field="menu_active" data-sortable="true">{{trans('messages.keyword_menu_active')}}</th>
+    <th data-field="type" data-sortable="true">{{trans('messages.keyword_menu_type')}}</th>
+    
     </thead>
 </table>
 <script>
