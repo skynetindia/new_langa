@@ -1,7 +1,5 @@
 @extends('adminHome')
-
 @section('page')
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -16,10 +14,25 @@ document.write(msg);
 <?php echo Form::open(array('url' => '/admin/taxonomies/optional/store', 'files' => true, 'id' => 'frmoptional')) ?>
 {{ csrf_field() }}
 <div class="col-md-12 text-right">
+    <div class="quiz-check"> <span>{{trans("messages.keyword_classic")}}?</span>
+      <div class="switch">
+        <input value="1" <?php if(isset($optional->is_classic) && $optional->is_classic=='1'){ echo 'checked';}?> class="" type="checkbox" name="classic" id="classic">
+        <label for="classic"></label>
+      </div>&nbsp;
+
+      <span>{{trans("messages.keyword_quiz")}}?</span>
+      <div class="switch">
+        <input value="1" <?php if(isset($optional->escludi_da_quiz) && $optional->escludi_da_quiz=='1'){ echo 'checked';}?> class="" type="checkbox" name="escludi_da_quiz" id="escludi_da_quiz">
+        <label for="escludi_da_quiz"></label>
+      </div>
+      <!-- <input value="1" <?php //if(isset($optional->escludi_da_quiz) && $optional->escludi_da_quiz=='1'){ echo 'checked';}?> class="" type="checkbox" name="escludi_da_quiz" id="escludi_da_quiz">--> 
+    </div>
+  </div><br><br>
+<?php /*<div class="col-md-12 text-right">
     <div class="quiz-check">
        <span>{{trans("messages.keyword_exclude_from_quiz?_(even)")}}</span><div class="switch"><input value="1" <?php if(isset($optional->escludi_da_quiz) && $optional->escludi_da_quiz=='1'){ echo 'checked';}?> class="" type="checkbox" name="escludi_da_quiz" id="escludi_da_quiz"><label for="escludi_da_quiz"></label></div>
     </div>
-    </div>
+    </div>*/?>
 <div class="col-md-4">
     <label for="code">{{trans('messages.keyword_short_name')}}<span class="required">(*)</span></label>
     <input value="{{ old('code') }}" class="form-control" type="text" name="code" id="code" placeholder="{{trans('messages.keyword_short_name')}}"><br>
@@ -37,9 +50,9 @@ document.write(msg);
     <select name="frequenza" class="form-control">
         @foreach($frequenze as $frequenza)
         @if($frequenza->id == old('code'))
-        <option selected value="{{$frequenza->id}}">{{$frequenza->nome}}</option>
+        <option selected value="{{$frequenza->id}}">{{$frequenza->rinnovo.' Days'}}</option>
         @else
-        <option value="{{$frequenza->id}}">{{$frequenza->nome}}</option>
+        <option value="{{$frequenza->id}}">{{$frequenza->rinnovo.' Days'}}</option>
         @endif
         @endforeach
     </select><br>

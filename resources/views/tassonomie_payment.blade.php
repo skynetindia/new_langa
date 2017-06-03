@@ -1,6 +1,12 @@
 @extends('adminHome')
 @section('page')
 <h1>{{trans('messages.keyword_taxonomies_payments')}}</h1><hr>
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
 @include('common.errors')
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script>
@@ -8,11 +14,8 @@
 <script type="text/javascript">
      $('.color').colorPicker();
 </script>
-
 <fieldset>
-
 <legend>{{trans('messages.keyword_emotional_state')}}</legend>
-
 <form action="{{url('/admin/taxonomies/addstatepayment')}}" method="post" id="frmemotionalPayment">
     {{ csrf_field() }}
     <div class="row">
@@ -33,48 +36,50 @@
 	</div>
 	</div>
 </form>
-
+@if(count($statepayments) > 0)
 <h4>{{trans('messages.keyword_edit_emotional_payment_state')}}</h4>
+<form action="{{url('/admin/tassonomie/updatestatepayment')}}" method="post" id="frmemotionalPaymentEdit">
 <div class="table-responsive">
 		<table class="table table-striped table-bordered text-right">
 	@foreach($statepayments as $statepayment)    	
 	<tr>
 		<td>
-			<form action="{{url('/admin/tassonomie/updatestatepayment')}}" method="post" id="frmemotionalPayment_{{$statepayment->id}}">
 				{{ csrf_field() }}
-				<input type="hidden" name="id" value="{{$statepayment->id}}">
+				<input type="hidden" name="id[]" value="{{$statepayment->id}}">
 					<table class="table sub-table">
 		              <tr>
-		                <td><input type="text" class="form-control" name="name" id="name" value="{{$statepayment->name}}"></td>
-		                <td><input type="text" class="form-control" name="description" value="{{$statepayment->description}}"></td>
-		                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$statepayment->color}}"></td>
+		                <td><input type="text" class="form-control" name="name[]" id="name" value="{{$statepayment->name}}"></td>
+		                <td><input type="text" class="form-control" name="description[]" value="{{$statepayment->description}}"></td>
+		                <td><input type="text" class="form-control color no-alpha" name="color[]" value="{{$statepayment->color}}"></td>
 		                <td><input type="submit" class="btn btn-primary" value="Salva">
 		                  <a  onclick="conferma(event);" type="submit" href="{{url('/admin/taxonomies/statepayment/delete/id' . '/' . $statepayment->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a></td>
 		              </tr>
 				    </table>
-			</form>
-			<script type="text/javascript">
-         $(document).ready(function() {
-           $("#frmemotionalPayment_{{$statepayment->id}}").validate({            
-                      rules: {
-                          name: {
-                              required: true,
-                          }
-                      },
-                      messages: {
-                          name: {
-                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
-                          }
-                      }
-                  });
-          });
-          </script>
+			
+			
 		</td>
 	</tr>       
 	@endforeach
 	</table>
 	</div>
 </form>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#frmemotionalPaymentEdit").validate({            
+      rules: {
+          "name[]": {
+              required: true,
+          }
+      },
+      messages: {
+          "name[]": {
+              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+          }
+      }
+	});
+});
+</script>
+@endif
 </fieldset>
 
 <script>

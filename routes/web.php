@@ -335,6 +335,7 @@ Route::get('/client-registration', function () {
 // store new client details
 Route::post('/client-signup/store','CommonController@storeclientsignup');
 
+/* =============================== Notification Route =============================== */
 //notification
 Route::get('/admin/shownotification', 
 	'AdminController@showadminnotification');
@@ -357,6 +358,7 @@ Route::post('/admin/notification/store/{id?}', 'AdminController@storeadminnotifi
 // detail notification
 Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');
 
+
 // make comment in notification
 Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');
 
@@ -368,6 +370,24 @@ Route::get('/notification/user-read', 'AdminController@userreadnotification');
 Route::get('/note_role/make-comment', 'AdminController@notemakecomment');
 // role wised read notification
 Route::get('/note_role/user-read', 'AdminController@userreadnote');
+
+
+
+
+// user send notification
+Route::get('/send-notification', 'AdminController@sendnotification');
+
+// detail notification json
+Route::get('/notifica/detail/json/{id?}', 'AdminController@detailnotificationjson');
+
+
+// show all notification
+Route::get('/notifiche', 'HomeController@mostranotifiche');
+// get list of notifications 
+Route::get('/notifiche/json', 'HomeController@getjsonnotifiche');
+// delete notification
+Route::get('/notifiche/delete/{id}', 'HomeController@cancellanotifica');
+
 
 /* ================================ Login Activity Admin ============================= */
 // show list of users
@@ -456,6 +476,7 @@ Route::get('/pagamenti/json', 'AccountingController@getjson');
 Route::post('/pagamenti/store', 'AccountingController@creadisposizione');
 //
 Route::post('/pagamenti/modifica/accounting/{accounting}', 'AccountingController@modificadisposizione');
+Route::get('/pagamenti/modifica/accounting/{accounting}', 'AccountingController@modificadisposizione');
 //
 Route::get('/pagamenti/duplicate/accounting/{accounting}', 'AccountingController@duplicadisposizione');
 //

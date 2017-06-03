@@ -11,14 +11,11 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
 
 <h1>{{trans('messages.keyword_quiz_pacchetto')}}</h1><hr>
- 
-    
 @if(!empty(Session::get('msg')))
-
-
+    <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
     document.write(msg);
-
+    </script>
 @endif
 </script>
 <!-- Fine filtraggio miei/tutti -->
@@ -50,12 +47,14 @@ var n = 0;
 $('#table').on('click-row.bs.table', function (row, tr, el) {
 	var cod = $(el[0]).children()[0].innerHTML;
 	if (!selezione[cod]) {
+		$('#table tr.selected').removeClass("selected");       
 		$(el[0]).addClass("selected");
 		selezione[cod] = cod;
 		indici[n] = cod;
 		n++;
 
-	} else {
+	} 
+	else {
 		$(el[0]).removeClass("selected");
 		selezione[cod] = undefined;
 		for(var i = 0; i < n; i++) {
@@ -66,6 +65,11 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 			}
 		}
 		n--;
+		$('#table tr.selected').removeClass("selected");       
+        $(el[0]).addClass("selected");
+        selezione[cod] = cod;
+        indici[n] = cod;
+        n++;
 	}
 });
 

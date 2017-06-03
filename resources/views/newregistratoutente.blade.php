@@ -15,44 +15,26 @@
 
 <!-- Latest compiled and minified Locales -->
 <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
-
-
 <script>
-
   $(function(){
-
         $("table").stupidtable();
-
     });
-
 @if(!empty(Session::get('msg')))
-
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
-
     document.write(msg);
-
 @endif
-
 </script>
-
-
 <div class="btn-group">
-
 @if (\Session::has('success'))
     <div class="alert alert-success">
         <ul>
-            <li style="list-style-type:none; width: 1000px; text-align: center; font-size: 20px">{!! \Session::get('success') !!}</li>
+            <li>{!! \Session::get('success') !!}</li>
         </ul>
     </div>
 @endif
-
-
 </div>
-
 <br><br>
-
 <div class="table-responsive table-custom-design">
-
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="newutente/json" data-classes="table table-bordered" id="table">
     <thead>
         <th data-field="id" data-sortable="true">
@@ -64,26 +46,17 @@
         <th data-field="id_ente" data-sortable="true">
         {{ trans('messages.keyword_entity') }} </th>
         <th data-field="cellulare" data-sortable="true">
-        {{ trans('messages.keyword_cell') }} </th>
-        <th data-field="color" data-sortable="true">
-        {{ trans('messages.keyword_color') }} </th>
-        <th data-field="azione" data-sortable="true"> Action </th>
+        {{ trans('messages.keyword_cell') }} </th>        
+        <th data-field="azione" data-sortable="true"> {{trans('messages.keyword_action')}} </th>
     </thead>
-
 </table>
-
 </div>
-
 <script>
-
 var selezione = [];
-
 var n = 0;
-
 $(".selectable tbody tr input[type=checkbox]").change(function(e){
     var stato = e.target.checked;
-  if (stato) {
-    
+  if (stato) {    
       $(this).closest("tr").addClass("selected");
       selezione[n] = $(this).closest("tr").children()[1].innerHTML;
        n++;

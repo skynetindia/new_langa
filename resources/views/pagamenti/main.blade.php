@@ -21,7 +21,6 @@ function aggiungiDisposizione() {
 	$("#nuovaDisposizione").modal();
 }
 </script>
-
 <div class="header-lst-img">
     <div class="header-svg text-left float-left">
         <img src="{{url('images/HEADER1_LT_ACCOUNTING.svg')}}" alt="header image">
@@ -30,7 +29,7 @@ function aggiungiDisposizione() {
         <h1> {{ trans('messages.keyword_project_design') }} </h1><hr>
         <div class="btn-group">
           <button class="btn btn-warning" type="button" name="update" title=" {{ trans('messages.keyword_add_new_layout') }} " onclick="aggiungiDisposizione()"><i class="fa fa-plus"></i></button>
-        <a id="mostra" class="btn btn-warning" name="remove" title=" {{ trans('messages.keyword_display_selected_format') }} " onclick="multipleAction('mostra');">
+        <?php /*<a id="mostra" class="btn btn-warning" name="remove" title=" {{ trans('messages.keyword_display_selected_format') }} " onclick="multipleAction('mostra');">
         	<i class="fa fa-pencil"></i>
         </a>
         <a onclick="multipleAction('modify');" id="modifica"  class="btn btn-primary" name="update" title=" {{ trans('messages.keyword_edit_last_selected_format') }} ">
@@ -38,20 +37,29 @@ function aggiungiDisposizione() {
         </a>
         <a id="duplicate" class="btn btn-info" name="duplicate" title=" {{ trans('messages.keyword_duplicates_selected_layouts') }}  " onclick="multipleAction('duplicate');">
 			<i class="fa fa-files-o"></i>
-        </a>    
+        </a>
         <a id="delete" class="btn btn-danger" name="remove" title=" {{ trans('messages.keyword_delete_selected_project') }}  " onclick="multipleAction('delete');">
 			<i class="fa fa-trash"></i>
-        </a>
-        
+        </a>*/?>            
         </div>
     </div>
 </div>
 
 <div class="clearfix"></div>
 <div class="height20"></div>
-
-<br><br>
-    <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/json');?>" data-classes="table table-bordered" id="table">
+    <div class="row">
+    @foreach($groupdetails as $key => $groupValue)
+        <div class="col-md-2">  
+            <div class="form-group">
+                <a href="{{url('pagamenti/mostra/accounting/').'/'.$groupValue->id}}"><img src="{{url('images/folder.jpg')}}"></a><br>      
+                <label for="logo" id="lblgroupname_{{$groupValue->groupid}}" onDblClick="showGroupName('<?php echo $groupValue->groupid;?>');" >{{$groupValue->groupname}}</label>                
+                <input type="text" name="groupnameupdate" class="groupnameTextbox form-control" id="groupnameupdate_{{$groupValue->groupid}}" value="{{$groupValue->groupname}}" style="display: none;">
+                <?php /*<button class="btn btn-warning" onclick="editgroup('<?php echo $groupValue->id; ?>')"><i class="fa fa-pencil"></i></button>*/?>              
+            </div>
+        </div>
+    @endforeach
+    </div>
+    <?php /*<table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/json');?>" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="id" data-sortable="true"> 
             {{ trans('messages.keyword_no_picture') }} 
@@ -64,8 +72,7 @@ function aggiungiDisposizione() {
             <th data-field="data" data-sortable="true">
             {{ trans('messages.keyword_date') }} 
         </thead>
-    </table>
-
+    </table>*/?>
 <!-- Aggiungi nuova disposizione MODALE -->
 <div id="nuovaDisposizione" class="modal fade" role="dialog">
   <div class="modal-dialog">
@@ -73,23 +80,22 @@ function aggiungiDisposizione() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> {{ trans('messages.keyword_add_framework_provisions') }} </h4>
+        <h4 class="modal-title"> {{ trans('messages.keyword_add_grouping') }} </h4>
       </div>
       <div class="modal-body">
         <form action="{{url('/pagamenti/store')}}" method="post" name="add_project" id="add_project">
         	{{ csrf_field() }}
-        	<label for="nomeprogetto"> {{ trans('messages.keyword_picturename') }} <span class="required">(*)</span> </label>
-        	<input id="nomeprogetto" name="nomeprogetto" type="text" class="form-control" value="{{old('nomeprogetto')}}" placeholder=" {{ trans('messages.keyword_framework_name_framework_project') }} "><br>
+        	<label for="nomeprogetto"> {{ trans('messages.keyword_grouping_name') }} <span class="required">(*)</span> </label>
+        	<input id="nomeprogetto" name="nomeprogetto" type="text" class="form-control" value="{{old('nomeprogetto')}}" placeholder="{{trans('messages.keyword_grouping_name_per_project') }} "><br>
             <!-- Seleziona progetto -->
             <label for="idprogetto"> {{ trans('messages.keyword_linktoproject') }} <span class="required">(*)</span> </label>
-            <select id="idprogetto" name="idprogetto" class="js-example-basic-single form-control" >
-            <option></option>
-            @foreach($progetti as $progetto)
-            	<option value="{{$progetto->id}}">::{{$progetto->id}}<?php echo '/' . substr($progetto->datainizio, -2);?> | {{$progetto->nomeprogetto}}</option>
-            @endforeach
-            </select><br>
-            <!-- fine progetto -->
-            <br>
+            <select id="idprogetto" name="idprogetto" class="js-example-basic-single form-control">
+                <option></option>
+                @foreach($progetti as $progetto)
+                	<option value="{{$progetto->id}}">::{{$progetto->id}}<?php echo '/' . substr($progetto->datainizio, -2);?> | {{$progetto->nomeprogetto}}</option>
+                @endforeach
+            </select><br><br>
+            <!-- fine progetto -->            
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal"> {{ trans('messages.keyword_close') }} </button>
@@ -97,7 +103,6 @@ function aggiungiDisposizione() {
         </form>
       </div>
     </div>
-
   </div>
 </div>
 <!-- FINE MODALE AGGIUNGI DISPOSIZIONE -->
@@ -116,7 +121,52 @@ var quadri = <?php echo json_encode($quadri); ?>;
       <div class="modal-body">
         <form method="post" id="modificaform" name="modificaform">
         	<script>
-				function impostaUrl() {
+            function showGroupName(gid){
+                $("#groupnameupdate_"+gid).show();
+                $("#lblgroupname_"+gid).hide();                
+            }
+            function editgroup(gid) {                                    
+                    $("#modificaDisposizione").modal();
+                    $('#modificaform').attr('action', urlmodifica);
+                    for(var i = 0; i < quadri.length; i++) {
+                        if(quadri[i]["id"] == gid) {                            
+                            $(".modal-body #nomeprogetto").val(quadri[i]["nomeprogetto"]);
+                            $(".modal-body #idprogetto").val(quadri[i]["id_progetto"]);
+                            break;      
+                        }   
+                    }
+                }            
+            $('.groupnameTextbox').keydown(function (e){
+                if(e.keyCode == 13) {
+                    var textboxid = $(this).attr('id');
+                    var textboxval = $(this).val();
+                    var arraygrp = textboxid.split('_');
+                    var grpid = arraygrp[1];                    
+                    var linkhref = "{{ url('/pagamenti/modifica/accounting') }}" + '/';
+                    $.ajax({
+                        type: "GET",
+                        url : linkhref + grpid,
+                        data:{"nomeprogetto":textboxval},
+                        error: function(url) {                            
+                            /*if(url.status==403) {
+                                link.href = "{{ url('/pagamenti/modifica/accounting') }}" + '/' + indici[n];
+                                link.dispatchEvent(clickEvent);
+                                error = true;
+                            } */
+                        },
+                        success: function(response){
+                           if(response=="true"){
+                                $("#groupnameupdate_"+grpid).hide();                            
+                                $("#lblgroupname_"+grpid).text(textboxval);                
+                                $("#lblgroupname_"+grpid).show();                
+                            }
+                        }
+                    });
+                    //alert($(this).val());
+                }
+            })
+
+				function impostaUrl() {                                    
 
 					$('#modificaform').attr('action', urlmodifica);
 					for(var i = 0; i < quadri.length; i++) {
@@ -274,11 +324,9 @@ function multipleAction(act) {
 
 
 <script type="text/javascript">
-$(document).ready(function() {
-      
-    // validate add project form on keyup and submit
-    $("#add_project").validate({
-        
+$(document).ready(function() {      
+    //validate add project form on keyup and submit
+    $("#add_project").validate({        
         rules: {   
             nomeprogetto: {
                 required:true
@@ -289,18 +337,16 @@ $(document).ready(function() {
         },
         messages: {
             nomeprogetto: {
-                required: "{{ trans('messages.keyword_please_enter_projectname') }}"
+                required: "{{ trans('messages.keyword_please_enter_group_name') }}"
             },
             idprogetto: {
                 required: "{{ trans('messages.keyword_please_select_projectlink') }}"
             }
         }
-
     });
 
     // validate edit project form on keyup and submit
-    $("#modificaform").validate({
-        
+    $("#modificaform").validate({        
         rules: {   
             nomeprogetto: {
                 required:true

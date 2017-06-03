@@ -138,7 +138,14 @@
     <script type="text/javascript" >
       CKEDITOR.replace( 'messaggio' );
     </script>
-    <input class="btn btn-warning" type="submit" value="{{ trans('messages.keyword_send') }}">
+<div class="chkselect">
+  <div class="form-group">
+    <input type="checkbox" id="is_email" name="is_email" value="1">
+    <label for="is_email"> Is Email info? </label>
+   </div>
+</div>
+
+<input class="btn btn-warning" type="submit" value="{{ trans('messages.keyword_send') }}">
 </div>
   </div>
     </form>

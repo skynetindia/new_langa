@@ -58,6 +58,7 @@ var n = 0;
 $('#table').on('click-row.bs.table', function (row, tr, el) {
   var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
   if (!selezione[cod]) {
+    $('#table tr.selected').removeClass("selected");       
     $(el[0]).addClass("selected");
     selezione[cod] = cod;
     indici[n] = cod;
@@ -73,6 +74,11 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
       }
     }
     n--;
+    $('#table tr.selected').removeClass("selected");       
+    $(el[0]).addClass("selected");
+    selezione[cod] = cod;
+    indici[n] = cod;
+    n++;
   }
 });
 

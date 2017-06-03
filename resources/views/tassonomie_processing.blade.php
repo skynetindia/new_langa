@@ -48,22 +48,24 @@
 	</div>
 	</div>
 </form>
+@if(count($lavorazioni) > 0)
 <h4>{{trans('messages.keyword_edit_types')}}</h4>
+<form action="{{url('/admin/taxonomies/updateprocessing')}}" method="post" id="frmemotionalProcessingEdit">        
 <div class="table-responsive">
 		<table class="table table-striped table-bordered top-up text-right">
 	@foreach($lavorazioni as $lavorazioni)		    	
 		<tr>
-		<td><form action="{{url('/admin/taxonomies/updateprocessing')}}" method="post" id="frmemotionalProcessing_{{$lavorazioni->id}}">        
+		<td>
 		{{ csrf_field() }}
-        <input type="hidden" name="departments_id" id="departments_id" value="{{$departments->id}}" />
-		<input type="hidden" name="id" value="{{$lavorazioni->id}}">
+    <input type="hidden" name="departments_id" id="departments_id" value="{{$departments->id}}" />
+		<input type="hidden" name="id[]" value="{{$lavorazioni->id}}">
 		<table class="table sub-table">
               <tr>
                 <td width="20%" class="text-left"><label>{{trans('messages.keyword_processing_name')}}</label>
-                  <input type="text" required="required" class="form-control" name="name" id="name" value="{{$lavorazioni->nome}}"></td>
+                  <input type="text" required="required" class="form-control" name="name[]" id="name" value="{{$lavorazioni->nome}}"></td>
                 <td class="text-left"><label>{{trans('messages.keyword_description')}}</label>
-                  <input type="text" class="form-control" name="description" value="{{$lavorazioni->description}}">
-                  <input type="hidden" name="color" value="{{$lavorazioni->color}}" />
+                  <input type="text" class="form-control" name="description[]" value="{{$lavorazioni->description}}">
+                  <input type="hidden" name="color[]" value="{{$lavorazioni->color}}" />
                   <?php 
 			// ON ACTIVE THIS REMOVE HIDDEN COLOR INPUT TYPE
 			/*<div class="col-xs-6 col-sm-3">
@@ -75,27 +77,29 @@
                   <a onclick="conferma(event);" type="submit" href="{{url('/admin/taxonomies/deleteprocessing/id' . '/' . $lavorazioni->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a></td>
               </tr>
             </table>			
-	</form><script type="text/javascript">
-         $(document).ready(function() {
-           $("#frmemotionalProcessing_{{$lavorazioni->id}}").validate({            
-                      rules: {
-                          name: {
-                              required: true,
-                          }
-                      },
-                      messages: {
-                          name: {
-                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
-                          }
-                      }
-                  });
-          });
-          </script></td>
+	     </td>
 	</tr>    
 	@endforeach
 	</table>
 	</div>	
 </form>
+@endif
+<script type="text/javascript">
+   $(document).ready(function() {
+     $("#frmemotionalProcessingEdit").validate({            
+                rules: {
+                    "name": {
+                        required: true,
+                    }
+                },
+                messages: {
+                    "name": {
+                        required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                    }
+                }
+            });
+    });
+</script>
 </fieldset>
 <div class="space40"></div>
 	@endforeach

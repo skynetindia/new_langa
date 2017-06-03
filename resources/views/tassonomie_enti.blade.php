@@ -2,15 +2,21 @@
 @section('page')
 <h1>{{trans('messages.keyword_taxonomy_entities')}}</h1><hr>
 @include('common.errors')
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script>
 <script type="text/javascript" src="{{asset('public/scripts/jqColorPicker.min.js')}}"></script>
 <script type="text/javascript">	
          $('.color').colorPicker(); // that's it   
 </script>
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
 <fieldset>
-<legend>{{ trans('messages.keyword_type')}}</legend>
+<legend> {{ trans('messages.keyword_types') }} </legend>
+
 <h4>{{ trans('messages.keyword_add_type')}}</h4>
 <form action="{{url('/admin/tassonomie/new')}}" method="post" id="frmentiadd" name="frmentiadd">
     {{ csrf_field() }}
@@ -34,45 +40,45 @@
 	</div>
 </form>
 <h4>{{trans('messages.keyword_edit_types')}}</h4>
+<form action="{{url('/admin/tassonomie/update')}}" method="post" id="frmentiedit_type">
 <div class="table-responsive">
     <table class="table table-striped table-bordered text-right">
       @foreach($type as $types)
       <tr>
-        <td><form action="{{url('/admin/tassonomie/update')}}" method="post" id="frmentiedit_{{$types->id}}">
+        <td>
             {{ csrf_field() }}
-            <input type="hidden" name="id" value="{{$types->id}}">
+            <input type="hidden" name="id[]" value="{{$types->id}}">
             <table class="table sub-table">
               <tr>
-                <td><input type="text" class="form-control" name="name" id="name" value="{{$types->name}}"></td>
-                <td><input type="text" class="form-control" name="description" value="{{$types->description}}"></td>
-                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$types->color}}"></td>
+                <td><input type="text" class="form-control" name="name[]" id="name" value="{{$types->name}}"></td>
+                <td><input type="text" class="form-control" name="description[]" value="{{$types->description}}"></td>
+                <td><input type="text" class="form-control color no-alpha" name="color[]" value="{{$types->color}}"></td>
                 <td><input type="submit" class="btn btn-primary" value="Salva">
                   <a  onclick="conferma(event);" type="submit" href="{{url('/admin/tassonomie/delete/id' . '/' . $types->id)}}" class="btn btn-danger"> Cancella</a></td>
               </tr>
-            </table>
-          </form>
-          <script type="text/javascript">
-         $(document).ready(function() {
-           $("#frmentiedit_{{$types->id}}").validate({            
-                      rules: {
-                          name: {
-                              required: true,
-                          }
-                      },
-                      messages: {
-                          name: {
-                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
-                          }
-                      }
-                  });
-          });
-          </script>
+            </table>                    
           </td>
       </tr>
       @endforeach
     </table>
   </div>
 </form>
+<script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmentiedit_type").validate({            
+                      rules: {
+                          "name[]": {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          "name[]": {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script>
 </fieldset>
 <div class="space40"></div>
 <fieldset>
@@ -101,45 +107,45 @@
 	</div>
 </form>
 <h4>{{trans('messages.keyword_edit_emotional_state')}}</h4>
+<form action="{{url('/admin/tassonomie/aggiornastatiemotivi')}}" method="post" id="frmentiemotionedit">
  <div class="table-responsive">
     <table class="table table-striped table-bordered text-right">
       @foreach($emotional_states_types as $emostatetye)
       <tr>
-        <td><form action="{{url('/admin/tassonomie/aggiornastatiemotivi')}}" method="post" id="frmentiemotionedit_{{$emostatetye->id}}">
+        <td>
             {{ csrf_field() }}
-            <input type="hidden" name="id" value="{{$emostatetye->id}}">
+            <input type="hidden" name="id[]" value="{{$emostatetye->id}}">
             <table class="table sub-table">
               <tr>
-                <td><input type="text" class="form-control" name="name" id="name" value="{{$emostatetye->name}}"></td>
-                <td><input type="text" class="form-control" name="description" value="{{$emostatetye->description}}"></td>
-                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$emostatetye->color}}"></td>
+                <td><input type="text" class="form-control" name="name[]" id="name" value="{{$emostatetye->name}}"></td>
+                <td><input type="text" class="form-control" name="description[]" value="{{$emostatetye->description}}"></td>
+                <td><input type="text" class="form-control color no-alpha" name="color[]" value="{{$emostatetye->color}}"></td>
                 <td><input type="submit" class="btn btn-primary" value="Salva">
                   <a  onclick="conferma(event);" type="submit" href="{{url('/admin/tassonomie/statiemotivi/delete/id' . '/' . $emostatetye->id)}}" class="btn btn-danger"> Cancella </a></td>
               </tr>
-            </table>
-          </form>
-          <script type="text/javascript">
-         $(document).ready(function() {
-           $("#frmentiemotionedit_{{$emostatetye->id}}").validate({            
-                      rules: {
-                          name: {
-                              required: true,
-                          }
-                      },
-                      messages: {
-                          name: {
-                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
-                          }
-                      }
-                  });
-          });
-          </script>
+            </table>                    
           </td>
       </tr>
       @endforeach
     </table>
   </div>
 </form>
+<script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmentiemotionedit").validate({            
+                      rules: {
+                          "name[]": {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          "name[]": {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script>
 </fieldset>
 <script>
 	function conferma(e) {

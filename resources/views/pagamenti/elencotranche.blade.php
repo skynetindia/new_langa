@@ -1,30 +1,22 @@
 @extends('layouts.app')
 @section('content')
-
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
     document.write(msg);
     </script>
 @endif
-
 @include('common.errors')
-
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-
 <!-- Latest compiled and minified JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
 <!-- Latest compiled and minified Locales -->
 <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
-
 <div class="header-lst-img">
 	<div class="header-svg text-left float-left">
-        <img src="http://betaeasy.langa.tv/images/HEADER1_LT_ACCOUNTING.svg" alt="header image">
+        <img src="{{url('images/HEADER1_LT_ACCOUNTING.svg')}}" alt="header image">
     </div>
     <div class="float-right text-right">
     	<h1> {{ trans('messages.keyword_list_invoices') }} </h1><hr>
@@ -82,6 +74,7 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 	var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
 	//console.log(/\d+/.exec($(el[0]).children()[1].innerHTML));
 	if (!selezione[cod]) {
+        $('#table tr.selected').removeClass("selected");       
 		$(el[0]).addClass("selected");
 		selezione[cod] = cod;
 		indici[n] = cod;
@@ -97,6 +90,11 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 			}
 		}
 		n--;
+        $('#table tr.selected').removeClass("selected");       
+        $(el[0]).addClass("selected");
+        selezione[cod] = cod;
+        indici[n] = cod;
+        n++;
 	}
 });
 
@@ -176,10 +174,7 @@ function multipleAction(act) {
 }    
 
 </script>
-
 <div class="footer-svg">
-  <img src="http://betaeasy.langa.tv/images/FOOTER2_RB_ACCOUNTING.svg" alt="footer enti image">
+  <img src="{{url('images/FOOTER2_RB_ACCOUNTING.svg')}}" alt="footer enti image">
 </div>
-
-
 @endsection

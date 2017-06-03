@@ -8,6 +8,12 @@
 <script type="text/javascript">
      $('.color').colorPicker();
 </script>
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
 <fieldset>
 <legend>{{trans('messages.keyword_emotional_state')}}</legend>
 <form action="{{url('/admin/taxonomies/addstatesproject')}}" method="post" id="frmemotionalProject">
@@ -28,43 +34,45 @@
 	</div>
 </form>
 <h4>{{trans('messages.keyword_edit_emotional_project_status')}}</h4>
+<form action="{{url('/admin/taxonomies/updatestatesproject')}}" method="post" id="frmemotionalProjectEdit">
 <div class="table-responsive">
 	<table class="table table-striped table-bordered text-right">
 	@foreach($statesproject as $statoemotivotipo)
 	<tr>
-        <td><form action="{{url('/admin/taxonomies/updatestatesproject')}}" method="post" id="frmemotionalProject_{{$statoemotivotipo->id}}">
+        <td>
             {{ csrf_field() }}
-            <input type="hidden" name="id" value="{{$statoemotivotipo->id}}">
+            <input type="hidden" name="id[]" value="{{$statoemotivotipo->id}}">
             <table class="table sub-table">
               <tr>
-                <td><input type="text" class="form-control" name="name" id="name" value="{{$statoemotivotipo->name}}"></td>
-                <td><input type="text" class="form-control" name="description" value="{{$statoemotivotipo->description}}"></td>
-                <td><input type="text" class="form-control color no-alpha" name="color" value="{{$statoemotivotipo->color}}"></td>
+                <td><input type="text" class="form-control" name="name[]" id="name" value="{{$statoemotivotipo->name}}"></td>
+                <td><input type="text" class="form-control" name="description[]" value="{{$statoemotivotipo->description}}"></td>
+                <td><input type="text" class="form-control color no-alpha" name="color[]" value="{{$statoemotivotipo->color}}"></td>
                 <td><input type="submit" class="btn btn-primary" value="{{trans('messages.keyword_save')}}">
                   <a  onclick="conferma(event);" type="submit" href="{{ url('/admin/taxonomies/statesproject/delete/id' . '/' . $statoemotivotipo->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}} </a></td>
               </tr>
             </table>
-          </form><script type="text/javascript">
-         $(document).ready(function() {
-           $("#frmemotionalProject_{{$statoemotivotipo->id}}").validate({            
-                      rules: {
-                          name: {
-                              required: true,
-                          }
-                      },
-                      messages: {
-                          name: {
-                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
-                          }
-                      }
-                  });
-          });
-          </script></td>
+          </td>
       </tr>
 	@endforeach
 	</table>
 	</div>
 </form>
+<script type="text/javascript">
+         $(document).ready(function() {
+           $("#frmemotionalProjectEdit").validate({            
+                      rules: {
+                          "name[]": {
+                              required: true,
+                          }
+                      },
+                      messages: {
+                          "name[]": {
+                              required: "{{trans('messages.keyword_please_enter_a_name')}}"
+                          }
+                      }
+                  });
+          });
+          </script>
 </fieldset>
 <script>
 function conferma(e) {

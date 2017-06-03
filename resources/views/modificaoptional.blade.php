@@ -20,7 +20,13 @@ document.write(msg);
     <h1 class="option-heading"> {{trans("messages.keyword_code")}}: {{$optional->id}}</h1>
   </div>
   <div class="col-md-6 text-right">
-    <div class="quiz-check"> <span>{{trans("messages.keyword_exclude_from_quiz?_(even)")}}</span>
+    <div class="quiz-check"> <span>{{trans("messages.keyword_classic")}}?</span>
+      <div class="switch">
+        <input value="1" <?php if(isset($optional->is_classic) && $optional->is_classic=='1'){ echo 'checked';}?> class="" type="checkbox" name="classic" id="classic">
+        <label for="classic"></label>
+      </div>&nbsp;
+
+      <span>{{trans("messages.keyword_quiz")}}?</span>
       <div class="switch">
         <input value="1" <?php if(isset($optional->escludi_da_quiz) && $optional->escludi_da_quiz=='1'){ echo 'checked';}?> class="" type="checkbox" name="escludi_da_quiz" id="escludi_da_quiz">
         <label for="escludi_da_quiz"></label>
@@ -47,9 +53,9 @@ document.write(msg);
     <select name="frequenza" class="form-control">
         @foreach($frequenze as $frequenza)
         @if($frequenza->id == $optional->frequenza)
-        <option selected value="{{$frequenza->id}}">{{$frequenza->nome}}</option>
+        <option selected value="{{$frequenza->id}}">{{$frequenza->rinnovo.' Days'}}</option>
         @else
-        <option value="{{$frequenza->id}}">{{$frequenza->nome}}</option>
+        <option value="{{$frequenza->id}}">{{$frequenza->rinnovo.' Days'}}</option>
         @endif
         @endforeach
     </select><br>

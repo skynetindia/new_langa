@@ -62,6 +62,7 @@ var n = 0;
 $('#table').on('click-row.bs.table', function (row, tr, el) {
   var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
   if (!selezione[cod]) {
+    $('#table tr.selected').removeClass("selected");       
     $(el[0]).addClass("selected");
     selezione[cod] = cod;
     indici[n] = cod;
@@ -77,6 +78,11 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
       }
     }
     n--;
+    $('#table tr.selected').removeClass("selected");       
+    $(el[0]).addClass("selected");
+    selezione[cod] = cod;
+    indici[n] = cod;
+    n++;
   }
 });
 
@@ -99,14 +105,19 @@ function multipleAction(act) {
             type: "GET",
             url : link.href + indici[i],
             error: function(url) {
+              console.log(url.status);
               if(url.status==403) {
                 link.href = "{{ url('/admin/tassonomie/delete/pacchetto') }}" + '/' + indici[n];
                 link.dispatchEvent(clickEvent);
                           } 
+            },
+            success:function(url){
+              console.log('successs');
+               console.log(url); 
             }
                     });
         }
-                selezione = undefined;
+        selezione = undefined;
         setTimeout(function(){location.reload();},100*n);
         n = 0;
           }

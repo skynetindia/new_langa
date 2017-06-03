@@ -1,45 +1,22 @@
 @extends('adminHome')
-
-
-
 @section('page')
-
-<h1>Tassonomie dipartimenti</h1><hr>
-
+<h1>{{trans('messages.keyword_taxonomies')}} {{trans('messages.keyword_departments')}} </h1><hr>
 @include('common.errors')
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-
 <!-- Latest compiled and minified JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
 <!-- Latest compiled and minified Locales -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
-
 <script>
-
   $(function(){
-
       //  $("table").stupidtable();
-
     });
-
-    
-
 @if(!empty(Session::get('msg')))
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
-
     document.write(msg);
-
-
-
 @endif
-
 </script>
-
-
-
   <form action="{{ url('/admin/tassonomie/dipartimenti/add') }}" method="post">
     {{ csrf_field() }}
     <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo dipartimento"><i class="fa fa-plus"></i></button>
@@ -79,6 +56,7 @@ var n = 0;
 $('#table').on('click-row.bs.table', function (row, tr, el) {
   var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
   if (!selezione[cod]) {
+    $('#table tr.selected').removeClass("selected");       
     $(el[0]).addClass("selected");
     selezione[cod] = cod;
     indici[n] = cod;
@@ -94,6 +72,11 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
       }
     }
     n--;
+    $('#table tr.selected').removeClass("selected");       
+      $(el[0]).addClass("selected");
+      selezione[cod] = cod;
+      indici[n] = cod;
+      n++;
   }
 });
 

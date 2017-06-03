@@ -1,29 +1,20 @@
 @extends('adminHome')
 @section('page')
-
 @include('common.errors')
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-
 <!-- Latest compiled and minified JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
 <!-- Latest compiled and minified Locales -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
-
-
 <h1>{{trans('messages.keyword_templates_for_taxation')}}</h1><hr>
-
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
     document.write(msg);
     </script>
 @endif
-
 <a onclick="multipleAction('add');" id="add"  class="btn btn-warning" name="create" title="{{trans('messages.keyword_new_taxation')}}"><span class="fa fa-plus"></span></a>
 <div class="space10"></div>
 <a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary"  name="update" title="{{'messages.keyword_modift_taxation'}}"><span class="fa fa-pencil"></span></a>
@@ -45,6 +36,7 @@ var n = 0;
 $('#table').on('click-row.bs.table', function (row, tr, el) {
   var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
   if (!selezione[cod]) {
+    $('#table tr.selected').removeClass("selected");       
     $(el[0]).addClass("selected");
     selezione[cod] = cod;
     indici[n] = cod;
@@ -60,6 +52,11 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
       }
     }
     n--;
+    $('#table tr.selected').removeClass("selected");       
+    $(el[0]).addClass("selected");
+    selezione[cod] = cod;
+    indici[n] = cod;
+    n++;
   }
 });
 function check() { return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}} " + n + " {{trans('messages.keyword_taxation')}}?"); }

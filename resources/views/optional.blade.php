@@ -11,8 +11,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
 <script type="text/javascript" src="http://ff.kis.v2.scr.kaspersky-labs.com/A6847946-FDE4-3F4D-8DC3-B77A1A9B63D3/main.js" charset="UTF-8"></script>
 
-<script>
-    
+<script>    
 $(function () {
 $("table").stupidtable();
         });
@@ -20,7 +19,6 @@ $("table").stupidtable();
 var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
 document.write(msg);
 @endif
-
 </script>
 <form action="{{ url('/admin/taxonomies/optional/add') }}" method="post">
   {{ csrf_field() }}
@@ -52,10 +50,10 @@ document.write(msg);
     var selezione = [];
     var indici = [];
     var n = 0;
-
     $('#table').on('click-row.bs.table', function (row, tr, el) {
         var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
         if (!selezione[cod]) {
+            $('#table tr.selected').removeClass("selected");       
             $(el[0]).addClass("selected");
             selezione[cod] = cod;
             indici[n] = cod;
@@ -71,6 +69,11 @@ document.write(msg);
                 }
             }
             n--;
+            $('#table tr.selected').removeClass("selected");       
+            $(el[0]).addClass("selected");
+            selezione[cod] = cod;
+            indici[n] = cod;
+            n++;
         }
     });
 
