@@ -81,15 +81,17 @@
 				<input type="text" disabled value="<?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?>" class="form-control">
 			</label>
 			<div class="btn-group"><?php           		
-				$link_prev = url('/preventivi/pdf/quote/') . '/'.  $progetto->id_preventivo;
-				$link_prev_noprezzi = url('/preventivi/noprezzi/pdf/quote/') . '/'.  $progetto->id_preventivo;
+				$link_prev = url('/estimates/pdf/quote/') . '/'.  $progetto->id_preventivo;
+				$link_prev_noprezzi = url('/estimates/noprezzi/pdf/quote/') . '/'.  $progetto->id_preventivo;
 				?>        		    
     		</div>
             
             	<div class="modifica-blade-progetto">
-                    <a id="pdf" class="btn">
+                    @if(isset($progetto->id_preventivo) && $progetto->id_preventivo != "")
+                    <a id="pdf" target="_blank" href="{{$link_prev}}" class="btn">
                             <i class="fa fa-file-pdf-o"></i>
                     </a>
+                    @endif
     			<a href="#" class="btn btn-warning">{{trans('messages.keyword_goallentity')}}</a>
 					<div class="float-right">
     				<a href="#" class="btn btn-warning">{{trans('messages.keyword_onlinereview')}}</a>

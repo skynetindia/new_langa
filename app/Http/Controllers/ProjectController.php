@@ -10,6 +10,7 @@ use Redirect;
 use Storage;
 use App\Http\Requests;
 use App\Project;
+use App\Classes\PdfWrapper as PDF;
 
 class ProjectController extends Controller
 {
@@ -141,6 +142,69 @@ class ProjectController extends Controller
 		$progetti = $this->progetti->forUser($request->user());
 		$this->completaCodice($progetti);
 		return json_encode($progetti);
+	}
+
+	public function pdf(Request $request)
+	{		
+		/*$request->id;
+		$quote*/
+		$project = DB::table('projects')->where('id', $request->id)->first();
+
+		$progetti_lavorazioni = DB::table('progetti_lavorazioni')->where('id_progetto', $request->id)->get();
+		
+		$preventivo = DB::table('quotes')->where('id', $project->id_preventivo)->first();		
+		
+		
+		$ente = DB::table('corporations')->where('id', $preventivo->idente)->first();
+		$utente = DB::table('users')->where('id', $preventivo->user_id)->first();
+		$responsabile = DB::table('users')->where('name', $ente->responsabilelanga)->first();
+		$ente_DA = array();
+		if(isset($utente->id_ente)){
+			$ente_DA = DB::table('corporations')->where('id', $utente->id_ente)->first();
+		}
+		$ownerDepartments = DB::table('departments')->where('id', $preventivo->dipartimento)->first();
+		$optional_preventivi = DB::table('optional_preventivi')->where('id_preventivo', $preventivo->id)->get();
+			
+		$pdf = new PDF('utf-8');
+		$pdf->mirrorMargins(1);
+						
+		$header = \View::make('pdf.project_header')->render();		
+		$footer = \View::make('pdf.project_footer')->render();
+		
+		$pdf->SetHTMLHeader($header, 'O');
+		$pdf->SetHTMLHeader($header, 'E');
+		$pdf->SetHTMLFooter($footer, 'O');
+		$pdf->SetHTMLFooter($footer, 'E');
+		
+		/*$pdf->AddPage('Portrait', margin-left, margin-right, margin-top, margin-bottom, margin-header, margin-footer, 'A4');*/
+		$pdf->AddPage('P', 10, 10, 38, 20, 8, 2, 'A4');
+		/*return view('pdf.quotation', [
+			'preventivo' =>$preventivo,										
+			'ente' => $ente,
+			'utente' => $utente,
+			'ente_DA' => $ente_DA,
+			'owner'=>$ownerDepartments,
+			'responsabile'=>$responsabile,
+			'optional_preventivi'=>$optional_preventivi]);
+		exit;*/
+
+		$pdf->loadView('pdf.project', [
+			'project'=>$project,
+			'progetti_lavorazioni'=>$progetti_lavorazioni,
+			'preventivo' =>$preventivo,										
+			'ente' => $ente,
+			'utente' => $utente,
+			'ente_DA' => $ente_DA,
+			'owner'=>$ownerDepartments,
+			'responsabile'=>$responsabile,
+			'optional_preventivi'=>$optional_preventivi]);
+		
+		$logs = 'Generate pdf for project Quote -> ( Quote ID: '. $project->id_preventivo .')';
+		//storelogs($request->user()->id, $logs);
+		
+		/*$pdf->download('test.pdf');*/
+		$pdf->stream('project_quote.pdf');				
+	
 	}
 	
 	public function miei(Request $request)

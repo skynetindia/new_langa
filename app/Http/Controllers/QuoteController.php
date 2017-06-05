@@ -10,6 +10,7 @@ use Redirect;
 use App\Quote;
 use DB;
 use Storage;
+use App\Classes\PdfWrapper as PDF;
 
 use App\PDF\QuotationPDF;
 use App\PDF\QuotationPDFNoPrezzi;
@@ -878,34 +879,55 @@ class QuoteController extends Controller
 	}
 	
 	public function pdf(Request $request, Quote $quote)
-	{
-	
-		// Prendo i dati del preventivo
-		$this->authorize('visualizzapdf', $quote);
+	{		
+		$preventivo = DB::table('quotes')->where('id', $quote->id)->first();		
+		$ente = DB::table('corporations')->where('id', $preventivo->idente)->first();
+		$utente = DB::table('users')->where('id', $preventivo->user_id)->first();
+		$responsabile = DB::table('users')->where('name', $ente->responsabilelanga)->first();
+		$ente_DA = array();
+		if(isset($utente->id_ente)){
+			$ente_DA = DB::table('corporations')->where('id', $utente->id_ente)->first();
+		}
+		$ownerDepartments = DB::table('departments')->where('id', $preventivo->dipartimento)->first();
+		$optional_preventivi = DB::table('optional_preventivi')->where('id_preventivo', $preventivo->id)->get();
+			
+		$pdf = new PDF('utf-8');
+		$pdf->mirrorMargins(1);
+						
+		$header = \View::make('pdf.quotation_header')->render();		
+		$footer = \View::make('pdf.quotation_footer')->render();
 		
-		$preventivo = DB::table('quotes')
-						->where('id', $quote->id)
-						->first();
-		// Prendo i dati dell'ente a cui è indirizzato il preventivo
-		$ente = DB::table('corporations')
-					->where('id', $preventivo->idente)
-					->first();
-		$utente = DB::table('users')
-					->where('id', $preventivo->user_id)
-					->first();
+		$pdf->SetHTMLHeader($header, 'O');
+		$pdf->SetHTMLHeader($header, 'E');
+		$pdf->SetHTMLFooter($footer, 'O');
+		$pdf->SetHTMLFooter($footer, 'E');
+		
+		/*$pdf->AddPage('Portrait', margin-left, margin-right, margin-top, margin-bottom, margin-header, margin-footer, 'A4');*/
+		$pdf->AddPage('P', 10, 10, 38, 20, 8, 2, 'A4');
+		/*return view('pdf.quotation', [
+			'preventivo' =>$preventivo,										
+			'ente' => $ente,
+			'utente' => $utente,
+			'ente_DA' => $ente_DA,
+			'owner'=>$ownerDepartments,
+			'responsabile'=>$responsabile,
+			'optional_preventivi'=>$optional_preventivi]);
+		exit;*/
 
-		//	if(isset($utente->id_ente)){
-			$ente_DA = DB::table('corporations')
-					->where('id', $utente->id_ente)
-					->first();
-		//}
-					
-		$pdf = new QuotationPDF($preventivo, $ente, $ente_DA,$utente);
-		$pdf->AddFont('Nexa', '', 'NexaLight.php');
-		$pdf->AddFont('Nexa', 'B', 'NexaBold.php');
-		//$pdf->writePdf();
+		$pdf->loadView('pdf.quotation', [
+			'preventivo' =>$preventivo,										
+			'ente' => $ente,
+			'utente' => $utente,
+			'ente_DA' => $ente_DA,
+			'owner'=>$ownerDepartments,
+			'responsabile'=>$responsabile,
+			'optional_preventivi'=>$optional_preventivi]);
 		
 		$logs = 'Generate pdf for Quote -> ( Quote ID: '. $quote->id .')';
 		//storelogs($request->user()->id, $logs);
+		
+		/*$pdf->download('test.pdf');*/
+		$pdf->stream('quote.pdf');				
+	
 	}
 }

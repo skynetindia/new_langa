@@ -21,7 +21,7 @@
         <hr>
     </div>    
     <div class="header-svg">
-        <img src="http://betaeasy.langa.tv/images/HEADER2-RT_QUOTES.svg" alt="header image">
+        <img src="{{url('images/HEADER2-RT_QUOTES.svg')}}" alt="header image">
     </div>
 </div>
 
@@ -55,8 +55,7 @@
 			<input disabled value=":{{$preventivo->id}}/{{$preventivo->anno}}" type="text" id="id" name="id" placeholder="{{ trans('messages.keyword_budget_code') }} " class="form-control">
 		</label>
 		<div class="btn-group btn-group-top-space">
-        	<a target="new" href="{{url('/preventivi/pdf/quote/') . '/' . $preventivo->id}}" class="btn btn-default" title=" 
-            {{ trans('messages.keyword_see_budget') }} "><i class="fa fa-file-pdf-o"></i></a>
+        	<a target="new" href="{{url('/estimates/pdf/quote/') . '/' . $preventivo->id}}" class="btn btn-default" title="{{trans('messages.keyword_see_budget')}} "><i class="fa fa-file-pdf-o"></i></a>
         </div>
 
         <div class="btn-group">
@@ -1080,7 +1079,7 @@
 </div>
 
 <div class="footer-svg">
-  <img src="http://betaeasy.langa.tv/images/FOOTER3-ORIZZONTAL_QUOTES.svg" alt="avvisi">
+  <img src="{{url('images/FOOTER3-ORIZZONTAL_QUOTES.svg')}}" alt="avvisi">
 </div>
 
 <script>
