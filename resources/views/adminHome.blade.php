@@ -178,7 +178,7 @@
 				 	 $logo;
 
 					$idente = DB::table('users')
-							->select('id_ente')
+							->select('id_ente','logo')
 							->where('id', Auth::user()->id)
 							->first();
 					$logo = DB::table('corporations')
@@ -186,7 +186,7 @@
 							->where('id', $idente->id_ente)
 							->first();	
 				  ?>
-            <img src="{{ url('/storage/app/images').'/'}}<?php if(is_object($logo)) echo $logo->logo; ?>" id="immagineprofilo" alt="">@if (!Auth::guest()) {{Auth::user()->name}} @endif <span class=" fa fa-angle-down"></span> </a>
+            <img src="{{ url('/storage/app/images').'/'}}<?php if(isset($idente->logo)) echo $idente->logo; ?>" id="immagineprofilo" alt="">@if (!Auth::guest()) {{Auth::user()->name}} @endif <span class=" fa fa-angle-down"></span> </a>
             <ul class="dropdown-menu dropdown-usermenu pull-right">
                                         <li><a href="{{url('/profilo')}}"><i class="fa fa fa-user pull-right"></i> {{trans("messages.keyword_profile")}}</a></li>
                                         <li><a href="javascript:;"><i class="fa fa-question pull-right"></i>{{trans('messages.keyword_help')}}</a></li>
@@ -210,12 +210,12 @@
 
           <li role="presentation" class="dropdown"> <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-envelope-o"></i> <span class="badge bg-green">
 
-          <?php if(Auth::user()->id === 0) echo '!'; else echo count($notifiche); ?>
+          <?php if(Auth::user()->id === 0) echo '!'; else echo count($notifications); ?>
           </span> </a>
 
           <div id="menu1" class="dropdown-menu list-unstyled msg_list notification-header">
 
-          <?php $count = 0; ?>
+         
 
             <div class="chkbox-blk">
                 <div class="chkbox"><input type="checkbox" id="notifi1">
@@ -244,8 +244,7 @@
               </a>
          </div>
 
-        <?php $count++; ?>
-          @endforeach
+                 @endforeach
 
         </div>
 
