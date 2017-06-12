@@ -17,10 +17,12 @@ class CorporationController extends Controller
 	protected $corporations;
 	protected $chiave;
 	protected $stato;
+	protected $logmainsection;
 	
     public function __construct(CorporationRepository $corporations) {
         $this->middleware('auth');
         $this->corporations = $corporations;
+		$this->logmainsection = 'Entity';
     }
 	
 	public function aggiornastatocliente(Request $request) {
@@ -46,15 +48,24 @@ class CorporationController extends Controller
 	 * Le credenziali sono inviate via email all'ente
 	 */
   public function newclient(Request $request, Corporation $corporation) {
+
   	if($request->user()->id == 0 ||
-  		 $request->user()->dipartimento == "AMMINISTRAZIONE") {
+  		 $request->user()->dipartimento == 1) {
 		  $password = substr(str_shuffle("abcdefghilmnopqrstuvz1234567890"), 0, 7);
 		  $count = DB::table('clienti')->where('email',$corporation->email)->orWhere('name',$corporation->nomereferente)->count();
 		  if($count == '0'){
 			  $user = DB::table('clienti')
 				->insertGetId([
-					'name' => $corporation->nomereferente,
+					'name' => $corporation->nomeazienda,
+					'id_ente' => $corporation->id,
+					'email' => $corporation->email,
+					'password' => bcrypt($password)				
+			  	]);
+
+				DB::table('users')->insert([
+					'name' => $corporation->nomeazienda,
 					'password' => bcrypt($password),
+					'dipartimento' => 5,
 					'email' => $corporation->email,
 					'id_ente' => $corporation->id
 			  ]);
@@ -63,7 +74,11 @@ class CorporationController extends Controller
 				->where('id', $corporation->id)
 				->update(array(
 					'id_cliente' => $user	
-			  ));   
+			  ));  
+
+			$logs = $this->logmainsection.' -> Generate new client for entity -> ( Entity ID: '. $corporation->id . ' Client ID '. $user .')';
+			storelogs($request->user()->id, $logs);
+
 			  /*Mail::send('nuovocliente', ['nome' => $corporation->nomereferente, 'email' => $corporation->email, 'password' => $password], function ($m) use ($request, $corporation) {
 				$m->from($request->user()->email, 'Easy LANGA');
 				$subject = trans('messages.keyword_credentials_for_langa_client_panel');
@@ -120,9 +135,12 @@ class CorporationController extends Controller
 	}
 
 	public function duplicate(Request $request, Corporation $corporation) {
+
 		$this->authorize('duplicate', $corporation);
 		// Duplica ente
-		$request->user()->corporations()->create([
+
+		// $request->user()->corporations()->create([
+		$corp =  DB::table('corporations')->insertGetId([ 
             'nomeazienda' => $corporation->nomeazienda,
             'statoemotivo' => $corporation->statoemotivo,
             'nomereferente' => $corporation->nomereferente,
@@ -143,8 +161,11 @@ class CorporationController extends Controller
 			'responsabilelanga' => $corporation->responsabilelanga,
 			'telefonoresponsabile' => $corporation->telefonoresponsabile,
         ]);
-                return Redirect::back()
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_entity_duplicate_successfully').'</div>');
+
+		$logs = $this->logmainsection.' -> Copy(Duplicate) Entity -> (ID: '. $corp . ')';
+		storelogs($request->user()->id, $logs);
+
+        return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_entity_duplicate_successfully').'</div>');
 	
         }
 	
@@ -166,8 +187,8 @@ class CorporationController extends Controller
             'noteenti' => 'max:255',
             'iban' => 'max:64',
             'statoemotivo' => 'max:64',
-			'responsabilelanga' => 'required|max:12',
-			'logo'=>'mimes:jpeg,jpg,png | max:1000',
+			'responsabilelanga' => 'required',
+			'logo'=>'mimes:jpeg,jpg,png|max:1000',
 			/*'telefonoresponsabile' => 'required|max:35',*/
         ]);
         $nome = "";
@@ -221,8 +242,8 @@ class CorporationController extends Controller
 				'skype_id'=>$request->skype_id,
 			));
 		
-		$logs = 'Update Entity -> ( Entity ID: '. $corporation->id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs =  $this->logmainsection.' -> Update Entity (ID: '. $corporation->id . ')';
+		storelogs($request->user()->id, $logs);
 
 		DB::table('enti_partecipanti')->where(
 			'id_ente', $corporation->id
@@ -361,13 +382,17 @@ class CorporationController extends Controller
 	
 	public function destroy(Request $request, Corporation $corporation)
 	{
-		$this->authorize('destroy', $corporation);		
+		$this->authorize('destroy', $corporation);	
+
 		DB::table('corporations')
 		  ->where('id', $corporation->id)
 		  ->update(array(
 			'is_deleted' => 1,
 		  ));
-	
+
+		$logs =  $this->logmainsection.' -> Delete Entity (ID: '. $corporation->id . ')';
+		storelogs($request->user()->id, $logs);
+
 		return Redirect::back()
 		  ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_entity_deleted_successfully').'</div>');
 	}
@@ -391,7 +416,8 @@ class CorporationController extends Controller
             'noteenti' => 'max:255',
             'iban' => 'max:64',
             'statoemotivo' => 'max:64',
-			'responsabilelanga' => 'required|max:12',
+			'responsabilelanga' => 'required',
+			'logo'=>'mimes:jpeg,jpg,png|max:1000',
 			/*'telefonoresponsabile' => 'required|max:35',*/
         ]);
         
@@ -427,6 +453,7 @@ class CorporationController extends Controller
 			'emailsecondaria' => $request->emailsecondaria,
 			'sedelegale' => $request->sedelegale,
 			'indirizzospedizione' => $request->indirizzospedizione,
+			'indirizzo' => $request->indirizzo,
             'fax' => isset($request->fax) ? $request->fax : '',
             'email' => $request->email,
 			'logo' => $nome,
@@ -435,10 +462,11 @@ class CorporationController extends Controller
 			'responsabilelanga' => $request->responsabilelanga,
 			'telefonoresponsabile' => isset($request->telefonoresponsabile) ? $request->telefonoresponsabile : '',
 			'skype_id'=> isset($request->skype_id) ? $request->skype_id : '',
+			'user_id'=>$request->user()->id
         ]);
 		
-		$logs = 'Add New Entity -> ( Entity ID: '. $corp . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs =  $this->logmainsection.' -> Add New Entity (ID: '. $corp . ')';
+		storelogs($request->user()->id, $logs);
 		
 		// Memorizza i partecipanti al progetto
         if(isset($request->partecipanti)) {			
@@ -541,9 +569,10 @@ class CorporationController extends Controller
 	
 	public function modify(Request $request, Corporation $corporation)
 	{
-		$this->authorize('modify', $corporation);
+		//$this->authorize('modify', $corporation);
 
 		return view('modificaente', [
+			'action'=>'edit',
 			'corp' => $corporation,
 			'users' => DB::table('users')
 				->get(),
@@ -559,11 +588,13 @@ class CorporationController extends Controller
 				->first(),
 			'participant' => DB::table('enti_partecipanti')
                                 ->where('id_ente', $corporation->id)
+								->orderBy('id', 'asc')
                                 ->get(),
 			'actionmessages' => DB::table('messages')
 				->where('id_ente', $corporation->id)
 				->get(),
 			'loginuser' => $request->user(),
+			'frequency'=>DB::table('frequenze')->get(),
 			'cost' => DB::table('costi')
 					->where('id_ente', $corporation->id)
 					->orderBy('datainserimento', 'asc')
@@ -620,6 +651,7 @@ class CorporationController extends Controller
 			'emotionState' => DB::table('statiemotivitipi')
 				->get(),
 			'loginuser' => $request->user(),
+			'frequency'=>DB::table('frequenze')->get(),
 			'selectedemotionState' => [],
 			'participant' => [],
 			'actionmessages' => [],

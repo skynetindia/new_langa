@@ -12,27 +12,31 @@ use App\Http\Requests;
 use App\Accounting;
 use App\PDF\fpdf;
 use Storage;
+use DateTime;
+use App\Classes\PdfWrapper as PDF;
 
 class AccountingController extends Controller
 {
     protected $pagamenti;
 	protected $progetti;
+	protected $logmainsection;
     
     public function __construct(AccountingRepository $accountings, ProjectRepository $projects)
     {
         $this->middleware('auth');
         $this->pagamenti = $accountings;
 		$this->progetti = $projects;
+		$this->logmainsection = 'Accounting';
 		
     }
 	
 	
 	public function elencotranche(Request $request)
 	{
-		if ($request->user()->id === 0 || $request->user()->dipartimento === 1)
+		// if ($request->user()->id === 0 || $request->user()->dipartimento === 1)			
 			return view('pagamenti.elencotranche');
-		else
-			return redirect('/unauthorized');
+		// else
+			// return redirect('/unauthorized');
 	}
 
 	public function getjsontuttetranche(Request $request)
@@ -97,16 +101,11 @@ class AccountingController extends Controller
 
 		return view('pagamenti.modificatranche', [
 			'tranche' => $tranche,
-			'utenti' => DB::table('users')
-				->get(),
-			'enti' => DB::table('corporations')
-				->orderBy('id', 'asc')
-				->get(),
-			'statiemotivi' => DB::table('statiemotivipagamenti')
-				->get(),
-			'statoemotivoselezionato' => DB::table('statipagamenti')
-				->where('id_pagamento', $tranche->id)
-				->first(),
+			'utenti' => DB::table('users')->get(),
+			'quotefiles' => DB::table('media_files')->select('*')->where('master_id', $request->id)->where('master_type','3')->get(),								
+			'enti' => DB::table('corporations')->orderBy('id', 'asc')->get(),
+			'statiemotivi' => DB::table('statiemotivipagamenti')->get(),
+			'statoemotivoselezionato' => DB::table('statipagamenti')->where('id_pagamento', $tranche->id)->first(),
 		]);
 	}
 	
@@ -122,172 +121,61 @@ class AccountingController extends Controller
 		if(!$this->hasPower($user, $tranche)) {
 			return redirect('/unauthorized');
 		}
-
-		$pdf = new FPDF('P', 'mm', 'A4');
-		$pdf->AddPage();
-		$pdf->AddFont('Nexa', '', 'NexaLight.php');
-		$pdf->AddFont('Nexa', 'B', 'NexaBold.php');
-		
-		// Stampo lo scheletro della fattura
-		$pdf->Image('http://easy.langa.tv/public/images/PDF/FATTURA.png',0,0,210,297,'PNG');
-		
-		/**
-		 * Stampo il logo dell'ente di chi ha fatto la fattura (DA)
-		 */ 
-		
 		$ente_DA = DB::table('corporations')
 					->where('id', $tranche->DA)
-					->first();
-					
+					->first();					
 		$disposizione = DB::table('accountings')
 							->where('id', $tranche->id_disposizione)
 							->first();
-
-		$pdf->SetTitle($tranche->idfattura . '_' . $disposizione->nomeprogetto . '_LANGA Group');
-		
-		// Stampo il logo
-		$logo = 'http://easy.langa.tv/storage/app/images' . '/' . $ente_DA->logo;
-		if(substr($logo, -3) == "png")
-			$estensione = "PNG";
-		else if(substr($logo, -3) == "jpg")
-			$estensione = "JPG";
-		else
-			$estensione = "JPEG";
-		$pdf->Image($logo, 10, 7.5, 20, 20, $estensione);
-		/**
-		 * Stampo la sede legale dell'ente (DA)
-		 */
-		// Stampo la sede legale dell'ente DA
-		
-		$this->stampaTesto($pdf, 140, 10, $ente_DA->sedelegale, 58, 'R', 3, 'Nexa', '', 8);
-		/**
-		 * Stampo il tipo di fattura, l'emissione, la base
-		 */
-		if($tranche->tipofattura == 0) {
-			$tipofattura = "FATTURA DI VENDITA";
-		} else {
-			$tipofattura = "NOTA DI CREDITO";
-		}
-		// Stampo il tipofattura
-		$this->stampatesto($pdf, 10, 33.5, $tipofattura, 27, 'L', 1, 'Nexa', '', 8);
-		// Stampo l'id della fattura
-		$this->stampatesto($pdf, 39, 33.5, $tranche->idfattura, 17, 'L', 1, 'Nexa', 'B', 7.75);
-		// Stampo l'emissione
-		$this->stampatesto($pdf, 56, 33.5, "EMISSIONE DEL", 180, 'L', 1, 'Nexa', '', 8);
-		$this->stampatesto($pdf, 78, 33.5, $tranche->emissione, 34, 'L', 1, 'Nexa', 'B', 7.75);
-		// Stampo su base
-		$this->stampatesto($pdf, 96, 33.5, "SU BASE", 12, 'L', 1, 'Nexa', '', 8);
-		$this->stampatesto($pdf, 110, 33.5, $tranche->base, 80, 'L', 1, 'Nexa', 'B', 7.75);
-		/**
-		 * Stampo la sede legale del cliente (A) e l'indirizzo di spedizione (A)
-		 */
+		/*$corpofattura = json_decode(json_encode(DB::table('corpofattura')
+							->where('id_tranche', $idtranche)
+							->orderBy('ordine_numerico', 'asc')
+							->get()), true);*/
+		$corpofattura = DB::table('corpofattura')
+							->where('id_tranche', $idtranche)
+							->orderBy('ordine_numerico', 'asc')
+							->get();
 		$ente_A = DB::table('corporations')
 					->where('id', $tranche->A)
 					->first();
-		// Stampo la sede legale (A)
-		$this->stampatesto($pdf, 11, 47.5, $ente_A->sedelegale, 90, 'L', 2.5, 'Nexa', '', 8);
-		// Stampo lindirizzo di spedizione (A)
-		$this->stampatesto($pdf, 104.5, 47.5, $tranche->indirizzospedizione, 90, 'L', 1, 'Nexa', '', 8);
-		/**
-		 * Stampo la modalità, la scadenza di disposizione, l'iban e la % del laovoro
-		 */
-		// Stampo la modalita
-		$this->stampatesto($pdf, 34, 71.5, $tranche->modalita, 35, 'C', 1, 'Nexa', 'B', 7.75);
-		// Stampo la scadenza di disposizione
-		$pdf->SetTextColor(243, 127, 13);
-		$this->stampatesto($pdf, 101, 71.5, $tranche->datascadenza, 35, 'L', 1, 'Nexa', 'B', 7.75);
-		$pdf->SetTextColor(0, 0, 0);
-		// Stampo l'iban
-		$this->stampatesto($pdf, 148, 71.5, $tranche->iban, 50, 'L', 1, 'Nexa', 'B', 7.75);
-		// Stampo la % della fattura
-		if($tranche->percentuale == 0) {
-			$this->stampatesto($pdf, 33, 76.5, "FATTURA RELATIVA A TRANCHE CONCORDATA DI EURO ", 30, 'C', 1, 'Nexa', '', 7.75);
-			$this->stampatesto($pdf, 82.5, 76.5, $tranche->testoimporto, 16, 'C', 1, 'Nexa', 'B', 7.75);
-		} else {
-			$this->stampatesto($pdf, 20, 76.5, "FATTURA SUL TOTALE LAVORO DEL ", 30, 'C', 1, 'Nexa', '', 7.75);
-			$this->stampatesto($pdf, 56, 76.5, $tranche->percentuale . '%', 16, 'C', 1, 'Nexa', 'B', 7.75);
-		}
-		// Se è un rinnovo stampo 'Rinnovo per &n giorni da data emissione'
-		if($tranche->tipo == 1) {
-			$this->stampatesto($pdf, 147, 76.5, "RINNOVO PER " . $tranche->frequenza . " GIORNI DA DATA EMISSIONE", 40, 'C', 1, 'Nexa', '', 7.75);
-		}
-		/**
-		 * Stampo il corpo della fattura
-		 */
-		$corpofattura = json_decode(json_encode(DB::table('corpofattura')
-							->where('id_tranche', $idtranche)
-							->orderBy('ordine_numerico', 'asc')
-							->get()), true);
 
-		// Ascisse per gli elementi del corpo fattura
-		$posizioni_x = array(
-			0 => 11,
-			1 => 26,
-			2 => 123,
-			3 => 133,
-			4 => 151,
-			5 => 169,
-			6 => 187
-		);
-		// 'Larghezza' del campo di un elemento di un corpo fattura a partire dalla fine dell'elemento precedente
-		$larghezza = array(
-			0 => 14,
-			1 => 95,
-			2 => 9,
-			3 => 17,
-			4 => 17,
-			5 => 17,
-			6 => 17
-		);
-		$index = array(
-			'ordine',
-			'descrizione',
-			'qta',
-			'subtotale',
-			'scontoagente',
-			'netto',
-			'percentualeiva'
-		);
-		// Elimino i campi che hanno qt, prezzo, %sconto, netto o %iva a 0
-		for($i = 0; $i < count($corpofattura); $i++) {
-			for($k = 2; $k < count($index); $k++) {
-				if($corpofattura[$i][$index[$k]] == 0) {
-					$corpofattura[$i][$index[$k]] = "";
-				}
-			}
-		}
-		for($i = 0; $i < count($corpofattura); $i++) {
-			for($k = 0; $k < count($posizioni_x); $k++) {
-				if($index[$k] =="descrizione") {
-					$this->stampatesto($pdf, $posizioni_x[$k], 90.5 + $i * 10, $corpofattura[$i][$index[$k]], $larghezza[$k], 'L', 3, 'Nexa', '', 7);	
-				} else {
-					$this->stampatesto($pdf, $posizioni_x[$k], 90.5 + $i * 10, $corpofattura[$i][$index[$k]], $larghezza[$k], 'L', 1, 'Nexa', '', 7);
-				}
-			}
-		}
-		/**
-		 * Stampo la base della fattura
-		 */
-		$pdf->SetAutoPageBreak(false);
-		if($tranche->peso == 0) $tranche->peso = "";
-		if($tranche->netto == 0) $tranche->netto = "";
-		if($tranche->scontoaggiuntivo == 0) $tranche->scontoaggiuntivo = "";
-		if($tranche->imponibile == 0) $tranche->imponibile = "";
-		if($tranche->prezzoiva == 0) $tranche->prezzoiva = "";
-		if($tranche->percentualeiva == 0) $tranche->percentualeiva = "";
-		if($tranche->dapagare == 0) $tranche->dapagare = "";
-		$this->stampatesto($pdf, 11, -13, $tranche->peso, 24, 'L', 1, 'Nexa', '', 7);
-		$this->stampatesto($pdf, 34, -13, $tranche->netto, 24, 'L', 1, 'Nexa', '', 7);
-		$this->stampatesto($pdf, 67, -13, $tranche->scontoaggiuntivo, 24, 'L', 1, 'Nexa', '', 7);
-		$this->stampatesto($pdf, 99, -13, $tranche->imponibile, 24, 'L', 1, 'Nexa', '', 7);
-		$this->stampatesto($pdf, 122, -13, $tranche->prezzoiva, 24, 'L', 1, 'Nexa', '', 7);
-		$this->stampatesto($pdf, 137, -13, $tranche->percentualeiva, 24, 'L', 1, 'Nexa', '', 7);
-		$this->stampatesto($pdf, 178, -13, $tranche->dapagare, 24, 'L', 1, 'Nexa', 'B', 8);
+		$pdf = new PDF('utf-8');
+		$pdf->mirrorMargins(1);
+						
+		//$header = \View::make('pdf.quotation_header')->render();		
+		$footer = \View::make('pdf.invoice_footer')->render();
+		
+		//$pdf->SetHTMLHeader($header, 'O');
+		//$pdf->SetHTMLHeader($header, 'E');
+		$pdf->SetHTMLFooter($footer, 'O');
+		$pdf->SetHTMLFooter($footer, 'E');
+		/*$pdf->AddPage('Portrait', margin-left, margin-right, margin-top, margin-bottom, margin-header, margin-footer, 'A4');*/
+		$pdf->AddPage('P', 10, 10, 10, 20, 0, 10, 'Letter');
+
 		$id_perfile = substr($tranche->idfattura, 0, 5) . '-' . substr($tranche->idfattura, 6);
-		$pdf->Output($id_perfile . '_' . $disposizione->nomeprogetto . '_LANGA Group' . '.pdf', 'I');
+		$pdf->SetTitle($id_perfile . '_' . $disposizione->nomeprogetto . '_LANGA Group');
+		
+		/*echo view('pdf.invoice', [
+			'ente_DA' => $ente_DA,
+			'ente_A'=>$ente_A,
+			'disposizione'=>$disposizione,
+			'corpofattura'=>$corpofattura,
+			'tranche'=>$tranche]);
+		echo $footer;
+		exit;*/
+			
+		$pdf->loadView('pdf.invoice', [
+			'ente_DA' => $ente_DA,
+			'ente_A'=>$ente_A,
+			'disposizione'=>$disposizione,
+			'corpofattura'=>$corpofattura,
+			'tranche'=>$tranche]);
 
-		$logs = 'Generate pdf for Invoice -> ( Invoice ID: '. $request->id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Generate pdf for Invoice (ID: '. $request->id . ')';
+		storelogs($request->user()->id, $logs);		
+
+		/*$pdf->download('test.pdf');*/
+		$pdf->stream($id_perfile . '_' . $disposizione->nomeprogetto . '_LANGA Group' . '.pdf');							
 	}
 
 	public function stampaTesto(&$pdf, $x, $y, $testo, $larghezza, $allineamento, $spessore, $family, $type, $size)
@@ -427,8 +315,8 @@ class AccountingController extends Controller
 						'dapagare' => isset($request->dapagare) ? $request->dapagare : '',
                       ]);
 		
-		$logs = 'Add New Invoice -> ( Invoice ID: '. $tranche . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Add New Invoice (ID: '. $tranche . ')';
+		storelogs($request->user()->id, $logs);
 
 		if($request->statoemotivo!=null) {
 			// Memorizzo lo stato emotivo
@@ -606,8 +494,8 @@ class AccountingController extends Controller
         ));
 		
 
-		$logs = 'Update Invoice -> ( Invoice ID: '. $request->id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Update Invoice (ID: '. $request->id . ')';
+		storelogs($request->user()->id, $logs);
 
 
 		if($request->statoemotivo!=null) {
@@ -688,13 +576,13 @@ class AccountingController extends Controller
 					->where('id_preventivo', $preventivo->id)
 					->get();
 				$ordine = $preventivo->id;
-				$anno = $preventivo->anno;
+				$year = $preventivo->year;
 				$prev = DB::table('quotes')->where('id', $preventivo->id)->first();
 				$sconto = $prev->scontoagente;
 				$scontobonus = $prev->scontobonus;
 			 } else {
 			 	$ordine = null;
-				$anno = null;
+				$year = null;
 				$corpofattura = null;
 				$sconto = null;
 				$scontobonus = null;
@@ -715,7 +603,7 @@ class AccountingController extends Controller
             					->get(),
 				'corpofattura' => $corpofattura,
 				'ordine' => $ordine,
-				'anno' => $anno,
+				'year' => $year,
 				'sconto' => $sconto,
 				'scontobonus' => $scontobonus
         	]);
@@ -775,12 +663,12 @@ class AccountingController extends Controller
 			'code' => $request->code,
 			'master_type' => 3,
 			'type'=>$request->user()->dipartimento,
-			'master_id' => isset($request->idtranche) ? $request->idtranche : 0
+			'master_id' => isset($request->idtranche) ? $request->idtranche : 0,
+			'date_time'=>time()
 		]);					
 	}
 
-	public function fileget(Request $request){
-		
+	public function fileget(Request $request){		
 		if(isset($request->quote_id)){
 			$updateData = DB::table('media_files')->where('quote_id', $request->quote_id)->get();										
 		}
@@ -789,16 +677,23 @@ class AccountingController extends Controller
 		}					
 		foreach($updateData as $prev) {
 			$imagPath = url('/storage/app/images/invoice/'.$prev->name);
-			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a></td></tr>';
+			$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";			
+			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
+
 			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
 			foreach($utente_file as $key => $val){
 				if($request->user()->dipartimento == $val->ruolo_id){
 					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
-					$html .=' <div class="cust-radio"><input type="radio" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$val->ruolo_id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+					
+					$specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 				else {
-					$html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+					$specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 			}
 			echo $html .='</td></tr>';
@@ -806,31 +701,26 @@ class AccountingController extends Controller
 		exit;			
 	}
 
-	public function filedelete(Request $request){
-		
+	public function filedelete(Request $request){		
 	    $response = DB::table('media_files')->where('id', $request->id)->delete();
-		if($response){
-			echo 'success';
-		}
-		else {
-			echo 'fail';
-		}
+	    echo ($response) ? 'success' :'fail';   		
+		exit;
+	}
+	public function filetypeupdate(Request $request){		 
+		$request->ids = isset($request->ids) ? implode(",",$request->ids) : "";
+		$response = DB::table('media_files')->where('id', $request->fileid)->update(array('type' => $request->ids));	    
+		echo ($response) ? 'success' :'fail';   		
+		exit;
+	}
+	public function updatemediaComment(Request $request){		 		
+		$updateData = DB::table('media_files')->where('code', $request->code)->orderBy('id', 'desc')->first();										
+		$title = $request->title;
+		$descriptions = $request->descriptions;
+		$response = DB::table('media_files')->where('date_time', $updateData->date_time)->update(array('description' => $descriptions,'title'=>$title));	    
+		echo ($response) ? 'success' : 'fail';		
 		exit;
 	}
 
-	public function filetypeupdate(Request $request){
-
-	 	$response = DB::table('media_files')
-			->where('id', $request->fileid)
-			->update(array('type' => $request->typeid));	    
-		if($response){
-			echo 'success';
-		}
-		else {
-			echo 'fail';
-		}
-		exit;
-	}
 
 	public function duplicatranche(Request $request)
 	{
@@ -866,8 +756,8 @@ class AccountingController extends Controller
         ]);
 		
 
-		$logs = 'Copy(Duplicate) Invoice -> ( Invoice ID: '. $id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Copy(Duplicate) Invoice (ID: '. $id . ')';
+		storelogs($request->user()->id, $logs);
 
 		$items = DB::table('corpofattura')
             ->where('id_tranche', $request->id)
@@ -901,8 +791,8 @@ class AccountingController extends Controller
 				'is_deleted' => 1	
 		));		
 
-		$logs = 'Delete Invoice -> ( Invoice ID: '. $request->id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Delete Invoice -> (ID: '. $request->id . ')';
+		storelogs($request->user()->id, $logs);
 
 		return Redirect::back()
             ->with('error_code', 5)
@@ -914,16 +804,23 @@ class AccountingController extends Controller
 	
 	public function index(Request $request)
 	{
+		if ($request->user()->id === 0 || $request->user()->dipartimento !== 3) {		
+			$data = DB::table('projects')
+    			->join('users', 'projects.user_id', '=', 'users.id')
+    			->join('accountings', 'projects.id', '=', 'accountings.id_progetto')	
+    			->select(DB::raw('projects.*, users.id as uid, users.is_delete,accountings.nomeprogetto as groupname,accountings.id as groupid'))
+				->where('is_deleted','0')
+				->where('users.is_delete', '=', 0)
+				->orderBy('projects.id', 'asc')
+				->get();			
 
-		if ($request->user()->id === 0 || $request->user()->dipartimento !== 3) {
-		
             return view('pagamenti.main', [
 				'progetti' => $this->progetti->forUser2($request->user()), 
 				'dipartimenti' => DB::table('departments')->get(),
-				'quadri' => DB::table('accountings')->get()
+				'quadri' => DB::table('accountings')->get(),
+				'groupdetails'=>$data
 			]);
-        } else {
-        	
+        } else {        	
 			return view('errors.403');
 		}
 	}
@@ -931,7 +828,8 @@ class AccountingController extends Controller
 	public function getjson(Request $request)
 	{
 		$pagamenti = $this->pagamenti->forUser($request->user());
-		$this->compila($pagamenti);
+		
+		//$this->compila($pagamenti);
 		return json_encode($pagamenti);
 	}
 
@@ -973,8 +871,8 @@ class AccountingController extends Controller
 						'id_progetto' => $request->idprogetto,
                       ]);
 		
-		$logs = 'Add New Provision -> ( Provision ID: '. $progetto . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Add New Provision -> (ID: '. $progetto . ')';
+		storelogs($request->user()->id, $logs);
 
 		return Redirect::back()
             ->with('error_code', 5)
@@ -985,8 +883,7 @@ class AccountingController extends Controller
 	public function modificadisposizione(Request $request, Accounting $accounting)
 	{
 		$this->authorize('modify', $accounting);
-       
-		$validator = Validator::make($request->all(), [
+       $validator = Validator::make($request->all(), [
             'nomeprogetto' => 'required|max:50',
         ]);
         
@@ -998,19 +895,24 @@ class AccountingController extends Controller
                 ->withErrors($validator);
         }
 		
-        DB::table('accountings')
+        $results = DB::table('accountings')
 			->where('id', $accounting->id)
 			->update(array(
-				'nomeprogetto' => $request->nomeprogetto,
-				'id_progetto' => $request->idprogetto,
+				'nomeprogetto' => $request->nomeprogetto
+				/*'id_progetto' => $request->idprogetto,*/
         	));
-
-        $logs = 'Update Provision -> ( Provision ID: '. $accounting->id . ')';
-		//storelogs($request->user()->id, $logs);
-		
-		return Redirect::back()
+        $logs = $this->logmainsection.' -> Update Provision -> (ID: '. $accounting->id . ')';
+		storelogs($request->user()->id, $logs);
+		return "true";
+		/*if($results) {
+			return "true";
+		}
+		else {
+			return "false";	
+		}*/
+		/*return Redirect::back()
                         ->with('error_code', 5)
-                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' !</div>');
+                        ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' !</div>');*/
 	}
 
 	public function duplicadisposizione(Request $request, Accounting $accounting)
@@ -1023,8 +925,8 @@ class AccountingController extends Controller
 			'id_progetto' => $accounting->idprogetto,
         ]);
 		
-		$logs = 'Copy(Duplicate) Disposal -> ( Disposal ID: '. $did . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Copy(Duplicate) Disposal -> (ID: '. $did . ')';
+		storelogs($request->user()->id, $logs);
 
 		return Redirect::back()
             ->with('error_code', 5)
@@ -1041,8 +943,8 @@ class AccountingController extends Controller
 		
 		$accounting->delete();
 		
-		$logs = 'Delete Disposal -> ( Disposal ID: '. $accounting->id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Delete Disposal -> (ID: '. $accounting->id . ')';
+		storelogs($request->user()->id, $logs);
 
 		return Redirect::back()
 	        ->with('error_code', 5)
@@ -1059,256 +961,405 @@ class AccountingController extends Controller
 
 	public function mostrastatistiche(Request $request)
 	{
-		$request->anno = date('Y');
-		$request->tipo = 0;
+		
+		$request->year = date('Y');
 		return $this->statisticheeconomiche($request);
 	}
 
 	public function statisticheeconomiche(Request $request)
 	{
-		if ($request->user()->id === 0 || $request->user()->dipartimento === 1) {
+		
+		if ($request->user()->id === 0 || $request->user()->dipartimento === 1 || $request->user()->dipartimento === 2) {
 
-			$guadagno = [];
-			$ricavi = [];
-			$spese = [];
+			$guadagno = []; $revenues = []; $expenses = [];
+			//dd($expenses);
+			$this->compexpense($expenses, $request->year);
+			$this->compRevenue($revenues, $request->year);
+			$this->calcolaGuadagno($guadagno, $revenues, $expenses);
+			
+			$month = array(
+					''.trans("messages.keyword_january").'',
+					''.trans("messages.keyword_february").'',
+					''.trans("messages.keyword_march").'',
+					''.trans("messages.keyword_april").'',
+					''.trans("messages.keyword_may").'',
+					''.trans("messages.keyword_june").'',
+					''.trans("messages.keyword_july").'',
+					''.trans("messages.keyword_august").'',
+					''.trans("messages.keyword_september").'',
+					''.trans("messages.keyword_october").'',
+					''.trans("messages.keyword_november").'',
+					''.trans("messages.keyword_december").'' );
 
-			$this->compilaSpese($spese, $request->anno);
-			$this->compilaRicavi($ricavi, $request->anno, $request->tipo);
-			$this->calcolaGuadagno($guadagno, $ricavi, $spese);
+			$statistics = array('month' => $month, 'revenue' => $revenues, 'expense' => $expenses, 'earn' => $guadagno);
 
 			return view('statistiche', [
-				'guadagno' => $guadagno,
-				'ricavi' => $ricavi,
-				'spese' => $spese,
-				'anno' => $request->anno,
-				'tipo' => $request->tipo
+				'statistics' =>$statistics,
+				'year' => $request->year
 			]);
-
 
 		} else
 			return redirect('/unauthorized');
 	}
 
-	public function compilaSpese(&$spese, $anno)
+	public function compexpense(&$expenses, $year)
 	{
 		for($i = 1; $i <= 12; $i++) {
 			if($i < 10)
 				$i = '0' . $i;
-			
-			$spese[] = $this->calcola($this->query($i, $anno));
+		$timestamp=strtotime('1-'.$i.'-'.$year);;
+		$expense = DB::table('costi')
+		->selectRaw("sum(costo) as cost")
+		->whereBetween('datainserimento',[date('Y-m-01',$timestamp),date('Y-m-t',$timestamp)])
+		->first();		
+		$expenses[] =  ($expense->cost!=null)?$expense->cost:0;
 		}
 	}
 
-	public function query($mese, $anno)
-	{	
-		$spese = DB::table('costi')->get();		
-		$spese_array = [];
-		foreach($spese as $spesa) {
-			// gg/mm/aaaa 
-			$spesa_mese = substr($spesa->datainserimento, 3, 2);			
-			$spesa_anno = substr($spesa->datainserimento, 6, 4);
-			if($spesa_mese == $mese && $spesa_anno == $anno)
-				$spese_array[] = $spesa->costo;
+	/*public function query($month, $year){	
+	
+		$timestamp=strtotime('1-'.$month.'-'.$year);;
+		$expenses = DB::table('costi')
+		->selectRaw("sum(costo) as cost")
+		->whereBetween('datainserimento',[date('Y-m-01',$timestamp),date('Y-m-t',$timestamp)])
+		->first();
+	
+		//echo($expenses->cost);
+		
+		/*$expenses_array = [];
+		foreach($expenses as $expense) {
+			$expense_month = date('m',strtotime($expense->datainserimento));			
+			$expense_year = date('Y',strtotime($expense->datainserimento));			
+			if($expense_month== $month&& $expense_year == $year)
+				$expenses_array[] = $expense->costo;
 		}
-				
-		return $spese_array;
+		
+		return ($expenses->cost!=null)?$expenses->cost:0;
 	}
 
-	public function calcola($spese)
-	{		
+	public function calcola($expenses)
+	{				
 		$totale = 0;
-		for($i = 0; $i < count($spese); $i++)
-			$totale += $spese[$i];
+		for($i = 0; $i < count($expenses); $i++)
+			$totale += $expenses[$i];
 
 		return $totale;	
 	}
+	*/	
+
+	public function compRevenue(&$revenues, $year)
+	{
+		DB::connection()->enableQueryLog();
+		for($i = 1; $i <= 12; $i++) {
+			if($i < 10)
+				$i = '0' . $i;
+		$timestamp=strtotime('1-'.$i.'-'.$year);;
+		$revenue = DB::table('tranche')
+		->Join('users', 'users.id', '=', 'tranche.user_id')
+		->selectRaw("sum(imponibile) as cost,dipartimento ")
+		->where('privato', 0)
+		//->where('dipartimento', 2)
+		->whereBetween('datainserimento',[date('Y-m-01',$timestamp),date('Y-m-t',$timestamp)])
+		->groupBy('dipartimento')
+		->get();
+		$totrevn=0;	
+		foreach($revenue as $revkey=>$revval){
+			if($revval->dipartimento==2)
+			$totrevn-=$revval->cost;
+			else
+			$totrevn+=$revval->cost;
+		}
+		$revenues[] =  $totrevn;
+			
+		}
+	}
+
+	/*public function queryrevenues($month, $year)
+	{
+		$revenues = DB::table('tranche')
+		
+		->where('privato', 0)->get();
+		$utenti = DB::table('users')->get();
+		$revenues_array = [];
+
+		foreach($revenues as $revenue) {
+			$revenue_month= date('m',strtotime($revenue->datainserimento));
+			$revenue_year = date('Y',strtotime($revenue->datainserimento));
+
+			// Check if the one who made the tranche is a commercial one,
+			// If yes, then I have to count the revenue as a expense (-)
+			for($i = 0; $i < count($utenti); $i++) {
+				if($utenti[$i]->id == $revenue->user_id) {
+					if($utenti[$i]->dipartimento === 2) {
+						$revenue->imponibile *= -1;
+					}
+					break;	
+				}	
+			}
+			if($revenue_month== $month&& $revenue_year == $year)
+				$revenues_array[] = $revenue->imponibile;
+		}
+		return $revenues_array;
+	}
+
+	public function calcolarevenues($expenses)
+	{
+		$totale = 0;
+		for($i = 0; $i < count($expenses); $i++)
+			$totale += $expenses[$i];
+		return $totale;	
+	}
+	*/
+	public function calcolaGuadagno(&$guadagno, $revenues, $expenses)
+	{		
+		foreach($revenues as $key=>$val) {
+			$guadagno[] = $val + $expenses[$key];
+		}	
+	}
 
 
-	// ==================  date  ====================================== // 
-	// ==================  date  ====================================== // 
-	// ==================  date  ====================================== // 
+	// ==================  Start Date Range ======================= // 
 
 	public function statisticheeconomichedate(Request $request)
-	{	
+	{
 
-		$request->date = str_replace("-", "/", $request->date);
+		if ($request->user()->id === 0 || $request->user()->dipartimento === 1 || $request->user()->dipartimento === 2) {
 
-		if ($request->user()->id === 0 || $request->user()->dipartimento === 1) {
+			$guadagno = []; $revenues = [];	$expenses = [];
+			$spece_date = []; $revenues_date = []; $guadagno_date = [];
 
-			$guadagno = [];
-			$ricavi = [];
-			$spese = [];
+			$month = array(
+				''.trans("messages.keyword_january").'', 
+				''.trans("messages.keyword_february").'',
+				''.trans("messages.keyword_march").'',
+				''.trans("messages.keyword_april").'',
+				''.trans("messages.keyword_may").'',
+				''.trans("messages.keyword_june").'',
+				''.trans("messages.keyword_july").'',
+				''.trans("messages.keyword_august").'',
+				''.trans("messages.keyword_september").'',
+				''.trans("messages.keyword_october").'',
+				''.trans("messages.keyword_november").'',
+				''.trans("messages.keyword_december").'' );
 
-			$request->tipo = 0;
-			$this->compilaSpeseDate($spese, $request->date);
-			$this->compilaRicaviDate($ricavi, $request->date, $request->tipo);
-			$this->calcolaGuadagnoDate($guadagno, $ricavi, $spese);
-			// dd($spese);
-			return view('statistiche', [
-				'guadagno' => $guadagno,
-				'ricavi' => $ricavi,
-				'spese' => $spese,
-				'anno' => $request->anno,
-				'tipo' => $request->tipo
+			// $month = array("1" => "Jan", "2" => "Feb", "3" => "Mar", "4" => "Apr", "5" => "May", "6" => "Jun" , "7" => "July", "8" => "Aug", "9" => "Sep", "10" => "Oct", "11" => "Nov", "12" => "Dec");
+
+			$this->compexpenseDate($expenses, $request->startDate, $request->endDate, $spece_date);
+			$this->compRevenueDate($revenues, $request->startDate, $request->endDate, $revenues_date);
+			$this->calcolaGuadagnoDate($guadagno, $revenues_date, $spece_date, $guadagno_date);
+
+			if($guadagno_date) {
+				foreach ($guadagno_date as $key => $value) {
+
+					if(array_key_exists($key, $revenues_date)){
+						$revenues_date[$key] =  $revenues_date[$key];
+						$revenue[] =  $revenues_date[$key];
+					} else {
+						$revenues_date[$key] = 0; $revenue[] = 0;
+					}
+					if(array_key_exists($key, $spece_date)){					
+						$spece_date[$key] =  $spece_date[$key];
+						$expense[] =  $spece_date[$key];
+					} else {
+						$spece_date[$key] = 0; $expense[] = 0;
+					}
+
+					$year = substr($key, 0, 4);
+					$mon = substr($key, 5, 2);		
+
+					for ($i=1; $i <=12 ; $i++) {						
+						if($mon == $i){ $date_month[] = $month[$i-1]." / ".$year; }
+					}					
+					ksort($spece_date); ksort($revenues_date);
+					$earn[] = $value;		
+				}
+				$statistics = array('month' => $date_month, 'revenue' => $revenue, 'expense' => $expense, 'earn' => $earn);
+				unset($guadagno); unset($revenues); unset($expenses);
+				unset($spece_date); unset($revenues_date); unset($guadagno_date);	
+
+			} else {
+							
+				$fromdate = $request->startDate;
+				$monFrom = substr($fromdate, 5, 1);				
+				$year = substr($fromdate, 0, 4);
+
+				$todate = $request->endDate;
+				$monTo = substr($todate, 5, 1);
+				
+				for ($i=0; $i <12 ; $i++) {		
+					if($monFrom == $i){ 
+						$date_month[] = $month[$i-1]." / ".$year; 
+						if($monFrom < $monTo){ $monFrom++; }
+					}										
+				}
+
+				for ($i=0; $i < count($date_month) ; $i++) { 
+					$revenue[] = 0; $expense[] = 0; $earn[] = 0;
+				}
+				
+				$statistics = array('month' => $date_month, 'revenue' => $revenue, 'expense' => $expense, 'earn' => $earn);				
+			}		
+			return view('statistics-date', [
+				'statistics' => $statistics,
+				'year' => date("Y")
 			]);
 		} else
 			return redirect('/unauthorized');
 	}
 
-	public function compilaSpeseDate(&$spese, $anno)
+	public function compexpenseDate(&$expenses, $startDate, $endDate, &$spece_date)
 	{	
-		for($i = 1; $i <= 12; $i++) {
-			if($i < 10)
-				$i = '0' . $i;
-			$spese[] = $this->calcolaDate($this->queryDate($i, $anno));
-		}
-	}
+		$spece_date = $this->queryDate($startDate, $endDate);
+		$expenses = [];
 
-	public function calcolaDate($spese)
-	{		
-		$totale = 0;
-		for($i = 0; $i < count($spese); $i++)
-			$totale += $spese[$i];
-
-		return $totale;	
-	}
-
-	public function queryDate($mese, $anno)
-	{	
-		$fromdate = substr($anno, 0, 10);
-		$todate = substr($anno, 22, 10);
-
-		$spese = DB::table('costi')
-			->whereBetween('datainserimento', [$fromdate, $todate])
-			->get();		
-		
-		$spese_array = [];
-	
-		foreach($spese as $spesa) {		
-			$spese_array[] = $spesa->costo;			
-		}
-
-		return $spese_array;
-	}
-
-	public function compilaRicaviDate(&$ricavi, $anno, $tipo)
-	{
-		for($i = 1; $i <= 12; $i++) {
-			if($i < 10)
-				$i = '0' . $i;
-			$ricavi[] = $this->calcolaRicaviDate($this->queryRicaviDate($i, $anno, $tipo));
-		}		
-	}
-
-	public function queryRicaviDate($mese, $anno, $tipo)
-	{
-		$fromdate = substr($anno, 0, 10);
-		$todate = substr($anno, 22, 10);
-
-		$ricavi = DB::table('tranche')
-			->whereBetween('datainserimento', [$fromdate, $todate])
-			->where('privato', 0)
-			->get();
-		
-		$ricavi_array = [];
-		$utenti = DB::table('users')
-				->where('is_delete', 0)
-				->get();
-		
-		foreach($ricavi as $ricavo) {	
-
-			for($i = 0; $i < count($utenti); $i++) {
-				if($utenti[$i]->id == $ricavo->user_id) {
-					if($utenti[$i]->dipartimento === 2) {
-						$ricavo->imponibile *= -1;
-					}
-					break;	
-				}	
-			}
-			
-			$ricavi_array[] = $ricavo->imponibile;
-		}
-		
-		return $ricavi_array;
-	}
-
-	public function calcolaRicaviDate($spese)
-	{
-		$totale = 0;
-		for($i = 0; $i < count($spese); $i++)
-			$totale += $spese[$i];
-
-		return $totale;	
-	}
-
-	public function calcolaGuadagnoDate(&$guadagno, $ricavi, $spese)
-	{		
-		for($i = 0; $i < 12; $i++) {
-			$guadagno[] = $ricavi[$i] + $spese[$i];
+		foreach ($spece_date as $key => $value) {			
+			$expenses[] = $value;
 		}	
 	}
-	
-	// ==================  End date  ====================================== // 
-	// ==================  End date  ====================================== // 
-	// ==================  End date  ====================================== // 
 
-	
+	public function queryDate($startDate, $endDate)
+	{			
+		$expenses = DB::table('costi')
+			->whereBetween('datainserimento', [$startDate, $endDate])
+			->orderBy('datainserimento')->get();
 
-	public function compilaRicavi(&$ricavi, $anno, $tipo)
-	{
-		for($i = 1; $i <= 12; $i++) {
-			if($i < 10)
-				$i = '0' . $i;
-			$ricavi[] = $this->calcolaRicavi($this->queryRicavi($i, $anno, $tipo));
+		$sMonth = date("m", strtotime($startDate));
+		$eMonth = date("m", strtotime($endDate));
+
+		// if($expenses){
+
+		// 	$expenses_array = []; $month= [];
+		// 	for ($i=$sMonth; $i<=$eMonth; $i++) { 
+		// 		echo $i. " ";
+		// 	}
+
+		// 	foreach($expenses as $expense) {				
+		// 		$expense_month= date("m", strtotime($expense->datainserimento));
+		// 		echo "month".$expense_month." ";
+
+		// 		$month[] = $expense_month;
+		// 	}
+
+		// } else {
+		// 	return $expenses_array = [];
+		// }
+
+		if($expenses){
+
+			$expenses_array = []; $month= [];
+
+			foreach($expenses as $expense) {
+
+				$expense_month= substr($expense->datainserimento, 0, 7);
+
+				if(in_array($expense_month, $month)){
+					$expenses_array[$expense_month] += floatval($expense->costo);			
+				} else {
+					$expenses_array[$expense_month] = floatval($expense->costo);
+				}
+
+				$month[] = $expense_month;			
+			}
+
+			// dd($expenses_array);
+			unset($month);
+			return $expenses_array;
+
+		} else {
+			return $expenses_array = [];
 		}
+		
+	}
+	
+	public function compRevenueDate(&$revenues, $startDate, $endDate, &$revenues_date)
+	{		
+		$revenues_date =$this->queryrevenuesDate($startDate, $endDate);
+		$revenues = [];
+
+		foreach ($revenues_date as $value) {
+			$revenues[] = $value;	
+		}	
 	}
 
-	public function queryRicavi($mese, $anno, $tipo)
+	public function queryrevenuesDate($startDate, $endDate)
 	{
-		$ricavi = DB::table('tranche')
-					->where('privato', 0)
-					->get();
-		$ricavi_array = [];
+		$revenues = DB::table('tranche')
+			->whereBetween('datainserimento', [$startDate, $endDate])
+			->where('privato', 0)->orderBy('datainserimento')->get();
+
+		$revenues_array = []; $month= [];
+
 		$utenti = DB::table('users')->get();
-		foreach($ricavi as $ricavo) {
-			// gg/mm/aaaa
-			if($tipo == 1) {
-				$ricavo_mese = substr($ricavo->datascadenza, 3, 2);
-				$ricavo_anno = substr($ricavo->datascadenza, 6, 4);
-			} else {
-				$ricavo_mese = substr($ricavo->datainserimento, 3, 2);
-				$ricavo_anno = substr($ricavo->datainserimento, 6, 4);
-			}
-			// Controllo se chi ha fatto la tranche è un commerciale,
-			// se sì, allora devo contara il ricavo come una spesa (-)
+
+		foreach($revenues as $revenue) {			
+
 			for($i = 0; $i < count($utenti); $i++) {
-				if($utenti[$i]->id == $ricavo->user_id) {
-					if($utenti[$i]->dipartimento === "COMMERCIALE") {
-						$ricavo->imponibile *= -1;
+				if($utenti[$i]->id == $revenue->user_id) {					
+					if($utenti[$i]->dipartimento === 2) {
+						$revenue->imponibile *= -1;
 					}
 					break;	
 				}	
 			}
-			if($ricavo_mese == $mese && $ricavo_anno == $anno)
-				$ricavi_array[] = $ricavo->imponibile;
+
+			$revenues_month= substr($revenue->datainserimento, 0, 7);
+
+			if(in_array($revenues_month, $month)){
+				$revenues_array[$revenues_month] += floatval($revenue->imponibile);
+			} else {
+				$revenues_array[$revenues_month] = floatval($revenue->imponibile);
+			}
+
+			$month[] = $revenues_month;	
+		}		
+		unset($month);
+		return $revenues_array;
+	}
+
+	public function calcolaGuadagnoDate(&$guadagno, $revenues_date, $spece_date, &$guadagno_date)
+	{	
+		if(count($spece_date) > count($revenues_date) || count($spece_date) == count($revenues_date)){
+			
+			if(count($spece_date) !=0 || count($revenues_date) !=0 ){	
+				foreach ($spece_date as $spece_key => $spece_value) {	
+					if(array_key_exists($spece_key, $revenues_date)){					
+						$earn[$spece_key] =  $spece_value + $revenues_date[$spece_key];
+					} else {
+						$earn[$spece_key] = $spece_value;
+					}						
+				}
+
+				$revenues = array_diff_key($revenues_date, $earn);
+				$guadagno_date = array_merge($earn, $revenues);
+
+			} else {
+				$earn = [];
+			}
+
+		} else if(count($spece_date) < count($revenues_date)){
+			foreach ($revenues_date as $revenues_key => $revenues_value) {	
+
+				if(array_key_exists($revenues_key, $spece_date)){					
+					$earn[$revenues_key] =  $revenues_value + $spece_date[$revenues_key];
+				} else {
+					$earn[$revenues_key] = $revenues_value;
+				}						
+			}
+
+			$expenses = array_diff_key($spece_date, $earn);
+			$guadagno_date = array_merge($earn, $expenses);
+
+		} else {
+			$earn = [];
 		}
-		return $ricavi_array;
+		
+		foreach ($guadagno_date as $value) {
+			$guadagno[] = $value;
+		}
 	}
 
-	public function calcolaRicavi($spese)
-	{
-		$totale = 0;
-		for($i = 0; $i < count($spese); $i++)
-			$totale += $spese[$i];
-		return $totale;	
-	}
+	// ==================  End Date Range ======================= // 
 
-	public function calcolaGuadagno(&$guadagno, $ricavi, $spese)
-	{		
-		for($i = 0; $i < 12; $i++) {
-			$guadagno[] = $ricavi[$i] + $spese[$i];
-		}	
-	}
 
 	public function getjsoncosti(Request $request)
 	{
@@ -1325,9 +1376,9 @@ class AccountingController extends Controller
 							->where('id', $costo->id_ente)
 							->first();
 			$costo->ente = $ente->nomeazienda;
-			if ($user->id === 0 || $user->dipartimento === "AMMINISTRAZIONE") {
-            	$elenco_costi[] = $costo;
-        	} else if($user->id == $tra->user_id) {
+			if ($user->id === 0 || $user->dipartimento === 1) {
+				$elenco_costi[] = $costo;
+			} else if($user->id == $tra->user_id) {
 				$elenco_costi[] = $costo;	
 			}
 		}
@@ -1348,16 +1399,16 @@ class AccountingController extends Controller
 	public function aggiornacosto(Request $request)
 	{		
 		$validator = Validator::make($request->all(), [
-            'oggetto' => 'required',
-            'costo' => 'required',
-            'datainserimento' => 'required'
-        ]);
-        
-        if($validator->fails()) {
-            return Redirect::back()
-	            ->withInput()
-	            ->withErrors($validator);
-        }
+			'oggetto' => 'required',
+			'costo' => 'required',
+			'datainserimento' => 'required'
+		]);
+		
+		if($validator->fails()) {
+			return Redirect::back()
+				->withInput()
+				->withErrors($validator);
+		}
 
 		DB::table('costi')
 			->where('id', $request->id)

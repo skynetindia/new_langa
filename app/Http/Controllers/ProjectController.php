@@ -15,12 +15,15 @@ use App\Classes\PdfWrapper as PDF;
 class ProjectController extends Controller
 {
     protected $progetti;
+	protected $logmainsection;
 
     public function __construct(ProjectRepository $projects) {
         $this->middleware('auth');
         $this->progetti = $projects;
+        $this->logmainsection = 'Project';
     }
 
+	//updatemediaComment
     /* File uploader : paras */
 	public function fileupload(Request $request){
 			/*$validator = Validator::make($request->all(), [
@@ -40,7 +43,8 @@ class ProjectController extends Controller
 				'name' => $nome,
 				'code' => $request->code,
 				'type'=>$request->user()->dipartimento,
-				'master_type'=>'1'
+				'master_type'=>'1',
+				'date_time'=>time()
 			]);					
 	}
 
@@ -64,16 +68,25 @@ class ProjectController extends Controller
 						
 			foreach($updateData as $prev) {
 				$imagPath = url('/storage/app/images/projects/'.$prev->name);
-				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a></td></tr>';
+				$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";			
+				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</p></td></tr>';
+
 				$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 				$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
 				foreach($utente_file as $key => $val){
 					if($request->user()->dipartimento == $val->ruolo_id){
 						$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
-						$html .=' <div class="cust-radio"><input type="radio" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');" value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$val->ruolo_id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+						/*$html .=' <div class="cust-radio"><input type="radio" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');" value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$val->ruolo_id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';*/
+						
+						$specailcharcters = array("'", "`");
+                    	$rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    	$html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 					}
 					else {
-						$html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$val->ruolo_id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+						/*$html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$val->ruolo_id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';*/
+						$specailcharcters = array("'", "`");
+                    	$rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    	$html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 					}
 				}
 				echo $html .='</td></tr>';
@@ -90,24 +103,22 @@ class ProjectController extends Controller
 							->withErrors($validator);
 		}*/
 	    $response = DB::table('media_files')->where('id', $request->id)->delete();
-		if($response){
-			echo 'success';
-		}
-		else {
-			echo 'fail';
-		}
+	    echo ($response) ? 'success' :'fail';   				
 		exit;
 	}
-	public function filetypeupdate(Request $request){
-		$response = DB::table('media_files')
-			->where('id', $request->id)
-			->update(array('type' => $request->typeid));	    
-		if($response){
-			echo 'success';
-		}
-		else {
-			echo 'fail';
-		}
+	public function filetypeupdate(Request $request){		 
+		$request->ids = isset($request->ids) ? implode(",",$request->ids) : "";
+		$response = DB::table('media_files')->where('id', $request->id)->update(array('type' => $request->ids));
+		echo ($response) ? 'success' :'fail';   			    		
+		exit;
+	}
+	public function updatemediaComment(Request $request){		 		
+		$updateData = DB::table('media_files')->where('code', $request->code)->orderBy('id', 'desc')->first();										
+		$title = $request->title;
+		$descriptions = $request->descriptions;
+		
+		$response = DB::table('media_files')->where('date_time', $updateData->date_time)->update(array('description' => $descriptions,'title'=>$title));
+		echo ($response) ? 'success' :'fail';   			    		
 		exit;
 	}
 		
@@ -199,8 +210,8 @@ class ProjectController extends Controller
 			'responsabile'=>$responsabile,
 			'optional_preventivi'=>$optional_preventivi]);
 		
-		$logs = 'Generate pdf for project Quote -> ( Quote ID: '. $project->id_preventivo .')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Generate pdf for project Quote ( Quote ID: '. $project->id_preventivo .')';
+		storelogs($request->user()->id, $logs);
 		
 		/*$pdf->download('test.pdf');*/
 		$pdf->stream('project_quote.pdf');				
@@ -270,8 +281,8 @@ class ProjectController extends Controller
 						'emotion_stat_id' => isset($request->statoemotivo) ? $request->statoemotivo : 0
                       ]);
 
-        $logs = 'Add New Project -> ( Project ID: '. $progetto . ')';
-		//storelogs($request->user()->id, $logs);
+        $logs = $this->logmainsection.' -> Add New Project (ID: '. $progetto . ')';
+		storelogs($request->user()->id, $logs);
 
 		/* DB::table('projects')->where('id', $project->id)
         ->update(array(
@@ -401,8 +412,8 @@ class ProjectController extends Controller
             	'is_deleted' => 1
 		));		
 
-		$logs = 'Delete Project -> ( Project ID: '. $project->id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Delete Project (ID: '. $project->id . ')';
+		storelogs($request->user()->id, $logs);
 
 		return Redirect::back()
             ->with('error_code', 5)
@@ -423,8 +434,8 @@ class ProjectController extends Controller
             'progresso' => $project->progresso
         ]);
 		
-		$logs = 'Copy(Duplicate) Project -> ( Project ID: '. $pid . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Copy(Duplicate) Project (ID: '. $pid . ')';
+		storelogs($request->user()->id, $logs);
 
 		return Redirect::back()
             ->with('error_code', 5)
@@ -531,8 +542,8 @@ class ProjectController extends Controller
 						'emotion_stat_id' => $request->statoemotivo
                       ));
 
-        $logs = 'Update Project -> ( Project ID: '. $project->id . ')';
-		//storelogs($request->user()->id, $logs);
+        $logs = $this->logmainsection.' -> Update Project (ID: '. $project->id . ')';
+		storelogs($request->user()->id, $logs);
 		
 		/*if($request->statoemotivo!=null) {
 			// Aggiorno lo stato emotivo

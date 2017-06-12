@@ -35,6 +35,15 @@
 
 @include('common.errors')
 
+<div class="header-right">
+  <div class="float-left">
+      <h1>{{trans('messages.keyword_editproject')}} <?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?></h1><hr>
+    </div>
+    <div class="header-svg">
+         <img src="{{url('images/HEADER1_RT_PROJECT.svg')}}" alt="header image">
+    </div>
+</div>
+<?php /*
 <div class="progetti-header">
 	<div class="header-svg float-left">
         <img src="{{url('images/HEADER1_LT_PROJECT.svg')}}" alt="header image">
@@ -43,7 +52,7 @@
     <div class="header-svg float-right">
         <img src="{{url('images/HEADER1_RT_PROJECT.svg')}}" alt="header image">
     </div>
-</div>
+</div>*/?>
 
 <div class="clearfix"></div>
 <div class="height20"></div>
@@ -58,9 +67,9 @@
         @endif
     @endif
 <div class="row">
-<div class="col-md-12">
+<?php /*<div class="col-md-12">
 	<h1>{{trans('messages.keyword_editproject')}} <?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?></h1><hr>
-</div>
+</div>*/?>
 		<div class="col-md-8">
     	    	<script>
 				/*var $ = jQuery.noConflict();
@@ -104,6 +113,7 @@
 	                <a class="btn btn-warning"  id="aggiungiLavorazione"><i class="fa fa-plus"></i></a>
 	                <a class="btn btn-danger" id="eliminaLavorazione"><i class="fa fa-trash"></i></a>
                 <div class="table-responsive">
+                <div class="set-height">
 	            <table class="table table-bordered">
 	                <thead>
 	                   <th>#</th>
@@ -424,6 +434,7 @@
 	                </script>
 	            </table>
             </div>
+            </div>
            <div class="row"> <div class="col-md-2" >
 	           <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
             </div></div>
@@ -506,7 +517,7 @@
 	        	<br>
 	        </div>
             </div>
-            <div class="set-height250">
+            <div class="set-height">
 		            <table class="table table-striped table-bordered">
 		                <thead>
 		                    <th>#</th>
@@ -927,37 +938,57 @@
          <div class="row">
           <div class="col-md-12">
           	<div class="bg-white image-upload-box">
-          <label for="scansione">{{trans('messages.keyword_selectfile')}}</label><br>
+          <label for="scansione">{{trans('messages.keyword_dropzone_for_multiple_file_upload')}}</label><br>
         <div class="image_upload_div"><?php echo Form::open(array('url' => 'progetti/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
                   {{ csrf_field() }}
                   </form>       
         </div>
         <script>
-        var url = '<?php echo url('progetti/getfiles/'.$mediaCode); ?>';
+        var urlgetfile = '<?php echo url('progetti/getfiles/'.$mediaCode); ?>';
         Dropzone.autoDiscover = false;
         $(".dropzone").each(function() {
           $(this).dropzone({
           complete: function(file) {
             if (file.status == "success") {
-               $.ajax({url: url, success: function(result){
-                  $("#files").html(result);
-              $(".dz-preview").remove();
-              $(".dz-message").show();
+               $.ajax({url: urlgetfile, success: function(result){                
+                    $("#files").html(result);
+                    $(".dz-preview").remove();
+                    $(".dz-message").show();
               }});
+            }
+            if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
+                $( "#addMediacommnetmodal" ).modal();
+                $('#addMediacommnetmodal').on('shown.bs.modal', function(){                    
+                });
             }
           }
           });
-        });
+        });        
+        
         function deleteQuoteFile(id){
           var urlD = '<?php echo url('/progetti/deletefiles/'); ?>/'+id;
             $.ajax({url: urlD, success: function(result){
               $(".quoteFile_"+id).remove();
               }});
         }
-        function updateType(typeid,fileid){
+        function updateType(typeid,fileid,checkboxid1){           
+            var ischeck = 0;            
+            if($('#'+checkboxid1+':checkbox:checked').length > 0){                
+                var ischeck = 1;
+            }
+         var checkValues = $('input[name=rdUtente_'+fileid+']:checked').map(function()
+            {
+                return $(this).val();
+            }).get();
             var urlD = '<?php echo url('/progetti/updatefiletype'); ?>/'+typeid+'/'+fileid;
-                $.ajax({url: urlD, success: function(result){                
-                }});
+            $.ajax({
+                url: urlD,
+                type: 'post',
+                data: { "_token": "{{ csrf_token() }}",ids: checkValues },
+                success:function(data){
+                }
+            });
+            //$.ajax({url: urlD, success: function(result){ }});
         }
         </script>
         <div class="set-height">
@@ -966,19 +997,24 @@
                     if(isset($progetto->id) && isset($projectmediafiles)){
                     foreach($projectmediafiles as $prev) {
                 $imagPath = url('/storage/app/images/projects/'.$prev->name);
-                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a></td></tr>';
+                $titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";
+                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
                 $html .='<tr class="quoteFile_'.$prev->id.'"><td>';
                 $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();                           
                 foreach($utente_file as $key => $val){
                     $check = '';
-                    if($val->ruolo_id == $prev->type){
+                    $array = explode(',', $prev->type);
+                    if(in_array($val->ruolo_id,$array)){                    
                         $check = 'checked';
                     }
-                    $html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$val->nome_ruolo.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    $specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
                 }
                 echo $html .='</td></tr>';
             }
-                    }
+        }
                     ?></tbody>                  
                     <tbody id="files">
                     </tbody>
@@ -1037,8 +1073,97 @@
         
 </div><!-- /row -->
 
+<div class="modal fade" id="addMediacommnetmodal" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-dialog modal-l">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title" id="modalTitle">{{trans('messages.keyword_add_title_and_description')}}</h3>
+            </div>
+            <div class="modal-body">
+                <!-- Start form to add a new event -->
+                <form action="{{ url('/progetti/mediacomment/').'/'.$mediaCode }}" name="commnetform" method="post" id="commnetform">
+                    {{ csrf_field() }}
+                    @include('common.errors')                       
+                    <div class="row">
+                        <div class="col-md-12">                               
+                            <div class="form-group">
+                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} <span class="required">(*)</span> </label>
+                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
+                            </div>
+                            <div class="form-group">
+                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} <span class="required">(*)</span></label>
+                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
+                            </div>
+                        </div>
+                     </div>
+                    <div class="modal-footer">
+                        <input type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_submit') }} ">
+                    </div>
+                </form>
+                <!-- End form to add a new event -->
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+      $("#commnetform").validate({            
+            rules: {
+                title: {
+                    required: true
+                },
+                descriptions: {
+                    required: true                    
+                }
+            },
+            messages: {
+                title: {
+                    required: "{{trans('messages.keyword_please_enter_a_title')}}"
+                },
+                descriptions: {
+                    required: "{{trans('messages.keyword_please_enter_a_description')}}"
+                }
+            }
+        });
 
+      $(function(){
 
+        $('#commnetform').on('submit',function(e){
+            $.ajaxSetup({
+                header:$('meta[name="_token"]').attr('content')
+            })
+            e.preventDefault(e);
+                $.ajax({
+                type:"POST",
+                url:'{{ url('/progetti/mediacomment/').'/'.$mediaCode }}',
+                data:$(this).serialize(),
+                //dataType: 'json',
+                success: function(data) {                    
+                    if(data == 'success'){
+                         $.ajax({url: urlgetfile, success: function(result){                
+                            $("#files").html(result);
+                            $(".dz-preview").remove();
+                            $(".dz-message").show();
+                        }});
+                      $('#addMediacommnetmodal').modal('hide');
+                    }
+                },
+                error: function(data){                   
+                  if(data == 'success'){
+                        $.ajax({url: urlgetfile, success: function(result){                
+                            $("#files").html(result);
+                            $(".dz-preview").remove();
+                            $(".dz-message").show();
+                        }});
+                      $('#addMediacommnetmodal').modal('hide');
+                    }
+                }
+            })
+            });
+        });
+    });
+</script>
 
 <script>
 var w = 250,

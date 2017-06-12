@@ -7,12 +7,15 @@
 $(function () {
     $("table").stupidtable();
 });
+</script>
 @if (!empty(Session::get('msg')))
+<script>
 var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
 document.write(msg);
+</script>
 @endif
 
-</script>
+
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
 <!-- Latest compiled and minified JavaScript -->

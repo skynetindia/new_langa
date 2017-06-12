@@ -18,7 +18,14 @@ class QuizController extends Controller
 	}   
 
 	public function index(Request $request){
-	  return view('quiz.quiz');
+
+		return view('quiz.quiz', [          
+			'optional' => DB::table('optional')
+						->get(),
+			'default' => DB::table('optional')
+						->first()        
+		]);
+	  
 	}
 
 	public function stepone(Request $request){
@@ -500,9 +507,12 @@ class QuizController extends Controller
 
 	public function stepfive(Request $request){
 	  
-	  return view('quiz.step-five', [
-            'quizid' =>$request->id
-        ]);
+	  	return view('quiz.step-five', [
+	  		'quizfiles' => DB::table('media_files')->select('*')->where('master_id', $request->id)->where('master_type', '4')->get(),
+	      'quizid' =>$request->id,
+	      'lastupdated' => DB::table('media_files')->select('*')->where('master_id', $request->id)->where('master_type', '4')
+	      ->orderBy('updated_at', 'desc')->first()
+	    ]);
 	}
 
 	public function storestepfive(Request $request)
@@ -524,6 +534,26 @@ class QuizController extends Controller
  
 	}
 
+	public function stepfivesaveimage(Request $request){
+	  
+	  	$imgid = $request->input('imgid');
+	  	$img = $request->input('img');	  
+
+	  	define('UPLOAD_DIR', 'storage/app/images/quiz/');
+	    $base64img = str_replace('data:image/jpeg;base64,', '', $img);
+	    $data = base64_decode($base64img);
+
+	    $date = date("h:i:sa");	  
+	    $date = str_replace(':', '-', $date);
+	    $filename = "img_".$date.".jpg";
+	    $file = UPLOAD_DIR . $filename;
+	    file_put_contents($file, $data);
+
+  		DB::table('media_files')
+			->where('id', $imgid)               
+			->update(array( 'name' => $filename, 'updated_at' => date("Y-m-d H:i:s")));
+	}
+
 	public function fileviewer(Request $request)
 	{
 		$src='http://betaeasy.langa.tv/storage/app/images/appunti%202%20per%20langa.docx';
@@ -535,33 +565,54 @@ class QuizController extends Controller
 	public function fileupload(Request $request){
 			
 		Storage::put(
-			'images/quote/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
+			'images/quiz/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
 		);
 
-		$nome = $request->file('file')->getClientOriginalName();			
-			DB::table('media_files')->insert([
+		$nome = $request->file('file')->getClientOriginalName();	
+
+		DB::table('media_files')->insert([
 			'name' => $nome,
 			'code' => $request->code,
-		]);					
+			'master_type' => 4,
+			'master_id' => isset($request->quizid) ? $request->quizid : 0
+		]);						
+
 	}
 	
 	public function fileget(Request $request){
 			
 		if(isset($request->quote_id)){
-			$updateData = DB::table('media_files')->where('quote_id', $request->quote_id)->get();										
+			$updateData = DB::table('media_files')->where('master_id', $request->quote_id)->get();										
 		}
 		else {
-			$updateData = DB::table('media_files')->where('code', $request->code)->get();				
+			$updateData = DB::table('media_files')->where('code', $request->code)->get();
 		}
-						
+		
 		foreach($updateData as $prev) {
-			$imagPath = url('/storage/app/images/quote/'.$prev->name);
-			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img id="crop" onclick="displayFile(this)" src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
+			$imagPath = url('/storage/app/images/invoice/'.$prev->name);
+			$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";			
+			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
-			
+
+			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
+			foreach($utente_file as $key => $val){
+				if($request->user()->dipartimento == $val->ruolo_id){
+					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
+					
+					$specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+				}
+				else {
+					$specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+				}
+			}
 			echo $html .='</td></tr>';
 		}
-		exit;			
+		exit;		
+		
 	}
 		
 	public function filedelete(Request $request){
@@ -573,6 +624,20 @@ class QuizController extends Controller
 		else {
 			echo 'fail';
 		}
+		exit;
+	}
+
+	public function quizupdatemediaComment(Request $request){	
+
+		$updateData = DB::table('media_files')->where('code', $request->code)->orderBy('id', 'desc')->first();
+
+		$title = $request->title;
+		$descriptions = $request->descriptions;	
+
+		$response = DB::table('media_files')->where('date_time', $updateData->date_time)->update(array('description' => $descriptions,'title'=>$title));	   
+
+		echo ($response) ? 'success' :'fail';   	
+
 		exit;
 	}
 

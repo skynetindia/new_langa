@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <html><head>
 
@@ -144,7 +143,7 @@
                                             <div class="caleder-notification">
                                             	<div class="switch">
                                                     <span> {{ trans('messages.keyword_sendnotification') }}</span>
-                                                    <input type="checkbox" class="form-control input-check" name="notifica" id="notifica">
+                                                    <input type="checkbox" class="form-control input-check" <?php echo (isset($event->notifica) && $event->notifica == '1') ? 'checked' : ''; ?>  value="1" name="notifica" id="notifica">
                                                     <label for="notifica" class="checkbox-inline"> </label>
                                                 </div>    
                                     		</div>
@@ -153,7 +152,7 @@
                                             <div class="caleder-notification">                  
 												<div class="switch">                                            	
                                                     <span>{{ trans('messages.keyword_private') }}</span>
-                                                    <input type="checkbox" class="form-control input-check" name="privato" id="privato">
+                                                    <input type="checkbox" class="form-control input-check" <?php echo (isset($event->privato) && $event->privato == '1') ? 'checked' : ''; ?> value="1" name="privato" id="privato">
                                                      <label for="privato" class="checkbox-inline"></label>
                                                  </div>    
                                         	</div>

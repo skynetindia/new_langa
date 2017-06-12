@@ -118,13 +118,12 @@
 				<table>
                 	<tr style="color:#fff">
 					@foreach ($events as $event)
-						@if($year <= $event->annoFine)
+						@if($year == $event->annoFine)
                         	@if($month <= $event->meseFine)
                             	<?php 
 									$utente = DB::table('users')
 												->where('id', $event->user_id)
-												->first();
-									
+												->first();									
 									$colore = (isset($utente->color))?$utente->color:'#fff';
 								?>
                             	@if($month == $event->mese)
@@ -259,7 +258,7 @@
 						  <input type="radio" name="type" id="changetype-address">
 						  <label for="changetype-address"> {{ trans('messages.keyword_addresses') }} </label>
 						  <input type="radio" name="type" id="changetype-geocode">
-						  <label for="changetype-geocode">{{ trans('messages.keyword_cap') }} </label>
+						  <label for="changetype-geocode">{{trans('messages.keyword_postal_code')}}</label>
                        </div>
                        
 	                    <div id="map1"></div>
@@ -297,7 +296,7 @@
                                             <div class="caleder-notification">
                                             	<div class="switch">
                                                 	<span> {{ trans('messages.keyword_sendnotification') }} </span>
-                                               		<input type="checkbox" class="form-control input-check" name="notifica" id="notifica">                              
+                                               		<input type="checkbox" class="form-control input-check" value="1" name="notifica" id="notifica">                              
                                                     <label for="notifica" class="checkbox-inline"> </label>
                                                 </div>
                                             </div>
@@ -306,7 +305,7 @@
                                             <div class="caleder-notification">
                                             	<div class="switch">
                                                  <span> {{ trans('messages.keyword_private') }} </span>
-                                                <input type="checkbox" class="form-control input-check" name="privato" id="privato">
+                                                <input type="checkbox" class="form-control input-check" value="1" name="privato" id="privato">
                                                 <label for="privato" class="checkbox-inline"> </label>
                                                 </div>
                                             </div>
@@ -384,7 +383,7 @@
 
         				<label for="nomeazienda" class="control-label"> {{ trans('messages.keyword_compname') }} <span class="required">(*)</span></label> 
 
-        				<input value="{{ old('nomeazienda') }}" type="text" name="nomeazienda" id="nomeazienda" class="form-control">
+        				<input value="{{ old('nomeazienda') }}" type="text" name="nomeazienda" placeholder="{{ trans('messages.keyword_compname') }}" id="nomeazienda" class="form-control">
 
         			</div>
 
@@ -392,15 +391,15 @@
 
         				<label for="nomereferente" class="control-label"> {{ trans('messages.keyword_refname') }}  <span class="required">(*)</span></label> 
 
-        				<input value="{{ old('nomereferente') }}" type="text" name="nomereferente" id="nomereferente" class="form-control">
+        				<input value="{{ old('nomereferente') }}" type="text" name="nomereferente" placeholder="{{ trans('messages.keyword_refname') }}" id="nomereferente" class="form-control">
 
         			</div>
 
 					<div class="form-group">
 
-        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }} <span class="required">(*)</span>
+        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }} <span class="required">(*)</span></label>
 
-        				<input value="{{ old('telefonoazienda') }}" type="text" name="telefonoazienda" id="telefonoazienda" class="form-control">
+        				<input value="{{ old('telefonoazienda') }}" type="text" name="telefonoazienda" placeholder="{{ trans('messages.keyword_comptele') }}" id="telefonoazienda" class="form-control">
 
         			</div>
 
@@ -408,17 +407,17 @@
 
         				<label for="email" class="control-label">{{ trans('messages.keyword_email') }} <span class="required">(*)</span></label> 
 
-        				<input value="{{ old('email') }}" type="email" name="email" id="email" class="form-control">
+        				<input value="{{ old('email') }}" type="email" name="email" id="email" class="form-control" placeholder="{{ trans('messages.keyword_email') }}">
 
         			</div>
 
 					<div class="form-group">
 
-                                            <label for="indirizzo" class="control-label">{{ trans('messages.keyword_address') }}<span class="required">(*)</span></label> 
+                                            <label for="indirizzo" class="control-label">{{ trans('messages.keyword_addresses') }}<span class="required">(*)</span></label> 
 
         				<input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text"
 
-							placeholder="{{ trans('messages.keyword_enteranaddress') }}    ">
+							placeholder="{{ trans('messages.keyword_addresses') }}    ">
 
 						<div id="type-selector" class="controls">
 
@@ -436,13 +435,13 @@
 
 						  <input type="radio" name="type" id="changetype-address">
 
-						  <label for="changetype-address">{{ trans('messages.keyword_ addresses') }}</label>
+						  <label for="changetype-address">{{ trans('messages.keyword_addresses') }}</label>
 
 
 
 						  <input type="radio" name="type" id="changetype-geocode">
 
-						  <label for="changetype-geocode">{{ trans('messages.keyword_cap') }}</label>
+						  <label for="changetype-geocode">{{trans('messages.keyword_postal_code')}}</label>
 
               </div>
 
@@ -466,9 +465,9 @@
 
                 </select>
 
-                    <br><label for="telefonoresponsabile">{{ trans('messages.responsiblephone') }} <span class="required">(*)</span></label>
+                    <br><label for="telefonoresponsabile">{{ trans('messages.keyword_responsiblephone') }} <span class="required">(*)</span></label>
 
-                <input value="{{ old('telefonoresponsabile') }}" class="form-control" type="text" name="telefonoresponsabile" id="telefonoresponsabile" placeholder="Telefono responsabile Langa"><br>
+                <input value="{{ old('telefonoresponsabile') }}" class="form-control" type="text" name="telefonoresponsabile" id="telefonoresponsabile" placeholder="{{ trans('messages.keyword_responsiblephone') }}"><br>
 
                 <script>
 
@@ -606,7 +605,7 @@ $(function() {
      $('#newEnte').modal('show');
      setTimeout(function() { google.maps.event.trigger(map, "resize") }, 1000);
 	 $('#newEvent').on('shown.bs.modal', function(){
-	  initMap2();
+	//  initMap2();
     });
 
 
@@ -804,10 +803,13 @@ function nuovoEnte() {
       
         var input = /** @type {!HTMLInputElement} */(
             document.getElementById('dove'));
+			
         var types = document.getElementById('type-selector1');
+		
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(types);
         var autocomplete = new google.maps.places.Autocomplete(input);
+		
         autocomplete.bindTo('bounds', map);
 		var image = "{{asset('public/marker.png')}}";
         var infowindow = new google.maps.InfoWindow();
@@ -885,8 +887,9 @@ function nuovoEnte() {
       }
 	//AIzaSyAL_rtMv03GNmWgYfQkcGPPOsQ43LGun-0
     </script>
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script>
-   	<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap2" async defer></script>-->
+	<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script>
+   	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap2" async defer></script>-->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&libraries=places&callback=initMap" async defer></script>
 <script>
 var eventi = <?php echo json_encode($events); ?>;
 var eventiDaStampare = [];
@@ -1012,7 +1015,7 @@ function mostraEventi(giorno) {
         elimina.onclick = function(e) {check = confirm("{{ trans('messages.keyword_suredeleteevent') }} "); if(!check) e.preventDefault();};
         elimina.className = "btn btn-danger btn-sm elimina";
         var tastoElimina = document.createElement("span");
-        tastoElimina.className = "fa fa-eraser";
+        tastoElimina.className = "fa fa-trash";
         elimina.appendChild(tastoElimina);
         
         striscia.appendChild(orario);

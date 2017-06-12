@@ -15,23 +15,17 @@
 
 <div class="corporation-blade">
 <div class="header-svg text-left float-left">
-	<img src="http://betaeasy.langa.tv/images/HEADER1-LT_ENTITY.svg" alt="header image">
+	<img src="{{url('images/HEADER1-LT_ENTITY.svg')}}" alt="header image">
 </div>
 
 <div class="float-right">
-<h1>Enti</h1>
+<h1>{{trans('messages.keyword_institutions')}}</h1>
 <hr>
-<script>
-@if(!empty(Session::get('msg')))
-    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
-    document.write(msg);
-@endif
-</script>
 <?php $loginuser = collect($loginuser)->toArray();?>
-@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
+@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '3' || $loginuser['dipartimento'] == '2')
 <form action="{{ url('/enti/add/') }}" method="post">
   {{ csrf_field() }}
-  <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo ente"><i class="fa fa-plus"></i></button>
+  <button class="btn btn-warning" type="submit" name="create" title="{{trans('messages.keyword_create_new_-_add_a_new_entity')}}"><i class="fa fa-plus"></i></button>
 </form>
 @endif 
 <!-- Inizio filtraggio miei/tutti --> 
@@ -44,12 +38,13 @@
 <a id="tutti" class="button button3" href="{{url('/enti')}}" name="tutti" title="<?php echo trans('messages.keyword_all').' - '.trans('messages.keyword_show_all'); ?>">{{trans('messages.keyword_all')}}</a> 
 @endif 
 <!-- Fine filtraggio miei/tutti --> 
-@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '1' || $loginuser['dipartimento'] == '2')
-
 <a onclick="multipleAction('modify');" id="modifica" class="btn btn-warning" name="update" title="<?php echo trans('messages.keyword_edit_-_edit_the_last_selected_entities');?>"><i class="fa fa-pencil"></i></a>
+
+@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '2')
 <a id="duplicate" onclick="multipleAction('duplicate');" class="btn btn-info" name="duplicate" title="<?php echo trans('messages.keyword_duplicate_-_duplicates_selected_entities');?>"><i class="fa fa-files-o"></i></a> 
 <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="<?php echo trans('messages.keyword_delete_-_delete_selected_entities') ?>"> <i class="fa fa-trash"></i></a>
 <div class="skype-call"> <a id="call" href="#" class="btn btn-warning"  title="skype "><img src="../images/phone-call.png" alt="skype call"/> Skype call</a> </div>
+@endif
 </div>
 
 </div>
@@ -59,14 +54,18 @@
 
 
   <div class="clearfix"></div>
-
 <div class="space30"></div>
+<script>
+@if(!empty(Session::get('msg')))
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
 @endif
+</script>
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php if(isset($miei)) echo url('enti/myenti/json'); else echo url('/enti/json');?>" data-classes="table table-bordered" id="table">
   <thead>
   <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
     <th data-field="nomeazienda" data-sortable="true">{{trans('messages.keyword_company_name')}}</th>
-    <th data-field="nomereferente" data-sortable="true">{{trans('messages.keyword_company_name')}}</th>
+    <th data-field="nomereferente" data-sortable="true">{{trans('messages.keyword_name')}}</th>
     <th data-field="settore" data-sortable="true">{{trans('messages.keyword_sector')}}</th>
     <th data-field="telefonoazienda" data-sortable="true">{{trans('messages.keyword_telephone_company')}}</th>
     <th data-field="email" data-sortable="true">{{trans('messages.keyword_email')}}</th>
@@ -79,7 +78,7 @@
 
 
 <div class="footer-svg">
-  <img src="http://betaeasy.langa.tv/images/FOOTER3-ORIZZONTAL_ENTITY.svg" alt="footer enti image">
+  <img src="{{url('images/FOOTER3-ORIZZONTAL_ENTITY.svg')}}" alt="footer enti image">
 </div>
 
 <script>

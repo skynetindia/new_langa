@@ -18,12 +18,10 @@
 
 <!-- Latest compiled and minified Locales -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
-
-
 <h1>{{ isset($menu->id) ? trans('messages.keyword_menu_modify') : trans('messages.keyword_menu_add') }}
 </h1><hr>
-<br>
-<?php if(isset($menu->id)) {
+<br><?php 
+if(isset($menu->id)) {
     ?><form action="{{url("/menu/update/$menu->id")}}" method="post" id="frmmenu" enctype="multipart/form-data"><?php
 }
 else {
@@ -32,54 +30,31 @@ else {
 ?>
     {{ csrf_field() }}
     <div class="col-md-12">
-        <div class="col-md-3"><label for="manuname">{{trans('messages.keyword_menu_name')}}</label>
+        <div class="col-md-3"><label for="manuname">{{trans('messages.keyword_menu_name')}} <span class="required">(*)</span></label>
             <input name="manuname" id="manuname" placeholder="{{trans('messages.keyword_menu_name')}}" class="form-control hasDatepicker" value="{{isset($menu->modulo) ? $menu->modulo : old('manuname')}}" type="text"><br></div>
-
         <div class="col-md-3">
-            <label for="menutype"> Type: </label>
-            <select name="menutype" id="menutype" class="js-example-basic-single form-control">
-                
-                <option value=""> -- select -- </option>
-                
-                @if(isset($menu->type))
-                    <option value="1" <?php if($menu->type == 1){ ?> selected="selected" <?php } ?>> Front-End </option>
-                    <option value="2" <?php if($menu->type == 2){ ?> selected="selected" <?php } ?>> Back-End </option>
-                @else
-                    <option value="1" > Front-End </option>
-                    <option value="2" > Back-End </option>
-                @endif                
-
+            <label for="menutype"> {{trans('messages.keyword_type')}}: <span class="required">(*)</span></label>
+            <select name="menutype" id="menutype" class="js-example-basic-single form-control">                
+                <option value=""> -- {{trans('messages.keyword_select')}} -- </option>                
+                <option value="1" <?php if(isset($menu->type) && $menu->type == 1){ ?> selected="selected" <?php } ?>> {{trans('messages.keyword_application_menu')}}</option>
+                <option value="2" <?php if(isset($menu->type) && $menu->type == 2){ ?> selected="selected" <?php } ?>> {{trans('messages.keyword_admin_menu')}} </option>                
             </select>        
         </div>
-
-        <script type="text/javascript">
-            
-            $( document ).ready(function() {
-                
+        <script type="text/javascript">            
+            $( document ).ready(function() {                
                 if ($("#menutype").val()) {
-
-                    url = "{{ url('/menu/parentmenu') }}" + '/' + $("#menutype").val();
-                    
+                    url = "{{ url('/menu/parentmenu') }}" + '/' + $("#menutype").val();                    
                     $.ajax({
-
                         type: "GET",
                         url: url,
-
-                        success: function (data, textStatus, jqXHR) {
-                            
+                        success: function (data, textStatus, jqXHR) {                            
                             var submenu = jQuery.parseJSON(data);
-
                             if (submenu != "") {
-
                                 $("#parentmenu").children().remove();
                                 $("#parentmenu").append($("<option></option>").attr("value", "").text('Select parentmenu'));
-
                                 $.each(submenu, function (key, value) {
-
-                                    var selected = "<?php echo isset($menu->modulo_sub) ? $menu->modulo_sub : '0' ;?>";
-                                    
+                                    var selected = "<?php echo isset($menu->modulo_sub) ? $menu->modulo_sub : '0' ;?>";                                    
                                     if(selected == value.id){
-
                                         $("#parentmenu").append($("<option selected></option>").attr("value", value.id).text(value.modulo));
                                         if(value.modulo_sub == '0' || value.modulo_sub == null){
                                             $("#parent").val(selected);
@@ -91,22 +66,16 @@ else {
                                         $("#parentmenu").append($("<option></option>").attr("value", value.id).text(value.modulo));
                                         
                                     }
-
                                 });
-
-
                                 // $.each(submenu, function (key, value) {
                                 //     $("#parentmenu").append($("<option></option>").attr("value", value.id).text(value.modulo));
                                 // });
-
-
                                 $("#parent").css("display", "block");
                             } else {
                                 $("#parentmenu").children().remove();
                                 $("#parent").css("display", "none");
                             }
                         },
-
                         error: function (data) {
                             alert("error");
                         }
@@ -116,11 +85,8 @@ else {
                     $("#parentmenu").children().remove();
                     $("#parent").css("display", "none");
                 }
-
             });
-
         </script>
-
         <div class="col-md-3 displaynone" id="parent">
             <label for="parentmenu">{{trans('messages.keyword_parent')}}</label>
             <select name="parentmenu" id="parentmenu" class="js-example-basic-single form-control">
@@ -138,56 +104,47 @@ else {
             </select>        
         </div>
         <div class="col-md-3 displaynone" id="optionsub">
-            <label for="submenu">Sub Menu</label>
+            <label for="submenu">{{trans('messages.keyword_sub_menu')}}</label>
             <select name="submenu" id="submenu" class="js-example-basic-single form-control"></select>
         </div>
         <script type="text/javascript">
     //$(".js-example-basic-single").select2();
         </script>
     </div>
-
     <div class="col-md-12">
         <div class="col-md-3"><label for="menulink">{{trans('messages.keyword_menu_link')}}</label>
             <input name="menulink" id="menulink" placeholder="{{trans('messages.keyword_menu_link')}}" class="form-control hasDatepicker" value="{{isset($menu->modulo_link) ? $menu->modulo_link : old('menulink')}}" type="text"><br></div>
         <div class="col-md-3"><label for="menuclass">{{trans('messages.keyword_menu_class')}}</label>
             <input name="menuclass" id="menuclass" placeholder="{{trans('messages.keyword_menu_class')}}" class="form-control hasDatepicker" value="{{isset($menu->modulo_class) ? $menu->modulo_class : old('menuclass')}}" type="text"><br></div>
         <div class="col-md-3">
-            <label for="deparments">Deparments</label>
+            <label for="deparments">{{trans('messages.keyword_department')}}</label>
             <select name="deparments" id="deparments" class="js-example-basic-single form-control">
-            <option value="0">ALL</option>
+            <option value="0">{{trans('messages.keyword_all')}}</option>
             @foreach($departments as $department)                          
                 <option value="{{$department->id}}" <?php echo (isset($menu->dipartimento) && $department->id == $menu->dipartimento) ? 'selected' : ''; ?>>{{$department->nomedipartimento}}</option>
             @endforeach
             </select>
         </div>
-
-        <div class="col-md-3"><label for="manuname"> Menu Image </label>
+        <div class="col-md-3"><label for="manuname"> {{trans('messages.keyword_image')}} </label>
             <input name="image" id="image" class="form-control hasDatepicker" value="" type="file"><br>
         </div>
-
     </div>
-
-    <div class="col-md-12">
-        
+    <div class="col-md-12">        
         <div class="col-md-3 displaynone" id="frontorder">
-        <label for="order" > Front Menu Priority  </label>
+        <label for="order"> {{trans('messages.keyword_application_menu_priority')}} </label>
             <input name="frontpriority" id="frontpriority" class="form-control hasDatepicker" 
             value="{{isset($menu->frontpriority) ? $menu->frontpriority : old('frontpriority')}}" type="text"><br>
         </div>
 
         <div class="col-md-3 displaynone" id="backorder">
-        <label for="order" > Back Menu Priority  </label>
+        <label for="order"> {{trans('messages.keyword_admin_menu_priority')}} </label>
             <input name="backpriority" id="backpriority"  class="form-control hasDatepicker" 
             value="{{isset($menu->backpriority) ? $menu->backpriority : old('priority')}}" type="text"><br>
         </div>
-
     </div>
-    
-
     <div class="col-md-12">
         <div class="col-md-3"><button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button></div>
     </div>
-
 </form>
 
 <script>
@@ -215,7 +172,7 @@ else {
         }
     });
     function check() {
-        return confirm("Sei sicuro di voler eliminare: " + n + " preventivi?");
+        return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}}: " + n + " menu?");
     }
     $("#parentmenu").change(function () {
         if ($("#parentmenu").val()) {
@@ -382,9 +339,7 @@ else {
 </script>
 <script type="text/javascript">
 $(document).ready(function() {
-
-
-      $("#frmmenu").validate({            
+      $("#frmmenu").validate({           
             rules: {
                 manuname: {
                     required: true,
@@ -402,10 +357,7 @@ $(document).ready(function() {
                     required: "{{trans('messages.keyword_please_select_menu_type')}}"
                 }
             }
-
         });
   });
-
 </script>
-
 @endsection

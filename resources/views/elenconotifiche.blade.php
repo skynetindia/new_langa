@@ -18,19 +18,19 @@
     document.write(msg);
     </script>
 @endif
-<h1>Elenco Notifiche</h1><hr>
-<a onclick="multipleAction('add');" id="add" class="btn btn-warning" name="add" title="Add  - Add new utente"> <i class="fa fa-plus"></i></a>
+<h1>{{trans('messages.keyword_listnotification')}}</h1><hr>
+<a onclick="multipleAction('add');" id="add" class="btn btn-warning" name="add" title="{{trans('messages.keyword_addnotification')}}"> <i class="fa fa-plus"></i></a>
 <div class="space10"></div>
-<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary"  name="update" title="Modifica - Modifica l'ultimo ente selezionato"><i class="glyphicon glyphicon-pencil"></i></a>
-<a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="fa fa-trash"></i></a>
-<a id="detail" onclick="multipleAction('detail');" class="btn btn-info" name="detail" title="detail - detail gli enti selezionati"><i class="glyphicon glyphicon-list-alt"></i></a>
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary"  name="update" title="{{trans('messages.keyword_edit_the_last_selected_notification')}}"><i class="glyphicon glyphicon-pencil"></i></a>
+<a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="{{trans('messages.keyword_delete_the_last_selected_notification')}}"><i class="fa fa-trash"></i></a>
+<a id="detail" onclick="multipleAction('detail');" class="btn btn-info" name="detail" title="{{trans('messages.keyword_detail_the_selected_notification')}}"><i class="glyphicon glyphicon-list-alt"></i></a>
 <div class="table-responsive">
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('/notification/json') }}" data-classes="table table-bordered" id="table" class="remove-hover">
         <thead>
-            <th data-field="id" data-sortable="true">n° id</th>
-            <th data-field="notification_type" data-sortable="true">Tipo</th>
-            <th data-field="tempo_avviso" data-sortable="true">Tempo di Avviso</th>
-           <th data-field="ruolo" data-sortable="true">Visualizzazione</th>
+            <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
+            <th data-field="notification_type" data-sortable="true">{{trans('messages.keyword_types')}}</th>
+            <th data-field="tempo_avviso" data-sortable="true">{{trans('messages.keyword_warntime')}}</th>
+           <th data-field="ruolo" data-sortable="true">{{trans('messages.keyword_viewing')}}</th>
         </thead>
     </table>
   </div>
@@ -69,7 +69,7 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
   }
 });
 
-function check() { return confirm("Sei sicuro di voler eliminare: " + n + " newsletter?"); }
+function check() { return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}}: " + n + " {{trans('messages.keyword_notification')}}?"); }
 function multipleAction(act) {
   var error = false;
   var link = document.createElement("a");

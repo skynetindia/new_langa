@@ -42,7 +42,7 @@
         <div class="col-md-12">
             <div class="table-responsive">
                 <label for="optional[]">{{ trans('messages.keyword_optional') }} </label>
-                <table class="table table-bordered">
+                <table class="table table-bordered lblshow">
                     <tr>
                         <?php $check = true; ?>
                     @for($i = 0; $i < count($optional); $i++)
@@ -52,7 +52,7 @@
                         <td class="ciao">
                             @foreach($optionalselezionati as $optsel)
                                 @if($optsel->optional_id == $optional[$i]->id)
-                                    <input checked type="checkbox" name="optional[]" id="optional" value="<?php echo $optional[$i]->id; ?>">
+                                    <input checked type="checkbox" name="optional[]" id="optional<?php echo $optional[$i]->id; ?>" value="<?php echo $optional[$i]->id; ?>">
                                     <label for="optional<?php echo $optional[$i]->id; ?>"> <?php echo " " . $optional[$i]->label; ?></label>
                                     <?php $check = false; ?>
                                 @endif

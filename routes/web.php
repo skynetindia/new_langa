@@ -11,9 +11,14 @@
 |
 */
 
-Route::get('/', function () {
+Route::get('/', 'HomeController@index')->name('home');
+Route::post('dashboard/statistics/year', 'HomeController@statisticdata');
+Route::post('dashboard/weatherautocomplete', 'HomeController@weatherautocomplete');
+Route::post('dashboard/getweatherdetails', 'HomeController@getweatherdetails');
+
+/*Route::get('/', function () {
     return view('welcome');
-});
+});*/
 
 Route::get('/unauthorized', function () {
     return view('errors.403');
@@ -311,8 +316,9 @@ Route::get('/estimates/files/{id}', 'QuoteController@filequote');
 Route::post('/estimates/modify/quote/uploadfiles/{code}', 'QuoteController@fileupload');
 Route::get('/estimates/modify/quote/getfiles/{code}', 'QuoteController@fileget');
 Route::get('/estimates/modify/quote/deletefiles/{id}', 'QuoteController@filedelete');
-Route::get('/estimates/modify/quote/updatefiletype/{typeid}/{fileid}', 'QuoteController@filetypeupdate');
+Route::post('/estimates/modify/quote/updatefiletype/{typeid}/{fileid}', 'QuoteController@filetypeupdate');
 Route::get('/estimates/modify/quote/getdefaultfiles/{quote_id}', 'QuoteController@fileget');
+Route::post('/estimates/mediacomment/{code}', 'QuoteController@updatemediaComment');
 // user read alert
 Route::get('/alert/user-read', 'AdminController@userreadalert');
 // make comment alert 
@@ -335,7 +341,6 @@ Route::get('/client-registration', function () {
 // store new client details
 Route::post('/client-signup/store','CommonController@storeclientsignup');
 
-/* =============================== Notification Route =============================== */
 //notification
 Route::get('/admin/shownotification', 
 	'AdminController@showadminnotification');
@@ -358,7 +363,6 @@ Route::post('/admin/notification/store/{id?}', 'AdminController@storeadminnotifi
 // detail notification
 Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');
 
-
 // make comment in notification
 Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');
 
@@ -371,29 +375,13 @@ Route::get('/note_role/make-comment', 'AdminController@notemakecomment');
 // role wised read notification
 Route::get('/note_role/user-read', 'AdminController@userreadnote');
 
-
-
-
-// user send notification
-Route::get('/send-notification', 'AdminController@sendnotification');
-
-// detail notification json
-Route::get('/notifica/detail/json/{id?}', 'AdminController@detailnotificationjson');
-
-
-// show all notification
-Route::get('/notifiche', 'HomeController@mostranotifiche');
-// get list of notifications 
-Route::get('/notifiche/json', 'HomeController@getjsonnotifiche');
-// delete notification
-Route::get('/notifiche/delete/{id}', 'HomeController@cancellanotifica');
-
-
 /* ================================ Login Activity Admin ============================= */
 // show list of users
-Route::get('/admin/loginactivity', 'AdminController@activitylogs');
+//Route::get('/admin/loginactivity/user', 'AdminController@activitylogs');
+Route::get('/admin/loginactivity/{mastertype}', 'AdminController@activitylogs');
+Route::get('/admin/loginactivity/{mastertype}/{type}', 'AdminController@activitylogs');
 // get users list json
-Route::get('loginactivity/json', 'AdminController@getjsonactivitylogs');
+Route::get('loginactivity/json/{mastertype}/{type}', 'AdminController@getjsonactivitylogs');
 Route::get('/admin/loginactivity/delete/{id}', 'AdminController@deleteActivitylogs');
 
 /* ================================= Calendar Route ================================== */
@@ -411,6 +399,10 @@ Route::post('/calendario/update/event/{event}', 'CalendarioController@update');
 Route::get('/progetti', 'ProjectController@index');
 Route::get('/progetti/miei', 'ProjectController@miei');
 Route::get('/progetti/add', 'ProjectController@aggiungi');
+
+//PDF
+Route::get('/progetti/pdf/{id}', 'ProjectController@pdf');
+
 // Salva il nuovo progetto
 Route::post('/progetti/store', 'ProjectController@store');
 Route::get('/progetti/delete/project/{project}', 'ProjectController@destroy');
@@ -428,8 +420,9 @@ Route::get('/progetti/files/{id}', 'ProjectController@filequote');
 Route::post('/progetti/uploadfiles/{code}', 'ProjectController@fileupload');
 Route::get('/progetti/getfiles/{code}', 'ProjectController@fileget');
 Route::get('/progetti/deletefiles/{id}', 'ProjectController@filedelete');
-Route::get('/progetti/updatefiletype/{typeid}/{id}', 'ProjectController@filetypeupdate');
+Route::post('/progetti/updatefiletype/{typeid}/{id}', 'ProjectController@filetypeupdate');
 Route::get('/progetti/getdefaultfiles/{quote_id}', 'ProjectController@fileget');
+Route::post('/progetti/mediacomment/{code}', 'ProjectController@updatemediaComment');
 
 
 /* =============================== Invoice Route =============================== */
@@ -463,7 +456,8 @@ Route::get('/add/fatture/getfiles/{code}', 'AccountingController@fileget');
 // delete invoice's uploaded file
 Route::get('/add/fatture/deletefiles/{id}', 'AccountingController@filedelete');
 // update invoice's uploaded file
-Route::get('/add/fatture/updatefiletype/{typeid}/{fileid}', 'AccountingController@filetypeupdate');
+Route::post('/add/fatture/updatefiletype/{typeid}/{fileid}', 'AccountingController@filetypeupdate');
+Route::post('/fatture/mediacomment/{code}', 'ProjectController@updatemediaComment');
 
 
 /* =============================== Provisions Route =============================== */
@@ -476,7 +470,6 @@ Route::get('/pagamenti/json', 'AccountingController@getjson');
 Route::post('/pagamenti/store', 'AccountingController@creadisposizione');
 //
 Route::post('/pagamenti/modifica/accounting/{accounting}', 'AccountingController@modificadisposizione');
-Route::get('/pagamenti/modifica/accounting/{accounting}', 'AccountingController@modificadisposizione');
 //
 Route::get('/pagamenti/duplicate/accounting/{accounting}', 'AccountingController@duplicadisposizione');
 //
@@ -489,15 +482,32 @@ Route::get('/pagamenti/delete/accounting/{accounting}', 'AccountingController@de
 // show information banking services
 Route::get('/pagamenti/coordinate', 'AccountingController@mostracoordinate');
 
+/* =================================== Stat Route =================================== */
+// show stat information
+Route::get('/statistiche/economiche', 'AccountingController@mostrastatistiche');
+// get stat data by type and year
+Route::get('/statistiche/economiche/{anno}', 'AccountingController@statisticheeconomiche');
+// get stat data by date
+Route::post('/statistiche/date', 'AccountingController@statisticheeconomichedate');
+// get cost data in json 
+Route::get('costi/json', 'AccountingController@getjsoncosti');
+// show form for update cost 
+Route::get('/costi/modify/{id}', 'AccountingController@modificacosto');
+// update cost details
+Route::post('/costo/aggiorna/{id}', 'AccountingController@aggiornacosto');
+// delete cost 
+Route::get('/costo/delete/{id}', 'AccountingController@destroycosto');
 
-/* =============================== Info section Route =============================== */
-Route::get('/contatti', 'HomeController@mostracontatti');
-Route::get('/faq', 'HomeController@mostrafaq');
-Route::get('/changelog', 'HomeController@mostrachangelog');
-Route::get('/valutaci', function () {
-    return view('layouts.valutaci');
-});
-Route::post('/valutaci/store', 'HomeController@segnalazionerrore');
+/*===================================== Frequency Admin Section =============================== */
+/*Route::get('/admin/taxonomies/estimates', 'AdminController@estimates'); //fatto
+Route::get('/admin/taxonomies/statiestimate/delete/id/{id}', 'AdminController@deleteStatiEstimates'); //fatto
+Route::post('/admin/taxonomies/updateestimates', 'AdminController@updateStatiEstimates'); //fatto(?)
+Route::post('/admin/taxonomies/addestimates', 'AdminController@addStatiEstimates');*/
+
+Route::get('/admin/frequency', 'AdminController@frequency'); 
+Route::get('/admin/frequency/delete/id/{id}', 'AdminController@deletefrequency'); 
+Route::post('/admin/frequency/update', 'AdminController@updatefrequency');
+Route::post('/admin/frequency/add', 'AdminController@addfrequency');
 
 /* =============================== Quiz Route =============================== */
 // show quiz start page
@@ -528,6 +538,10 @@ Route::post('/storeStepfour', 'QuizController@storestepfour');
 Route::get('/quiz/stepfive/{id}', 'QuizController@stepfive');
 // store quiz step five details
 Route::post('/storeStepfive', 'QuizController@storestepfive');
+// quiz step five save image
+Route::post('/quiz/stepfive/saveimage', 'QuizController@stepfivesaveimage');
+// quiz step five refresh image
+Route::post('/quiz/stepfive/refresh', 'QuizController@stepfiverefreshimage');
 // file viewer
 Route::any('/fileviewer/{src}/{type}', 'QuizController@fileviewer');
 // upload file step five
@@ -536,4 +550,13 @@ Route::post('/stepfive/uploadfiles/{code}', 'QuizController@fileupload');
 Route::get('/stepfive/getfiles/{code}', 'QuizController@fileget');
 // delete file step five
 Route::get('/stepfive/deletefiles/{id}', 'QuizController@filedelete');
+// comment in uploaded file.
+Route::post('/quiz/mediacomment/{code}', 'QuizController@quizupdatemediaComment');
+
+
+// notification delete
+Route::get('/notification/userdelete', 'AdminController@userdeletenotification');
+
+// delete alert 
+Route::get('/alert/userdelete', 'AdminController@userdeletealert');
 

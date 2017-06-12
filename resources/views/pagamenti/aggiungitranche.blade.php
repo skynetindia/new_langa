@@ -2,13 +2,12 @@
 @section('content')
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-<style>tr:hover td {
-    background: #f2ba81;
-}</style>
+
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
-<h1> {{ trans('messages.keyword_add_invoice') }} </h1><hr>
+
+
 
 @if(!empty(Session::get('msg')))
     <script>
@@ -18,15 +17,34 @@
 @endif
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
- <link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
+<link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
 <script type="text/javascript" src="{{asset('public/scripts/dropzone.js')}}"></script>
 
 @include('common.errors')
 <form action="{{url('/pagamenti/tranche/store')}}" method="post" name="add_fattura" id="add_fattura">
 	{{ csrf_field() }}
+	<?php $mediaCode = date('dmyhis');?>
+    <input type="hidden" name="mediaCode" id="mediaCode" value="{{$mediaCode}}" />
+    
+    <div class="invoice-aggiungitranche">
+    
+    <div class="header-lst-img">
+        <div class="header-svg text-left float-left">
+            <img src="http://betaeasy.langa.tv/dev/images/HEADER1_LT_ACCOUNTING.svg" alt="header image">
+        </div>
+        <div class="float-right text-right">
+            <h1> {{ trans('messages.keyword_add_invoice') }} </h1><hr>
+        </div>
+	</div>
+    
+    
+    	<div class="clearfix"></div>
+		<div class="height20"></div>
+
+    
 <div class="row">
 	<div class="col-md-8">
     	    <script>
@@ -50,7 +68,12 @@
 								link.dispatchEvent(clickEvent);
     	    				});
     	    			</script></label>
-    	<div class="col-md-4">
+    	
+	
+	<div class="row">
+	
+    
+    <div class="col-md-4">
 		 	<label for="id"> {{ trans('messages.keyword_invoicenumber') }} </label>
 	        <input value="{{old('idfattura')}}" type="text" id="idfattura" name="idfattura" placeholder=" {{ trans('messages.keyword_invoicenumber') }} " class="form-control">
         </div>
@@ -65,11 +88,10 @@
             @endforeach
 		        
 		    </select>
-<br><br><br>
+<br><br>
 		</div>
-	
-	<div class="row">
-	
+    
+    
 	<div class="col-md-4">
 		<h4> {{ trans('messages.keyword_invoice_header') }} </h4>
 	    <label for="sedelegaleente"> {{ trans('messages.keyword_registered_office_from') }} </label>
@@ -159,12 +181,17 @@
 	</div>
 	</div>
 			<h4> {{ trans('messages.keyword_invoice_body') }} </h4>
-	        <div class="col-md-12">
-	                <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiCorpo"><span class="fa fa-plus"></span></a>
-	                <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminaCorpo"><span class="fa fa-eraser"></span></a>
-	        </div><br>
-	        <div class="">
-	    	<table class="table table-striped">
+               <div class="row">
+                <div class="col-md-12">
+                        <a class="btn btn-warning"  id="aggiungiCorpo"><span class="fa fa-plus"></span></a>
+                        <a class="btn btn-danger"  id="eliminaCorpo"><span class="fa fa-trash"></span></a>
+                </div>
+               </div> 
+               
+               <div class="height10"></div>
+               
+	        <div class="set-height">
+	    	<table class="table table-bordered">
 	    		<thead>
 	    			<th>#</th>
 	    			<th> {{ trans('messages.keyword_references') }} </th>
@@ -321,7 +348,7 @@
 	                </script>
 	    	</table>
 	    	</div>
-			<h4> {{ trans('messages.keyword_base_invoice') }} </h4><a onclick="calcola()" style="text-decoration:none" class="" title="{{ trans('messages.keyword_assembled_compilation') }}"><br> {{ trans('messages.keyword_click') }}  <span class="fa fa-info"></span> {{ trans('messages.keyword_for_compilation') }} </span></a>
+			<h4> {{ trans('messages.keyword_base_invoice') }} </h4><a onclick="calcola()" class="" title="{{ trans('messages.keyword_assembled_compilation') }}"> {{ trans('messages.keyword_click') }}  <span class="fa fa-info"></span> {{ trans('messages.keyword_for_compilation') }} </span></a>
 			<div class="table-responsive">
 	   	<br><table class="table table-bordered">
 	   		<thead>
@@ -356,14 +383,14 @@
 						var percentualeiva = $j('#percentualeiva').val() || 0;
 						var dapagare = $j('#dapagare').val() || 0;
 						
-						var importototale = eval(prompt("Inserisci l'importo equivalente al 100%", <?php echo $totale; ?> || netto));
-						sconto = eval(prompt("Inserisci lo sconto aggiuntivo (€)", sconto));
-						percentuale = eval(prompt("Inserisci la percentuale (%)", percentuale));
-						netto = eval(prompt("Inserisci il prezzo netto (€)", (importototale - sconto) * percentuale / 100));
-						imponibile = eval(prompt("Inserisci l'imponibile (€)", netto));
-						percentualeiva = eval(prompt("Inserisci la l'iva (%)", 22));
-						prezzoiva = eval(prompt("Inserisci il prezzo con iva (€)", imponibile * percentualeiva / 100));
-						dapagare = eval(prompt("Inserisci il totale da pagare (€)", imponibile + prezzoiva));
+						var importototale = eval(prompt("{{trans('messages.keyword_enter_the_amount_equivalent_to')}} 100%", <?php echo $totale; ?> || netto));
+						sconto = eval(prompt("{{trans('messages.keyword_enter_the_additional_discount')}} (€)", sconto));
+						percentuale = eval(prompt("{{trans('messages.keyword_enter_the_percentage')}} (%)", percentuale));
+						netto = eval(prompt("{{trans('messages.keyword_enter_the_net_price')}} (€)", (importototale - sconto) * percentuale / 100));
+						imponibile = eval(prompt("{{trans('messages.keyword_enter_the_taxable_amount')}} (€)", netto));
+						percentualeiva = eval(prompt("{{trans('messages.keyword_enter_the_vat')}} (%)", 22));
+						prezzoiva = eval(prompt("{{trans('messages.keyword_enter_the_price_with_vat')}} (€)", imponibile * percentualeiva / 100));
+						dapagare = eval(prompt("{{trans('messages.keyword_enter_the_total_payable')}} (€)", imponibile + prezzoiva));
 						
 						approssima(netto);
 						approssima(imponibile);
@@ -385,15 +412,15 @@
 	   	</table>
 	   	</div>
 
-	   	<div class="col-md-2" style="padding-top:20px;padding-bottom:10px;">
+	<div class="row"><div class="col-md-2" >
 		<input onclick="mostra2()" type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_save') }}">
-	</div>
+	</div></div>
 
 	</div>
 	<div class="col-md-4">
 		<label for="statoemotivo"> {{ trans('messages.keyword_emotional_state') }} </label>
 		<!-- statiemotivi -->
-		<select name="statoemotivo" class="form-control" id="statoemotivo" style="color:#ffffff">
+		<select name="statoemotivo" class="form-control" id="statoemotivo">
 			@for($i = 0; $i < count($statiemotivi); $i++)
             	@if($i == 0)
 					<option selected style="background-color:{{$statiemotivi[$i]->color}};color:#ffffff">{{$statiemotivi[$i]->name}}</option>
@@ -429,7 +456,7 @@
 		    <input id="frequ" name="frequenza" class="form-control" placeholder="{{ trans('messages.keyword_frequency_in_days') }}" value="{{old('frequenza')}}">
 		</div>
         
-			<br><label for="percentuale">% {{ trans('messages.keyword_total_amount') }}   <p style="color:#f37f0d;display:inline">(*)</p></label>
+			<br><label for="percentuale">% {{ trans('messages.keyword_total_amount') }}  <span class="required">(*)</span></label>
 			<input id="percentuale" name="percentuale" class="form-control" value="{{old('percentuale')}}" placeholder="% {{ trans('messages.keyword_description') }}">
             <div id="percentualediv">
 		    <br><label for="frequ"> {{ trans('messages.keyword_amount') }} </label>
@@ -447,7 +474,7 @@
 				}
 			});
 			</script>
-			<br><label for="datascadenza"> {{ trans('messages.keyword_expiry_date_invoice') }}  <p style="color:#f37f0d;display:inline">(*)</p></label><br>
+			<br><label for="datascadenza"> {{ trans('messages.keyword_expiry_date_invoice') }} <span class="required">(*)</span></label><br>
 		    <input value="{{old('datascadenza')}}" class="form-control" name="datascadenza" id="datascadenza"></input><br>
 		    <script>
 		    $j('#frequenza').hide();
@@ -466,87 +493,103 @@
 		});
 		</script>
 
-</form>          	
-          	<?php $mediaCode = date('dmyhis');?>
+</form>  
 
+		<div class="row">
           	<div class="col-md-12">
-
+            <div class="bg-white modifica-blade-estimate-upload">
+            
 	        <label for="scansione"> 
 	        {{ trans('messages.keyword_attach_administrative_file') }} 
 	        </label><br>
-
-	        <br>
+	        <div class="row">
 	        <div class="col-md-12">
-
             	<div class="image_upload_div">
-                <?php echo Form::open(array('url' => '/add/fatture/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
-					
+                <?php echo Form::open(array('url' => '/add/fatture/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>					
 					{{ csrf_field() }}					
-
     			</form>				
 				</div>
-
 				<script>
-				var url = '<?php echo url('/add/fatture/getfiles/'.$mediaCode); ?>';
+				var $ = jQuery.noConflict();
+				var urlgetfile = '<?php echo url('/add/fatture/getfiles/'.$mediaCode); ?>';
 				Dropzone.autoDiscover = false;
-				$j(".dropzone").each(function() {
-				  $j(this).dropzone({
+				$(".dropzone").each(function() {
+				  $(this).dropzone({
 					complete: function(file) {
 					  if (file.status == "success") {
-					  	 $j.ajax({url: url, success: function(result){
-        					$j("#files").html(result);
-							$j(".dz-preview").remove();
-							$j(".dz-message").show();
+					  	 $.ajax({url: urlgetfile, success: function(result){
+        					$("#files").html(result);
+							$(".dz-preview").remove();
+							$(".dz-message").show();
 					    }});
 					  }
+					  if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
+                           $( "#addMediacommnetmodal" ).modal();
+                           $('#addMediacommnetmodal').on('shown.bs.modal', function(){});
+                      }
 					}
 				  });
 				});
-
-
 				function deleteQuoteFile(id){
 					var urlD = '<?php echo url('/add/fatture/deletefiles/'); ?>/'+id;
-						$j.ajax({url: urlD, success: function(result){
-							$j(".quoteFile_"+id).remove();
-					    }});
-				}
-
-				function updateType(typeid,fileid){
-					var urlD = '<?php echo url('/add/fatture/updatefiletype/'); ?>/'+typeid+'/'+fileid;
-						$j.ajax({url: urlD, success: function(result){
-							//$j(".quoteFile_"+id).remove();
+						$.ajax({url: urlD, success: function(result){
+							$(".quoteFile_"+id).remove();
 					    }});
 				}				
+				function updateType(typeid,fileid,checkboxid1){           
+                    var ischeck = 0;            
+                    if($('#'+checkboxid1+':checkbox:checked').length > 0){                
+                        var ischeck = 1;
+                    }
+                    var checkValues = $j('input[name=rdUtente_'+fileid+']:checked').map(function(){
+                        return $(this).val();
+                    }).get();
+                    var urlD = '<?php echo url('/add/fatture/updatefiletype/'); ?>/'+typeid+'/'+fileid;
+                    $.ajax({
+                        url: urlD,
+                        type: 'post',
+                        data: { "_token": "{{ csrf_token() }}",ids: checkValues },
+                        success:function(data){
+                        }
+                    });
+                    //$.ajax({url: urlD, success: function(result){ }});
+                }				
 			
                 </script>
-	            <table class="table table-striped table-bordered">	                
+	           <div class="set-height">
+                <table class="table table-striped table-bordered">	                
 	                <tbody><?php
 					if(isset($preventivo->id) && isset($quotefiles)){
 					foreach($quotefiles as $prev) {
-				$imagPath = url('/storage/app/images/quote/'.$prev->name);
-				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-eraser"></i></a></td></tr>';
-				$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
-				$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();							
-				foreach($utente_file as $key => $val){
-					$check = '';
-					if($val->ruolo_id == $prev->type){
-						$check = 'checked';
-					}
-					$html .=' <input type="radio" name="rdUtente_'.$prev->id.'"  '.$check.' id="rdUtente_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /> '.$val->nome_ruolo;
-				}
-				echo $html .='</td></tr>';
-			}
+						$imagPath = url('/storage/app/images/quote/'.$prev->name);
+						$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";
+	        			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';						
+						
+						$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
+						$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();							
+						foreach($utente_file as $key => $val){
+							$check = '';
+							$array = explode(',', $prev->type);
+                            if(in_array($val->ruolo_id,$array)){                    
+                                $check = 'checked';
+                            }
+                            $specailcharcters = array("'", "`");
+                            $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                            $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+						}
+						echo $html .='</td></tr>';
+						}
 					}
                     ?></tbody>
                     <tbody id="files">
 	                </tbody>
                     
 	                <script>
-	                var $j = jQuery.noConflict();
+	                
 	                    var selezione = [];
 	                    var nFile = 0;
 	                    var kFile = 0;
-	                    $j('#aggiungiFile').on("click", function() {
+	                    $('#aggiungiFile').on("click", function() {
 	                        var tab = document.getElementById("files");
 	                        var tr = document.createElement("tr");
 	                        var check = document.createElement("td");
@@ -564,28 +607,132 @@
 	                        tr.appendChild(check);
 	                        tr.appendChild(td);
 	                        tab.appendChild(tr);
-	                        $j('.selezione').on("click", function() {
+	                        $('.selezione').on("click", function() {
 				                selezione[nFile] = $j(this).parent().parent();
 				                nFile++;
 		                	});
 	                    });
-	                    $j('#eliminaFile').on("click", function() {
+	                    $('#eliminaFile').on("click", function() {
 	                       for(var i = 0; i < nFile; i++) {
 	                           selezione[i].remove();
 	                       }
 	                       nFile = 0;
 	                    });
 	                </script>
-	            </table><hr>
-	            </div>
-
+	            </table><hr></div>
+	            </div></div>
+            </div>	
             </div>
-		
+            </div>
+            
+            	
 	</div>
 </div>
 
 
+<div class="modal fade" id="addMediacommnetmodal" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-dialog modal-l">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title" id="modalTitle">{{trans('messages.keyword_add_title_and_description')}}</h3>
+            </div>
+            <div class="modal-body">
+                <!-- Start form to add a new event -->
+                <form action="{{ url('/fatture/mediacomment/').'/'.$mediaCode }}" name="commnetform" method="post" id="commnetform">
+                    {{ csrf_field() }}
+                    @include('common.errors')                       
+                    <div class="row">
+                        <div class="col-md-12">                               
+                            <div class="form-group">
+                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} <span class="required">(*)</span> </label>
+                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
+                            </div>
+                            <div class="form-group">
+                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} <span class="required">(*)</span></label>
+                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
+                            </div>
+                        </div>
+                     </div>
+                    <div class="modal-footer">
+                        <input type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_submit') }} ">
+                    </div>
+                </form>
+                <!-- End form to add a new event -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+
+<div class="footer-svg">
+  <img src="http://betaeasy.langa.tv/dev/images/FOOTER2_RB_ACCOUNTING.svg" alt="footer enti image">
+</div>
+
+
+
+
 <script type="text/javascript">
+$(document).ready(function() {
+      $("#commnetform").validate({            
+            rules: {
+                title: {
+                    required: true
+                },
+                descriptions: {
+                    required: true                    
+                }
+            },
+            messages: {
+                title: {
+                    required: "{{trans('messages.keyword_please_enter_a_title')}}"
+                },
+                descriptions: {
+                    required: "{{trans('messages.keyword_please_enter_a_description')}}"
+                }
+            }
+        });
+
+      $(function(){
+        $('#commnetform').on('submit',function(e){
+            $.ajaxSetup({
+                header:$('meta[name="_token"]').attr('content')
+            })
+            e.preventDefault(e);
+                $.ajax({
+                type:"POST",
+                url:'{{ url('/fatture/mediacomment/').'/'.$mediaCode }}',
+                data:$(this).serialize(),
+                //dataType: 'json',
+                success: function(data) {                    
+                    if(data == 'success'){
+                         $.ajax({url: urlgetfile, success: function(result){                
+                            $("#files").html(result);
+                            $(".dz-preview").remove();
+                            $(".dz-message").show();
+                        }});
+                      $('#addMediacommnetmodal').modal('hide');
+                    }
+                },
+                error: function(data){                   
+                  if(data == 'success'){
+                        $.ajax({url: urlgetfile, success: function(result){                
+                            $("#files").html(result);
+                            $(".dz-preview").remove();
+                            $(".dz-message").show();
+                        }});
+                      $('#addMediacommnetmodal').modal('hide');
+                    }
+                }
+            })
+            });
+        });
+    });
+
 $(document).ready(function() {
       
 	// validate add invoice form on keyup and submit

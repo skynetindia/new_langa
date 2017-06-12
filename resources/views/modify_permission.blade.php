@@ -14,14 +14,13 @@
     </script> 
 @endif
 
-@include('common.errors')
 <h1>{{ trans('messages.keyword_permission') }}</h1>
 <hr>
 <h5>{{ trans('messages.keyword_profiling') }} Easy <b> LANGA </b></h5>
 <hr>
 <?php $ruolo = DB::table('ruolo_utente')->where('is_delete', '=', 0)->get(); ?>
 <?php echo Form::open(array('url' => '/store-permessi', 'id' => 'addroleform', 'name' => 'addroleform' )) ?>
-<div class="row text-right">
+<div class="col-md-12 text-right">
 <div class="col-md-6"></div>
 <?php $currentRoleName = "";?>
   @if(isset($ruolo_id))    
@@ -39,7 +38,7 @@
   @endif 
   <div class="col-md-3 form-group permission-role">
   <label for="dipartimento">{{trans('messages.keyword_profiling_name')}} <span class="required">(*)</span></label>
-    <input type="text" name="new_ruolo" class="form-control pull-left" value="{{$currentRoleName}}" placeholder="enter role name">
+    <input type="text" name="new_ruolo" class="form-control pull-left" value="{{$currentRoleName}}" placeholder="{{trans('messages.keyword_profiling_name')}}">
   </div>
 </div>
 <?php
@@ -199,7 +198,7 @@
       }  
     }
   
-  echo "</table>";
+  echo "</table></div>";
 ?>
 @endif 
 <script type="text/javascript">
@@ -224,11 +223,29 @@
 </div>
 <?php echo Form::close(); ?> 
 <script>
+$(document).ready(function() {
+//
+  // validate add role form on keyup and submit
+        $("#addroleform").validate({            
+            rules: {
+                new_ruolo: {
+                    required: true,
+                }
+            },
+            messages: {
+                new_ruolo: {
+                    required: "{{trans('messages.keyword_please_enter_a_role_name')}}"
+                }
+            }
+        });
+      });
+</script>
+
+<script>
 $('#nome_ruolo').change(function() {
   var url = '<?php echo url('/role-permessi');?>';
   window.location = url+'/'+$(this).val();
 });
 </script> 
-<script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
-
+<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script>
 @endsection

@@ -1,17 +1,13 @@
 @extends('adminHome')
 @section('page')
 
-@include('common.errors')
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script>
-<script type="text/javascript" src="{{asset('public/scripts/jqColorPicker.min.js')}}"></script>
+@include('common.errors') 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script> 
+<script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script> 
+<script type="text/javascript" src="{{asset('public/scripts/jqColorPicker.min.js')}}"></script> 
 <script type="text/javascript">
      $('.color').colorPicker();
-</script>
-
-
-
+</script> 
 <script type="text/javascript">
  
  $(document).ready(function() {
@@ -22,14 +18,14 @@
         $("#sconto_section").hide();       
         $("#rendita").hide();
         $("#rendita_reseller").hide();
-        $("#zone").hide();
+        $("#zone_section").hide();
     } 
     else if( $(this).val() == 3) {
 
         $("#sconto_section").hide();    
         $("#rendita").hide();
         $("#rendita_reseller").hide();
-        $("#zone").hide();
+        $("#zone_section").hide();
 
     } else if( $(this).val() == 4) {
 
@@ -41,41 +37,35 @@
           $("#rendita").hide(); 
         }
         $("#rendita_reseller").hide();
-        $("#zone").show();
+        $("#zone_section").show();
 
     } 
     else {
       $("#sconto_section").show(); 
-      if (!$('#profilazioneinterna').is(':checked')) {
+        if (!$('#profilazioneinterna').is(':checked')) {
           $("#rendita").show();
         }
         else {
           $("#rendita").hide(); 
         }
       $("#rendita_reseller").show();
-      $("#zone").show();
+      $("#zone_section").show();
     }
-
-
   });
 
 });
 
-</script>
-
-@if(!empty(Session::get('msg')))
-
-    <script>
+</script> 
+@if(!empty(Session::get('msg'))) 
+<script>
 
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
 
     document.write(msg);
 
-    </script>
-
-@endif
-
-    <script type="text/javascript">
+    </script> 
+@endif 
+<script type="text/javascript">
 
         $(document).on("click", "#profilazioneinterna", function () {
             
@@ -86,170 +76,131 @@
             }
         });
 
-    </script>
-
-
+    </script> 
 @include('common.errors')
+<h1>{{ isset($utente) ? trans('messages.keyword_edituser') : trans('messages.keyword_adduser') }} </h1>
+<hr>
 
+<!-- echo $utente->id -->
 
-  <h1>{{ isset($utente) ? trans('messages.keyword_edituser') : trans('messages.keyword_adduser') }} </h1><hr>
-
-  
-  <!-- echo $utente->id -->
-	
-  <?php $redirct=(isset($utente))? ("/".$utente->id):"";
+<?php $redirct=(isset($utente))? ("/".$utente->id):"";
    echo Form::open(array( 'url' => '/admin/update/utente' .$redirct, 'files' => true, 'id' => 'user_modification'));
 	
    ?>
+{{ csrf_field() }} 
 
-    {{ csrf_field() }}
+<!-- colonna a sinistra -->
+<div class="col-md-12 text-right">
+<div id="profilazione">
+	<div class="form-group m_select lblshow">
+  <input type="checkbox" id="profilazioneinterna" name="is_internal_profile" value="1" <?php if(isset($utente->is_internal_profile) && ($utente->is_internal_profile == '1')) { echo 'checked'; } ?>  />
+   <label for="profilazioneinterna" > {{ trans('messages.keyword_internalprofile') }}? </label>
+   </div>
+</div>
+</div>
 
-    <!-- colonna a sinistra -->
-
-  <div id="profilazione" class="pull-right">
-
-    <label for="profilazione" >
-        <input type="checkbox" id="profilazioneinterna" name="is_internal_profile" value="1" <?php if(isset($utente->is_internal_profile) && ($utente->is_internal_profile == '1')) { echo 'checked'; } ?>  />
-        {{ trans('messages.keyword_internalprofile') }}?
-    </label>
-
+<div class="col-md-4">
+	<div class="form-group">
+  <label for="name">{{ trans('messages.keyword_name') }} <span class="required">(*)</span></label>
+  <input type="hidden" name="user_id" value=" <?php if(isset($utente->id)){ echo $utente->id; } ?>">
+  <input value="<?php if(isset($utente->name)){ echo $utente->name; } ?>" class="form-control" type="text" name="name" id="name" placeholder="{{trans('messages.keyword_name')}}">
   </div>
 
-   <div class="col-md-4">
+<div class="form-group">
+  <label for="colore">{{ trans('messages.keyword_color') }}</label>
+  <input value="<?php if(isset($utente->color)){ echo $utente->color; } ?>" class="form-control color no-alpha" type="text" name="colore" id="colore" placeholder="{{ trans('messages.keyword_color') }}">
+</div>
 
-    <label for="name">{{ trans('messages.keyword_name') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <input type="hidden" name="user_id" value=" <?php if(isset($utente->id)){ echo $utente->id; } ?>">
-
-    <input value="<?php if(isset($utente->name)){ echo $utente->name; } ?>" class="form-control" type="text" name="name" id="name" placeholder="enter name"><br>
-                
-    <label for="colore">{{ trans('messages.keyword_color') }}</label>
-
-    <input value="<?php if(isset($utente->color)){ echo $utente->color; } ?>" class="form-control color no-alpha" type="text" name="colore" id="colore" placeholder="choose color"><br>
-
-    <div id="sconto_section"  <?php if(isset($utente->dipartimento)){ if($utente->dipartimento == 1 || $utente->dipartimento == 3) { ?> style="display: none" <?php } } ?>>
-
+  <div id="sconto_section"  <?php if(isset($utente->dipartimento)){ if($utente->dipartimento == 1 || $utente->dipartimento == 3) { ?> style="display: none" <?php } } ?>>
     <div id="sconto">
-
-    <label for="sconto">{{ trans('messages.keyword_discount') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <input value="<?php if(isset($utente->sconto)){ echo $utente->sconto; } ?>" class="form-control" type="text" name="sconto" id="sconto" placeholder="enter discont"><br>
-
-    </div>
-
-    <div id="sconto_bonus">
-
-    <label for="sconto_bonus">{{ trans('messages.keyword_discount') }} {{ trans('messages.keyword_bonus') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <input value="<?php if(isset($utente->sconto_bonus)){ echo $utente->sconto_bonus; } ?>" class="form-control" type="text" name="sconto_bonus" id="sconto_bonus" placeholder="enter discount bonus"><br>
-
-    </div></div>  
-
-    </div>
-
-    <!-- colonna centrale -->
-
-    <div class="col-md-4">
-
-    <label for="id_ente">
-    {{ trans('messages.keyword_associate') }}  <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-      <div class="col-xs-6">
-
-      <br>
-
-      <a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungiente"><i class="fa fa-plus"></i></a>
-
-      <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminaente"><i class="fa fa-eraser"></i></a>
-              
+    <div class="form-group">
+      <label for="sconto">{{ trans('messages.keyword_discount') }} <span class="required">(*)</span></label>
+      <input value="<?php if(isset($utente->sconto)){ echo $utente->sconto; } ?>" class="form-control" type="text" name="sconto" id="sconto" placeholder="{{ trans('messages.keyword_discount') }}">
       </div>
+    </div>
+    <div id="sconto_bonus">
+     <div class="form-group">
+      <label for="sconto_bonus">{{ trans('messages.keyword_discount') }} {{ trans('messages.keyword_bonus') }} <span class="required">(*)</span></label>
+      <input value="<?php if(isset($utente->sconto_bonus)){ echo $utente->sconto_bonus; } ?>" class="form-control" type="text" name="sconto_bonus" id="sconto_bonus" placeholder="{{ trans('messages.keyword_discount') }} {{ trans('messages.keyword_bonus') }}">
+    </div>
+    </div>
+  </div>
+</div>
 
-    <div class="col-md-12">
+<!-- colonna centrale -->
+<div class="col-md-4">
+  <div class="form-group">
+  <label for="id_ente"> {{ trans('messages.keyword_associate') }} <span class="required">(*)</span></label>
+  <div class="row">
+  <div class="col-xs-9 m_select" id="m_select"><?php 
+  if(isset($utente->id_ente))
+  {
+      $ente = explode(",", $utente->id_ente);          
+      $i=0;
+            
+      foreach ($ente as $ente_value) { ?>
+      <div class="mb10"><select name="idente[]" class="form-control checkente<?php echo $i;?>" id="id_ente">
+            <option style="background-color:white" selected="" disabled="">-- select --</option>
+           <?php foreach ($enti as $enti_value) { ?>
+                <option <?php if($enti_value->id == $ente_value){ echo 'selected'; } ?> value="<?php echo $enti_value->id ?>"><?php echo $enti_value->nomereferente ?> </option>
+                <?php  }  ?>
+          </select>          
+          <input id="checkente<?php echo $i;?>" type="checkbox" class="checkente">
+          <label for="checkente<?php echo $i;?>"></label></div>
+           <?php $i++; ?>       
+          <?php } ?>
+        <input type="hidden" id="hidden" name="check" value="<?php echo $i; ?>">
+        <?php 
+  }
+  else {
+     $i=0;
+    ?><div class="mb10"><select name="idente[]" class="form-control checkente<?php echo $i;?>" id="id_ente">
+          <option style="background-color:white" selected="" disabled="">-- select --</option><?php 
+          foreach ($enti as $enti_value) { 
+              ?><option value="<?php echo $enti_value->id ?>"><?php echo $enti_value->nomereferente ?> </option><?php  
+            }
+          ?></select>          
+          <input id="checkente<?php echo $i;?>" type="checkbox" class="checkente">
+          <label for="checkente<?php echo $i;?>"></label></div>
+          <input type="hidden" id="hidden" name="check" value="1"><?php
 
-      <table class="table table-striped table-bordered">
-                  
-      <tbody id="ente">
-
-<?php 
-
-if(isset($utente->id_ente))
-{
-    $ente = explode(",", $utente->id_ente);          
-    $i=0;
-          
-    foreach ($ente as $ente_value) { ?>
-          
-    <tr>                      
-    <label class="checkente<?php echo $i;?>">
-
-    <select name="idente[]" class="form-control" id="id_ente" style="width: 200px">
-
-      <option style="background-color:white" selected disabled>-- select --</option>  
-
-      <?php foreach ($enti as $enti_value) { ?> 
-        <option <?php if($enti_value->id == $ente_value){ echo 'selected'; } ?> value="<?php echo $enti_value->id ?>"><?php echo $enti_value->nomereferente ?> </option> 
-      <?php  }  ?>
-    
-    </select>
-    <input id="checkente<?php echo $i;?>" type="checkbox" class="checkente">  
-
-    </label>
-
-    <?php $i++; ?>
-
-    </tr>
-    <?php } ?>
-
-    <input type="hidden" id="hidden" name="check" value="<?php echo $i; ?>">
-
-<?php 
-} else {  
+  } 
+/*else {  
 
   $i=0;
-  ?>        
+  ?>
       <tr>
-                      
-    <label class="checkente<?php echo $i;?>">
-      <select name="idente[]" class="form-control" id="id_ente" style="width: 200px">
-
-      <option style="background-color:white" selected disabled>-- select --</option> 
-
-      <?php foreach ($enti as $enti_value) { ?> 
-
-        <option value="<?php echo $enti_value->id ?>">
-        <?php echo $enti_value->nomereferente ?> </option> 
-
-      <?php  }  ?>
-    
-      </select>
-      
-      <input id="checkente<?php echo $i;?>" type="checkbox" class="checkente">  
-
-    </label>
-
-    <?php $i++; ?>
-
-    </tr>
-   
-    <input type="hidden" id="hidden" name="check" value="<?php echo $i; ?>">
-
-<?php } ?>
-
-</tbody>
-
-    <script>
-                    
+        <label class="checkente<?php echo $i;?>">
+          <select name="idente[]" class="form-control" id="id_ente" style="width: 200px">
+            <option style="background-color:white" selected disabled>-- select --</option>
+            <?php foreach ($enti as $enti_value) { ?>
+            <option value="<?php echo $enti_value->id ?>"> <?php echo $enti_value->nomereferente ?> </option>
+            <?php  }  ?>
+          </select>
+          <input id="checkente<?php echo $i;?>" type="checkbox" class="checkente">
+        </label>
+        <?php $i++; ?>
+      </tr>
+      <input type="hidden" id="hidden" name="check" value="<?php echo $i; ?>">
+<?php } */?>
+  </div>
+    <div class="col-md-3 text-right"> 
+      <a class="btn btn-warning" id="aggiungiente"><i class="fa fa-plus"></i></a> 
+      <a class="btn btn-danger" id="eliminaente"><i class="fa fa-trash"></i></a>
+    </div>  
+    <div class="col-md-12"><label for="id_ente" generated="true" class="error"></label></div>
+  </div>
+  </div>
+      <script>      
     $('#aggiungiente').on("click", function() {
     var i = $("#hidden").val();
-      
-      $('#ente').append("<label class='checkente"+i+"'><select name='idente[]' class='form-control' id='id_ente'> <option selected style='background-color:white' disabled> -- select -- </option><?php foreach ($enti as $enti_value) { ?><option value='<?php echo  $enti_value->id ?>'><?php echo $enti_value->nomereferente ?></option><?php } ?></select><input id='checkente"+i+"' type='checkbox' class='checkente'></label>" );
-        i++;
 
+      $('#m_select').append("<div class='mb10'><select name='idente[]' class='form-control checkente"+i+"' id='id_ente"+i+"'><option style='background-color:white' selected disabled>-- select --</option><?php foreach ($enti as $enti_value) { ?><option value='<?php echo  $enti_value->id ?>'><?php echo $enti_value->nomereferente ?></option><?php } ?></select><input id='checkente"+i+"' class='checkente' type='checkbox'><label for='checkente"+i+"'></label></div>");
+      i++; 
+     /* $('#m_select').append("<label class='checkente"+i+"'><select name='idente[]' class='form-control' id='id_ente'> <option selected style='background-color:white' disabled> -- select -- </option><?php foreach ($enti as $enti_value) { ?><option value='<?php echo  $enti_value->id ?>'><?php echo $enti_value->nomereferente ?></option><?php } ?></select><input id='checkente"+i+"' type='checkbox' class='checkente'></label>" );*/
         $('#hidden').val(i);
 
-        });
-
-              $('#eliminaente').on("click", function() {
+        });   $('#eliminaente').on("click", function() {
 
                   if($('#checkente0').prop('checked') == true) {
                       alert("Can not remove default ente");
@@ -261,11 +212,12 @@ if(isset($utente->id_ente))
 
                       var i = $("#hidden").val();
 
-                        if($(this).prop('checked') ==true) {
+                        if($(this).prop('checked') == true) {
 
                           var newclass = $(this).prop('id');
-                          $("."+newclass).remove(); 
-                          
+                          $("."+newclass).remove();
+                          $(this).remove(); 
+                          $('label[for="'+newclass+'"]').remove();                         
                             i--;
                             $('#hidden').val(i);
                       }
@@ -276,54 +228,39 @@ if(isset($utente->id_ente))
               });
 
           </script>
+  <div class="form-group">
+    <label for="email">{{ trans('messages.keyword_email') }} <span class="required"> (*) </span></label>  
+    <input value="<?php if(isset($utente->email)){ echo $utente->email; } ?>" class="form-control" type="email" name="email" id="email" placeholder="{{ trans('messages.keyword_email') }}">
+ </div>
 
+  <div class="form-group" id="rendita" <?php if(isset($utente->is_internal_profile) && ($utente->is_internal_profile == 1)) { echo 'style="display: none"';} ?> >
+    <label for="rendita">{{ trans('messages.keyword_revenue') }}<span class="required"> (*) </span></label>
+    <input value="<?php if(isset($utente->rendita)){ echo $utente->rendita; } ?>" class="form-control" type="text" name="rendita" id="rendita" placeholder="{{ trans('messages.keyword_revenue') }}">    
+  </div>
+  <div class="form-group" id="rendita_reseller" <?php echo (isset($utente->dipartimento) && ($utente->dipartimento == 1 || $utente->dipartimento == 3 || $utente->dipartimento == 4))?"style='display: none'":""; ?>>
+    <label for="rendita_reseller"> {{ trans('messages.keyword_revenuereseller') }} <span class="required"> (*) </span> </label>
+    <input value="<?php if(isset($utente->rendita_reseller)){ echo $utente->rendita_reseller; } ?>" class="form-control" type="text" name="rendita_reseller" id="rendita_reseller" placeholder="{{ trans('messages.keyword_revenuereseller') }}">    
+  </div>
+</div>
 
-              </table>
-        </div>  
-      <br>
+<!-- colonna a destra -->
+<div class="col-md-4">
 
-      <label for="email">{{ trans('messages.keyword_email') }} </label><p style="color:#f37f0d;display:inline"> (*) </p></label>
-
-      <input value="<?php if(isset($utente->email)){ echo $utente->email; } ?>" class="form-control" type="email" name="email" id="email" placeholder="enter email"><br>
-
-      <div id="rendita" <?php if(isset($utente->is_internal_profile) && ($utente->is_internal_profile == 1)) { echo 'style="display: none"';} ?> >
-
-      <label for="rendita">{{ trans('messages.keyword_revenue') }} <p style="color:#f37f0d;display:inline"> (*) </p></label>
-
-      <input value="<?php if(isset($utente->rendita)){ echo $utente->rendita; } ?>" class="form-control" type="text" name="rendita" id="rendita" placeholder="enter revenue l'annuità"><br>
-    
-      </div>
-
-
-      <div id="rendita_reseller" <?php echo (isset($utente->dipartimento) && ($utente->dipartimento == 1 || $utente->dipartimento == 3 || $utente->dipartimento == 4))?"style='display: none'":""; ?>>
-
-     <label for="rendita_reseller">{{ trans('messages.keyword_revenuereseller') }}<p style="color:#f37f0d;display:inline"> (*) </p></label>
-
-      <input value="<?php if(isset($utente->rendita_reseller)){ echo $utente->rendita_reseller; } ?>" class="form-control" type="text" name="rendita_reseller" id="rendita_reseller" placeholder="enter revenue of reseller"><br>
-
-      </div>
-
-      </div>
-
-    <!-- colonna a destra -->
-
-
-    <div class="col-md-4">
-
-    <label for="dipartimento">{{ trans('messages.keyword_profile') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <select id="dipartimento" class="form-control" name="dipartimento">
-        
-        <option style="background-color:white" selected disabled>-- select --</option>  
-         @foreach($ruolo as $ruolo)
-           <option  value="{{ $ruolo->ruolo_id }}" <?php echo (isset($utente->dipartimento) && $utente->dipartimento == $ruolo->ruolo_id) ? 'selected="selected"':'';?>>{{ $ruolo->nome_ruolo }}</option>  
+<div class="form-group">
+   <label for="dipartimento">{{ trans('messages.keyword_profile') }} <span class="required">(*)</span></label>
+  <select id="dipartimento" class="form-control" name="dipartimento">
+    <option style="background-color:white" selected disabled>-- select --</option>      
+         @foreach($ruolo as $ruolo)           
+    <option  value="{{ $ruolo->ruolo_id }}" <?php echo (isset($utente->dipartimento) && $utente->dipartimento == $ruolo->ruolo_id) ? 'selected="selected"':'';?>>{{ $ruolo->nome_ruolo }}</option>      
         @endforeach 
-
-      </select><br>
-
-      <div class="role" > </div>
-
-      <script>
+  </select>
+</div>
+<div class="form-group">
+  <label for="password">{{ trans('messages.keyword_password') }}</label>
+  <input class="form-control" type="password" name="password" id="password" placeholder="{{ trans('messages.keyword_password') }}" >
+</div>
+  <div class="role" > </div>
+  <script>
       
         $('#dipartimento').change(function() {
 
@@ -390,107 +327,102 @@ if(isset($utente->id_ente))
 
 
       </script>
+  
+  <div class="form-group" id="zone_section" <?php if(isset($utente->dipartimento) && ( $utente->dipartimento == 1 || $utente->dipartimento == 3)) { ?> style="display: none" <?php } ?>>
+     <label for="zone">{{ trans('messages.keyword_zone') }} <span class="required">(*)</span></label>
+    <div class="row">
+      <div class="col-md-9 m_select m_select-set-width" id="zone"><?php 
+      if(isset($utente->id_citta))
+      {
+    $city = explode(",", $utente->id_citta);
+    $i=0;
+    foreach ($city as $city_value) { ?>
+        <div class="mb10"><select name="zone[]" class="form-control checkzone<?php echo $i;?>">
+                <option style="background-color:white" selected disabled>-- select --</option>
+                <?php  
 
-      <label for="password">{{ trans('messages.keyword_password') }}</label>
+    foreach ($citta as $citta_value) { ?>
+                <option <?php if($citta_value->id_citta == $city_value){ echo 'selected'; } ?> value="<?php echo $citta_value->id_citta ?>"><?php echo $citta_value->nome_citta ?> </option>
+                <?php    }                
+                ?></select><input id="checkzone<?php echo $i;?>" type="checkbox" class="checkzone">
+              <label for="checkzone<?php echo $i;?>"></label></div><?php $i++; 
+            }
+}
+else {
+  $i=0;
+  ?><div class="mb10"><select name="zone[]" class="form-control checkzone<?php echo $i;?>">
+                <option style="background-color:white" selected disabled>-- select --</option>
+                <?php  
 
-      <input class="form-control" type="password" name="password" id="password" placeholder="enter password" > <br>
+    foreach ($citta as $citta_value) { ?>
+                <option value="<?php echo $citta_value->id_citta ?>"><?php echo $citta_value->nome_citta ?> </option>
+                <?php    }                
+    ?>
+              </select><input id="checkzone<?php echo $i;?>" type="checkbox" class="checkzone">
+              <label for="checkzone<?php echo $i;?>"></label></div><?php $i++; 
 
-      <div id="zone" <?php if(isset($utente->dipartimento) && ( $utente->dipartimento == 1 || $utente->dipartimento == 3)) { ?> style="display: none" <?php } ?>>
+}?>
+<input type="hidden" id="hiddenzone" name="checkhidden" value="<?php echo $i; ?>">
+        <?php 
 
-      <label for="zone">{{ trans('messages.keyword_zone') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-      <div class="col-xs-6">
-      <br><a class="btn btn-warning" style="text-decoration: none; color:#fff" id="aggiungizone"><i class="fa fa-plus"></i></a>
-
-      <a class="btn btn-danger" style="text-decoration: none; color:#fff" id="eliminazone"><i class="fa fa-eraser"></i></a>
-
-    </div>
-
-    <div class="col-md-12">
-    
-    <table class="table table-striped table-bordered">
-                  
-    <tbody id="zone">
-
-<?php 
-
-if(isset($utente->id_citta))
+/*if(isset($utente->id_citta))
 {
 
     $city = explode(",", $utente->id_citta);
-
     $i=0;
-
     foreach ($city as $city_value) { ?>
+          <tr>
+            <label class="checkzone<?php echo $i;?>">
+              <select name="zone[]" class="form-control" id="zone" style="width: 200px">
+                <option style="background-color:white" selected disabled>-- select --</option>
+                <?php  
 
-    <tr>
-
-    <label class="checkzone<?php echo $i;?>">                    
-
-    <select name="zone[]" class="form-control" id="zone" style="width: 200px">
-          <option style="background-color:white" selected disabled>-- select --</option>  
-    <?php  
-
-    foreach ($citta as $citta_value) { ?> 
-
-     <option <?php if($citta_value->id_citta == $city_value){ echo 'selected'; } ?> value="<?php echo $citta_value->id_citta ?>"><?php echo $citta_value->nome_citta ?> </option> 
-    <?php    }
+    foreach ($citta as $citta_value) { ?>
+                <option <?php if($citta_value->id_citta == $city_value){ echo 'selected'; } ?> value="<?php echo $citta_value->id_citta ?>"><?php echo $citta_value->nome_citta ?> </option>
+                <?php    }
     ?>
-
-    </select>
-
-    <input id="checkzone<?php echo $i;?>" type="checkbox" class="checkzone"> 
-    </label>
-    <?php $i++; ?>
-        </tr>
-    <?php  } ?>
-
-    <input type="hidden" id="hiddenzone" name="checkhidden" value="<?php echo $i; ?>">
-
-<?php 
-} else {  
+              </select>
+              <input id="checkzone<?php echo $i;?>" type="checkbox" class="checkzone">
+            </label>
+            <?php $i++; ?>
+          </tr>
+          <?php  } ?>
+        <input type="hidden" id="hiddenzone" name="checkhidden" value="<?php echo $i; ?>">
+        <?php 
+} 
+else {  
 
   $i=0;
   ?>
+        <tr>
+          <label class="checkzone<?php echo $i;?>">
+            <select name="zone[]" class="form-control" id="zone" style="width: 200px">
+              <option style="background-color:white" selected disabled>-- select --</option>
+              <?php  
 
-   <tr>
-
-    <label class="checkzone<?php echo $i;?>">                    
-
-    <select name="zone[]" class="form-control" id="zone" style="width: 200px">
-          <option style="background-color:white" selected disabled>-- select --</option> 
-    <?php  
-
-    foreach ($citta as $citta_value) { ?> 
-
-     <option value=""><?php echo $citta_value->nome_citta ?> </option> 
-
-    <?php    }
+    foreach ($citta as $citta_value) { ?>
+              <option value=""><?php echo $citta_value->nome_citta ?> </option>
+              <?php    }
     ?>
-
-    </select>
-
-    <input id="checkzone<?php echo $i;?>" type="checkbox" class="checkzone"> 
-    </label>
-
-    <?php $i++; ?>
+            </select>
+            <input id="checkzone<?php echo $i;?>" type="checkbox" class="checkzone">
+          </label>
+          <?php $i++; ?>
         </tr>
-
-    <input type="hidden" id="hiddenzone" name="checkhidden" value="<?php echo $i; ?>">
-
-<?php } ?>
-   
-    
-    </tbody>
-
-
-    <script>
+        <input type="hidden" id="hiddenzone" name="checkhidden" value="<?php echo $i; ?>">
+        <?php } */ ?>        
+      </div>
+      <div class="col-md-3 text-right"> <a class="btn btn-warning" id="aggiungizone"><i class="fa fa-plus"></i></a> <a class="btn btn-danger" id="eliminazone"><i class="fa fa-trash"></i></a> </div>
+      <div class="col-md-12"><label for="zone[]" generated="true" class="error"></label></div>
+    </div>
+</div>
+ <script>
                   
       $('#aggiungizone').on("click", function() {
 
       var i = $("#hiddenzone").val();
 
-      $('#zone').append("<label class='checkzone"+i+"'><select name='zone[]' class='form-control' id='zone'> <option selected style='background-color:white' disabled> -- select -- </option><?php foreach ($citta as $citta_value) { ?><option value='<?php echo  $citta_value->id_citta ?>'><?php echo $citta_value->nome_citta ?></option><?php } ?></select><input id='checkzone"+i+"' type='checkbox' class='checkzone'></label>" );
+      $('#zone').append("<div class='mb10'><select name='zone[]' class='form-control checkzone"+i+"' id='zone'> <option selected style='background-color:white' disabled> -- select -- </option><?php foreach ($citta as $citta_value) { ?><option value='<?php echo  $citta_value->id_citta ?>'><?php echo $citta_value->nome_citta ?></option><?php } ?></select><input id='checkzone"+i+"' type='checkbox' class='checkzone'><label for='checkzone"+i+"'></label></div>" );
 
         i++;
         $('#hiddenzone').val(i);
@@ -514,6 +446,7 @@ if(isset($utente->id_citta))
 
                   var newclass = $(this).prop('id');
                   $("."+newclass).remove(); 
+                  $(this).remove();
                   
                     i--;
                     $('#hiddenzone').val(i);
@@ -523,20 +456,10 @@ if(isset($utente->id_citta))
 
           }                 
       });
-
       </script>
-             
-      </table>
-
-      </div>
-      
-     </div>    
-
-  </div> 
-
-
+</div>
 <div class="col-md-12" id="permissionview">
-<?php
+  <?php
 
   echo "<table class='table table-striped table-bordered'>";
     echo "<tr>";
@@ -553,10 +476,8 @@ if(isset($utente->id_citta))
 
     $i=0;
 ?>
-
-@if(isset($permessi))
-
-<?php
+  @if(isset($permessi))
+  <?php
 
     foreach ($module as $module) {
 
@@ -569,16 +490,18 @@ if(isset($utente->id_citta))
             echo "<td><b>";
             echo $module->modulo;
             echo "</td></b> <td>";
-       ?><input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]"  value="<?php echo $module->id.'|0|lettura';?>" 
-       <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?>> 
-       
-        <?php
-            echo "</td><td>"; ?>
-              <input type="checkbox" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"<?php echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :''; ?>>
-
-              <!-- <div class="class_checkbox writing <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
-             
-            <?php
+       ?>       
+  <input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $module->modulo.$i; ?>" name="lettura[]"  value="<?php echo $module->id.'|0|lettura';?>" 
+       <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?>>
+       <label for="lettura<?php echo $module->modulo.$i; ?>"></label>
+  <?php
+            echo "</td><td>"; ?>            
+  <input type="checkbox" class="writing input_class_checkbox" id="scrittura<?php echo $module->modulo.$i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"<?php echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :''; ?>>
+  <label for="scrittura<?php echo $module->modulo.$i; ?>"></label>
+  
+  <!-- <div class="class_checkbox writing <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
+  
+  <?php
         echo "</td></tr>";
 
         foreach ($submodule as $submodule) {
@@ -589,21 +512,23 @@ if(isset($utente->id_citta))
             echo $submodule->modulo;
             echo "</td>";
 
-            echo "<td>"; ?>
-              <input type="checkbox" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"<?php echo (in_array($module->id.'|'.$submodule->id.'|lettura', $permessi)) ? 'checked' :''; ?> >
-
-              <!-- <div class="class_checkbox lettura <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
-
-              <?php
+            echo "<td>"; ?>            
+  <input type="checkbox" class="lettura<?php echo $module->modulo.$i; ?> input_class_checkbox" id="lettura<?php echo $module->modulo.$submodule->modulo.$i; ?>" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"<?php echo (in_array($module->id.'|'.$submodule->id.'|lettura', $permessi)) ? 'checked' :''; ?> >
+  <label for="lettura<?php echo $module->modulo.$submodule->modulo.$i; ?>"></label>
+  
+  <!-- <div class="class_checkbox lettura <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
+  
+  <?php
             echo "</td>";
 
-            echo "<td>"; ?>
-              <input type="checkbox" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo (in_array($module->id.'|'.$submodule->id.'|scrittura', $permessi)) ? 'checked' :''; ?> >
-
-              <!-- <div class="class_checkbox scrittura <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
-
-              <input type="hidden" id="hidden" name="checkhidden" value="<?php echo $i; ?>">
-            <?php
+            echo "<td>"; ?>            
+  <input type="checkbox" class="scrittura<?php echo $module->modulo.$i; ?> input_class_checkbox" id="scrittura<?php echo $module->modulo.$submodule->modulo.$i; ?>" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo (in_array($module->id.'|'.$submodule->id.'|scrittura', $permessi)) ? 'checked' :''; ?> >
+  <label for="scrittura<?php echo $module->modulo.$submodule->modulo.$i; ?>"></label>
+  
+  <!-- <div class="class_checkbox scrittura <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
+  
+  <input type="hidden" id="hidden" name="checkhidden" value="<?php echo $i; ?>">
+  <?php
             echo "</td>";
 
           echo "</tr>";
@@ -616,17 +541,17 @@ if(isset($utente->id_citta))
             echo $module->modulo;
          echo "</td></b> ";
 
-          echo "<td>"; ?>
-            <input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :''; ?>>
-
-             <!-- <div class="class_checkbox reading <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
-
-            <?php
+          echo "<td>"; ?>          
+  <input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $module->modulo.$i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :''; ?>>
+  <label for="lettura<?php echo $module->modulo.$i; ?>"></label>
+  
+  <!-- <div class="class_checkbox reading <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
+  
+  <?php
           echo "</td>";
 
           echo "<td>"; ?>
-          
-          <?php
+  <?php
           echo "</td>";
 
         echo "</tr>";
@@ -635,9 +560,8 @@ if(isset($utente->id_citta))
   
   echo "</table>";
  ?>
-
-@else
- <?php  
+  @else
+  <?php  
     foreach ($module as $module) {
 
       $submodule = DB::table('modulo')
@@ -651,10 +575,14 @@ if(isset($utente->id_citta))
             echo $module->modulo;
             echo "</td></b> <td>";
 
-       ?><input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">        <?php
-            echo "</td><td>"; ?>
-              <input type="checkbox" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>">
-            <?php
+       ?>       
+  <input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $module->modulo.$i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
+  <label for="lettura<?php echo $module->modulo.$i; ?>"></label>
+  <?php
+            echo "</td><td>"; ?>            
+  <input type="checkbox" class="writing input_class_checkbox" id="scrittura<?php echo $module->modulo.$i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>">
+  <label for="scrittura<?php echo $module->modulo.$i; ?>"></label>
+  <?php
         echo "</td></tr>";
 
         foreach ($submodule as $submodule) {
@@ -666,14 +594,18 @@ if(isset($utente->id_citta))
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>">
-              <?php
+            
+  <input type="checkbox" class="lettura<?php echo $module->modulo.$i; ?> input_class_checkbox" id="lettura<?php echo $module->modulo.$submodule->modulo.$i; ?>" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>">
+  <label for="lettura<?php echo $module->modulo.$submodule->modulo.$i; ?>"></label>
+  <?php
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>">
-              <input type="hidden" id="hidden" name="checkhidden" value="<?php echo $i; ?>">
-            <?php
+            
+  <input type="checkbox" class="scrittura<?php echo $module->modulo.$i; ?> input_class_checkbox" id="scrittura<?php echo $module->modulo.$submodule->modulo.$i; ?>" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>">
+  <label for="scrittura<?php echo $module->modulo.$submodule->modulo.$i; ?>"></label>
+  <input type="hidden" id="hidden" name="checkhidden" value="<?php echo $i; ?>">
+  <?php
             echo "</td>";
 
           echo "</tr>";
@@ -687,13 +619,14 @@ if(isset($utente->id_citta))
          echo "</td></b> ";
 
           echo "<td>"; ?>
-            <input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
-            <?php
+
+  <input type="checkbox" class="reading input_class_checkbox" id="lettura<?php echo $module->modulo.$i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
+  <label for="lettura<?php echo $module->modulo.$i; ?>"></label>
+  <?php
           echo "</td>";
 
           echo "<td>"; ?>
-          
-          <?php
+  <?php
           echo "</td>";
 
         echo "</tr>";
@@ -702,9 +635,7 @@ if(isset($utente->id_citta))
   
   echo "</table>";
 ?>
-@endif
-</div>
-
+  @endif </div>
 <script type="text/javascript">
   
   $('.reading').click(function () {   
@@ -764,21 +695,12 @@ if(isset($utente->id_citta))
 //   }
 // });
 
+</script> 
 </script>
-
-
-</script>
-
-	<div class="col-md-12" style="padding-top:10px;padding-bottom:10px;">
-
-		<button type="submit" class="btn btn-primary">Salva</button>
-
-    {!! link_to(URL::previous(), 'Cancel', ['class' => 'btn btn-danger']) !!}
-
-	</div>
-
-    <?php echo Form::close(); ?>  
-
+<div class="col-md-12" style="padding-top:10px;padding-bottom:10px;">
+  <button type="submit" class="btn btn-primary">Salva</button>
+  {!! link_to(URL::previous(), 'Cancel', ['class' => 'btn btn-danger']) !!} </div>
+<?php echo Form::close(); ?> 
 <script>
 
 $('.ciao').on("click", function() {
@@ -787,9 +709,8 @@ $('.ciao').on("click", function() {
 
 });
 
-</script>
-
-<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script>
+</script> 
+<script type="text/javascript" src="{{asset('public/scripts/index.js')}}"></script> 
 <script>
   $(document).ready(function() {
         // validate signup form on keyup and submit
@@ -800,9 +721,15 @@ $('.ciao').on("click", function() {
                     required: true,
                     maxlength: 50
                 },
-                add_password: {
+                "idente[]":{
+                   required: true,
+                 },
+                 "zone[]":{
+                  required: true,
+                 },
+                 add_password: {
                     required: true,
-          minlength : 8,
+                    minlength : 8,
                     maxlength: 16
                 },
                 email: {
@@ -837,8 +764,7 @@ $('.ciao').on("click", function() {
                     digits: true
                 },
                 zone: {
-                    required: true
-                    
+                    required: true                    
                 }
             },
             messages: {
@@ -846,7 +772,13 @@ $('.ciao').on("click", function() {
                     required: "<?php echo trans('messages.keyword_please_enter_a_name');?>",
                     maxlength: "<?php echo trans('messages.keyword_name_less_than_50_characters');?>"
                 },
-                add_password: {
+                "idente[]":{
+                   required: "<?php echo trans('messages.keyword_please_select_a_associate_with_entity');?>",
+                 },
+                 "zone[]":{
+                  required: "<?php echo trans('messages.keyword_please_enter_a_zone');?>",
+                 },
+                 add_password: {
                     required: "<?php echo trans('messages.keyword_please_enter_a_password');?>",
                     minlength : "<?php echo trans('messages.keyword_password_6_characters_long');?>",
                     maxlength: "<?php echo trans('messages.keyword_password_less_than_16_characters');?>"
@@ -893,5 +825,5 @@ $('.ciao').on("click", function() {
     });
 }); 
         
-</script>
+</script> 
 @endsection

@@ -59,18 +59,18 @@
       <input value="{{ isset($pacchetto_data[0]->nome_pacchetto) ? $pacchetto_data[0]->nome_pacchetto : "" }}" class="form-control" type="text" name="nome_pacchetto" id="nome_pacchetto" placeholder="{{trans('messages.keyword_package_name')}}">
     </div>  
     <div class="form-group">                
-      <label for="colore">{{trans('messages.keyword_total_pages')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+      <label for="colore">{{trans('messages.keyword_total_pages')}} <span class="required">(*)</span></label>
       <input value="{{ isset($pacchetto_data[0]->pagine_totali) ? $pacchetto_data[0]->pagine_totali : ""}}" class="form-control no-alpha" type="text" name="pagine_totali" id="pagine_totali" placeholder="{{trans('messages.keyword_total_pages')}}"><br>    
     </div>
     </div>
     <!-- colonna centrale -->
       <div class="col-md-6">           
           <div class="form-group">
-            <label for="colore">{{trans('messages.keyword_package_price')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+            <label for="colore">{{trans('messages.keyword_package_price')}} <span class="required">(*)</span></label>
  	   <input value="{{ isset($pacchetto_data[0]->prezzo_pacchetto) ? $pacchetto_data[0]->prezzo_pacchetto : ""}}" class="form-control no-alpha" type="text" name="prezzo_pacchetto" id="prezzo_pacchetto" placeholder="{{trans('messages.keyword_package_price')}}">
      </div>     
     <div class="form-group">      
- 	     <label for="email">{{trans('messages.keyword_per_price_page')}} </label><p style="color:#f37f0d;display:inline"> (*) </p></label>
+ 	     <label for="email">{{trans('messages.keyword_per_price_page')}} </label> <span class="required">(*)</span></label>
     	  <input value="{{isset($pacchetto_data[0]->per_pagina_prezzo) ? $pacchetto_data[0]->per_pagina_prezzo : ""}}" class="form-control no-alpha" type="text" name="per_pagina_prezzo" id="per_pagina_prezzo" placeholder="{{trans('messages.keyword_per_price_page')}}">
        </div>
       </div>
@@ -82,12 +82,12 @@
   <div class="footer-svg">
     <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
   </div>
-    <?php echo Form::close(); ?>  
-<script>
-$('.ciao').on("click", function() {
-    $(this).children()[0].click();
-});
-$(document).ready(function() {
+  <?php echo Form::close(); ?>  
+  <script>
+  $('.ciao').on("click", function() {
+      $(this).children()[0].click();
+  });
+  $(document).ready(function() {
         // validate signup form on keyup and submit
         $("#package_modification").validate({
             rules: {
@@ -96,15 +96,18 @@ $(document).ready(function() {
                     maxlength: 35
                 },
                 pagine_totali: {
-					required: true,                    
+					         required: true,
+                   digits:true                    
                 },
                 prezzo_pacchetto: {
                     required: true,                    
                     maxlength: 10,
+                    number:true
                 },
                 per_pagina_prezzo: {
                     required: true,   
-                    maxlength: 10                 
+                    maxlength: 10,
+                    number:true                 
                 }
             },
             messages: {
@@ -113,15 +116,18 @@ $(document).ready(function() {
                     maxlength: "<?php echo trans('messages.keyword_the_package_name_must_be_less_than_35_characters');?>"
                 },
                 pagine_totali: {
-					required: "<?php echo trans('messages.keyword_enter_total_pages');?>"
+					         required: "<?php echo trans('messages.keyword_enter_total_pages');?>",
+                   digits:"<?php echo trans('messages.keyword_please_enter_valid_pages')?>"                    
                 },
                 prezzo_pacchetto: {
                     required: "<?php echo trans('messages.keyword_enter_the_price_of_the_package');?>",                    
                     maxlength: "<?php echo trans('messages.keyword_the_price_must_be_less_than_10_characters');?>",
+                    number:"<?php echo trans('messages.keyword_please_enter_valid_price')?>"
                 },
                 per_pagina_prezzo: {
                     required: "<?php echo trans('messages.keyword_enter_the_price_per_page');?>",   
-                    maxlength: "<?php echo trans('messages.keyword_the_price_per_page_must_be_less_than_10_characters');?>"                 
+                    maxlength: "<?php echo trans('messages.keyword_the_price_per_page_must_be_less_than_10_characters');?>",
+                    number:"<?php echo trans('messages.keyword_please_enter_valid_price')?>"                 
                 }
             }
         });

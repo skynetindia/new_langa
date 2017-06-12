@@ -2,78 +2,19 @@
 @section('page')
 
 @include('common.errors')
-
-<style>
-tr:hover {
-  background: #f39538;
-}
-.selected {
-  font-weight: bold;
-  font-size: 16px;
-}
-th {
-  cursor: pointer;
-}
-li label {
-  padding-left: 10px;
-}
-.button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 3px 15px;
-    padding-bottom: 6px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 4px;
-}
-.button2 { /* blue */
-    background-color: white;
-    color: black;
-    border: 2px solid #337ab7;
-}
-
-.button2:hover {
-    background-color: #337ab7;
-    color: white;
-}
-
-.button3 { /* red */
-    background-color: white;
-    color: black;
-    border: 2px solid #d9534f;
-}
-
-.button3:hover {
-    background-color: #d9534f;
-    color: white;
-}
-</style>
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
-
 <!-- Latest compiled and minified JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
 <!-- Latest compiled and minified Locales -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-
 <!-- ckeditor -->
 <script src="//cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
-
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -81,43 +22,25 @@ li label {
     </script>
 @endif
 
-
-
 <div class="row">
-
-  <form action="{{url('/admin/notification/store')}}" method="post" id="addnotification">
-
+  <form action="{{url('/admin/notification/store')}}" method="post" name="addnotification" id="addnotification">
   {{ csrf_field() }}
 
-
-  @if(isset($notifica))
-    <h1>{{ trans('messages.keyword_editnoti') }}</h1><hr>
+  @if(isset($notifica) && $action == 'edit')
+    <h1>{{trans('messages.keyword_update_notification')}}</h1><hr>
      <div class="col-md-4">
-
-    <label>{{ trans('messages.keyword_type') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <input class="form-control" id="type" name="type" value="{{ $notifica->notification_type }}" placeholder="{{ trans('messages.keyword_enternotitype') }}">
-
+    <label>{{trans('messages.keyword_types')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <input class="form-control" id="type" name="type" value="{{ $notifica->notification_type }}" placeholder="{{trans('messages.keyword_type_of_notification')}}">
   </div>
-
   <div class="col-md-4">
-
-    <label>{{ trans('messages.keyword_warntime') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="{{ $notifica->tempo_avviso }}" placeholder="{{ trans('messages.keyword_enterwarntime') }} ">
-
+    <label> {{trans('messages.keyword_warntime')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="{{ $notifica->tempo_avviso }}" placeholder="{{trans('messages.keyword_enterwarntime')}}">
   </div>
-
-
   <div class="col-md-4">
-
-    <label> {{ trans('messages.keyword_module') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
+    <label> {{trans('messages.keyword_module')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
       <select class="form-control" id="modulo" name="modulo">
-
         <option></option>
         @foreach($modulo as $modulo)
-
           @if($modulo->id == $notifica->modulo)
             <option value="{{ $modulo->id }}" selected="selected">
               {{$modulo->modulo}}
@@ -129,150 +52,84 @@ li label {
           @endif
         @endforeach
       </select><br>
-
   </div>
-
-  <div class="col-md-6">
-
-  <textarea id="show_ente" name="show_ente" class="form-control" rows="4"></textarea><br>
-
-  </div>
-
-  <div class="col-md-6">
-
-  <textarea id="show_role" name="show_role" class="form-control" rows="4"></textarea><br>
-
-  </div>
-
   <br>
-
-
 <?php $entity = explode(",", $notifica->id_ente); ?>
-
 <div class="col-md-6">
-
-<label for="ente">{{ trans('messages.keyword_entity') }}</label>
+<label for="ente">{{trans('messages.keyword_entity')}}</label>
 
 <select id="ente" name="ente[]" class="js-example-basic-multiple form-control" onchange="myEnte()" multiple="multiple">
-
     <option></option>
     @foreach($enti as $enti)
-
       @if( $entity[0] != '' && in_array($enti->id, $entity) )
-
         <option value="{{ $enti->id }}" selected="selected">
           {{$enti->nomeazienda}}
         </option>
-
       @else
          <option value="{{ $enti->id }}">
           {{$enti->nomeazienda}}
         </option>
-
       @endif
-
     @endforeach
   </select>
-
   </div>
-
 <div class="col-md-6">
-
-<label for="ruolo">{{ trans('messages.keyword_role') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
+<label for="ruolo">{{trans('messages.keyword_role')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
 <?php $ruolo = explode(",", $notifica->ruolo); ?>
-
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple" required> 
-
     <option></option>
-
     @foreach($ruolo_utente as $ruolo_utente)
-
        @if(in_array($ruolo_utente->ruolo_id, $ruolo))
-
         <option value="{{ $ruolo_utente->ruolo_id }}" selected="selected">
           {{$ruolo_utente->nome_ruolo}}
         </option>
-
       @else
-
         <option value="{{ $ruolo_utente->ruolo_id }}">
           {{$ruolo_utente->nome_ruolo}}
         </option>
-
       @endif
-
     @endforeach
-
 </select>
-
       <script type="text/javascript">
-
         $(".js-example-basic-multiple").select2();
-
         function myEnte() {
           var ente = document.getElementsByName("ente");
-
           console.log(ente.length);
-
           for(var x=0; x < ente.length; x++)   
           {
             console.log(ente[x].value, "hello");
             // document.getElementById("show_ente").innerHTML = ente[x].value;
-          }
-          
+          }          
         }
-
         function myRole() {
           var x = document.getElementById("ruolo").value;
           console.log(x);
           // document.getElementById("show_role").innerHTML = x;
         }
-
-      </script>
-
-  </div>
-
-</div>
-    
+      </script>  </div>
+</div>    
     <br>
 
-    <label> {{ trans('messages.keyword_description') }} </label>
-
+    <label> {{trans('messages.keyword_description')}} </label>
     <textarea name="description" id="description" rows="10" cols="50" class="form-control">{{ $notifica->notification_desc }}</textarea>
-
     <script type="text/javascript" >
       CKEDITOR.replace( 'description' );
     </script>
-
     <input type="hidden" name="id" value="{{ $notifica->id }}">
-
   @else
-
-    <h1> {{ trans('messages.keyword_addnoti') }} </h1><hr>
-
- <div class="col-md-4">
-
-    <label> {{ trans('messages.keyword_type') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <input class="form-control" id="type" name="type" value="" placeholder="{{ trans('messages.keyword_enternotitype') }}">
-
+    <h1>{{trans('messages.keyword_addnoti')}}</h1><hr>
+  <div class="col-md-4">
+    <label>{{trans('messages.keyword_types')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+    <input class="form-control" id="type" name="type" value="" placeholder="{{trans('messages.keyword_type_of_notification')}}">
   </div>
-
+  <div class="col-md-4">
+    <label> {{trans('messages.keyword_warntime')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="" placeholder="{{trans('messages.keyword_warntime')}}">
+  </div>
   <div class="col-md-4">
 
-    <label> {{ trans('messages.keyword_warntime') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
-    <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="" placeholder="{{ trans('messages.keyword_enterwarntime') }} ">
-
-  </div>
-
-  <div class="col-md-4">
-
-    <label>{{ trans('messages.keyword_module') }}  <p style="color:#f37f0d;display:inline">(*)</p></label>
-
+    <label> {{trans('messages.keyword_module')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
       <select class="form-control" id="modulo" name="modulo">
-
         <option></option>
         @foreach($modulo as $modulo)
           <option value="{{ $modulo->id }}">
@@ -280,29 +137,11 @@ li label {
           </option>
         @endforeach
       </select><br>
-
-  </div>
-
-  <div class="col-md-6">
-
-  <textarea id="show_ente" name="show_ente" class="form-control" rows="4"></textarea><br>
-
-  </div>
-
-  <div class="col-md-6">
-
-  <textarea id="show_role" name="show_role" class="form-control" rows="4"></textarea><br>
-
-  </div>
-
+  </div>  
   <br>
-
 <div class="col-md-6">
-
-<label for="ente">{{ trans('messages.keyword_entity') }} </label>
-
+<label for="ente">{{trans('messages.keyword_entity')}}</label>
 <select id="ente" name="ente[]" class="js-example-basic-multiple form-control " onchange="myEnte()" multiple="multiple">
-
     <option></option>
     @foreach($enti as $enti)
       <option value="{{ $enti->id }}">
@@ -310,15 +149,10 @@ li label {
       </option>
     @endforeach
   </select>
-
   </div>
-
 <div class="col-md-6">
-
-<label for="ruolo"> {{ trans('messages.keyword_role') }} <p style="color:#f37f0d;display:inline">(*)</p></label>
-
+<label for="ruolo">{{trans('messages.keyword_role')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple" required>
-
     <option></option>
     @foreach($ruolo_utente as $ruolo_utente)
       <option value="{{ $ruolo_utente->ruolo_id }}">
@@ -326,58 +160,72 @@ li label {
       </option>
     @endforeach
 </select>
-
       <script type="text/javascript">
-
         $(".js-example-basic-multiple").select2();
-
         function myEnte() {
           var ente = document.getElementsByName("ente");
-
           console.log(ente.length);
-
           for(var x=0; x < ente.length; x++)   
           {
             console.log(ente[x].value, "hello");
             // document.getElementById("show_ente").innerHTML = ente[x].value;
-          }
-          
+          }          
         }
-
         function myRole() {
           var x = document.getElementById("ruolo").value;
           console.log(x);
           // document.getElementById("show_role").innerHTML = x;
         }
-
       </script>
-
+      <label for="ruolo" generated="true" class="error"></label>
   </div>
-
-</div>
-    
+</div>    
     <br>
-
-    <label>{{ trans('messages.keyword_description') }}  </label>
-
+    <label> {{trans('messages.keyword_description')}} </label>
     <textarea name="description" id="description" rows="10" cols="50" class="form-control"></textarea>
-
     <script type="text/javascript" >
       CKEDITOR.replace( 'description' );
     </script>
-
   @endif
-
       <br>
-
-    <input class="btn btn-warning" type="submit" value="{{ trans('messages.keyword_send') }}">
-
+    <input class="btn btn-warning" type="submit" value="{{trans('messages.keyword_send')}}">
     </form>
-
   </div>
-
-
 <script>
+$(document).ready(function() {
+ // validate notification form on keyup and submit
+        $("#addnotification").validate({
+            rules: {
+                type: {
+                    required: true,
+                },
+                tempo_avviso: {
+                    required: true
+                },
+                modulo: {
+                    required: true,
+                },
+                "ruolo[]": {
+                    required: true,              
+                }
+            },
+            messages: {
+                type: {
+                    required: "{{trans('messages.keyword_please_enter_a_notification_type')}}"
+                },
+                tempo_avviso: {
+                    required: "{{trans('messages.keyword_please_enter_a_notification_warning_time')}}"
+                },
+                modulo: {
+                    required: "{{trans('messages.keyword_please_select_a_module')}}"
+                },
+                "ruolo[]": {
+                    required: "{{trans('messages.keyword_please_select_a_role')}}"                    
+                }
+            }
+        });
+      });
+
 var selezione = [];
 var indici = [];
 var n = 0;
@@ -403,7 +251,7 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
   }
 });
 
-function check() { return confirm("Sei sicuro di voler eliminare: " + n + " newsletter?"); }
+function check() { return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}}: " + n + " {{trans('messages.keyword_notification')}}?"); }
 function multipleAction(act) {
   var error = false;
   var link = document.createElement("a");
@@ -445,5 +293,4 @@ function multipleAction(act) {
     }
 }
 </script>
-
 @endsection

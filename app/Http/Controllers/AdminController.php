@@ -11,13 +11,13 @@ use Mail;
 use File;
 use Hash;
 use Auth;
+use DateTime;
 
 
 class AdminController extends Controller
-{
-    public function __construct(Request $request){ 
-        $this->middleware('auth');	
-
+{	
+	public function __construct(Request $request){ 
+        $this->middleware('auth');
     }
 	public function index(Request $request) {
         if ($request->user()->id != 0) {
@@ -26,6 +26,24 @@ class AdminController extends Controller
 		     return $this->show($request);
         }
     }
+
+    public function copyClient(Request $request){
+
+    	if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+     	} else {
+
+			$true = DB::insert("INSERT INTO users (id_ente, color, name, dipartimento, 
+				cellulare, email, password, remember_token, created_at, updated_at)
+					SELECT id_ente, color, name, 5, cellulare, email, password, remember_token, created_at, updated_at FROM clienti");
+
+			if($true){
+				echo "<h3> Copy Client in user table is completed..!!! </h3>";
+			}else {
+				echo "<h1> Somthing Went Wroong..!!! </h1>";
+			}
+     	}    	
+   }
 
 	
 	// Language details
@@ -333,11 +351,11 @@ class AdminController extends Controller
 				foreach($phases as $phase){
 					if(++$i === $numItems) {
 						$content .= '
-						"'.$phase->language_key.'" => "'.$phase->language_value.'"';
+						"'.$phase->language_key.'" => "'.htmlspecialchars($phase->language_value).'"';
 					}
 					else {
 						$content .= '
-						"'.$phase->language_key.'" => "'.$phase->language_value.'",';
+						"'.$phase->language_key.'" => "'.htmlspecialchars($phase->language_value).'",';
 					}					
 				}
 				$content .= "]; ?>";
@@ -444,8 +462,8 @@ class AdminController extends Controller
              //    ->where('id', $request->id)
              //    ->update(array(
              //        'is_approvato' => 1));
-        
-		  return Redirect::back()->with('success', trans('messages.keyword_approved_successfully'));
+        return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_approved_successfully').' </div>');             
+		  
         }
     }
 
@@ -464,8 +482,7 @@ class AdminController extends Controller
             //     ->where('id', $request->id)
             //     ->update(array(
             //         'is_approvato' => 2));
-                
-            return Redirect::back()->with('success', trans('messages.keyword_rejected_successfully'));
+            return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_rejected_successfully').' </div>');              
         }
     }
 
@@ -494,23 +511,31 @@ class AdminController extends Controller
                 'description' => $request->description,
                 'color' => $request->color,
             ]);
-            return Redirect::back();
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
         }
     }
 	
 	public function tassonomieUpdate(Request $request)
 	{
-            if ($request->user()->id != 0) {
+        if ($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {
-            DB::table('masterdatatypes')
-                    ->where('id', $request->id)
-                    ->update(array(
-                        'name' => $request->name,
-                        'description' => $request->description,
-                        'color' => $request->color,
-            ));
-            return Redirect::back();
+        	$arrname = $request->name;
+        	foreach($arrname as $key => $val){
+        		if(isset($request->id[$key])){
+        		$description = isset($request->description[$key]) ? $request->description[$key] : '';
+        		$color = isset($request->color[$key]) ? $request->color[$key] : '';
+	            DB::table('masterdatatypes')
+	                    ->where('id', $request->id[$key])
+	                    ->update(array(
+	                        'name' => $val,
+	                        'description' => $description,
+	                        'color' => $color,
+	            ));
+	            }
+            }
+            return Redirect::back()
+                ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' </div>');
         }
     }
 	
@@ -525,23 +550,30 @@ class AdminController extends Controller
 				'description' => $request->description,
 				'color' => $request->color,
 			]);
-			return Redirect::back();
+			return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
 		}
 	}
 	
 	public function aggiornaStatiEmotivi(Request $request)
 	{
-            if ($request->user()->id != 0) {
+        if ($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {
-            DB::table('statiemotivitipi')
-                    ->where('id', $request->id)
-                    ->update(array(
-                        'name' => $request->name,
-                        'description' => $request->description,
-                        'color' => $request->color,
-            ));
-            return Redirect::back();
+        	$arrname = $request->name;
+        	foreach($arrname as $key => $val){
+        		if(isset($request->id[$key])){
+        		$description = isset($request->description[$key]) ? $request->description[$key] : '';
+        		$color = isset($request->color[$key]) ? $request->color[$key] : '';
+	            DB::table('statiemotivitipi')
+	                    ->where('id', $request->id[$key])
+	                    ->update(array(
+	                        'name' => $val,
+	                        'description' => $description,
+	                        'color' => $color,
+	            ));
+	            }
+	        }
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' </div>');
         }
     }
 	
@@ -551,7 +583,7 @@ class AdminController extends Controller
 		DB::table('masterdatatypes')
 			->where('id', $request->id)
 			->delete();
-		return Redirect::back();
+		return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
 	}
 	
 	public function deleteStatiEmotivi(Request $request)
@@ -559,7 +591,7 @@ class AdminController extends Controller
 		DB::table('statiemotivitipi')
 			->where('id', $request->id)
 			->delete();
-                return Redirect::back();
+                return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
 	}
 /*================================= Estimates sections ============================================= */
 	public function estimates(Request $request) {
@@ -577,14 +609,21 @@ class AdminController extends Controller
             if ($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {
-            DB::table('statiemotivipreventivi')
-                    ->where('id', $request->id)
-                    ->update(array(
-                        'name' => $request->name,
-                        'description' => $request->description,
-                        'color' => $request->color,
-            ));
-            return Redirect::back();
+        	$arrname = $request->name;
+        	foreach($arrname as $key => $val){
+        		if(isset($request->id[$key])){
+        			$description = isset($request->description[$key]) ? $request->description[$key] : '';
+        			$color = isset($request->color[$key]) ? $request->color[$key] : '';
+		            DB::table('statiemotivipreventivi')
+		                    ->where('id', $request->id[$key])
+		                    ->update(array(
+		                        'name' => $val,
+		                        'description' => $description,
+		                        'color' => $color,
+		            ));
+		        }
+		    }
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').'</div>');
         }
     }
 	
@@ -592,7 +631,7 @@ class AdminController extends Controller
 		DB::table('statiemotivipreventivi')
 			->where('id', $request->id)
 			->delete();
-                return Redirect::back();
+                return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
 	}
 	
 	public function addStatiEstimates(Request $request)
@@ -605,7 +644,7 @@ class AdminController extends Controller
 				'description' => $request->description,
 				'color' => $request->color,
 			]);
-			return Redirect::back();
+			return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
 		}
 	}
 	
@@ -627,7 +666,7 @@ class AdminController extends Controller
 				'description' => $request->description,
 				'color' => $request->color,
 			]);
-			return Redirect::back();
+			return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
 		}
 	}
 
@@ -636,14 +675,21 @@ class AdminController extends Controller
         if ($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {
-            DB::table('statiemotiviprogetti')
-                    ->where('id', $request->id)
-                    ->update(array(
-                        'name' => $request->name,
-                        'description' => $request->description,
-                        'color' => $request->color,
-            ));
-            return Redirect::back();
+        	$arrname = $request->name;
+        	foreach($arrname as $key => $val){
+        		if(isset($request->id[$key])){
+        			$description = isset($request->description[$key]) ? $request->description[$key] : '';
+        			$color = isset($request->color[$key]) ? $request->color[$key] : '';
+		            DB::table('statiemotiviprogetti')
+		                    ->where('id', $request->id[$key])
+		                    ->update(array(
+		                        'name' => $val,
+		                        'description' => $description,
+		                        'color' => $color,
+		            ));
+		        }
+		     }
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').'</div>');
         }
     }
 
@@ -651,7 +697,7 @@ class AdminController extends Controller
 		DB::table('statiemotiviprogetti')
 			->where('id', $request->id)
 			->delete();
-       return Redirect::back();
+       return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
 	}
 
 	/* ==================================== Processing(Lavorazioni) section START Paras ======================================== */
@@ -677,18 +723,16 @@ class AdminController extends Controller
                 'description' => $request->description,
 				'color' => $request->color,
                 'departments_id' => $request->departments_id
-            ]);
-            return Redirect::back();
-			/*return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_added_successfully').'</div>');*/
+            ]);            
+			return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
         }
     }
 	
 	public function deleteProcessing(Request $request) {
 		DB::table('lavorazioni')
 			->where('id', $request->id)
-			->delete();
-		return Redirect::back();
-		 /*return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_deleted_successfully').'</div>');*/
+			->delete();		
+		 return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
 	}
 	
 	public function updateProcessing(Request $request)
@@ -696,15 +740,22 @@ class AdminController extends Controller
             if ($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {	
-            DB::table('lavorazioni')
-                    ->where('id', $request->id)
-                    ->update(array(
-                        'nome' => $request->name,
-                        'description' => $request->description,
-                        'color' => $request->color,
-            ));
-            return Redirect::back();
-			/*return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_processing_updated_successfully').'</div>');*/
+        	$arrname = $request->name;
+        	foreach($arrname as $key => $val){
+        		if(isset($request->id[$key])){
+        			$description = isset($request->description[$key]) ? $request->description[$key] : '';
+        			$color = isset($request->color[$key]) ? $request->color[$key] : '';
+		            DB::table('lavorazioni')
+		                    ->where('id', $request->id[$key])
+		                    ->update(array(
+		                        'nome' => $val,
+		                        'description' => $description,
+		                        'color' => $color,
+		            ));
+			    }
+			}
+           
+			return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').'</div>');
         }
     }
 	/* ==================================== Lavorazioni section END ======================================== */
@@ -728,7 +779,7 @@ class AdminController extends Controller
 				'description' => $request->description,
 				'color' => $request->color,
 			]);
-			return Redirect::back();
+			return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
 		}
 	}
 	
@@ -736,21 +787,28 @@ class AdminController extends Controller
 		DB::table('statiemotivipagamenti')
 			->where('id', $request->id)
 			->delete();
-                return Redirect::back();
+                return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
 	}
 	
 	public function updateStatePayment(Request $request) {
          if ($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {
-            DB::table('statiemotivipagamenti')
-                    ->where('id', $request->id)
-                    ->update(array(
-                        'name' => $request->name,
-                        'description' => $request->description,
-                        'color' => $request->color,
-            ));
-            return Redirect::back();
+        	$arrname = $request->name;
+        	foreach($arrname as $key => $val){
+        		if(isset($request->id[$key])){
+        			$description = isset($request->description[$key]) ? $request->description[$key] : '';
+        			$color = isset($request->color[$key]) ? $request->color[$key] : '';		    
+		            DB::table('statiemotivipagamenti')
+		                    ->where('id', $request->id[$key])
+		                    ->update(array(
+		                        'name' => $val,
+		                        'description' => $description,
+		                        'color' => $color,
+		            ));
+		        }
+		     }
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').'</div>');
         }
     }
 
@@ -881,20 +939,15 @@ class AdminController extends Controller
             $reading = $request->input('lettura');
             $writing = $request->input('scrittura');
             
-            if(isset($reading) && isset($writing)){
- 				echo "if";
+            if(isset($reading) && isset($writing)){ 				
                 $permessi = json_encode(array_merge($reading, $writing));
 
-            } else if(isset($reading)){
-             	echo "if1";
+            } else if(isset($reading)){             	
                 $permessi = json_encode($reading);
 
-            } else if(isset($writing)){
-            	echo "if2";
+            } else if(isset($writing)){            	
                 $permessi = json_encode($writing);
-
-            } else {
-  				echo "else";
+            } else {  				
                 $permessi = json_encode(null);
             }
 
@@ -990,6 +1043,16 @@ class AdminController extends Controller
                 'is_approvato' => 1,
                 'permessi' => $permessi            
             ));
+
+            if($request->dipartimento == 5) {
+
+            	DB::table('clienti')->insert([
+                'name' => $data['name'],
+                'cellulare' => isset($data['cellulare']) ? $data['cellulare'] : '',
+                'email' => $data['email'],
+                'password' => bcrypt($pswd)                
+            	]);
+            }
             return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_user_added_successfully').'</div>');
             }        
         }            
@@ -1182,14 +1245,14 @@ class AdminController extends Controller
                     ->update(array('permessi' => $permessi,'nome_ruolo'=>$new_ruolo));
  
                 return Redirect::back()
-                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> permessi updated succesfully..!</div>');
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_permission_updated_successfully').'</div>');
             } else {
                 
                 DB::table('ruolo_utente')->insert(        
                     ['nome_ruolo' => $new_ruolo, 'permessi' => $permessi ]
                     ); 
                 return Redirect::back()
-                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> Role Add succesfully..!</div>');
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_role_added_successfully').'</div>');
             }
         }
     }
@@ -1206,10 +1269,8 @@ class AdminController extends Controller
                 ->update(array(
                     'is_delete' => 1
                 ));
-
         return Redirect::back()
-            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> Ruolo deleted succesfully..!</div>');
-          
+            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_role_deleted_successfully').'</div>');          
         }
     }
 
@@ -1235,11 +1296,10 @@ class AdminController extends Controller
                     ->where('is_approvato', '=', 0)
                     ->get();
         // dd($users);
-                   
+		$utenti = array();                   
         foreach ($users as $user) {
          $user->azione="<a class='btn btn-warning' id='approvare' href='".url('/approvare/'.$user->id)."' onclick=\"return confirm('".trans('messages.keyword_are_you_sure_you_want_to_approve_this_item?')."');\">".trans('messages.keyword_approve')." </a> 
              <a class='btn btn-danger' id='rifiutare' href='".url('/rifiutare/'.$user->id)."' onclick=\"return confirm('".trans('messages.keyword_are_you_sure_you_want_to_reject_this_item?')."');\">".trans('messages.keyword_reject')."  </a>";
-
           $utenti[] = $user;
 
         }
@@ -1252,14 +1312,13 @@ class AdminController extends Controller
     {
         if($request->user()->id != 0) {
             return redirect('/unauthorized');
-        } else {
-            
+        } else {            
             DB::table('users')
                 ->where('id', $request->id)
                 ->update(array(
                     'is_approvato' => 1));
 
-            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '. trans('messages.keyword_approved_successfully') .' </div>');
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_approved_successfully').' </div>');
 
 
         }
@@ -1902,11 +1961,12 @@ class AdminController extends Controller
                 'frequenza' => $request->frequenza,
                 'dipartimento' => $request->dipartimento,
                 'description_quize'=>$request->description_quize,
+                'escludi_da_quiz'=>isset($request->escludi_da_quiz) ? $request->escludi_da_quiz : '0',
+                'is_classic'=>isset($request->classic) ? $request->classic : '0',
                 'lavorazione'=>$request->lavorazione,
                 'sconto_reseller'=>$request->sconto_reseller,
             ]);
-
-            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Dipartimento aggiunto correttamente!</div>');
+            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_optional_added_correctly').'</div>');
         }
     }
 
@@ -1931,8 +1991,8 @@ class AdminController extends Controller
     public function saveoptionalchanges(Request $request) {
         if ($request->user()->id != 0) {
             return redirect('/unauthorized');
-        } else {
-       
+        } 
+        else {       
             $validator = Validator::make($request->all(), [
                         'code' => 'required|max:35',
 //                        /'label' => 'required|max:35',
@@ -1972,12 +2032,14 @@ class AdminController extends Controller
                         'frequenza' => $request->frequenza,
                         'dipartimento' => $request->dipartimento,
                         'description_quize'=>$request->description_quize,
+                        'escludi_da_quiz'=>isset($request->escludi_da_quiz) ? $request->escludi_da_quiz : '0',
+                        'is_classic'=>isset($request->classic) ? $request->classic : '0',
                         'lavorazione'=>$request->lavorazione,
                         'sconto_reseller'=>$request->sconto_reseller,
-            ));
+            		));
 
             return Redirect::back()
-                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Optional modificato correttamente!</div>');
+                            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_optional_modified_correctly').'</div>');
         }
     }
 
@@ -2055,7 +2117,7 @@ class AdminController extends Controller
 
         $validator = Validator::make($request->all(), [
                     'manuname' => 'required',
-                    'image'=>'required|mimes:jpeg,jpg,png,svg|max:1000',
+                    'image'=>'mimes:jpeg,jpg,png,svg|max:1000',
                     'menutype' => 'required'
         ]);
 
@@ -2390,8 +2452,10 @@ class AdminController extends Controller
                 'ente' => $entity,
                 'ruolo' => $role,
                 'messaggio' => $message,
+                'is_email'=> isset($request->is_email) ? $request->is_email : '0',
                 'created_at' => $today
             ]);
+
 
             return Redirect::back()
                 ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
@@ -2450,16 +2514,21 @@ class AdminController extends Controller
                     ->withInput()
                     ->withErrors($validator);
             }
-
-            DB::table('alert_tipo')
-                ->where('id_tipo', $request->id_tipo)
-                ->update(array(
-                    'nome_tipo' => $request->nome_tipo,
-	                'desc_tipo' => isset($request->desc_tipo) ? $request->desc_tipo :'',
-	                'color' => isset($request->color) ? $request->color :'' 
-            ));
-
-            return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_edisuccessmsg').' </div>');;
+		$arrName=$request->nome_tipo;
+		foreach($arrName as $key => $val){
+			$desctiontion = isset($request->desc_tipo[$key]) ? $request->desc_tipo[$key] : '';
+			$color = isset($request->color[$key]) ? $request->color[$key] : '';
+			if($request->id_tipo[$key]){			
+	            DB::table('alert_tipo')
+	                ->where('id_tipo', $request->id_tipo[$key])
+	                ->update(array(
+	                    'nome_tipo' => $val,
+		                'desc_tipo' => $desctiontion,
+		                'color' => $color 
+	            ));
+            }
+        }
+         return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' </div>');;
         }
     }
 
@@ -2470,14 +2539,13 @@ class AdminController extends Controller
             ->where('id_tipo', $request->id_tipo)
             ->delete();
 
-        return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');;
+        return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');;
     }
 
     // send alert notification to users
     public function sendalert(Request $request)
     {
-        if($request->user()->id != 0) {
-            
+        if($request->user()->id != 0) {            
             return redirect('/unauthorized');
 
         } else {
@@ -2515,7 +2583,7 @@ class AdminController extends Controller
                             ->where('is_delete', 0)
                             ->first();                       	
                        	
-                        if(isset($getrole)) {   
+                        if(isset($getrole)) {  
 
                         	$check = in_array($getrole->dipartimento, $ruolo);   
 
@@ -2523,7 +2591,8 @@ class AdminController extends Controller
 
                         	$corporations = DB::table('corporations')
                                 ->where('id', $getente->id_ente)
-                                ->first();
+                                ->first();                              
+        	                    
          
                             $store = DB::table('inviare_avviso')->insert([
                                 'id_ente' => $corporations->id,
@@ -2549,7 +2618,16 @@ class AdminController extends Controller
 	                            ->where('alert_id', $value->alert_id)       
 	                            ->update(array(     
 	                            'is_sent' => 1      
-	                    	));	
+	                    	));
+	                     	if($value->is_email == '1') {      	
+	                     		$emailSubject = "Alert :".$value->nome_alert;
+	                     		$toEmail = $corporations->email;
+	                    		Mail::send('layouts.alertemail', ['content' => $value->messaggio], function ($m) use ($corporations,$emailSubject,$toEmail) {
+									$m->from('easy@langa.tv', 'Alert LANGA');
+									/*$corporations->email = "developer5@mailinator.com";*/
+									$m->to($corporations->email)->subject($emailSubject);
+        						});
+	                    	}
                         } 
                     }
                 }
@@ -2912,50 +2990,69 @@ class AdminController extends Controller
     public function quizdemoUpdate(Request $request) {
         if ($request->user()->id != 0) {
             return redirect('/unauthorized');
-        } else {
-
-
-            $validator = Validator::make($request->all(), [
+        } 
+        else {
+            /*$validator = Validator::make($request->all(), [
                         'name' => 'required',
-                        'name' => 'required|max:255|unique:quizdemodettagli,nome,'.$request->id.',id',                    
+                        'name' => 'required|max:255|unique:quizdemodettagli,nome,'.$request->id.',id',
                         'url' => 'required',
-                        'immagine' => 'mimes:jpeg,jpg,png|max:1000'
+                        'immagine.*' => 'mimes:jpeg,jpg,png|max:1000'
             ]);
             if ($validator->fails()) {
                 return Redirect::back()
                                 ->withInput()
                                 ->withErrors($validator);
+            }*/
+			/*$rules = array();
+			$arrname = $request->name;
+            foreach($arrname as $key => $val) {
+            	 $rules['name.'.$key] = 'required|max:255';
             }
+            $validator = Validator::make($request->all(),$rules);
+            if ($validator->fails()) {
+               	return Redirect::back()
+                                ->withInput()
+                                ->withErrors($validator);
+            }*/
+            $arrImages=array();			
+			$arrname = $request->name;
+        	foreach($arrname as $key => $val) {
+        		
+        		if(isset($request->id[$key])){
+        			$description = isset($request->description[$key]) ? $request->description[$key] : '';
+        			$color = isset($request->color[$key]) ? $request->color[$key] : '';		    
+        			$url = isset($request->url[$key]) ? $request->url[$key] : '';		    
 
-            $averageRate = '3';
-            $totalRate = '5';
-            $today = date("Y-m-d h:i:s");
-            $immagine = DB::table('quizdemodettagli')
-                    ->select('immagine')
-                    ->where('id', $request->id)
-                    ->first();
+		            $averageRate = '3';
+		            $totalRate = '5';
+		            $today = date("Y-m-d h:i:s");
+		            $immagine = DB::table('quizdemodettagli')
+		                    ->select('immagine')
+		                    ->where('id', $request->id[$key])
+		                    ->first();
 
-            $arr = json_decode(json_encode($immagine), true);
-            $immaginenome = $arr['immagine'];
+            		$arr = json_decode(json_encode($immagine), true);
+            		$immaginenome = $arr['immagine'];   
+            		$arrfiles = $request->file('immagine');  
 
-            if ($request->immagine != null) {
-                // Memorizzo l'immagine nella cartella public/imagesavealpha
-                Storage::put(
-                        'images/quizdemo/' . $request->file('immagine')->getClientOriginalName(), file_get_contents($request->file('immagine')->getRealPath())
-                );
-                $immaginenome = $request->file('immagine')->getClientOriginalName();
-            }
+		            if (isset($arrfiles[$key]) && $arrfiles[$key] != null) {
+		                // Memorizzo l'immagine nella cartella public/imagesavealpha
+		                Storage::put('images/quizdemo/' . $arrfiles[$key]->getClientOriginalName(), file_get_contents($arrfiles[$key]->getRealPath()));
+		                $immaginenome = $arrfiles[$key]->getClientOriginalName();
+		            }
 
-            DB::table('quizdemodettagli')
-                    ->where('id', $request->id)
-                    ->update(array(
-                        'nome' => $request->name,
-                        'url' => $request->url,
-                        'immagine' => $immaginenome,
-                        /* 'tassomedio' => $averageRate,
-                          'tassototale' => $totalRate, */
-                        'updated_date' => $today,
-            ));
+		            DB::table('quizdemodettagli')
+		                    ->where('id', $request->id[$key])
+		                    ->update(array(
+		                        'nome' => $val,
+		                        'url' => $url,
+		                        'immagine' => $immaginenome,
+		                        /* 'tassomedio' => $averageRate,
+		                          'tassototale' => $totalRate, */
+		                        'updated_date' => $today,
+		            ));
+	           }
+	         }
 
             //trans("messages.keyword_quiz_update");die;                
             return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>' . trans("messages.keyword_quiz_update") . '</div>');
@@ -3091,13 +3188,42 @@ class AdminController extends Controller
                 ->where('id', '!=', 0)
                 ->where('users.is_delete', '=', 0)
                 ->where('is_approvato', '=', 1)
+                ->where('dipartimento', '!=', 5)
                 ->where('ruolo_utente.is_delete', '=', 0)
                 ->get()
                 ->toArray();
         foreach ($users as $key => $usr) {
-            $users[$key]->button = '<button id="access" class="access btn btn-warning" onclick="access(' . $usr->id . ')" type="submit">Access</button>';
+            $users[$key]->button = '<button id="access" class="access btn btn-warning" onclick="access(' . $usr->id . ')" type="submit">'.trans('messages.keyword_access').'</button>';
         }
         return json_encode($users);
+    }
+
+    public function clients(Request $request) {
+
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            return view('clients');
+        }
+    }
+
+    public function getjsonclients(Request $request) {
+
+        $clients = DB::table('users')
+               ->join('ruolo_utente', 'users.dipartimento', '=', 'ruolo_utente.ruolo_id')
+               ->leftjoin('stato', 'users.id_stato', '=', 'stato.id_stato')
+               ->select('*')               
+               ->where('users.is_delete', '=', 0)
+               ->where('is_approvato', '=', 1)
+               ->where('dipartimento', '=', 5)              
+               ->get()
+               ->toArray();
+
+        foreach ($clients as $key => $usr) {
+            $clients[$key]->button = '<button id="access" class="access btn btn-warning" onclick="access(' . $usr->id . ')" type="submit">Access</button>';
+        }
+
+        return json_encode($clients);
     }
 
     protected function access(Request $request) {
@@ -3273,9 +3399,7 @@ class AdminController extends Controller
 	
     /* ==================================== Alert end======================================== */
 	
-	/* ====================================Notification start ======================================== */
-
-	
+	/* ====================================Notification start ======================================== */	
 	 // show notification
     public function showadminnotification(Request $request)
     {
@@ -3288,7 +3412,7 @@ class AdminController extends Controller
                     ->get()            
             ]);
         }
-    }
+    }    
 
     public function deletenotification(Request $request) {
         if($request->user()->id != 0) {
@@ -3300,7 +3424,7 @@ class AdminController extends Controller
                 ->delete();
 
             return Redirect::back()
-                ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>notification eliminata correttamente!</div>');
+                ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_notification_deleted_successfully').'</div>');
         }
     }
 
@@ -3334,39 +3458,43 @@ class AdminController extends Controller
         if($request->user()->id != 0) {
             return redirect('/unauthorized');
         } else {
-
+			$notifica = array();
+			$action = 'add';
             if($request->id){
-
-                return view('addadminnotification', [
-                    'notifica' => DB::table('notifica')
+            	$notifica = DB::table('notifica')
                         ->where('id', "=", $request->id)
-                        ->first(),
-                    'enti' => DB::table('corporations')
-                        ->get(),
-                    'modulo' => DB::table('modulo')
-                        ->where('modulo_sub', '=', null)
-                        ->get(),
-                    'ruolo_utente' => DB::table('ruolo_utente')
-                        ->get()                
+                        ->first();
+                $action = 'edit';
+            } 
+            return view('addadminnotification', [
+            		'action'=>$action,
+                    'notifica' => $notifica,
+                    'enti' => DB::table('corporations')->get(),
+                    'modulo' => DB::table('modulo')->where('modulo_sub', '=', null)->get(),
+                    'ruolo_utente' => DB::table('ruolo_utente')->where('is_delete',0)->get()                
                 ]);
-
-            } else {
-
-                return view('addadminnotification', [
-                    'enti' => DB::table('corporations')
-                        ->get(),
-                    'modulo' => DB::table('modulo')
-                        ->where('modulo_sub', '=', null)
-                        ->get(),
-                    'ruolo_utente' => DB::table('ruolo_utente')
-                        ->get()                
-                ]);
-            }
             
         }
     }
 
-  
+  // detail notification json
+    public function detailnotificationjson(Request $request)
+    {
+        if($request->id) {
+
+            $notifica = DB::table('invia_notifica')
+                ->where('notification_id', "=", $request->id)
+                ->get();   
+               
+        } else {
+
+            $notifica = DB::table('invia_notifica')
+                ->get();               
+        }
+
+        return json_encode($notifica);
+
+    }
 
      // store admin notification
     public function storeadminnotification(Request $request)
@@ -3420,7 +3548,7 @@ class AdminController extends Controller
                     ));
 
                     return Redirect::back()
-                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Notification update correttamente!</div>');
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_notification_updated_successfully').'</div>');
 
             } else {
 
@@ -3460,7 +3588,7 @@ class AdminController extends Controller
                 ]);
 
                 return Redirect::back()
-                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Notification add correttamente!</div>');
+                    ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_notification_added_successfully').'</div>');
             }    
         }
     }
@@ -3468,7 +3596,7 @@ class AdminController extends Controller
     // send alert notification to users
   
 
-    // send notification to users
+      // send notification to users
     public function sendnotification(Request $request)
     {
         if($request->user()->id != 0) {
@@ -3477,16 +3605,15 @@ class AdminController extends Controller
 
         } else {
 
-
             $today = date("Y-m-d");
 
             $notifica = DB::table('notifica')
                 ->where('created_at', $today)
+                ->where('is_sent', '=', 0)
                 ->get();
 
-            if(empty($notifica)) {
-
-                return "Notification not set for today.!!";
+            if($notifica->isEmpty()) {
+                return "Notification not set ..!!";
             }
 
             foreach ($notifica as $value) {
@@ -3495,103 +3622,171 @@ class AdminController extends Controller
                 $ruolo = explode(",", $value->ruolo);
 
                 if($ente[0] != null){
-                      
-                  foreach ($ente as $ente) {
+                	
+                	foreach ($ente as $ente) {
 
-                    $getente = DB::table('enti_partecipanti')
-                        ->select('id_user')
-                        ->where('id_ente', $ente)
-                        ->get();
+                		$getente = DB::table('enti_partecipanti')
+	                        ->select('id_ente', 'id_user')
+	                        ->where('id_ente', $ente)
+	                        ->distinct()
+	                        ->get();
 
-                    foreach ($getente as $getente) {
+	                    $store = false;
 
-                        foreach ($ruolo as $role) {
+                        foreach ($getente as $getente) {                        
 
                             $getrole = DB::table('users')
-                                ->select('*')
-                                ->where('id', $getente->id_user)
-                                ->where('dipartimento', '=',  $role)
-                                ->first();
+	                            ->select('dipartimento')
+	                            ->where('id', $getente->id_user)
+	                            ->where('is_delete', 0)
+	                            ->first(); 
+             	
+	                        if(isset($getrole)) {  
 
-                            if($getrole) {
+                        	$check = in_array($getrole->dipartimento, $ruolo);  
 
-                                $corporations = DB::table('corporations')
-                                    ->where('id', $value->id_ente)
-                                ->first();
-                            
-                             $true = DB::table('invia_notifica')->insert([
-                                    'id_ente' => $corporations->id,
-                                    'ruolo' => $role,
-                                    'user_id' => $getrole->id,
-                                    'notification_id' => $value->id,
-                                    'nome_azienda' => $corporations->nomeazienda,
-                                    'nome_referente' => $corporations->nomereferente,
-                                    'settore' => $corporations->settore,
-                                    'telefono_azienda' => $corporations->telefonoazienda,
-                                    'email' => $corporations->email,
-                                    'data_lettura' => '',
-                                    'conferma' => 'NON LETTO'
-                                ]);
+                        	if($check){
 
-                      
-                                if($true){
-                                    return "notification send succesfully.!";
+	                        	$corporations = DB::table('corporations')
+	                                ->where('id', $getente->id_ente)
+	                                ->first();
 
-                                } else {
+	                            $store = DB::table('invia_notifica')->insert([
+	                            	'id_ente' => $corporations->id,
+	                                'user_id' => $getente->id_user,
+	                                'notification_id' => $value->id,
+	                                'nome_azienda' => $corporations->nomeazienda,
+	                                'nome_referente' => $corporations->nomereferente,
+	                                'settore' => $corporations->settore,
+	                                'telefono_azienda' => $corporations->telefonoazienda,
+	                                'email' => $corporations->email,
+	                                'data_lettura' => '',
+	                                'conferma' => 'NON LETTO'
+	                            ]);	       
 
-                                    return false;
-                                }
+	                            DB::table('notifica')
+                                ->where('id', $value->id)
+                                ->update(array( 'is_sent' => 1 ));   
 
-                            }
+                                $true = true;                  
+
+                    			}
+                        	} 
                         } 
-                    }
-                }
+                	}
 
-                } // end if 
-                else {
-
-                    foreach ($ruolo as $role) {
+                } else {
+                	
+                	foreach ($ruolo as $role) {
 
                         $getdept = DB::table('users')
+                        	->select('id', 'dipartimento')
                             ->where('dipartimento', $role)
-                            ->get();
-                      
+                            ->where('is_delete', 0)
+                            ->get();                       	
+
                         foreach ($getdept as $getdept) {
 
-                            $corporations = DB::table('corporations')
-                            ->where('id', $getdept->id)
-                            ->first();
-   
-                            $true = DB::table('invia_notifica')->insert([
-                            'ruolo' => $role,
-                            'user_id' => $getdept->id,
-                            'notification_id' => $value->id,
-                            'nome_azienda' => $corporations->nomeazienda,
-                            'nome_referente' => $corporations->nomereferente,
-                            'settore' => $corporations->settore,
-                            'telefono_azienda' => $corporations->telefonoazienda,
-                            'email' => $corporations->email,
-                            'data_lettura' => '',
-                            'conferma' => 'NON LETTO'
-                            ]);
+	                        $store = DB::table('invia_notifica')->insert([
+	                            'ruolo' => $role,
+	                            'user_id' => $getdept->id,
+	                            'notification_id' => $value->id,
+	                            'nome_azienda' => '',
+	                            'nome_referente' => '',
+	                            'settore' => '',
+	                            'telefono_azienda' => '',
+	                            'email' => '',
+	                            'data_lettura' => '',
+	                            'conferma' => 'NON LETTO'
+	                        ]);
 
+                            if($store) {
+                            	$true = true;     
+                            }	
                         }
-                    }
 
-                    if($true){
-
-                        return "notification send succesfully.!";
-
-                    } else {
-
-                        return false;
-                    }
-                             
+                        DB::table('notifica')
+                        ->where('id', $value->id)
+                        ->update(array( 'is_sent' => 1 ));
+                    } 
                 }
-            }
+            }	
+
+            if($true){
+               return "Send all notifications successfully.!!";
+            } else {
+               return "Somthing Went Wrong";
+            }                       
         }
     }
 
+// user read notification
+    public function userreadnotification(Request $request)
+    {
+        $today = date("Y-m-d h:i:s");
+
+        $notification_id = $request->input('notification_id');
+        $user_id = $request->input('user_id');
+
+        DB::table('invia_notifica')
+            ->where('notification_id', $notification_id)
+            ->where('user_id', $user_id)
+            ->update(array(
+	            'data_lettura' => $today,
+	            'conferma' => 'LETTO'
+            ));                
+        
+        return Redirect::back();        
+    }
+
+    // make comment in notification
+    public function notificationmakecomment(Request $request)
+    {
+    	$messaggio = $request->input('messaggio');
+        $notification_id = $request->input('notification_id');
+        $user_id = $request->input('user_id');
+        
+        DB::table('invia_notifica')
+            ->where('notification_id', $notification_id)
+            ->where('user_id', $user_id)
+            ->update(array(
+                'comment' => $messaggio
+        	));
+                
+        return Redirect::back();  
+    }   
+
+    // notification delete
+    public function userdeletenotification(Request $request)
+    {    	
+        $notification_id = $request->input('notification_id');
+        $user_id = $request->input('user_id');
+        
+        DB::table('invia_notifica')
+            ->where('notification_id', $notification_id)
+            ->where('user_id', $user_id)
+            ->update(array(
+                'is_deleted' => 1
+        	));
+                
+        return Redirect::back();  
+    }
+
+    // alert delete
+    public function userdeletealert(Request $request)
+    {    	
+        $alert_id = $request->input('alert_id');
+        $user_id = $request->input('user_id');
+        
+        DB::table('inviare_avviso')
+            ->where('alert_id', $alert_id)
+            ->where('user_id', $user_id)
+            ->update(array(
+                'is_deleted' => 1
+        	));
+                
+        return Redirect::back();  
+    }   
    
 
     public function getnotificationjson(Request $request)
@@ -3646,18 +3841,36 @@ class AdminController extends Controller
 
     /* ==================================== Activity Logs section START ======================================== */
 	// show user page list
-    public function activitylogs(Request $request) {
+    public function activitylogs(Request $request) {    	
         if ($request->user()->id != 0) {
             return redirect('/unauthorized');
         } 
-        else {
-            return view('member_activity_log');
+        else {        	
+        	$request->mastertype = isset($request->mastertype) ? $request->mastertype : 'user';        	
+        	$request->type = isset($request->type) ? $request->type : '0';
+            return view('member_activity_log',
+            	['departments'=> DB::table('ruolo_utente')->where('is_delete','0')->where('ruolo_id','!=','1')->get(),
+            	'usertype'=>$request->type,
+            	'mastertype'=>$request->mastertype]);
         }
     }
 
-    public function getjsonactivitylogs(Request $request) {
-        $users = DB::table('member_activity_log')->get()->toArray();        
-        return json_encode($users);
+    public function getjsonactivitylogs(Request $request) {    	
+    	$request->type = isset($request->type) ? $request->type : '0';    	
+    	//$request->type = $request->type == 'admin'
+    	$query=	DB::table('member_activity_log')
+			->join('users', 'users.id', '=', 'member_activity_log.user_id')
+			->join('ruolo_utente', 'ruolo_utente.ruolo_id', '=', 'users.dipartimento')
+			->select('users.name as username','users.dipartimento','ruolo_utente.nome_ruolo','member_activity_log.*')
+			->orderBy('member_activity_log.id', 'desc');
+	    	if($request->mastertype == 'admin'){			
+				$query->where("users.dipartimento",'1');			
+	    	}
+	    	else {
+	    		($request->type == '0') ? $query->where("users.dipartimento","!=","1")	: $query->where("users.dipartimento",$request->type);					
+	    	}    	
+			$users = $query->get()->toArray();		
+        	return json_encode($users);
     }
 
     /* This function is used to delete activity logs */
@@ -3672,5 +3885,114 @@ class AdminController extends Controller
             return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_activity_deleted_successfully').'</div>');			
         }
     }
-	/* ==================================== Activity Logs section START ======================================== */
+	/*================================= Frequency sections ============================================= */
+	public function frequency(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+		else {
+          return view('frequency', [
+			'frequency' => DB::table('frequenze')->orderBy('id', 'desc')->get(),
+			]);
+        }
+    }   
+	
+	public function updatefrequency(Request $request) {
+            if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+        	$arrname = $request->name;
+        	foreach($arrname as $key => $val){
+        		if(isset($request->id[$key])){
+        			$description = isset($request->description[$key]) ? $request->description[$key] : '';
+        			$rinnovo = isset($request->rinnovo[$key]) ? $request->rinnovo[$key] : '';
+		            DB::table('frequenze')
+		                    ->where('id', $request->id[$key])
+		                    ->update(array(
+		                        'nome' => $val,
+		                        'descrizione' => $description,
+		                        'rinnovo' => $rinnovo,
+		            ));
+		        }
+		    }
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').'</div>');
+        }
+    }
+	
+	public function deletefrequency(Request $request) {
+		DB::table('frequenze')
+			->where('id', $request->id)
+			->delete();
+                return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
+	}
+	
+	public function addfrequency(Request $request)
+	{
+		if($request->user()->id != 0)
+			return redirect('/unauthorized');
+		else {
+			DB::table('frequenze')->insert([
+				'nome' => $request->name,
+				'descrizione' => $request->description,
+				'rinnovo' => $request->rinnovo,
+			]);
+			return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
+		}
+	}
+
+	/*================================= Notification sections ============================================= */
+	/* get filter notification in json format  */
+	 public function notificationjson(Request $request) {
+       
+      $userId = Auth::id();
+
+		$notifications = DB::table('invia_notifica')
+       ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
+       ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
+       ->where('user_id', $userId)
+       ->where('is_enabled', 0)
+       ->Where('notification_type', 'like', '%' .$request->find. '%')
+       ->orderBy('data_lettura', 'asc')	         
+       ->get()->toArray();
+
+      // $html = '';
+      $noti = [];
+
+      if($notifications){
+
+      	foreach($notifications as $notification){
+				$date = $notification->created_at; $date = date_format(new DateTime($date), 'D-m-Y H:i:s'); 
+
+		  		$html = "<div id='replace-noti'><div class='chkbox-blk'> <div class='chkbox'> <input type='checkbox' id='notifi2'> <label for='notifi2'> notifi2 </label> </div> <div class='info'> <a href='" .url('/notifiche/delete') .'/' .$notification->id. "' onclick='return confirm('".trans('messages.keyword_sure_to_disable_notification')."?')'> <span>" .$notification->notification_type;
+				$html .="</span> <span class='time'>" .$date;
+				$html .= "</span> <div class='message'>" .$notification->notification_desc;
+				$html .= "</div> </a> </div> </div> </div> ";
+		      $noti = $html;
+   		}	
+
+      } else {
+      	$html = "<div class='chkbox-blk'> <div class='chkbox'> </div> <div class='info'> <a href=''> <span> No matches Found";				
+			$html .= "</span> </div> </a> </div> </div> ";
+			$noti = $html;
+      }
+   	
+      return $noti;
+    }
+
+    public function notificationdisabled(Request $request) 
+    {
+        if($request->user()->id != 0) {        	
+            return redirect('/unauthorized');
+        } else {
+        		$id = $request->arr_id;
+        		foreach ($id as $value){
+        			DB::table('invia_notifica')
+                 ->where('id', $value)
+                 ->update(array(
+                     'is_enabled' => 1
+               ));
+        		}
+        }
+    }
+
 }

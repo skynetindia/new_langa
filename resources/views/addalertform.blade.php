@@ -39,17 +39,11 @@
     <label> {{ trans('messages.keyword_tipoalert') }}  <span class="required" >(*)</span></label>
 
       <select  class="form-control" id="tipo_alert" name="tipo_alert" style="color:#ffffff" >
-
         <!-- <option style="background-color:black;" selected disabled> select </option>   -->
-
         <option selected disabled>-- {{ trans('messages.keyword_select') }} --</option>  
-
         @foreach($alert_tipo as $type)
-
           <option style="background-color:{{ $type->color }};" value="{{ $type->id_tipo }}"> {{ $type->nome_tipo }} </option>
-
-        @endforeach
-        
+        @endforeach        
       </select>
       </div>
 	  <script>
@@ -62,13 +56,10 @@
                 });
 				</script>
   </div>
-
 <div class="col-md-6">
 <div class="form-group">
-<label for="ente"> {{ trans('messages.keyword_entity') }} </label>
-
+<label for="ente"> {{ trans('messages.keyword_entity') }} <span class="required" >(*)</span> </label>
 <select id="ente" name="ente[]" class="js-example-basic-multiple form-control" multiple="multiple">
-
     @foreach($enti as $enti)
       <option value="{{ $enti->id }}">
         {{$enti->nomeazienda}}
@@ -80,7 +71,7 @@
 
 <div class="col-md-6">
 <div class="form-group">
-<label for="ruolo"> {{ trans('messages.keyword_role') }} </label>
+<label for="ruolo"> {{ trans('messages.keyword_role') }} <span class="required" >(*)</span> </label>
 
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple">
 
@@ -190,10 +181,10 @@
                 tipo_alert: {
                     required: true
                 },
-                ente: {
+                "ente[]": {
                     required: true
                 },
-                ruolo: {
+                "ruolo[]": {
                     required: true              
                 },
                 messaggio: {                   
@@ -211,10 +202,10 @@
                 tipo_alert: {
                     required: "{{trans('messages.keyword_please_select_a_alert_type')}}"
                 },
-                ente: {
+                "ente[]": {
                     required: "{{trans('messages.keyword_please_select_an_entity')}}"
                 },
-                ruolo: {
+                "ruolo[]": {
                     required: "{{trans('messages.keyword_please_select_a_role')}}"                    
                 },
                 messaggio: {

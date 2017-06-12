@@ -66,10 +66,10 @@ li label {
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
 
 <!-- Latest compiled and minified Locales -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
+<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
 
 
-<h1>Notifiche</h1><hr>
+<h1> {{ trans('messages.keyword_notifiche') }} </h1><hr>
 
 @if(!empty(Session::get('msg')))
 
@@ -87,19 +87,25 @@ li label {
 
 <a id="delete" onclick="multipleAction('delete');" style="display:inline;">
 
-<button class="btn btn-danger" type="button" name="remove" title="Elimina - Elimina le notifiche selezionate"><span class="fa fa-trash"></span></button>
+<button class="btn btn-danger" type="button" name="remove" title=" {{ trans('messages.keyword_delete_selected_notifications') }} "><span class="fa fa-trash"></span></button>
 
 </a>
 
 </div>
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="notifiche/json" data-classes="table table-bordered" id="table">
         <thead>
-            <th data-field="id" data-sortable="true">n° notifica
-            <th data-field="id_ente" data-sortable="true">Ente          
-            <th data-field="data_lettura" data-sortable="true"> Data lettura
-            <th data-field="comment" data-sortable="true"> Comment
-            <th data-field="conferma" data-sortable="true"> Conferma
-            
+            <th data-field="id" data-sortable="true">  
+            {{ trans('messages.keyword_no_notification') }} 
+            <th data-field="id_ente" data-sortable="true">
+            {{ trans('messages.keyword_entity') }} 
+            <th data-field="data_lettura" data-sortable="true"> 
+            {{ trans('messages.keyword_read_date') }} 
+            <th data-field="comment" data-sortable="true"> 
+            {{ trans('messages.keyword_comment') }} 
+            <th data-field="conferma" data-sortable="true">
+            {{ trans('messages.keyword_confirm') }}             
+            <th data-field="is_enabled" data-sortable="true">
+            {{ trans('messages.keyword_is_enabled') }} 
         </thead>
     </table>
 <script>
@@ -128,7 +134,7 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
   }
 });
 
-function check() { return confirm("Sei sicuro di voler eliminare: " + n + " notifiche?"); }
+function check() { return confirm("  {{ trans('messages.keyword_sure') }}: " + n + " {{ trans('messages.keyword_notifiche') }} ?"); }
 function multipleAction(act) {
   var error = false;
   var link = document.createElement("a");

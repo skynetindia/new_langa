@@ -81,6 +81,35 @@
         e.preventDefault();
 	return confirmation ;
 }
+$(document).ready(function() {
+// validate add alert type form on keyup and submit
+        $("#alerttipo").validate({            
+            rules: {
+                nome_tipo: {
+                    required: true,
+                }
+            },
+            messages: {
+                nome_tipo: {
+                    required: "{{trans('messages.keyword_please_enter_a_type_name')}}"
+                }
+            }
+        });
+
+        // validate edit alert type form on keyup and submit
+        $("#modifyalerttipo").validate({            
+            rules: {
+                "nome_tipo[]": {
+                    required: true,
+                }
+            },
+            messages: {
+                "nome_tipo[]": {
+                    required: "{{trans('messages.keyword_please_enter_a_type_name')}}"
+                }
+            }
+        });
+    });
 </script>
 <script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
 @endsection

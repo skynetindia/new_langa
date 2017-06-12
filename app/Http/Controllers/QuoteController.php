@@ -20,12 +20,14 @@ class QuoteController extends Controller
 {
 	protected $quotes;
 	protected $corporations;
+	protected $logmainsection;
 	
 	public function __construct(QuoteRepository $quotes, CorporationRepository $corporations)
 	{
 		$this->middleware('auth');
 		$this->quotes = $quotes;		
 		$this->corporations = $corporations;
+		$this->logmainsection = 'Quotes';
 	}
 	
 	public function filequote(Request $request) {
@@ -76,8 +78,7 @@ class QuoteController extends Controller
 		}
 	}
 
-	public function fileupload(Request $request){
-		
+	public function fileupload(Request $request){		
 			Storage::put(
 					'images/quote/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
 			);
@@ -85,9 +86,10 @@ class QuoteController extends Controller
 				DB::table('media_files')->insert([
 				'name' => $nome,
 				'code' => $request->code,
-				'master_type' => 3,
+				'master_type' => 0,
 				'type'=>$request->user()->dipartimento,
-				'master_id' => isset($request->idpreventivo) ? $request->idpreventivo : 0
+				'master_id' => isset($request->idpreventivo) ? $request->idpreventivo : 0,
+				'date_time'=>time()
 			]);					
 	}
 	
@@ -99,24 +101,25 @@ class QuoteController extends Controller
 		else {
 			$updateData = DB::select("SELECT * FROM media_files WHERE code=$request->code");
 			/*DB::table('media_files')->where('code',$request->code)->get();*/				
-		}
-		/*$queries = DB::getQueryLog();
-		$last_query = end($queries);
-		print_r($last_query);
-		print_r($updateData);
-		exit;*/
+		}		
 		foreach($updateData as $prev) {
 			$imagPath = url('/storage/app/images/quote/'.$prev->name);
-			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a></td></tr>';
+			$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";			
+			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
 			foreach($utente_file as $key => $val){
 				if($request->user()->dipartimento == $val->ruolo_id){
 					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
-					$html .=' <div class="cust-radio"><input type="radio" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$val->ruolo_id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+					$specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 				else {
-					$html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+					$specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 			}
 			echo $html .='</td></tr>';
@@ -124,32 +127,25 @@ class QuoteController extends Controller
 		exit;			
 	}
 		
-	public function filedelete(Request $request){
-		
+	public function filedelete(Request $request){		
 	    $response = DB::table('media_files')->where('id', $request->id)->delete();
-		if($response){
-			echo 'success';
-		}
-		else {
-			echo 'fail';
-		}
+	    echo ($response) ? 'success' :'fail';   				
 		exit;
 	}
-
-	public function filetypeupdate(Request $request){
-
-	 	$response = DB::table('media_files')
-			->where('id', $request->fileid)
-			->update(array('type' => $request->typeid));	    
-		if($response){
-			echo 'success';
-		}
-		else {
-			echo 'fail';
-		}
+	public function filetypeupdate(Request $request){		 
+		$request->ids = isset($request->ids) ? implode(",",$request->ids) : "";
+		$response = DB::table('media_files')->where('id', $request->fileid)->update(array('type' => $request->ids));	    
+		echo ($response) ? 'success' :'fail';   				
 		exit;
 	}
-		
+	public function updatemediaComment(Request $request){		 		
+		$updateData = DB::table('media_files')->where('code', $request->code)->orderBy('id', 'desc')->first();										
+		$title = $request->title;
+		$descriptions = $request->descriptions;		
+		$response = DB::table('media_files')->where('date_time', $updateData->date_time)->update(array('description' => $descriptions,'title'=>$title));	    
+		echo ($response) ? 'success' :'fail';   				
+		exit;
+	}
 	
 	public function getJsonMyestimates(Request $request)
 	{
@@ -213,22 +209,13 @@ class QuoteController extends Controller
 	public function add(Request $request)
 	{
 		return view('estimates.add', [
-			'utenti' => DB::table('users')
-							->select('*')
-							->get(),
+			'utenti' => DB::table('users')->select('*')->get(),
 			'enti' => $this->corporations->forUser2($request->user()),
-			'dipartimenti' => DB::table('departments')
-								->select('*')
-								->get(),
-			'optional' => DB::table('optional')
-							->select('*')
-							->get(),
-			'pacchetti' => DB::table('pack')
-							->select('*')
-							->get(),
-			'optional_pack' => DB::table('optional_pack')
-								->select('*')
-								->get(),
+			'dipartimenti' => DB::table('departments')->select('*')->get(),
+			'optional' => DB::table('optional')->select('*')->get(),
+			'pacchetti' => DB::table('pack')->select('*')->get(),
+			'optional_pack' => DB::table('optional_pack')->select('*')->get(),
+			'frequency'=>DB::table('frequenze')->get(),
 			'statiemotivi' => DB::table('statiemotivipreventivi')->get()
 		]);
 	}
@@ -335,8 +322,8 @@ class QuoteController extends Controller
 				'legameprogetto' => isset($request->legameprogetto) ? $request->legameprogetto : 0,
 			]);
 			
-			$logs = 'Add New Quote -> ( Quote ID: '. $nuovopreventivo . ')';
-			//storelogs($request->user()->id, $logs);
+			$logs = $this->logmainsection.' -> Add New Quote (ID: '. $nuovopreventivo . ')';
+			storelogs($request->user()->id, $logs);
 
 			if($request->statoemotivo!=null) {
 				// Memorizzo lo stato emotivo
@@ -461,10 +448,7 @@ class QuoteController extends Controller
 								->select('*')
 								->where('id', $quote->id)
 								->first(),
-			'quotefiles' => DB::table('media_files')
-								->select('*')
-								->where('master_id', $quote->id)
-								->get(),								
+			'quotefiles' => DB::table('media_files')->select('*')->where('master_id', $quote->id)->where('master_type', '0')->get(),								
 			'utenti' => DB::table('users')
 							->select('*')
 							->get(),
@@ -488,6 +472,7 @@ class QuoteController extends Controller
 					->where('qp_quote_id', $quote->id)
 					->get(),
 			'statiemotivi' => DB::table('statiemotivipreventivi')->get(),
+			'frequency'=>DB::table('frequenze')->get(),
 			'statoemotivoselezionato' => DB::table('statipreventivi')
 				->where('id_preventivo', $quote->id)
 				->first()
@@ -609,8 +594,8 @@ class QuoteController extends Controller
 				'prezzo_confermato' => $request->prezzo
 		));
 
-		$logs = 'Update Quote -> ( Quote ID: '. $quote->id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Update Quote (ID: '. $quote->id . ')';
+		storelogs($request->user()->id, $logs);
 
 		if($request->statoemotivo!=null) {
 			// Aggiorno lo stato emotivo
@@ -742,8 +727,8 @@ class QuoteController extends Controller
 				'is_deleted' => 1
 		));
 		
-		$logs = 'Delete Quote -> ( Quote ID: '. $quote->id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Delete Quote (ID: '. $quote->id . ')';
+		storelogs($request->user()->id, $logs);
 
 		return Redirect::back()
 				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_quote_deleted_correctly').'</div>');
@@ -830,8 +815,8 @@ class QuoteController extends Controller
 			'lineebianche' => $quote->lineebianche
 		]);
 
-		$logs = 'Copy(Duplicate) Quote -> ( Quote ID: '. $id . ')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Copy(Duplicate) Quote (ID: '. $id . ')';
+		storelogs($request->user()->id, $logs);
 
 		$items = DB::table('optional_preventivi')
 			->where('id_preventivo', $quote->id)
@@ -894,7 +879,7 @@ class QuoteController extends Controller
 		$pdf = new PDF('utf-8');
 		$pdf->mirrorMargins(1);
 						
-		$header = \View::make('pdf.quotation_header')->render();		
+		$header = \View::make('pdf.quotation_header')->render();				
 		$footer = \View::make('pdf.quotation_footer')->render();
 		
 		$pdf->SetHTMLHeader($header, 'O');
@@ -903,8 +888,9 @@ class QuoteController extends Controller
 		$pdf->SetHTMLFooter($footer, 'E');
 		
 		/*$pdf->AddPage('Portrait', margin-left, margin-right, margin-top, margin-bottom, margin-header, margin-footer, 'A4');*/
-		$pdf->AddPage('P', 10, 10, 38, 20, 8, 2, 'A4');
-		/*return view('pdf.quotation', [
+		$pdf->AddPage('P', 0, 0, 40, 20, 0, 0, 'Letter');
+		/*echo $header;
+		echo view('pdf.quotation', [
 			'preventivo' =>$preventivo,										
 			'ente' => $ente,
 			'utente' => $utente,
@@ -912,8 +898,8 @@ class QuoteController extends Controller
 			'owner'=>$ownerDepartments,
 			'responsabile'=>$responsabile,
 			'optional_preventivi'=>$optional_preventivi]);
+		echo $footer;
 		exit;*/
-
 		$pdf->loadView('pdf.quotation', [
 			'preventivo' =>$preventivo,										
 			'ente' => $ente,
@@ -923,8 +909,8 @@ class QuoteController extends Controller
 			'responsabile'=>$responsabile,
 			'optional_preventivi'=>$optional_preventivi]);
 		
-		$logs = 'Generate pdf for Quote -> ( Quote ID: '. $quote->id .')';
-		//storelogs($request->user()->id, $logs);
+		$logs = $this->logmainsection.' -> Generate pdf for Quote -> (ID: '. $quote->id .')';
+		storelogs($request->user()->id, $logs);
 		
 		/*$pdf->download('test.pdf');*/
 		$pdf->stream('quote.pdf');				

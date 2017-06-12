@@ -285,111 +285,6 @@ if (typeof NProgress != 'undefined') {
 $(document).ready(function() {
 
         // validate signup form on keyup and submit
-        $("#user_modification").validate({
-
-            rules: {
-                name: {
-                    required: true,
-                    maxlength: 50
-                },
-                add_password: {
-                    required: true,
-					minlength : 8,
-                    maxlength: 16
-                },
-                email: {
-                    required: true,
-                    email: true,
-                    maxlength: 64,
-                },
-                idente: {
-                    required: true,   
-                    maxlength: 35                 
-                },
-                dipartimento: {
-                    required: true,   
-                    maxlength: 64  
-                },
-                colore: {   
-                    maxlength: 30                 
-                },
-                sconto: {
-                    required: true,
-                    digits: true
-                },
-                sconto_bonus: {
-                    required: true,
-                    digits: true
-                },
-                rendita: {
-                    required: true,
-                    digits: true
-                },
-                rendita_reseller: {
-                    required: true,
-                    digits: true
-                },
-                zone: {
-                    required: true
-                    
-                }
-            },
-            messages: {
-                name: {
-                    required: "Please enter a name",
-                    maxlength: "Name must be less than 50 charcters"
-                },
-                add_password: {
-                    required: "Please enter a password",
-					minlength : "Password must at least 6 characters long",
-                    maxlength: "Password must be less than 16 characters"
-                },
-				email: {
-                    required: "Please enter emaail address",
-                    email: "Please enter valid email address",
-                    maxlength: "Email character must be less than 64 characters",
-                },
-                idente: {
-                    required: "Please enter a idente",
-                    maxlength: "Your idente maximum length should be 35 characters"
-                },
-                dipartimento: {
-                    required: "Please enter a dipartimento",
-                    maxlength: "Your dipartimento maximum length should be 64 characters"
-                },
-                colore: {   
-                    maxlength: "Your colore maximum length should be 30 characters"
-                },
-                sconto: {
-                    required: "Please enter a sconto",
-                    digits: "only digits allowed"
-                },
-                sconto_bonus: {
-                    required: "Please enter a sconto_bonus",
-                    digits: "only digits allowed"
-                },
-                rendita: {
-                    required: "Please enter a rendita",
-                    digits: "only digits allowed"
-                },
-                rendita_reseller: {
-                    required: "Please enter a rendita_reseller",
-                    digits: "only digits allowed"
-                },
-                zone: {
-                   required: "Please enter a zone"
-                }
-            }
-
-        });
-
-        $.validator.setDefaults({
-        ignore: []
-    });
-        
-
-
-        // validate signup form on keyup and submit
         $("#addalert").validate({
 
             rules: {
@@ -424,65 +319,9 @@ $(document).ready(function() {
         });
 
 
-        // validate notification form on keyup and submit
-        $("#addnotification").validate({
+       
 
-            rules: {
-                type: {
-                    required: true,
-                },
-                tempo_avviso: {
-                    required: true
-                },
-                modulo: {
-                    required: true,
-                },
-                ruolo: {
-                    required: true,              
-                }
-            },
-            messages: {
-                type: {
-                    required: "Please enter a notification type"
-                },
-                tempo_avviso: {
-                    required: "Please enter a notification tempo di avviso"
-                },
-                modulo: {
-                    required: "Please Select a modulo"
-                },
-                ruolo: {
-                    required: "Please Select a role"                    
-                }
-            }
-
-        });
-
-        // validate taxation form on keyup and submit
-        $("#taxation_form").validate({
-
-            rules: {
-                tassazione_nome: {
-                    required: true,
-					maxlength: 35
-                },
-                tassazione_percentuale: {
-                    required: true,
-                    digits: true
-                }
-            },
-            messages: {
-                tassazione_nome: {
-                    required: "Please enter a Tassazione name",
-					maxlength: "Please enter less than 35 charcters"
-                },
-                tassazione_percentuale: {
-                    required: "Please enter Tassazione Percentuale",
-                    digits: "only digits allowed"
-                }
-            }
-
-        });
+       
 
         // validate provincie form on keyup and submit
         $("#provincie_form").validate({
@@ -515,32 +354,7 @@ $(document).ready(function() {
         });
 		
 		        // validate add sconti form on keyup and submit
-        $("#addscontiform").validate({
-            
-            rules: {
-                name: {
-                    required: true,
-                },
-                tipoente: {
-                    required: true,
-                },
-                sconto: {
-                    required: true
-                }
-            },
-            messages: {
-                name: {
-                    required: "Please enter a name"
-                },
-                tipoente: {
-                    required: "Please Select a tipo ente"
-                },
-                sconto: {
-                    required: "Please enter a sconto"
-                }
-            }
-
-        });
+       
 
         // validate add sconti form on keyup and submit
         $("#editscontiform").validate({
@@ -625,54 +439,6 @@ $(document).ready(function() {
             }
 
         });
-
-         // validate add role form on keyup and submit
-        $("#addroleform").validate({
-            
-            rules: {
-                new_ruolo: {
-                    required: true,
-                }
-            },
-            messages: {
-                new_ruolo: {
-                    required: "Please enter a role name"
-                }
-            }
-
-        });
-		// validate add alert type form on keyup and submit
-        $("#alerttipo").validate({
-            
-            rules: {
-                nome_tipo: {
-                    required: true,
-                }
-            },
-            messages: {
-                nome_tipo: {
-                    required: "Please enter a type name"
-                }
-            }
-
-        });
-
-        // validate edit alert type form on keyup and submit
-        $("#modifyalerttipo").validate({
-            
-            rules: {
-                nome_tipo: {
-                    required: true,
-                }
-            },
-            messages: {
-                nome_tipo: {
-                    required: "Please enter a type name"
-                }
-            }
-
-        });
-
 
 });
 

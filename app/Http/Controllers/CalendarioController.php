@@ -16,6 +16,7 @@ class CalendarioController extends Controller
 {
     private $nomiMesi = array(null, "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre");
     protected $events;
+    protected $logmainsection;
     /**
      * Create a new controller instance.
      *
@@ -24,10 +25,24 @@ class CalendarioController extends Controller
     public function __construct(EventRepository $events, CorporationRepository $corporations)
     {
         $this->middleware('auth');
+        $Gennaio = trans('messages.keyword_january');
+        $Febbraio = trans('messages.keyword_february');
+        $Marzo = trans('messages.keyword_march');
+        $Aprile = trans('messages.keyword_april');
+        $Maggio = trans('messages.keyword_may');
+        $Giugno = trans('messages.keyword_june');
+        $Luglio = trans('messages.keyword_july');
+        $Agosto = trans('messages.keyword_august');
+        $Settembre = trans('messages.keyword_september');
+        $Ottobre = trans('messages.keyword_october');
+        $Novembre = trans('messages.keyword_november');
+        $Dicembre = trans('messages.keyword_december'); 
+        $this->nomiMesi = array(null, $Gennaio, $Febbraio, $Marzo, $Aprile, $Maggio, $Giugno, $Luglio, $Agosto, $Settembre, $Ottobre, $Novembre, $Dicembre);
 
         $this->events = $events;
 		
 		$this->corporations = $corporations;
+        $this->logmainsection = 'Event';
     }
 
     // user read notification
@@ -140,8 +155,7 @@ class CalendarioController extends Controller
 
                 return false;
             }   
-
-            dd("End..!!");
+            
 // else {
 
 //                     return "No event set for today.!!";
@@ -161,7 +175,7 @@ class CalendarioController extends Controller
                                 ->where('id', $event->id_ente)
                                 ->first();
 
-                            dd($corporations);
+
 
                             $true = DB::table('invia_notifica')->insert([
                                     'id_ente' => $corporations->id,
@@ -296,13 +310,9 @@ class CalendarioController extends Controller
     				'dettagli' => $request->dettagli,
     			));
 
-            $logs = 'Update Event -> ( Event ID: '. $event->id . ')';
-            //storelogs($request->user()->id, $logs);
-
+            $logs = $this->logmainsection.' -> Update Event (ID: '. $event->id . ')';
+            storelogs($request->user()->id, $logs);
     		return redirect('/calendario/0');
-
-            
-       
 	}
 
 	
@@ -323,6 +333,8 @@ class CalendarioController extends Controller
 		DB::table('events')
 			->where('id', $event->id)
 			->delete();
+        $logs = $this->logmainsection.' -> Delete Event (ID: '. $event->id . ')';
+        storelogs($request->user()->id, $logs);
 		return Redirect::back();
 	}
 	
@@ -388,8 +400,8 @@ class CalendarioController extends Controller
 			'dove' => $request->dove
         ]);
 		
-        $logs = 'Add New Event -> ( Event ID: '. $evento . ')';
-        //storelogs($request->user()->id, $logs);
+        $logs = $this->logmainsection.' -> Add New Event (ID: '. $evento . ')';
+        storelogs($request->user()->id, $logs);
 
 		$user = DB::table('corporations')
 					->where('id', $ente->id)
@@ -412,18 +424,25 @@ class CalendarioController extends Controller
      */
     public function show(Request $request)
     {
+        DB::enableQueryLog();
         if($request->month == date('n') && $request->day == 0 && $request->year == date('Y'))
             $request->day = date('j');
 
 		if($request->tipo == 0) {
-			// miei
+            //my
 			$eventi = $this->events->forUser($request->user(), $request->month, $request->year);
-
-		} else {
-            
-			// tutti
+		} 
+        else {
+			//All
 			$eventi = $this->events->forUser2($request->user(), $request->month, $request->year);
 		}
+        /*$queries = DB::getQueryLog();
+        $last_query = end($queries);
+        print_r($last_query);
+        exit;
+        print('<pre>');
+        print_r($eventi);
+        exit;*/
         return view('calendario', [
             'day' => $request->day,
             'month' => $request->month,

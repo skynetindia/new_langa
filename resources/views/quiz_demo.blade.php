@@ -11,13 +11,15 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script> 
 <script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script> 
 <script type="text/javascript" src="{{asset('public/scripts/jqColorPicker.min.js')}}"></script> 
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/additional-methods.min.js"></script>
+
 <script type="text/javascript">
     $('.color').colorPicker(); // that's it   
 </script>
 <?php //$lavorazioni = DB::table('lavorazioni')->where('departments_id', $departments->id)->get(); ?>
 <fieldset>
   <div class="row">
-    <form action="{{url('/admin/quizdemonew')}}" method="post" enctype="multipart/form-data">
+    <form action="{{url('/admin/quizdemonew')}}" method="post" name="quizdemoadd" id="quizdemoadd" enctype="multipart/form-data">
       <div class="col-md-12">
         <legend>{{trans("messages.keyword_quiz")}}</legend>
       </div>
@@ -26,13 +28,13 @@
       <div class="col-sm-4">
         <div class="form-group">
           <label>&nbsp; </label>
-          <input type="text" required="required" class="form-control" name="name" id="name" value="{{old('name')}}" placeholder="{{trans("messages.keyword_name")}}">
+          <input type="text" class="form-control" name="name" id="name" value="{{old('name')}}" placeholder="{{trans("messages.keyword_name")}}">
         </div>
       </div>
       <div class="col-sm-4">
         <div class="form-group">
           <label>&nbsp;</label>
-          <input type="url" class="form-control" required="required" name="url" value="{{old('url')}}" placeholder="{{trans("messages.keyword_url")}}">
+          <input type="url" class="form-control" name="url" value="{{old('url')}}" placeholder="{{trans("messages.keyword_url")}}">
         </div>
       </div>
       <div class="col-sm-4">
@@ -52,7 +54,7 @@
   </div>
   @if(count($quizdemodettagli) > 0)
   <h4>{{trans("messages.keyword_edit_types")}}</h4>
-  <form action="{{url('/admin/quizdemoupdate')}}" method="post" enctype="multipart/form-data">
+  <form action="{{url('/admin/quizdemoupdate')}}" name="quizdemoedit" id="quizdemoedit" method="post" enctype="multipart/form-data">
   <div class="table-responsive">
     <table class="table table-striped text-right">
     	<tr>
@@ -64,7 +66,7 @@
             <table class="table table-bordered">
             <tr>
                 <td width="20%"><label>&nbsp; </label>
-                  <input type="text" required="required" class="form-control" name="name[]" id="name" value="{{$quizdemodettagli->nome}}"></td>
+                  <input type="text" class="form-control" name="name[]" id="name" value="{{$quizdemodettagli->nome}}"></td>
                 <td width="20%"><label> &nbsp; </label>
                   <input type="url" class="form-control" name="url[]" value="{{$quizdemodettagli->url}}"></td>
                 <td width="20%"><label class="pull-left">{{trans("messages.keyword_highlighted_image")}}</label>
@@ -100,6 +102,68 @@
           e.preventDefault();
       return confirmation;
   }
+  $(document).ready(function() {
+    $.validator.addMethod('minImageWidth', function(value, element, minWidth) {
+    return ($(element).data('imageWidth') || 0) > minWidth;
+    }, function(minWidth, element) {
+    var imageWidth = $(element).data('imageWidth');
+  return (imageWidth)
+      ? ("Your image's width must be greater than " + minWidth + "px")
+      : "Selected file is not an image.";
+});
+// validate add alert type form on keyup and submit
+        $("#quizdemoadd").validate({            
+            rules: {
+                name: {
+                    required: true,
+                },
+                url:{
+                  url:true
+                },
+                immagine:{
+                   accept: "image/jpg,image/jpeg,image/png,image/gif"              
+                }                
+            },
+            messages: {
+                name: {
+                    required: "{{trans('messages.keyword_please_enter_a_type_name')}}"
+                },
+                url:{
+                  url:"{{trans('messages.keyword_please_enter_a_type_name')}}"
+                },
+                immagine:{
+                  accept: "{{trans('messages.keyword_the_file_must_be_a_type_of__jpeg,_jpg,_png.')}}"
+                }
+            }
+        });
+
+        // validate edit alert type form on keyup and submit
+        $("#quizdemoedit").validate({            
+            rules: {
+                "name[]": {
+                    required: true,
+                },
+                "url[]": {
+                  url:true
+                },
+                "immagine[]":{
+                  accept: "image/jpg,image/jpeg,image/png,image/gif"              
+                }
+            },
+            messages: {
+                "name[]": {
+                    required: "{{trans('messages.keyword_please_enter_a_type_name')}}"
+                },
+                "url[]":{
+                  url:"{{trans('messages.keyword_please_enter_a_type_name')}}"
+                },
+                "immagine[]":{
+                  accept: "{{trans('messages.keyword_the_file_must_be_a_type_of__jpeg,_jpg,_png.')}}"
+                }
+            }
+        });
+    });
+
 </script> 
 <script type="text/javascript" src="{{asset('public/scripts/index.js')}}">
 @endsection

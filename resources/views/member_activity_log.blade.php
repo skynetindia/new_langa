@@ -1,6 +1,6 @@
 @extends('adminHome')
 @section('page')
-<h1>{{ trans('messages.keyword_login_activity') }} </h1><hr>
+<h1><?php echo ($mastertype != 'admin') ? 'User '.trans('messages.keyword_login_activity') : 'Admin ' .trans('messages.keyword_login_activity');?></h1><hr>
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 <script>
@@ -21,13 +21,31 @@ document.write(msg);
 <?php /*<a onclick="multipleAction('add');" id="add" class="btn btn-warning" name="add" title="{{ trans('messages.keyword_adduser') }}"><i class="glyphicon glyphicon-plus"></i></a>
 <div class="space10"></div>
 <a class="btn btn-primary" onclick="multipleAction('modify');" id="modifica" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a>*/?>
-<a id="delete" class="btn btn-danger"  onclick="multipleAction('delete');" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="fa fa-trash"></i></a>
+<div class="row">
+  <div class="col-md-1">
+    <a id="delete" class="btn btn-danger"  onclick="multipleAction('delete');" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="fa fa-trash"></i></a>
+</div>
+@if($mastertype != 'admin')
 
+<div class="col-md-3">
+<div class="form-group">
+    <label> Type </label>
+<select class="form-control" id="filterbytype">
+    <option value="0">-- Select --</option>
+    @foreach($departments as $department)
+        <option value="{{$department->ruolo_id}}">{{$department->nome_ruolo}}</option>
+    @endforeach
+</select>
+  </div>
+  </div>
+@endif
+</div>
 <div class="table-responsive table-custom-design">
-    <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('loginactivity/json') }}" data-classes="table table-bordered" id="table">
+    <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('loginactivity/json/').'/'.$mastertype.'/'.$usertype }}" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="id" data-sortable="true"> {{ trans('messages.keyword_id') }} </th>
             <th data-field="user_id" data-sortable="true"> {{ trans('messages.keyword_user_id') }} </th>
+            <th data-field="nome_ruolo" data-sortable="true"> {{ trans('messages.keyword_department') }} </th>
             <th data-field="log_date" data-sortable="true"> {{ trans('messages.keyword_date') }} </th>
             <th data-field="logs" data-sortable="true"> {{ trans('messages.keyword_activity') }}</th>
             <th data-field="ip_address" data-sortable="true"> {{ trans('messages.keyword_ip_address') }} </th>        
@@ -35,7 +53,6 @@ document.write(msg);
     </table>
 </div>
 <script>
-
     var selezione = [];
     var indici = [];
     var n = 0;
@@ -111,11 +128,14 @@ document.write(msg);
         }
     }
 
-    function access(id) {
-        
-        window.location = "{{ url('admin/user/access') }}" + '/'+id ;
-        
+    function access(id) {        
+        window.location = "{{ url('admin/user/access') }}" + '/'+id ;        
     }
+
+    $('#filterbytype').on('change', function () {
+        var type = $(this).val();
+        window.location = "{{ url('/admin/loginactivity/user') }}" + '/'+type;
+    });
 </script>
 
 @endsection
