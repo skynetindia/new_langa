@@ -9,6 +9,7 @@
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
         "laravelcollective/html": "~5.3",
+        "mpdf/mpdf": "^6.1",
         "vsmoraes/laravel-pdf": "^1.0"
     },
 	
