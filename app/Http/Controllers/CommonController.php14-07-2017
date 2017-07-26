@@ -1,0 +1,281 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Requests;
+use DB;
+use Validator;
+use Redirect;
+use Session;
+
+class CommonController extends Controller
+{   
+
+    public function downloadcsv(Request $request)
+    {
+              
+        $language = DB::table("language_transalation")->get();
+        $url = url('public/csv/keyword.csv');
+        
+        if(file_exists( $url )){
+            
+            unlink( $url );
+        }
+
+        
+        $test = $_SERVER['DOCUMENT_ROOT'].'/easylanganew/public/csv/keyword.csv';
+        
+        chmod( $test, 0777);
+        $fp = fopen( $test, 'w+');
+        
+        
+        $title['language_key']='language_key'; 
+        $title['language_label']='language_label';
+        $title['language_value']='language_value';
+        $title['code']='code';
+        $title['date']='date';
+
+        fputcsv($fp, $title);
+
+        foreach ($language as $value) {
+
+            $value = (array) $value;
+            $value['language_key']= str_replace('.','',$value['language_key']);
+            unset($value['id']);
+            
+            fputcsv($fp, $value);
+        }
+
+        fclose($fp);
+
+        return redirect($url);
+    
+    }
+
+    public function uploadcsv(Request $request)
+    {
+  
+        $class1="";
+        $message='';
+        $error=0;
+        $target_dir = url('public/');
+        
+        $target_file = $target_dir . basename($_FILES["file"]["name"]);
+
+
+        $target_file = $_FILES['file']['name'];
+        $fileType = pathinfo($target_file,PATHINFO_EXTENSION);
+        if($fileType != "csv")  // here we are checking for the file extension. We are not allowing othre then (.csv) extension .
+        {
+            $message .= "Sorry, only CSV file is allowed.<br>";
+            $error=1;
+        }
+        else
+        {
+            if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file))
+             {
+                DB::table('language_transalation')->truncate(); 
+
+                $message .="File uplaoded successfully.<br>";
+
+                if (($getdata = fopen($target_file, "r")) !== FALSE)
+               {
+                    $x = 0;
+
+                    while (($data = fgetcsv($getdata, 10000, ",")) !== FALSE) 
+                    {
+                        ini_set('max_execution_time', 300);
+                        if($x > 0) 
+                        {                                               
+                           DB::table('language_transalation')->insert(array(
+                                'language_key' =>$data[0],
+                                'language_label' => $data[1],
+                                'language_value' => $data[2],
+                                'code' => $data[3],
+                                'date'=>$data[4]
+                            ));                               
+                        }
+                        $x++;
+                    }
+                    
+                        fclose($getdata);
+                    
+                }
+                    unlink($target_file);
+            } 
+            else 
+            {
+                $message .="Sorry, there was an error uploading your file.";
+                $error=1;
+            }
+        }
+        
+        return redirect()->back();
+    
+    }
+
+    public function getStateList(Request $request)
+    {
+        $states = DB::table("stato")
+            ->lists("nome_stato","id_stato");
+
+        return response()->json($states);
+    }
+    
+    public function getCityList($id)
+    {
+        $cities = DB::table("citta")
+            ->where("id_stato", $id)
+            ->pluck("nome_citta","id_citta");
+
+        return json_encode($cities);
+    }
+
+    // store client sign up details
+    public function storeclientsignup(Request $request)
+    {     
+
+        $validator = Validator::make($request->all(), [
+            'nomeazienda' => 'required',
+            'nomereferente' => 'required',
+            'telefonoprimario' => 'required',
+            'emailprimaria' => 'required|email|max:255|unique:corporations',
+            'settore' => 'required',
+            'telefonosecondario' => '',
+            'emailsecondario' => 'email|max:255|unique:corporations',
+            'fax' => '',
+            'statoemotivo' => '',
+            'cf' => '',
+            'cartadicredito' => '',
+            'iban' => '',
+            'swift' => '',
+            'sedelegale' => '',
+            'indirizzospedizione' => '',
+            // 'logo'=>'required|image| max:10000'
+        ]);
+
+        if ($validator->fails()) {
+
+            return Redirect::back()
+                ->withInput()
+                ->withErrors($validator);
+        }
+        
+        DB::table('corporations')->insert(array(
+            'nomeazienda' => isset($request->nomeazienda) ? $request->nomeazienda : '',
+            'nomereferente' => isset($request->nomereferente) ? $request->nomereferente :'',
+            'telefonoprimario' => isset($request->telefonoprimario) ? $request->telefonoprimario : '',
+            'emailprimaria' => isset($request->emailprimaria) ? $request->emailprimaria :'',
+            'settore' => isset($request->settore) ? $request->settore :'',
+            'telefonosecondaria' => isset($request->telefonosecondario) ? $request->telefonosecondario : '',
+            'emailsecondaria' => isset($request->emailsecondaria) ? $request->emailsecondaria : '',
+            'fax' => isset($request->fax) ? $request->fax : '',
+            'statoemotivo' => isset($request->statoemotivo) ? $request->statoemotivo : '',
+            'cf' => isset($request->cf) ? $request->cf : '',
+            'cartadicredito' => isset($request->cartadicredito) ? $request->cartadicredito : '' ,
+            'iban' => isset($request->iban) ? $request->iban : '',
+            'swift' => isset($request->swift) ? $request->swift : '',
+            'sedelegale' => isset($request->sedelegale) ? $request->sedelegale : '',
+            'indirizzospedizione' => isset($request->indirizzospedizione) ? $request->indirizzospedizione : '',
+            'logo' => isset($request->logo) ? $request->logo : ''
+        ));
+
+        return Redirect::back()
+            ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><h4> Created ..!!! </h4></div>');
+    }
+
+    public function storesteptwo(Request $request)
+    {        
+        $user = DB::table('users')
+            ->where('id', $request->user_id)
+            ->update( array( 'dipartimento' => $request->role ));
+        $user_id = $request->user_id;
+
+        if($user) { 
+            $user = DB::table('users')->where('id', $user_id)->first();
+            return json_encode($user); 
+        }
+        return 'true';
+    }
+	
+	public function nextstep()
+	{
+		
+		if (Session::has('reg_user_id')) {
+			$reg_user_id = Session::get('reg_user_id');
+			$reg_user =  DB::table('users')->where('id', $reg_user_id)->first();
+		}
+		return  view("auth.register-second",["reg_user"=>$reg_user]);
+
+	}
+
+    public function storestepthree(Request $request)
+    {
+        $user = DB::table('users')
+            ->where('id', $request->user_id_three)
+            ->update( array( 
+                'id_citta' => $request->city, 
+                'id_stato' => $request->state,
+            ));
+
+       $user_id = $request->user_id_three;
+
+        if($user) { 
+            $user = DB::table('users')->where('id', $user_id)->first();
+            return json_encode($user); 
+        }
+        return 'true';
+    }
+
+    public function storestepfour(Request $request)
+    {
+        $user = DB::table('users')
+            ->where('id', $request->user_id_forth)
+            ->update( array( 
+                'color' => $request->color, 
+                'cellulare' => $request->cellphone,
+                'logo' => $request->logo,
+            ));
+
+       $user_id = $request->user_id_forth;
+
+        if($user) { 
+            $user = DB::table('users')->where('id', $user_id)->first();
+            return json_encode($user); 
+        }
+        return 'true';
+    }
+
+    // show add alert form
+    public function addadminalert(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {            
+            return view('s.alertmail', [
+                'enti' => DB::table('corporations')
+                    ->get(),
+                'role_type' => DB::table('ruolo_utente')
+                    ->where('is_delete', '=', 0)
+                    ->get(),
+                'alert_type' => DB::table('alert_tipo')
+                    ->get(),
+            ]);
+        }
+    }
+
+    // get alert entity in json format
+    public function getalertjson(Request $request)
+    {
+        $entity = DB::table('inviare_avviso')
+                    ->get();  
+        foreach($entity as $newkey=>$newval)
+        {
+            $newval->data_lettura=($newval->data_lettura!='0000-00-00 00:00:00')?date('d-m-Y h:i:s a',strtotime($newval->data_lettura)):'-';
+            $allaray[]=$newval;
+        }
+        return json_encode($allaray);
+    }
+
+}

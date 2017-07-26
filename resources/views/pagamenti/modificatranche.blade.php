@@ -10,6 +10,9 @@
     document.write(msg);
     </script>
 @endif
+<!-- <style type="text/css">
+.table.table-bordered tr td input[type="checkbox"] { display: block;}
+</style> -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -35,7 +38,7 @@
     	<input name="idfattura" value="{{ $tranche->idfattura }}" type="hidden">   
     @endif
 <div class="row">
-	<div class="col-md-8">
+	<div class="col-md-8 col-sm-12 col-xs-12">
     	    <script>
 			"use strict";
 			$.datepicker.setDefaults(
@@ -66,136 +69,202 @@
 			<h4> {{ trans('messages.keyword_invoice_header') }} </h4>
 			
             
+            
             <div class="row">
-			<div class="col-md-3">
-	<!-- colonna a sinistra -->
-	    <label for="sedelegaleente"> {{ trans('messages.keyword_registered_office_from') }} </label>
-	    <select name="DA" id="sedelegaleente" class="js-example-basic-single form-control">
-	        <option></option>
-	        @foreach($enti as $ente)
-	        	@if($ente->id == $tranche->DA)
-	        		<option selected value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
-                @else
-                	<option value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
-                @endif
-	        @endforeach
-	    </select><br><br>
-
-	    <label for="id"> {{ trans('messages.keyword_note') }}  </label>
-        <input value="{{$tranche->idfattura}}" type="text" id="id" name="idfattura" placeholder="{{ trans('messages.keyword_paymentcode') }} " class="form-control">
-	   
-	    <br><label for="modalita"> {{ trans('messages.keyword_payment_methods') }} </label>
-		<input value="{{$tranche->modalita}}" type="text" class="form-control" id="modalita" name="modalita" placeholder=" {{ trans('messages.keyword_payment_methods') }} "><br>
-	</div>
-	<div class="col-md-3">
-		<label for="sedelegaleentea"> {{ trans('messages.keyword_registered_office_to') }} </label>
-	    <select id="sedelegaleentea" name="A" class="js-example-basic-single form-control">
-	        <option></option>
-	        @foreach($enti as $ente)
-            	@if($ente->id == $tranche->A)
-	        		<option selected value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
-                @else
-                	<option value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
-                @endif
-	        @endforeach
-	    </select><br><br>
-	   
-          
-	    <label for="emissione"> {{ trans('messages.keyword_issue_of_the') }} </label>
-	    <input type="text" name="emissione" id="emissione" class="form-control" value="{{$tranche->emissione}}">
-
-	    <br><label for="iban"> {{ trans('messages.keyword_company_iban') }} </label>
-	     <select name="iban" id="iban" class="js-example-basic-single form-control">
-	        <option></option>
-	        @foreach($enti as $ente)
-            	@if($ente->iban == $tranche->iban)
-	       			<option selected value="{{$ente->iban}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
-                @else
-                	<option value="{{$ente->iban}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
-                @endif
-	        @endforeach
-	    </select><script type="text/javascript">
-
-    $(".js-example-basic-single").select2();
-
-</script><br>
-		
-	</div>
-	<div class="col-md-3">
-	 <label for="id"> {{ trans('messages.keyword_invoicenumber') }} </label>
-        <input value="{{$tranche->idfattura}}" type="text" id="idfattura" name="idfattura" placeholder=" {{ trans('messages.keyword_paymentcode') }} " class="form-control"><br>
-    </div>
-	<div class="col-md-3">
-	<label for="Tipo"> {{ trans('messages.keyword_type_of_invoice') }} </label>
-        <select id="Tipo" name="tipofattura" class="form-control">
-        	@if($tranche->tipofattura == "NOTA DI CREDITO")
-                <option value="0"> {{ trans('messages.keyword_sales_invoice') }} </option>
-                <option value="1" selected> {{ trans('messages.keyword_credit_note') }} </option>
-            @else
-            	<option value="0" selected> {{ trans('keyword_sales_invoice.keyword') }} </option>
-                <option value="1"> {{ trans('messages.keyword_credit_note') }} </option>
-            @endif
-        </select><br>
-     
-	    <label for="base"> {{ trans('messages.keyword_on_the_base') }} </label>
-	    <input class="form-control" type="text" name="base" id="base" placeholder="{{ trans('messages.keyword_on_the_base') }}" value="{{$tranche->base}}">
-	    <br>
-	     <label for="indirizzospedizione"> {{ trans('messages.	keyword_shipping_address') }} </label>
-        <select name="indirizzospedizione" id="indirizzospedizione" class="js-example-basic-single form-control">
-	        <option></option>
-	        @foreach($enti as $ente)
-            	@if($ente->id == $tranche->indirizzospedizione)
-	        		<option selected value="{{$ente->indirizzospedizione}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
-                @else
-                	<option value="{{$ente->indirizzospedizione}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
-                @endif
-	        @endforeach
-	    </select><br>
-	    <script>	    
-	        var today = new Date();
-			var dd = today.getDate();
-			var mm = today.getMonth()+1; //January is 0!
-			var yyyy = today.getFullYear();
-			var tbody = document.createElement("tbody");
-			if(dd<10) {
-				dd='0'+dd;
-			} 
-			if(mm<10) {
-				mm='0'+mm;
-			}
-    		var vecchiaData = "<?php echo $tranche->datainserimento; ?>";
-    		var dataInserimento = vecchiaData.toString();
-    		var impedisciModifica = function(e) {
-    			this.blur();
-    			this.value = dataInserimento;
-		    }
-	</script>		
-	</div>
-	</div>
+          		 <div class="col-md-3 col-sm-12 col-xs-12">
+            	<div class="form-group">
+                <!-- colonna a sinistra -->
+                    <label for="sedelegaleente"> {{ trans('messages.keyword_registered_office_from') }} </label>
+                    <select name="DA" id="sedelegaleente" class="js-example-basic-single form-control required-input error">
+                        <option></option>
+                        @foreach($enti as $ente)
+                            @if($ente->id == $tranche->DA)
+                                <option selected value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                            @else
+                                <option value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                    <label for="sedelegaleente" generated="true" class="error"></label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-12 col-xs-12">    
+                        <div class="form-group">
+                        <label for="sedelegaleentea"> {{ trans('messages.keyword_registered_office_to') }} </label>
+                        <select id="sedelegaleentea" name="A" class="js-example-basic-single form-control required-input error">
+                            <option></option>
+                            @foreach($enti as $ente)
+                                @if($ente->id == $tranche->A)
+                                    <option selected value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                                @else
+                                    <option value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                        <label for="sedelegaleentea" generated="true" class="error"></label>
+                        </div>
+                   </div>
+                   <div class="col-md-3 col-sm-12 col-xs-12">     
+                        <div class="form-group">
+                     <label for="id"> {{ trans('messages.keyword_invoicenumber') }} </label>
+                    <input value="{{$tranche->idfattura}}" type="text" id="idfattura" name="idfattura" placeholder=" {{ trans('messages.keyword_paymentcode') }} " class="form-control">
+                        </div>
+                   </div>     
+                   <div class="col-md-3 col-sm-12 col-xs-12">     
+                        <div class="form-group">
+                        <label for="Tipo"> {{ trans('messages.keyword_type_of_invoice') }} </label>
+                            <select id="Tipo" name="tipofattura" class="form-control">
+                                @if($tranche->tipofattura == "NOTA DI CREDITO")
+                                    <option value="0"> {{ trans('messages.keyword_sales_invoice') }} </option>
+                                    <option value="1" selected> {{ trans('messages.keyword_credit_note') }} </option>
+                                @else
+                                    <option value="0" selected> {{ trans('messages.keyword_sales_invoice') }} </option>
+                                    <option value="1"> {{ trans('messages.keyword_credit_note') }} </option>
+                                @endif
+                            </select>
+                            </div>
+                   </div>     
+                   
+            </div>
+            
+            
+            
+            <div class="row">
+            	 <div class="col-md-4 col-sm-12 col-xs-12">
+                   		<div class="form-group">
+                            <label for="id"> {{ trans('messages.keyword_note') }}  </label>
+                            <input value="{{$tranche->idfattura}}" type="text" id="id" name="idfattura" placeholder="{{ trans('messages.keyword_paymentcode') }} " class="form-control">
+                         </div>
+                   </div>
+                   <div class="col-md-4 col-sm-12 col-xs-12">
+                   		<div class="form-group">
+                            <label for="emissione"> {{ trans('messages.keyword_issue_of_the') }} </label>
+                            <input type="text" name="emissione" id="emissione" class="form-control required-input error" value="<?php 
+                            if($tranche->emissione != '0000-00-00'){
+                                $dateemi = str_replace('/', '-', $tranche->emissione);
+                                echo date('d/m/Y', strtotime($dateemi));
+                            }
+                            ?>">
+                                </div>
+                   </div>
+                   
+                   
+                   <div class="col-md-4 col-sm-12 col-xs-12">
+                   		<div class="form-group">
+                            <label for="base"> {{ trans('messages.keyword_on_the_base') }} </label>
+                            <input class="form-control required-input error" type="text" name="base" id="base" placeholder="{{ trans('messages.keyword_on_the_base') }}" value="{{$tranche->base}}">
+                            </div>
+                   </div>
+            </div>
+            
+            <div class="row">
+            	<div class="col-md-4 col-sm-12 col-xs-12">
+                   		<div class="form-group">
+                            <label for="modalita"> {{ trans('messages.keyword_payment_methods') }} </label>
+                            <input value="{{$tranche->modalita}}" type="text" class="form-control" id="modalita" name="modalita" placeholder=" {{ trans('messages.keyword_payment_methods') }} ">
+                        </div>
+                   </div>
+                   <div class="col-md-4 col-sm-12 col-xs-12">
+                   		<div class="form-group">
+                                <label for="iban"> {{ trans('messages.keyword_company_iban') }} </label>
+                                 <select name="iban" id="iban" class="js-example-basic-single form-control">
+                                    <option></option>
+                                    @foreach($enti as $ente)
+                                        @if($ente->iban == $tranche->iban)
+                                            <option selected value="{{$ente->iban}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                                        @else
+                                            <option value="{{$ente->iban}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                                        @endif
+                                    @endforeach
+                                </select><script type="text/javascript">
+                        
+                            $(".js-example-basic-single").select2();
+                        
+                       		 </script>
+                       </div>
+                   </div>
+                   <div class="col-md-4 col-sm-12 col-xs-12">
+                   		<div class="form-group">
+                             <label for="indirizzospedizione"> {{ trans('messages.keyword_shipping_address') }} </label>
+                            <select name="indirizzospedizione" id="indirizzospedizione" class="js-example-basic-single form-control">
+                                <option></option>
+                                @foreach($enti as $ente)
+                                    @if($ente->id == $tranche->indirizzospedizione)
+                                        <option selected value="{{$ente->indirizzospedizione}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                                    @else
+                                        <option value="{{$ente->indirizzospedizione}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            </div>
+                            <script>	    
+                                var today = new Date();
+                                var dd = today.getDate();
+                                var mm = today.getMonth()+1; //January is 0!
+                                var yyyy = today.getFullYear();
+                                var tbody = document.createElement("tbody");
+                                if(dd<10) {
+                                    dd='0'+dd;
+                                } 
+                                if(mm<10) {
+                                    mm='0'+mm;
+                                }
+                                var vecchiaData = "<?php echo $tranche->datainserimento; ?>";
+                                var dataInserimento = vecchiaData.toString();
+                                var impedisciModifica = function(e) {
+                                    this.blur();
+                                    this.value = dataInserimento;
+                                }
+                        </script>		
+                   </div>
+            </div>
+            
+            
 		<h4> {{ trans('messages.keyword_invoice_body') }} </h4>			
             <div class="row">
 	        <div class="col-md-12">
             		<!-- <a target="new" href="{{url('/pagamenti/tranche/corpofattura') . '/' . $tranche->id}}" class="btn btn-info" style="color:#ffffff;text-decoration: none" title="Vedi Corpo fattura esistenti"><i class="fa fa-info"></i></a> -->
+                    @if(checkpermission('5', '20', 'scrittura','true'))
 	                <a class="btn btn-warning" id="aggiungiCorpo"><i class="fa fa-plus"></i></a>
 	                <a class="btn btn-danger" id="eliminaCorpo"><i class="fa fa-trash"></i></a>
+                    @endif
 	        </div>
             </div>
             <div class="height10"></div>
-	    	<table class="table table-bordered">
+            <div class="set-height450">
+	    	<table class="table table-bordered modificatranshe-blade-pagamenti-tbl">
 	    		<thead>
-	    			<th>#</th>
+	    			<th> #</th>
 	    			<th> {{ trans('messages.keyword_references') }} </th>
-	    			<th> {{ trans('messages.keyword_description') }} </th>
-	    			<th> {{ trans('messages.keyword_qty') }} </th>
+	    			<th> {{ trans('messages.keyword_description') }}</th>
+	    			<th> {{ trans('messages.keyword_qty') }}, {{ trans('messages.keyword_unitary') }} </th>
 	    			<th> {{ trans('messages.keyword_subtotal') }} </th>
-	    			<th> {{ trans('messages.keyword_total') }} </th>
 	    		</thead>
+
 	    		<tbody id="corpofattura">
+	    		<?php $pbody = 0;?>
+	    		@foreach($invoicebody as $keybody => $keyval)
+	    			<tr>
+	    				<td><input class="selezione" id="checkinv{{$keybody}}" type="checkbox"><label for="checkinv{{$keybody}}"></label></td>
+	    				<td><input class="form-control" placeholder=":Quote" name="ordine[]" type="text" value="{{$keyval->ordine}}">
+	    				<input placeholder=":Project" class="form-control" name="project_refer_no[]" type="text" value="{{$keyval->project_refer_no}}"></td>
+	    				<td><textarea class="form-control" name="desc[]" rows="3" cols="80">{{$keyval->descrizione}}</textarea></td>
+	    				<td><input class="form-control" placeholder=":Qty" name="qt[]" type="text" value="{{$keyval->qta}}">
+	    				<input class="form-control" placeholder=":Unit Price" name="unitario" type="text" value="{{$keyval->netto}}"></td>
+	    				<td><input class="form-control" name="subtotale[]" type="text" value="{{$keyval->subtotale}}">
+	    				<div class="switch">
+	    					<input value="1" name="is_active[{{$keybody}}]" id="is_active_{{$keybody}}" <?php echo ($keyval->is_active == '1') ? 'checked' : ''?> type="checkbox">
+	    					<label for="is_active_{{$keybody}}"></label>
+	    				</div>
+	    				</td></tr>
+	    				<?php $pbody++;?>
+	    		@endforeach
 	    		</tbody>
 	    		 <script>
-				 	var kCorpo = 0;
-				 var selezioneCorpo = [];
-	                    var nCorpo = 0;
+			 		var kCorpo = '{{$pbody}}';
+				 	var selezioneCorpo = [];
+	                    var nCorpo = '{{$pbody}}';
+	                    var count = '{{$pbody}}';
 	                    $j('#aggiungiCorpo').on("click", function() {
 	                        var tab = document.getElementById("corpofattura");
 	                        var tr = document.createElement("tr");
@@ -203,7 +272,14 @@
 	                        var checkbox = document.createElement("input");
 	                        checkbox.type = "checkbox";
 	                        checkbox.className = "selezione";
+	                        checkbox.id = "checkinv"+count;
 	                        check.appendChild(checkbox);
+
+	                        var checkboxLabel = document.createElement("label");                               
+                            checkboxLabel.setAttribute('for', "checkinv"+count);
+                            var td = document.createElement("td");
+                            check.appendChild(checkboxLabel);
+
 	                        var ord = document.createElement("td");
 	                        var ordine = document.createElement("input");
 	                        ordine.type = "text";
@@ -217,7 +293,7 @@
 	                        progetto.type = "text";
 	                        progetto.placeholder = ":{{ trans('messages.keyword_project') }}";
 	                        progetto.className = "form-control";
-	                        progetto.name = "ordine[]";
+	                        progetto.name = "project_refer_no[]";
 							// progetto.value = ":";
 	                        ord.appendChild(progetto);
 
@@ -233,6 +309,7 @@
 	                        var quantita = document.createElement("input");
 	                        quantita.type = "text";
 	                        quantita.className = "form-control";
+	                        quantita.placeholder = ":{{ trans('messages.keyword_qty') }}";
 	                        quantita.name = "qt[]";
 	                        qt.appendChild(quantita);
 
@@ -240,8 +317,9 @@
 	                        var unitary = document.createElement("input");
 	                        unitary.type = "text";
 	                        unitary.className = "form-control";
+	                        unitary.placeholder = ":{{ trans('messages.keyword_unit_price') }}";
 	                        unitary.name = "unitario";
-							unitario.appendChild(unitary);
+							qt.appendChild(unitary);
 
 
 	                        var pr = document.createElement("td");
@@ -250,6 +328,23 @@
 	                        prezzo.className = "form-control";
 	                        prezzo.name = "subtotale[]";
 	                        pr.appendChild(prezzo);
+
+	                        var idNotificheDiv = document.createElement("div");
+								idNotificheDiv.className='switch';
+								
+								var idNotificheLabel = document.createElement("label");
+								idNotificheLabel.for = "is_active_"+count;
+								idNotificheLabel.setAttribute('for', "is_active_"+count);
+								var idNotifiche = document.createElement("input");
+				                idNotifiche.type = "checkbox";	                        
+				                idNotifiche.value = '1';
+				                idNotifiche.name = "is_active["+count+"]";
+								idNotifiche.id = "is_active_"+count;
+								idNotificheDiv.appendChild(idNotifiche);
+								idNotificheDiv.appendChild(idNotificheLabel);
+								pr.appendChild(idNotificheDiv);
+
+
 	                        var perc = document.createElement("td");
 	                        var percentualesconto = document.createElement("input");
 	                        percentualesconto.type = "text";
@@ -274,19 +369,16 @@
 	                        iva.className = "form-control";
 	                        iva.name = "iva[]";
 	                        perciva.appendChild(iva);
+
+	                        
 	                        tr.appendChild(check);
 	                        tr.appendChild(ord);
 	                        tr.appendChild(td);
 	                        tr.appendChild(qt);
-	                        tr.appendChild(unitario);
 	                        tr.appendChild(pr);
-	      	//              tr.appendChild(perc);
-			// 				tr.appendChild(per);
-	      	//              tr.appendChild(netto);
-	      	//              tr.appendChild(perciva);
 
 	                        kCorpo++;
-
+	                        count++;
 	                        tab.appendChild(tr);
 
 	                        $j('.selezione').on("click", function() {
@@ -303,7 +395,9 @@
 	                    });
 	                </script>
 	    	</table>
+	    	</div>
 			<h4> {{ trans('messages.keyword_base_invoice') }} </h4><a onclick="calcola()"  class="" title=" {{ trans('messages.keyword_assembled_compilation') }} "><br>{{ trans('messages.keyword_click') }}  <i class="fa fa-info"></i> {{ trans('messages.keyword_for_compilation') }} </i></a>
+            <div class="table-responsive">
 	   	<table class="table table-bordered">
 	   		<thead>
 	   			
@@ -316,13 +410,27 @@
 	   			<th> {{ trans('messages.keyword_amount_due') }} </th>
 	   		</thead>
 	   		<tbody>
-	   			<td><input id="lavorazioni" class="form-control" type="text" name="lavorazioni" value=""></td>
 	   			<td><input id="netto" class="form-control" type="text" name="netto" value="{{$tranche->netto}}"></td>
+
+	   			<td><input id="scontoaggiuntivo" class="form-control" type="text" name="scontoaggiuntivo" value="{{$tranche->scontoaggiuntivo}}"></td>
+
 	   			<td><input id="sconto" class="form-control" type="text" name="scontoaggiuntivo" value="{{$tranche->scontoaggiuntivo}}"></td>
+
 	   			<td><input id="imponibile" class="form-control" type="text" name="imponibile" value="{{$tranche->imponibile}}"></td>
+
 	   			<td><input id="prezzoiva" class="form-control" type="text" name="prezzoiva" value="{{$tranche->prezzoiva}}"></td>
-	   			<td><input id="percentualeiva" class="form-control" type="text" name="percentualeiva" value="{{$tranche->percentualeiva}}"></td>
+
+	   			<td><input id="percentualeiva" class="form-control" type="text" name="percentualeiva" value="<?php 
+                if(isset($tranche->percentualeiva) && $tranche->percentualeiva != null){
+                    echo $tranche->percentualeiva;
+                }
+                elseif(isset($taxation->tassazione_percentuale)){
+                    echo $taxation->tassazione_percentuale;   
+                }
+                ?>"></td>
+
 	   			<td><input id="dapagare" class="form-control" type="text" name="dapagare" value="{{$tranche->dapagare}}"></td>
+
                 <script>
 					function approssima(x) {
 						
@@ -338,19 +446,18 @@
 
 						var importototale = eval(prompt("{{trans('messages.keyword_enter_the_amount_equivalent_to')}} 100%", netto));
 						sconto = eval(prompt("{{trans('messages.keyword_enter_the_additional_discount')}} (€)", sconto));
-						percentuale = eval(prompt("{{trans('messages.keyword_enter_the_percentage')}} (%)", percentuale));
+						percentuale = eval(prompt("{{trans('messages.keyword_enter_the_percentage_of_total_amount')}} (%)", percentuale));
 						netto = eval(prompt("{{trans('messages.keyword_enter_the_net_price')}} (€)", (importototale - sconto) * percentuale / 100));
 						imponibile = eval(prompt("{{trans('messages.keyword_enter_the_taxable_amount')}} (€)", netto));
-						percentualeiva = eval(prompt("{{trans('messages.keyword_enter_the_vat')}} (%)", 22));
+						percentualeiva = eval(prompt("{{trans('messages.keyword_enter_the_vat')}} (%)", percentualeiva));
 						prezzoiva = eval(prompt("{{trans('messages.keyword_enter_the_price_with_vat')}} (€)", imponibile * percentualeiva / 100));
 						dapagare = eval(prompt("{{trans('messages.keyword_enter_the_total_payable')}} (€)", imponibile + prezzoiva));
 						
-						approssima(netto);
+						/*approssima(netto);
 						approssima(imponibile);
 						approssima(prezzoiva);
-						approssima(dapagare);
-						
-						
+						approssima(dapagare);*/
+                        
 						$j('#percentuale').val(percentuale);
 						$j('#netto').val(importototale);
 						$j('#sconto').val(sconto);
@@ -363,28 +470,36 @@
 				</script>
 	   		</tbody>
 	   	</table>
+        </div>
+    @if(checkpermission('5', '20', 'scrittura','true'))
 	<div class="row">
-    <div class="col-md-2">
+    <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-desktop">
 		<input onclick="mostra2()" type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_save') }}">
 	</div>
     </div>
+    @endif
 	</div>
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
     	<div class="clearfix"></div>
         <div class="height10"></div>
+        
+        <div class="form-group">
 		<label for="statoemotivo"> {{ trans('messages.keyword_emotional_state') }} </label>
 		<select name="statoemotivo" class="form-control" id="statoemotivo" >
 			<!-- statoemotivoselezionato -->
 			@if($statoemotivoselezionato!=null)
 				@foreach($statiemotivi as $statoemotivo)
-					<option @if($statoemotivo->id == $statoemotivoselezionato->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+                <?php $label = (!empty($statoemotivo->language_key)) ?  ucwords(strtolower(trans('messages.'.$statoemotivo->language_key))) : (($statoemotivo->name)); ?>
+					<option @if($statoemotivo->id == $statoemotivoselezionato->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{ ucwords(strtolower($label)) }}</option>
 				@endforeach
 			@else
 				@foreach($statiemotivi as $statoemotivo)
-					<option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+                   <?php $label = (!empty($statoemotivo->language_key)) ?  ucwords(strtolower(trans('messages.'.$statoemotivo->language_key))) : (($statoemotivo->name)); ?>
+					<option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{ ucwords($label) }}</option>
 				@endforeach
 			@endif
 		</select>
+        </div>
 		<script>
 		var yourSelect = document.getElementById( "statoemotivo" );
 			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
@@ -393,7 +508,7 @@
 			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
 		});
 		</script>
-		<br>
+		<div class="form-group">
 		 <label for="privato"> {{ trans('messages.keyword_hide_stats') }} </label>
 		  <i class="fa fa-eye-slash" title="{{ trans('messages.keyword_ifso') }} "></i>
             <select class="form-control" name="privato">
@@ -405,7 +520,8 @@
                     <option value="1" selected> {{ trans('messages.keyword_yes') }} </option>
                 @endif
             </select>
-			<br/>
+		</div>
+        <div class="form-group">
 			<label for="tipo"> {{ trans('messages.keyword_type') }} </label>
 		    <select name="tipo" id="tipo" class="form-control">
             	@if($tranche->tipo == 1)
@@ -416,17 +532,22 @@
                     <option value="1"> {{ trans('messages.keyword_renewal') }} </option>
                 @endif
 		    </select>
+        </div>    
+            
 		<!-- 	<div id="frequenza">
 		    <br><label for="frequ">Frequenza <p style="color:#f37f0d;display:inline">(In giorni)</p></label>
 		    <input value="{{$tranche->frequenza}}" id="frequ" name="frequenza" class="form-control" placeholder="Frequenza">
 		</div> -->
-        
-			<br><label for="percentuale">% {{ trans('messages.keyword_total_amount') }}  <span class="required">(*)</span> </label>
-			<input id="percentuale" name="percentuale" class="form-control" value="{{$tranche->percentuale}}" placeholder="{{ trans('messages.keyword_description') }} % ">
+        <div class="form-group">
+			<label for="percentuale">% {{ trans('messages.keyword_total_amount') }} </label>
+			<input id="percentuale" name="percentuale" class="form-control required-input error" value="{{$tranche->percentuale}}" placeholder="{{ trans('messages.keyword_description') }} % ">
+        </div>   
+        <div class="form-group"> 
             <div id="percentualediv">
-		    <br><label for="frequ"> {{ trans('messages.keyword_amount') }} </label>
+		    <label for="frequ"> {{ trans('messages.keyword_amount') }} </label>
 		    <input name="importo_nopercentuale" class="form-control" placeholder="{{ trans('messages.keyword_amount') }} " value="<?php echo $tranche->testoimporto; ?>">
 		</div>
+        </div>
             <script>
 			if($j('#tipo').val() == 1) {
 					// Mostro l'importo
@@ -453,8 +574,13 @@
 				test();
 			});
 			</script>
-			<br><label for="datascadenza"> {{ trans('messages.keyword_expiry_date_invoice') }} <span class="required">(*)</span> </label><br>
-		    <input value="{{$tranche->datascadenza}}" class="form-control" name="datascadenza" id="datascadenza"></input><br>
+			<div class="form-group">
+            <label for="datascadenza"> {{ trans('messages.keyword_expiry_date_invoice') }}  </label>
+		    <input value="<?php 
+		    $datedatascadenza = str_replace('/', '-', $tranche->datascadenza);
+			echo ($tranche->datascadenza != '0000-00-00') ? date('d/m/Y', strtotime($datedatascadenza)) : '';
+		    ?>" class="form-control required-input error" name="datascadenza" id="datascadenza"></input>
+            </div>
            
 			  <script>
 		    $j('#frequenza').hide();
@@ -474,11 +600,11 @@
 		</script>
 		</form>          	
 			<div class="row">
-          	<div class="col-md-12">
+          	<div class="col-md-12 col-sm-12 col-xs-12">
             <div class="bg-white image-upload-box">
 	        <label for="scansione"> {{ trans('messages.keyword_attach_administrative_file') }} </label>            
             <div class="row">
-	        <div class="col-md-12">
+	        <div class="col-md-12 col-sm-12 col-xs-12">
             	<div class="image_upload_div">
                 <?php echo Form::open(array('url' => '/add/fatture/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
 						{{ csrf_field() }}
@@ -536,9 +662,22 @@
 	                <tbody><?php
 					if(isset($tranche->id) && isset($quotefiles)){
 						foreach($quotefiles as $prev) {
-							$imagPath = url('/storage/app/images/quote/'.$prev->name);
+							$imagPath = url('/storage/app/images/invoice/'.$prev->name);
+							$downloadlink = url('/storage/app/images/invoice/'.$prev->name);
+							$filename = $prev->name;			
+							$arrcurrentextension = explode(".", $filename);
+							$extention = end($arrcurrentextension);
+										
+							$arrextension['docx'] = 'docx-file.jpg';
+							$arrextension['pdf'] = 'pdf-file.jpg';
+							$arrextension['xlsx'] = 'excel.jpg';
+							if(isset($arrextension[$extention])){
+								$imagPath = url('/storage/app/images/invoice/default/'.$arrextension[$extention]);			
+							}
+
+							
 							$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";
-	        				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';							
+	        				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';							
 
 							$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 							$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();							
@@ -574,6 +713,7 @@
 	                        kFile++;
 	                        var td = document.createElement("td");
 	                        var fileInput = document.createElement("input");
+
 	                        fileInput.type = "file";
 	                        fileInput.className = "form-control";
 	                        fileInput.name = "filee[]";
@@ -603,6 +743,13 @@
             </div>
 		
 	</div>
+    
+   
+    <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-mobile">
+		<input onclick="mostra2()" type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_save') }}">
+	</div>
+  
+    
 </div>
 <div class="footer-svg">
   <img src="{{url('images/FOOTER2_RB_ACCOUNTING.svg')}}" alt="footer enti image">
@@ -622,12 +769,12 @@
                     <div class="row">
                         <div class="col-md-12">                               
                             <div class="form-group">
-                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} <span class="required">(*)</span> </label>
-                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
+                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} </label>
+                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
                             </div>
                             <div class="form-group">
-                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} <span class="required">(*)</span></label>
-                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
+                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} </label>
+                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
                             </div>
                         </div>
                      </div>

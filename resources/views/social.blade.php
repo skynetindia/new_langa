@@ -1,0 +1,212 @@
+@extends('adminHome')
+@section('page')
+
+<div class="res-tassonomie-enti">
+<h1>{{trans('messages.keyword_social')}}</h1><hr>
+@include('common.errors')
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
+
+<fieldset>
+<legend> {{ trans('messages.keyword_types') }} </legend>
+
+<h4>{{ trans('messages.keyword_add_type')}}</h4>
+<form action="{{url('/social/add')}}" method="post" id="socialadd" name="socialadd" enctype="multipart/form-data">
+    {{ csrf_field() }}
+	<div class="row">
+    <div class="col-md-3 col-sm-12 col-xs-12">
+		<div class="form-group">
+			<input type="text" class="form-control" name="title" placeholder="{{trans('messages.keyword_title')}}">
+		</div>
+	</div>
+  <div class="col-md-3 col-sm-12 col-xs-12">
+    <div class="form-group">
+      <input type="text" class="form-control" name="url" placeholder="{{trans('messages.keyword_url')}}">
+    </div>
+  </div>
+	<div class="col-md-3 col-sm-12 col-xs-12">
+		<div class="form-group">
+			<input type="file" class="form-control" value="" name="image" />
+		</div>
+	</div>
+
+  <div class="col-md-3 col-sm-12 col-xs-12">
+
+    <div class="form-group" >
+      <select class="form-control" name="is_active">
+        <option value="1">Active</option>
+        <option value="0">Inactive</option>
+      </select>      
+    </div>
+
+  </div>
+
+  </div>
+	<div class="text-right res-left">
+		<input type="submit" class="btn btn-primary" 
+    value="{{trans('messages.keyword_add')}}">    
+	</div>
+</form>
+
+<h4>{{trans('messages.keyword_edit_types')}}</h4>
+<div class="row alltaxationeditparts">
+  <div class="col-md-6">
+  <div class="form-group m_select lblshow">
+    <input id="chktasentitypeall" name="chktasentitypeall" value="1" type="checkbox">
+     <label for="chktasentitypeall"> {{trans('messages.keyword_select_all')}} </label>
+  </div>
+  </div>
+  <div class="col-md-6 text-right">
+    <input type="button" onclick="AllTaxonomiesAction('update')" class="btn btn-warning" value="{{trans('messages.keyword_save_selected')}}">
+    <input type="button" onclick="AllTaxonomiesAction('delete')" class="btn btn-danger" value="{{trans('messages.keyword_delete_selected')}}">
+  </div>
+</div>
+
+<!-- This forms used to edit/delete both actions  --> 
+<form action="{{url('/social/update')}}" method="post" id="socialupdate" name="socialupdate" enctype="multipart/form-data">
+{{ csrf_field() }}
+<input type="hidden" id="actiontype" name="action" value="update">
+<div class="table-responsive">
+    <table class="table table-striped table-bordered text-right checkbox-tbl">
+      @foreach($socials as $social)
+      <tr>
+        <td>
+
+            <input type="hidden" name="id[]" value="{{$social->social_id}}"> 
+            <table class="table sub-table">
+              <tr>
+                <td>
+
+                <input type="checkbox" class="form-control social" name="social[{{$social->social_id}}]" id="social_{{$social->social_id}}" value="{{$social->social_id}}">
+                <label for="social_{{$social->social_id}}"></label></td>
+                <td><input type="text" class="form-control" name="title[{{$social->social_id}}]" id="title" value="{{$social->title}}"></td>
+                <td><input type="text" class="form-control" name="url[{{$social->social_id}}]" value="{{$social->url}}"></td>
+                <td><input type="file" class="form-control" name="imageicon[{{$social->social_id}}]"></td>
+                <td><img src="{{ url('/storage/app/images/social/'.$social->image) }}" height="100" width="100" class="img-responsive" alt="image not exists"></td>
+                <td>
+                  <select class="form-control" name="is_active[{{$social->social_id}}]">
+                    <option value="1" <?php if(isset($social->is_active) && $social->is_active == 1) echo "selected"; ?> >Active</option>
+                    <option value="0" <?php if(isset($social->is_active) && $social->is_active == 0) echo "selected"; ?>>Inactive</option>
+                  </select> 
+                </td>
+
+                <td><input type="button" onclick="SingleTaxonomiesAction('{{$social->social_id}}','update')" class="btn btn-warning" value="{{trans('messages.keyword_save')}}">
+
+                <a onclick="conferma(event);" type="button" href="javascript:SingleTaxonomiesAction('{{$social->social_id}}','delete')" class="btn btn-danger"> {{trans('messages.keyword_delete_label')}}</a></td>
+
+              </tr>
+            </table>                    
+          </td>
+      </tr>
+      @endforeach
+    </table>
+  </div>
+</form>
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+  $("#socialadd").validate({          
+      rules: {
+          "title": {
+              required: true,
+          },
+          "url": {
+              required: true,
+          }
+      },
+      messages: {
+          "title": {
+              required: " {{trans('messages.keyword_please_enter_a_title')}}"
+          },
+          "url": {
+              required: " {{trans('messages.keyword_please_enter_a_url')}}"
+          }
+      }
+    });
+
+  $("#socialupdate").validate({          
+      rules: {
+          "title[]": {
+              required: true,
+          },
+          "url[]": {
+              required: true,
+          }
+      },
+      messages: {
+          "title[]": {
+              required: " {{trans('messages.keyword_please_enter_a_title')}}"
+          },
+          "url[]": {
+              required: " {{trans('messages.keyword_please_enter_a_url')}}"
+          }
+      }
+    });
+
+});
+
+
+$("#chktasentitypeall").click(function () {
+   $('.social').not(this).prop('checked', this.checked);
+   addremoveclass();
+});
+
+$(".social").click(function () {        
+  addremoveclass();
+});
+
+function SingleTaxonomiesAction(id,action) {
+  $("#social_"+id).prop('checked', true);
+  $("#actiontype").val(action);
+  $( "#comicupdate" ).submit();
+}
+
+function AllTaxonomiesAction(action) {
+if ($("#socialupdate input:checkbox:checked").length > 0) {    
+  if(action == 'delete'){
+    var confirmation = confirm("<?php echo trans('messages.keyword_are_you_sure?');?>") ;
+    if (!confirmation) {
+      return false;
+    }        
+  }
+  $("#actiontype").val(action);
+  $( "#socialupdate").submit();  
+ }
+ else {
+    alert("{{trans('messages.keyword_select_at_least_one_record')}}");
+ }
+}
+
+function addremoveclass(){
+  $(".table input[type=checkbox]").each(function() {
+    if(false == $(this).prop("checked")) { 
+        $(this).closest("tr").removeClass("selected");
+     }
+     else {
+          $(this).closest("tr").addClass("selected");
+    } 
+  });
+}
+
+</script>
+
+</div>
+<script>
+
+	function conferma(e) {
+	var confirmation = confirm("<?php echo trans('messages.keyword_are_you_sure?');?>") ;
+    if (!confirmation)
+        e.preventDefault();
+	return confirmation ;
+}
+</script>
+@endsection

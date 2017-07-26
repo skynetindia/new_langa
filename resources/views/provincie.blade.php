@@ -43,12 +43,14 @@
               <label for="stato"><span class=""></span> 
               {{trans('messages.keyword_select_status')}}</label>
 
-            <select id="stato" name="stato[]" class="form-control" required="required">
+            <select id="stato" name="stato[]" class="form-control" required>
                 <option></option>
                 @foreach($stato as $state)
+
                   <option value="{{ $state->id_stato }}">
                   {{ $state->nome_stato }}
                   </option>
+
                 @endforeach
 
               </select>
@@ -62,10 +64,11 @@
             <div class="form-group">
               <label for="provincie"> {{trans('messages.keyword_enter_provincie')}} </label>
               <input type="text" class="form-control" id="provincie" placeholder="{{trans('messages.keyword_enter_provincie')}}" name="citta" required="required" />
-            </div>            
-            <?php /*<button type="button" id="btn_save" class="btn btn-success btn-block"><span class="glyphicon"></span> {{trans('messages.keyword_save')}} </button>*/?>
+            </div>
+           <?php /*<button type="button" id="btn_save1" class="btn btn-success btn-block"><span class="glyphicon"></span> {{trans('messages.keyword_save')}} </button>*/?>
           </form>
-        </div>      
+        </div>
+      
       <div class="modal-footer text-right">
         <button type="button" id="btn_save" class="btn btn-warning"><span class="glyphicon"></span> {{trans('messages.keyword_save')}} </button>
           <button type="button" id="btn_close" class="btn btn-danger btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove" ></span> {{trans('messages.keyword_close')}}</button>         
@@ -76,16 +79,19 @@
 </div> 
 <script>
 $(document).ready(function(){
+
     $("#myBtn").click(function(){
         $("#myModal").modal();
     });
+
     $("#btn_close").click(function(){
         location.reload();
     });
+
+
     $("#btn_save").click(function(e){
        if($("#provincie_form").valid()){
-        e.preventDefault();
-
+          e.preventDefault();
           var stato = $("#stato").val(); 
           var citta = $("#citta").val();
           var provincie = $("#provincie").val(); 
@@ -103,55 +109,67 @@ $(document).ready(function(){
                // console.log(data);
                $('#success_message').html(data);
             }
-        });
-        }
+          });
+      };
     });
 });
 </script>
 <?php echo Form::open(array('url' => '/store-provincie')) ?>
 
 <div class="row indici-costo-wrap">   
+
 @php
+
 $i = 1
+
 @endphp
 
 @foreach($stato as $state)
+
 @if($i/3 == 1)
+
 <div class="row">  
   <div class="col-md-4">
   <div class="row"><div class="col-md-12">
     <label for="nome_stato"> {{ $state->nome_stato }} </label></div></div>
-        @foreach($provincie as $citta)    
+
+        @foreach($provincie as $citta)
+    
           @if($citta->id_stato == $state->id_stato)
-            @if($citta->nome_citta !='')
-            <div class="row">
-              <div class="col-md-6">
-                <input type="text" required="required" name="citta[]" value="{{ $citta->nome_citta }}">
-              </div>
-              <div class="col-md-6"> 
-                <input type="text" required="required" name="provincie[]" value="{{ $citta->provincie }}">
-              </div>
+          @if($citta->nome_citta !='')
+          <div class="row">
+            <div class="col-md-6">
+              <input type="text" name="citta[]" value="{{ $citta->nome_citta }}">
             </div>
-              <input type="hidden" name="id_citta[]" value="{{ $citta->id_citta }}">
-            @endif
+            <div class="col-md-6"> 
+              <input type="text" name="provincie[]" value="{{ $citta->provincie }}">
+            </div>
+          </div>
+            <input type="hidden" name="id_citta[]" value="{{ $citta->id_citta }}">
+
           @endif
-       @endforeach  
+          @endif
+
+       @endforeach
+  
 </div>
 </div>
 <br>
-@else 
+@else
+ 
   <div class="col-md-4">
 <div class="row"><div class="col-md-12">
     <label for="nome_stato"> {{ $state->nome_stato }} </label></div></div>
+
         @foreach($provincie as $citta)    
           @if($citta->id_stato == $state->id_stato)
            @if($citta->nome_citta !='')
             <div class="row">
               <div class="col-md-6">
-                  <input type="text" required="required" name="citta[]" value="{{$citta->nome_citta }}">
+                  <input type="text" name="citta[]" value="{{$citta->nome_citta }}">
               </div>
               <div class="col-md-6">
-                  <input type="text" required="required" name="provincie[]" value="{{$citta->provincie }}">
+                  <input type="text" name="provincie[]" value="{{$citta->provincie }}">
               </div>
                   <input type="hidden" name="id_citta[]" value="{{$citta->id_citta }}">
             </div>

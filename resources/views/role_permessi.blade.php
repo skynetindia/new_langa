@@ -3,12 +3,10 @@
 <h1>{{ trans('messages.keyword_role') }} Easy <strong>LANGA</strong></h1><hr>
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
+
 <script>
   $(function(){
         $("table").stupidtable();
@@ -19,8 +17,12 @@
 @endif
 </script>
 <a onclick="multipleAction('add');" id="add" class="btn btn-warning" title="{{ trans('messages.keyword_addrole') }}"><i class="glyphicon glyphicon-plus"></i></a>
-<div class="space10"></div>
 <a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a><a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="fa fa-trash"></i></a>
+
+<div class="space10"></div>
+
+<div class="panel panel-default">
+<div class="panel-body">
 <div class="table-responsive table-custom-design">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="utente-permessi/json" data-classes="table table-bordered" id="table">
     <thead>
@@ -31,6 +33,11 @@
     </thead>
     </table>
 </div>
+</div>	
+</div>
+
+
+
 <script>
 var selezione = [];
 var indici = [];

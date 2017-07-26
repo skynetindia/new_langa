@@ -3,12 +3,11 @@
 <h1>New Enti <strong>LANGA</strong></h1><hr>
 @include('common.errors')
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
+
 <script>
   $(function(){
         $("table").stupidtable();
@@ -19,9 +18,13 @@
 @endif
 </script>
 <div class="btn-group">
-@if (\Session::has('success'))    
-<div class="alert alert-success fade in alert-dismissable"> 
-    <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a> {!! \Session::get('success') !!} </div>
+
+@if (\Session::has('success'))
+    <div class="alert alert-success">
+        <ul>
+            <li>{!! \Session::get('success') !!}</li>
+        </ul>
+    </div>
 @endif
 </div>
 <div class="table-responsive">

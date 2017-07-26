@@ -2,11 +2,12 @@
 @section('content')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
+
+<script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
+
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -19,11 +20,11 @@
         <img src="{{url('images/HEADER1_LT_ACCOUNTING.svg')}}" alt="header image">
     </div>
     <div class="float-right text-right">
-        <h1> {{ trans('messages.keyword_add_invoice') }} </h1><hr>            
+        <h1> {{ucwords(trans('messages.keyword_add_invoice')) }} </h1><hr>            
+         @if(checkpermission('5', '20', 'scrittura','true'))
         <a href="{{url('/pagamenti/tranche/add') . '/' . $idfattura}}" id="modifica" class="btn btn-warning" title=" {{ trans('messages.keyword_add_tranche_arrangement') }} ">
 			<i class="fa fa-plus"></i>
 		</a>
-
         <div class="btn-group">
         <a onclick="multipleAction('modify');" id="modifica"  class="btn btn-warning" title=" {{ trans('messages.keyword_edit_last_selected_format') }} ">
             <i class="fa fa-pencil"></i>
@@ -36,8 +37,19 @@
         </a>
         <a id="pdf" onclick="multipleAction('pdf');"  class="btn" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} ">
             <i class="fa fa-file-pdf-o"></i>
-        </a>
+        </a>        
         </div>
+        @else
+        <div class="btn-group">
+        <a onclick="multipleAction('modify');" id="modifica"  class="btn btn-warning" title=" {{ trans('messages.keyword_edit_last_selected_format') }} ">
+            <i class="fa fa-info"></i>
+        </a>
+        <a id="pdf" onclick="multipleAction('pdf');"  class="btn" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} ">
+            <i class="fa fa-file-pdf-o"></i>
+        </a>        
+        </div>
+        @endif
+
     </div>
 </div>
 
@@ -46,20 +58,20 @@
 
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/tranche/json') . '/id/' . $idfattura;?>" data-classes="table table-bordered" id="table">
         <thead>
-            <th data-field="id" data-sortable="true"> {{ trans('messages.keyword_noprovision') }} 
+            <th data-field="id" data-sortable="true"> {{ ucwords(trans('messages.keyword_noprovision')) }} 
             <th data-field="idfattura" data-sortable="true"> 
-            {{ trans('messages.keyword_invoicenumber') }}             
+            {{ ucwords(trans('messages.keyword_invoicenumber')) }}             
             <th data-field="ente" data-sortable="true"> 
-            {{ trans('messages.keyword_entity') }} 
+            {{ ucwords(trans('messages.keyword_entity')) }} 
             <th data-field="tipo" data-sortable="true"> 
-            {{ trans('messages.keyword_type') }} 
-            <th data-field="datainserimento" data-sortable="true"> {{ trans('messages.keyword_inserting') }} 
-            <th data-field="datascadenza" data-sortable="true"> {{ trans('messages.keyword_deadline') }} 
+            {{ ucwords(trans('messages.keyword_type')) }} 
+            <th data-field="datainserimento" data-sortable="true"> {{ ucwords(trans('messages.keyword_inserting')) }} 
+            <th data-field="datascadenza" data-sortable="true"> {{ ucwords(trans('messages.keyword_deadline')) }} 
             <th data-field="percentuale" data-sortable="true">%
             <th data-field="dapagare" data-sortable="true"> 
-            {{ trans('messages.keyword_keyword_topay') }} 
+            {{ ucwords(trans('messages.keyword_topay')) }} 
             <th data-field="statoemotivo" data-sortable="true"> 
-            {{ trans('messages.keyword_emotional_state') }}
+            {{ ucwords(trans('messages.keyword_emotional_state')) }}
         </thead>
     </table>
 <div class="footer-svg">

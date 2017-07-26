@@ -1,0 +1,539 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Application Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register all of the routes for an application.
+| It's a breeze. Simply tell Laravel the URIs it should respond to
+| and give it the controller to call when that URI is requested.
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/unauthorized', function () {
+    return view('errors.403');
+});
+
+Route::get('/onworking', function () {
+    return view('errors.503');
+});
+
+Route::auth();
+//Auth::routes();
+
+Route::get('/logout', 'Auth\LoginController@logout');
+Route::get('/admin', 'AdminController@index');
+/*===================================== Language section routes =============================== */
+// Lanauge
+Route::get('/admin/language', 'AdminController@language');
+Route::get('/admin/language/json', 'AdminController@getjsonlanguage');
+Route::get('/admin/modify/language/{languageid?}', 'AdminController@modifylanguage');
+Route::post('/admin/update/language/{languageid?}', 'AdminController@saveLanguage');
+Route::get('/admin/destroy/language/{languageid}', 'AdminController@destroylanguage');
+
+// Language Translations
+Route::get('/admin/languagetranslation/{code?}', 'AdminController@translation');
+Route::get('/admin/languagetranslation/json/{code?}', 'AdminController@getjsontranslation');
+Route::get('/admin/languagetranslation/delete/{id}', 'AdminController@destroytranslation');
+Route::get('/admin/writelanguage', 'AdminController@writelanguagefile');
+
+Route::any('/admin/add/languagetranslation', 'AdminController@addtranslation');
+Route::get('/admin/modify/languagetranslation/{id}', 'AdminController@addtranslation');
+Route::post('admin/languagetranslation/store', 'AdminController@savetranslation');
+Route::post('admin/languagetranslation/update/{key}', 'AdminController@updatetranslation');
+
+Route::get('/language-chooser', 'LanguageController@changeLanguage');
+Route::get('/language/', array('before'=> 'csrf','as'=>'language-chooser','uses'=>'LanguageController@changeLanguage'));
+
+/*===================================== Entiity Emotion section routes =============================== */
+//Company(Entities) sections
+Route::get('admin/taxonomies/enti', 'AdminController@enti');
+
+Route::post('/admin/tassonomie/new', 'AdminController@nuovoTipo');
+Route::post('/admin/tassonomie/update', 'AdminController@tassonomieUpdate');
+Route::get('/admin/tassonomie/delete/id/{id}', 'AdminController@delete');
+// Stati emotivi enti
+Route::post('/admin/tassonomie/nuovostatoemotivo', 'AdminController@nuovoStatoEmotivo');
+Route::post('/admin/tassonomie/aggiornastatiemotivi', 'AdminController@aggiornaStatiEmotivi');
+Route::get('/admin/tassonomie/statiemotivi/delete/id/{id}', 'AdminController@deleteStatiEmotivi');
+
+
+// for getting new enti list New Enti sections
+Route::get('/newenti', 'AdminController@newregisteredenti');
+Route::get('/newenti/json', 'AdminController@getjsonregisteredenti');
+// approve enti
+Route::get('/approveenti/{id}', 'AdminController@approveenti');
+// reject enti
+Route::get('/rejectenti/{id}', 'AdminController@rejectedenti');
+
+/*===================================== Estimates (Preventi) section routes =============================== */
+// Preventivi -> Stato emotivo
+Route::get('/admin/taxonomies/estimates', 'AdminController@estimates'); //fatto
+Route::get('/admin/taxonomies/statiestimate/delete/id/{id}', 'AdminController@deleteStatiEstimates'); //fatto
+Route::post('/admin/taxonomies/updateestimates', 'AdminController@updateStatiEstimates'); //fatto(?)
+Route::post('/admin/taxonomies/addestimates', 'AdminController@addStatiEstimates');
+
+/*===================================== Project (Progetti) section routes =============================== */
+//Progetti -> Stato emotivo
+Route::get('/admin/taxonomies/project', 'AdminController@project');
+Route::get('/admin/taxonomies/statesproject/delete/id/{id}', 'AdminController@deleteStatesProject');
+Route::post('/admin/taxonomies/updatestatesproject', 'AdminController@updateStatesProject');
+Route::post('/admin/taxonomies/addstatesproject', 'AdminController@addStatesProject');
+
+//Project -> Processing (lavorazioni) 
+Route::get('/admin/taxonomies/processing', 'AdminController@processing');
+Route::post('/admin/taxonomies/addprocessing', 'AdminController@addProcessing');
+Route::post('/admin/taxonomies/updateprocessing', 'AdminController@updateProcessing');
+Route::get('/admin/taxonomies/deleteprocessing/id/{id}', 'AdminController@deleteProcessing');
+
+/*===================================== Payments (Pagamenti) section =============================== */
+// Pagamenti -> Stato emotivo
+Route::get('/admin/taxonomies/payments', 'AdminController@payments');
+Route::post('/admin/taxonomies/addstatepayment', 'AdminController@addstatepayment');
+Route::get('/admin/taxonomies/statepayment/delete/id/{id}', 'AdminController@deleteStatePayment');
+Route::post('/admin/tassonomie/updatestatepayment', 'AdminController@updateStatePayment');
+
+
+/* ========================================= Entity Section ============================================ */
+Route::get('/enti/myenti', 'CorporationController@myenti');
+Route::get('enti/myenti/json', 'CorporationController@getJsonMyenti');
+Route::get('/enti', 'CorporationController@index');
+Route::get('enti/json', 'CorporationController@getjson');
+Route::get('/enti/delete/corporation/{corporation}', 'CorporationController@destroy');
+Route::get('/enti/modify/corporation/{corporation}', 'CorporationController@modify');
+Route::post('/enti/update/corporation/{corporation}', 'CorporationController@update');
+Route::get('/enti/duplicate/corporation/{corporation}', 'CorporationController@duplicate');
+Route::get('/enti/newclient/corporation/{corporation}', 'CorporationController@newclient');
+Route::post('/enti/add/', 'CorporationController@add');
+Route::get('/enti/add/', 'CorporationController@add');
+Route::post('/enti/store/', 'CorporationController@store');
+
+
+/*==================================================================================================================== */
+// show list of users
+Route::get('/admin/utenti', 'AdminController@utenti');
+// get users list json
+Route::get('users/json', 'AdminController@getjsonusers');
+// add/edit user form view
+Route::get('/admin/modify/utente/{utente?}', 'AdminController@modificautente');
+// store user details
+Route::post('/admin/update/utente/{utente?}', 'AdminController@aggiornautente');
+//Delete user
+Route::get('/admin/destroy/utente/{utente}', 'AdminController@destroyutente');
+
+// get role permission
+Route::get('/admin/role/permission/{ruolo_id?}', 'AdminController@rolepermission');
+
+// show role view
+Route::get('/utente-permessi', 'AdminController@permessiutente');
+// get role permission json
+Route::get('/utente-permessi/json', 'AdminController@rolepermessijson');
+// add/edit view for role permission
+Route::get('/role-permessi/{ruolo_id?}', 'AdminController@permessirole');
+// store role permissions
+Route::post('/store-permessi', 'AdminController@storepermessi');
+// delete role
+Route::get('/admin/destroy/ruolo/{ruolo_id}', 'AdminController@deleterole');
+
+// get new user list
+Route::get('/newutente', 'AdminController@newregistratoutente');
+// new user json
+Route::get('/newutente/json', 'AdminController@newutentejson');
+// approve user
+Route::get('/approvare/{id}', 'AdminController@approvareutente');
+// reject user
+Route::get('/rifiutare/{id}', 'AdminController@rifiutareutente');
+
+
+// show package list 
+Route::get('/admin/tassonomie/pacchetti', 'AdminController@mostrapacchetti');
+// get package json
+Route::get('/admin/tassonomie/pacchetti/json', 'AdminController@mostrapacchettijson');
+// add package form
+Route::get('/admin/tassonomie/pacchetti/add', 'AdminController@aggiungipacchetto');
+// store add package details
+Route::post('/admin/tassonomie/pacchetti/store', 'AdminController@salvapacchetto');
+// edit package form
+Route::get('/admin/tassonomie/modify/pacchetto/{pacchetto}', 'AdminController@modifypacchetto');
+// store edit package details
+Route::post('/admin/tassonomie/update/pacchetto/{pacchetto}', 'AdminController@aggiornapacchetto');
+// delete package detail
+Route::get('/admin/tassonomie/delete/pacchetto/{pacchetto}', 'AdminController@destroypacchetto');
+
+
+// discount view
+Route::get('/admin/tassonomie/sconti', 'AdminController@mostrasconti');
+// get discount json
+Route::get('/admin/sconti/json', 'AdminController@scontijson');
+// add discount form
+Route::get('/admin/tassonomie/sconti/add', 'AdminController@aggiungisconto');
+// store add discount
+Route::post('/admin/tassonomie/sconti/store', 'AdminController@salvasconto');
+// edit discount form
+Route::get('/admin/tassonomie/modify/sconto/{sconto}', 'AdminController@modifysconto');
+// store edit discount
+Route::post('/admin/tassonomie/update/sconto/{sc}', 'AdminController@aggiornasconto');
+// delete discount
+Route::get('/admin/tassonomie/delete/sconto/{sconto}', 'AdminController@destroysconto');
+
+// discount bonus view
+Route::get('/admin/tassonomie/scontibonus', 'AdminController@mostrascontibonus');
+// get discount json
+Route::get('/admin/scontibonus/json', 'AdminController@scontibonusjson');
+// add bonus discount form
+Route::get('/admin/tassonomie/scontibonus/add', 'AdminController@aggiungiscontobonus');
+// store bonus discount form
+Route::post('/admin/tassonomie/scontibonus/store', 'AdminController@salvascontobonus');
+// edit bonus discount form
+Route::get('/admin/tassonomie/modify/scontobonus/{sconto}', 'AdminController@modifyscontobonus');
+// store bonus discount form
+Route::post('/admin/tassonomie/update/scontobonus/{sc}', 'AdminController@aggiornascontobonus');
+// delete bonus discount 
+Route::get('/admin/tassonomie/delete/scontobonus/{sconto}', 'AdminController@destroyscontobonus');
+
+Route::get('admin/tassonomie/vendita', 'AdminController@vendita');
+Route::get('/admin/taxonomies/optional/', 'AdminController@mostraoptional');
+Route::any('/admin/taxonomies/optional/add', 'AdminController@aggiungioptional');
+Route::any('/admin/taxonomies/optional/store', 'AdminController@salvaoptional');
+Route::get('/admin/taxonomies/modify/optional/{optional}', 'AdminController@modificaoptional');
+Route::post('/admin/taxonomies/update/optional/{optional}', 'AdminController@saveoptionalchanges');
+Route::get('/admin/taxonomies/delete/optional/{optional}', 'AdminController@destroyoptional');
+Route::get('/admin/taxonomies/json', 'AdminController@getjson');
+
+
+//Dynamic Menu
+Route::get('/admin/menu', 'AdminController@menu');
+Route::any('/menu/add', 'AdminController@menuadd');
+Route::get('/menu/parentmenu/{parent}', 'AdminController@parentmenu');
+Route::get('/menu/submenu/{parent}', 'AdminController@submenu');
+Route::post('/menu/store', 'AdminController@storemenu');
+Route::get('/menu/json', 'AdminController@menujson');
+Route::get('/menu/modify/{id}', 'AdminController@menumodify');
+Route::post('/menu/update/{id}', 'AdminController@menuupdate');
+Route::get('/menu/delete/{id}', 'AdminController@menudelete');
+
+Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/admin/user/access/{userid}', 'AdminController@access')->name('home');
+
+
+// ========================================================================================
+// 									Alert Route
+// ========================================================================================
+
+// show aff alert form
+Route::get('/admin/alert', 'AdminController@addadminalert');
+// get alert entity in json
+Route::get('/alert/enti/json', 'AdminController@getalertjson');
+// store alert details
+Route::post('/admin/alert/store', 'AdminController@storeadminalert');
+// show and modify alert type
+Route::get('/admin/alert/tipo', 'AdminController@alertTipo');
+// add alert type
+Route::post('/alert/add/tipo', 'AdminController@newalertTipo');
+// update alert type
+Route::post('/admin/update/tipo', 'AdminController@alerttipoUpdate');
+// delete alert type
+Route::get('/admin/delete/tipo/{id_tipo}', 'AdminController@alerttipodelete');
+// send alert to users
+Route::get('/send-alert', 'AdminController@sendalert');
+
+// Deparments
+Route::get('admin/tassonomie/dipartimenti', 'AdminController@dipartimenti');
+Route::post('/admin/tassonomie/dipartimenti/add', 'AdminController@add');
+Route::get('/admin/tassonomie/dipartimenti/add', 'AdminController@nuovo');
+Route::post('/admin/tassonomie/dipartimenti/store', 'AdminController@salvadipartimento');
+Route::get('/admin/tassonomie/dipartimenti/modify/department/{department}', 'AdminController@modificadipartimento');
+Route::get('/admin/tassonomie/dipartimenti/delete/department/{department}', 'AdminController@destroydipartimento');
+Route::post('/admin/tassonomie/dipartimenti/update/department/{department}', 'AdminController@aggiornadipartimento');
+Route::get('admin/tassonomie/dipartimentijson', 'AdminController@dipartimentijson');
+
+// show taxation 
+Route::get('/taxation', 'AdminController@showtaxation');
+// add taxation
+Route::get('/taxation/add/{id?}', 'AdminController@addtaxation');
+// store taxation
+Route::post('/taxation/store', 'AdminController@storetaxation');
+// delete taxation
+Route::get('/taxation/delete/{id}', 'AdminController@deletetaxation');
+// get taxation
+Route::get('taxation/json', 'AdminController@getjsontaxation');
+
+Route::get('/admin/quiz', 'AdminController@quizdemo');
+Route::post('/admin/quizdemonew', 'AdminController@nuovoquizdemo');
+Route::get('/admin/quizdemodelete/id/{id}', 'AdminController@quizdemodelete');
+Route::post('/admin/quizdemoupdate', 'AdminController@quizdemoUpdate');
+
+// show all provinces
+Route::get('/show-provincie', 'AdminController@showprovincie');
+// store provinces
+Route::post('/store-provincie', 'AdminController@storeprovincie');
+// add new provinces
+Route::post('/addprovincie', 'AdminController@addprovincie');
+/*================================================================ Quiz Package =============================================================== */
+/// Pacchetto (Package)
+Route::get('/admin/quizpackage', 'AdminController@quizpackage');
+Route::get('/admin/modify/quizpaackage/{pacchetto?}', 'AdminController@modifyquizpackage');
+Route::get('/admin/quizpackage/json', 'AdminController@getjsonquizpackage');
+Route::post('/admin/save/quizpackage/{pacchetto?}', 'AdminController@savequizpackage');
+Route::get('/admin/destroy/quizpackage/{pacchetto}', 'AdminController@destroyquizpackage');
+
+// Profilo utente
+Route::get('/profilo', 'HomeController@mostraprofilo');
+Route::post('/profilo/aggiornaimmagine/{id}', 'HomeController@aggiornaimmagine');
+Route::get('/profilo/link/elimina/{id}', 'HomeController@eliminalink');
+Route::post('/profilo/aggiungilink', 'HomeController@aggiungilink');
+
+/*================================================================= Preveti (Quote section) Front ====================================================== */
+// Preventivi (Estimates)
+Route::get('/estimates', 'QuoteController@index');
+Route::get('/estimates/my', 'QuoteController@myestimates');
+Route::post('/estimates/add', 'QuoteController@newEstimates');
+Route::get('/estimates/add', 'QuoteController@add');
+Route::post('/estimates/store', 'QuoteController@store');
+Route::get('/estimates/modify/quote/{quote}', 'QuoteController@modify');
+Route::post('/estimates/modify/quote/{quote}', 'QuoteController@update');
+Route::get('/estimates/delete/quote/{quote}', 'QuoteController@deleteEstimates');
+Route::get('/estimates/duplicate/quote/{quote}', 'QuoteController@duplicatEstimates');
+Route::get('/estimates/pdf/quote/{quote}', 'QuoteController@pdf');
+Route::get('/estimates/noprezzi/pdf/quote/{quote}', 'QuoteController@pdfnoprice');
+
+/*Route::get('/preventivi/optional/{quote}', 'QuoteController@eliminaoptional');
+Route::post('/preventivo/optional/aggiorna/{id}', 'QuoteController@aggiornaoptional');
+Route::get('/preventivi/optional/elimina/{id}', 'QuoteController@eliminaoptionaldalprev');*/
+Route::get('estimates/json', 'QuoteController@getjson');
+Route::get('estimates/miei/json', 'QuoteController@getJsonMyestimates');
+Route::get('/estimates/files/{id}', 'QuoteController@filequote');
+Route::post('/estimates/modify/quote/uploadfiles/{code}', 'QuoteController@fileupload');
+Route::get('/estimates/modify/quote/getfiles/{code}', 'QuoteController@fileget');
+Route::get('/estimates/modify/quote/deletefiles/{id}', 'QuoteController@filedelete');
+//Route::get('/estimates/modify/quote/updatefiletype/{typeid}/{fileid}', 'QuoteController@filetypeupdate');
+Route::get('/estimates/modify/quote/getdefaultfiles/{quote_id}', 'QuoteController@fileget');
+// user read alert
+Route::get('/alert/user-read', 'AdminController@userreadalert');
+// make comment alert 
+Route::get('/alert/make-comment', 'AdminController@alertmakecomment');
+
+
+// ========================================================================================
+// 									Zone Route
+// ========================================================================================
+
+// get citi list by state id
+Route::get('/cities/{id}','CommonController@getCityList');
+
+// ========================================================================================
+
+// cleint sign up form
+Route::get('/client-registration', function () {
+    return view('client_signup');
+});
+// store new client details
+Route::post('/client-signup/store','CommonController@storeclientsignup');
+
+/* =============================== Notification Route =============================== */
+//notification
+Route::get('/admin/shownotification', 
+	'AdminController@showadminnotification');
+// get notification json
+Route::get('/notification/json', 'AdminController@getnotificationjson');
+
+// get enti notification json
+Route::get('/notification/enti/json', 
+	'AdminController@getentinotificationjson');
+
+// add notification
+Route::get('/admin/notification/{id?}', 
+	'AdminController@addadminnotification');
+
+Route::get('/notification/delete/{id}', 'AdminController@deletenotification');
+
+// store notification
+Route::post('/admin/notification/store/{id?}', 'AdminController@storeadminnotification');
+
+// detail notification
+Route::get('/notification/detail/{id?}', 'AdminController@detailadminnotification');
+
+
+// make comment in notification
+Route::get('/notification/make-comment', 'AdminController@notificationmakecomment');
+
+// user read notification
+Route::get('/notification/user-read', 'AdminController@userreadnotification');
+
+
+// make comment in role wised notification
+Route::get('/note_role/make-comment', 'AdminController@notemakecomment');
+// role wised read notification
+Route::get('/note_role/user-read', 'AdminController@userreadnote');
+
+
+
+
+// user send notification
+Route::get('/send-notification', 'AdminController@sendnotification');
+
+// detail notification json
+Route::get('/notifica/detail/json/{id?}', 'AdminController@detailnotificationjson');
+
+
+// show all notification
+Route::get('/notifiche', 'HomeController@mostranotifiche');
+// get list of notifications 
+Route::get('/notifiche/json', 'HomeController@getjsonnotifiche');
+// delete notification
+Route::get('/notifiche/delete/{id}', 'HomeController@cancellanotifica');
+
+
+/* ================================ Login Activity Admin ============================= */
+// show list of users
+Route::get('/admin/loginactivity', 'AdminController@activitylogs');
+// get users list json
+Route::get('loginactivity/json', 'AdminController@getjsonactivitylogs');
+Route::get('/admin/loginactivity/delete/{id}', 'AdminController@deleteActivitylogs');
+
+/* ================================= Calendar Route ================================== */
+
+Route::get('/calendario/{tipo}', 'CalendarioController@index');
+Route::get('/calendario/show/{tipo}/day/{day}/month/{month}/year/{year}', 'CalendarioController@show');
+Route::post('/calendario/add', 'CalendarioController@store');
+Route::get('/calendario/delete/event/{event}', 'CalendarioController@destroy');
+Route::get('/calendario/edit/event/{event}', 'CalendarioController@edit');
+Route::post('/calendario/update/event/{event}', 'CalendarioController@update');
+
+/* ================================= Project Route =================================================*/
+// Progetti
+// Aggiungi nuovo progetto
+Route::get('/progetti', 'ProjectController@index');
+Route::get('/progetti/miei', 'ProjectController@miei');
+Route::get('/progetti/add', 'ProjectController@aggiungi');
+// Salva il nuovo progetto
+Route::post('/progetti/store', 'ProjectController@store');
+Route::get('/progetti/delete/project/{project}', 'ProjectController@destroy');
+Route::get('/progetti/duplicate/project/{project}', 'ProjectController@duplicate');
+Route::get('/progetti/modify/project/{project}', 'ProjectController@modify');
+Route::post('/progetti/modify/project/{project}', 'ProjectController@update');
+Route::get('/progetti/files/{project}', 'ProjectController@vedifiles');
+Route::get('/progetti/files/elimina/{project}', 'ProjectController@eliminafile');
+Route::get('/progetti/add/{id}', 'ProjectController@creadapreventivo');
+Route::get('progetti/miei/json', 'ProjectController@getJsonMiei');
+Route::get('progetti/json', 'ProjectController@getjson');
+
+
+Route::get('/progetti/files/{id}', 'ProjectController@filequote');
+Route::post('/progetti/uploadfiles/{code}', 'ProjectController@fileupload');
+Route::get('/progetti/getfiles/{code}', 'ProjectController@fileget');
+Route::get('/progetti/deletefiles/{id}', 'ProjectController@filedelete');
+Route::get('/progetti/updatefiletype/{typeid}/{id}', 'ProjectController@filetypeupdate');
+Route::get('/progetti/getdefaultfiles/{quote_id}', 'ProjectController@fileget');
+
+
+/* =============================== Invoice Route =============================== */
+
+// show list of invoices
+Route::get('/pagamenti/tranche/elenco', 'AccountingController@elencotranche');
+// get invoices in json 
+Route::get('/pagamenti/tranche/json', 'AccountingController@getjsontuttetranche');
+// show invoice modification page
+Route::get('/pagamenti/tranche/modifica/{id}', 'AccountingController@modificatranche');
+// update invoice modification page
+Route::post('/pagamenti/tranche/update/{id}', 'AccountingController@aggiornatranche');
+// generate pdf for invoice
+Route::get('/pagamenti/tranche/pdf/{id}', 'AccountingController@generapdftranche');
+// show list of invoices for selected element
+Route::get('/pagamenti/mostra/accounting/{accounting}', 'AccountingController@mostradisposizione');
+// get invoices in json for selected element
+Route::get('/pagamenti/tranche/json/id/{id}', 'AccountingController@getjsontranche');
+// add invoices for selected element
+Route::get('/pagamenti/tranche/add/{id}', 'AccountingController@aggiungitranche');
+// store invoice details
+Route::post('/pagamenti/tranche/store', 'AccountingController@salvatranche');
+// delete invoicea
+Route::get('/pagamenti/tranche/delete/{id}', 'AccountingController@eliminatranche');
+// copy invoices
+Route::get('/pagamenti/tranche/duplicate/{id}', 'AccountingController@duplicatranche');
+// upload files for invoices
+Route::post('/add/fatture/uploadfiles/{code}', 'AccountingController@fileupload');
+// display uploaded file for invoices
+Route::get('/add/fatture/getfiles/{code}', 'AccountingController@fileget');
+// delete invoice's uploaded file
+Route::get('/add/fatture/deletefiles/{id}', 'AccountingController@filedelete');
+// update invoice's uploaded file
+Route::get('/add/fatture/updatefiletype/{typeid}/{fileid}', 'AccountingController@filetypeupdate');
+
+
+/* =============================== Provisions Route =============================== */
+
+// show list of provisions of projects
+Route::get('/pagamenti', 'AccountingController@index');
+// get provisions of projects in json
+Route::get('/pagamenti/json', 'AccountingController@getjson');
+//
+Route::post('/pagamenti/store', 'AccountingController@creadisposizione');
+//
+Route::post('/pagamenti/modifica/accounting/{accounting}', 'AccountingController@modificadisposizione');
+Route::get('/pagamenti/modifica/accounting/{accounting}', 'AccountingController@modificadisposizione');
+//
+Route::get('/pagamenti/duplicate/accounting/{accounting}', 'AccountingController@duplicadisposizione');
+//
+Route::get('/pagamenti/delete/accounting/{accounting}', 'AccountingController@destroydisposizione');
+//
+
+
+/* =============================== Method Route =============================== */
+
+// show information banking services
+Route::get('/pagamenti/coordinate', 'AccountingController@mostracoordinate');
+
+
+/* =============================== Info section Route =============================== */
+Route::get('/contatti', 'HomeController@mostracontatti');
+Route::get('/faq', 'HomeController@mostrafaq');
+Route::get('/changelog', 'HomeController@mostrachangelog');
+Route::get('/valutaci', function () {
+    return view('layouts.valutaci');
+});
+Route::post('/valutaci/store', 'HomeController@segnalazionerrore');
+
+/* =============================== Quiz Route =============================== */
+// show quiz start page
+Route::get('/quiz', 'QuizController@index');
+// step one
+Route::get('/quiz/stepone', 'QuizController@stepone');
+// store step one details
+Route::post('/storeStepone', 'QuizController@storestepone');
+// get old ente details
+Route::post('/oldente', 'QuizController@oldente');
+// add new ente details
+Route::post('/newente', 'QuizController@newente');
+// step two
+Route::get('/quiz/steptwo/{id}', 'QuizController@steptwo');
+// get details
+Route::get('quiz/getDetails', 'QuizController@getQuizDetails');
+// store step two details
+Route::post('quiz/saveDetails', 'QuizController@saveRatDetails');
+// step three
+Route::get('/quiz/stepthree/{id}', 'QuizController@stepthree');
+// store step three details
+Route::post('/storeStepthree', 'QuizController@storeStepthree');
+// quiz step four
+Route::get('/quiz/stepfour/{id}', 'QuizController@stepfour');
+// store quiz step four data
+Route::post('/storeStepfour', 'QuizController@storestepfour');
+// quiz step five
+Route::get('/quiz/stepfive/{id}', 'QuizController@stepfive');
+// store quiz step five details
+Route::post('/storeStepfive', 'QuizController@storestepfive');
+// file viewer
+Route::any('/fileviewer/{src}/{type}', 'QuizController@fileviewer');
+// upload file step five
+Route::post('/stepfive/uploadfiles/{code}', 'QuizController@fileupload');
+// get file step five
+Route::get('/stepfive/getfiles/{code}', 'QuizController@fileget');
+// delete file step five
+Route::get('/stepfive/deletefiles/{id}', 'QuizController@filedelete');
+

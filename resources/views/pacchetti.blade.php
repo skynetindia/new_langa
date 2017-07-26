@@ -6,15 +6,9 @@
 
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
-<!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 
 <script>
 
@@ -35,9 +29,11 @@
 
 </script>
 <a onclick="multipleAction('add');" class="btn btn-warning" id="modifica" title="{{ trans('messages.keyword_addpackage') }}"><i class="fa fa-plus"></i></a>
-<div class="space10"></div>
 <a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a> <a name="remove" title="{{ trans('messages.keyword_delete') }}" class="btn btn-danger" id="delete" onclick="multipleAction('delete');" > <i class="fa fa-trash"></i> </a>
-<div class="space30"></div>
+<div class="space10"></div>
+
+<div class="panel panel-default">
+<div class="panel-body">
 <div class="table-responsive">    
     <table data-toggle="table" class="selectable table table-hover table-bordered"  data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('/admin/tassonomie/pacchetti/json') }}" data-classes="table table-bordered" id="table">
     <thead>    
@@ -51,6 +47,8 @@
       {{ trans('messages.keyword_optional') }} </th>      
     </thead>
     </table>
+</div>
+</div>
 </div>
 
 <script>

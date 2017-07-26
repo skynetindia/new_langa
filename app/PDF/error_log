@@ -1,0 +1,7 @@
+[29-Jul-2016 23:40:31 Europe/Berlin] PHP Parse error:  syntax error, unexpected '"RESPONSABILE LANGA: "' (T_CONSTANT_ENCAPSED_STRING) in /home/rfqinbfa/public_html/sistemi/easy.langa.tv/app/PDF/QuotationPDF.php on line 275
+[29-Jul-2016 23:41:15 Europe/Berlin] PHP Parse error:  syntax error, unexpected '" | "' (T_CONSTANT_ENCAPSED_STRING), expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in /home/rfqinbfa/public_html/sistemi/easy.langa.tv/app/PDF/QuotationPDF.php on line 277
+[29-Jul-2016 23:51:33 Europe/Berlin] PHP Parse error:  syntax error, unexpected '.' in /home/rfqinbfa/public_html/sistemi/easy.langa.tv/app/PDF/QuotationPDF.php on line 275
+[30-Jul-2016 00:13:50 Europe/Berlin] PHP Parse error:  syntax error, unexpected ';', expecting ')' in /home/rfqinbfa/public_html/sistemi/easy.langa.tv/app/PDF/QuotationPDF.php on line 188
+[30-Jul-2016 00:14:00 Europe/Berlin] PHP Parse error:  syntax error, unexpected ';', expecting ')' in /home/rfqinbfa/public_html/sistemi/easy.langa.tv/app/PDF/QuotationPDF.php on line 188
+[30-Jul-2016 00:18:09 Europe/Berlin] PHP Parse error:  syntax error, unexpected 'self' (T_STRING) in /home/rfqinbfa/public_html/sistemi/easy.langa.tv/app/PDF/QuotationPDF.php on line 164
+[30-Jul-2016 00:41:01 Europe/Berlin] PHP Parse error:  syntax error, unexpected '" "' (T_CONSTANT_ENCAPSED_STRING) in /home/rfqinbfa/public_html/sistemi/easy.langa.tv/app/PDF/QuotationPDF.php on line 180

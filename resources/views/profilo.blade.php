@@ -13,13 +13,13 @@
             <div class="col-md-5">
             	<div class="row">
              <div class="col-md-3">
-              <h3>User: {{$utente->name}}</h3>
-              <input type="hidden" name="user_id" name="user_id" value="{{isset($utente->id) ? $utente->id : ''}}">
+              <h3>User: {{$utente->name}}</h3>              
               @if(!empty($utente->logo))
                 <img src="{{ url('storage/app/images').'/'.$utente->logo }}" class="img-responsive"></img>
               @endif
             </div>            
             <div class="col-md-9">
+            <input type="hidden" id="login_user_id" name="login_user_id" value="{{isset($utente->id) ? $utente->id : ''}}">            
               <div class="space40"></div>              
              	<div class="form-group">
                 <label for="logo">{{trans('messages.keyword_upload_profile_image')}}</label>
@@ -148,11 +148,11 @@
             echo $module->modulo;
             echo "</td></b> <td>";
        ?><input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]"  value="<?php echo $module->id.'|0|lettura';?>" 
-       <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?>> <label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+       <?php echo (in_array($module->id.'|0|lettura', $permessi) || ($utente->id == '0')) ? 'checked' :'';  ?>> <label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
        
         <?php
             echo "</td><td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"<?php echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :''; ?>><label for="scrittura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly="readonly" disabled="disabled" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"<?php echo (in_array($module->id.'|0|scrittura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?>><label for="scrittura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
 
               <!-- <div class="class_checkbox writing <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
              
@@ -168,7 +168,7 @@
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"<?php echo (in_array($module->id.'|'.$submodule->id.'|lettura', $permessi)) ? 'checked' :''; ?> ><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly="readonly" disabled="disabled" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"<?php echo (in_array($module->id.'|'.$submodule->id.'|lettura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?> ><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
 
               <!-- <div class="class_checkbox lettura <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
 
@@ -176,7 +176,7 @@
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo (in_array($module->id.'|'.$submodule->id.'|scrittura', $permessi)) ? 'checked' :''; ?> ><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly="readonly" disabled="disabled" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo (in_array($module->id.'|'.$submodule->id.'|scrittura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?> ><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
 
               <!-- <div class="class_checkbox scrittura <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
 
@@ -195,7 +195,7 @@
          echo "</td></b> ";
 
           echo "<td>"; ?>
-            <input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :''; ?>><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+            <input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi) || ($utente->id == '0') ) ? 'checked' :''; ?>><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
 
              <!-- <div class="class_checkbox reading <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
 
@@ -232,7 +232,7 @@
        ?><input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
        <label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label><?php
             echo "</td><td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly="readonly" disabled="disabled" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
             <?php
         echo "</td></tr>";
 
@@ -245,12 +245,12 @@
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly="readonly" disabled="disabled" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
               <?php
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox"  readonly="readonly" disabled="disabled" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>"><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
+              <input type="checkbox"  readonly="readonly" disabled="disabled" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
               <input type="hidden" id="hidden" name="checkhidden" value="<?php echo $i; ?>">
             <?php
             echo "</td>";
@@ -264,7 +264,7 @@
             echo $module->modulo;
          echo "</td></b>";
           echo "<td>"; ?>
-            <input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
+            <input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>>
             <label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
             <?php
           echo "</td>";
@@ -282,7 +282,10 @@
 </div>
 
 <script type="text/javascript">
-  
+  <?php if($utente->id == '0'){ ?>
+    $('.reading').prop('checked', this.checked);
+    $('.writing').prop('checked', this.checked);
+  <?php } ?>
   $('.reading').click(function () {   
     var $id = $(this).attr('id');
     $('.'+$id).prop('checked', this.checked);

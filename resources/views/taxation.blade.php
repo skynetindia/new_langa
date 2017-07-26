@@ -2,12 +2,10 @@
 @section('page')
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
+
 <h1>{{trans('messages.keyword_templates_for_taxation')}}</h1><hr>
 @if(!empty(Session::get('msg')))
     <script>
@@ -16,18 +14,29 @@
     </script>
 @endif
 <a onclick="multipleAction('add');" id="add"  class="btn btn-warning" name="create" title="{{trans('messages.keyword_new_taxation')}}"><span class="fa fa-plus"></span></a>
-<div class="space10"></div>
-<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary"  name="update" title="{{'messages.keyword_modift_taxation'}}"><span class="fa fa-pencil"></span></a>
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary"  name="update" title="{{trans('messages.keyword_modift_taxation')}}"><span class="fa fa-pencil"></span></a>
 <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="{{trans('messages.keyword_delete_taxation')}}"><span class="fa fa-trash"></span></a>
+
+
+<div class="space10"></div>
+
+<div class="panel panel-default">
+<div class="panel-body">
+
 <div class="table-responsive">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="taxation/json" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="tassazione_id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
             <th data-field="tassazione_nome" data-sortable="true">{{trans('messages.keyword_name')}}</th>
             <th data-field="tassazione_percentuale" data-sortable="true">{{trans("messages.keyword_percentage")}}</th>
+            <th data-field="status" data-sortable="true">{{trans("messages.keyword_active")}}</th>
         </thead>
     </table>
   </div>
+  
+  </div>
+  </div>
+  
 <script>
 var selezione = [];
 var indici = [];
@@ -60,6 +69,21 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
   }
 });
 function check() { return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}} " + n + " {{trans('messages.keyword_taxation')}}?"); }
+ function updateTaxionStatus(id){
+         var url = "{{ url('/taxation/changestatus') }}" + '/';
+         var status = '1';
+        if ($("#activestatus_"+id).is(':checked')) {
+            status = '0';
+        }
+        $.ajax({
+            type: "GET",
+            url: url + id +'/'+status,
+            error: function (url) {                
+            },
+            success:function (data) {             
+            }
+         });
+    }
 function multipleAction(act) {
   var error = false;
   var link = document.createElement("a");

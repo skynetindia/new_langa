@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Questa pagina non esiste.</title>
+        <title>{{trans('messages.keyword_this_page_does_not_exist')}}</title>
 <link rel="shortcut icon" href="{{asset('public/favicon.ico')}}" />
         <link rel="stylesheet" href="{{asset('public/css/stylesheet.css')}}">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
@@ -22,8 +22,8 @@
     </head>
     <body>
 		<div class="container">
-			<h1 style="text-align:center;color:#ffffff">Pagina non trovata, torna 
-			<a href="javascript:window.history.back();" style="text-decoration: none;color:#ffffff"><strong>indietro</strong></a></h1>
+			<h1 style="text-align:center;color:#ffffff">{{trans('messages.keyword_page_not_found,_back')}} 
+			<a href="javascript:window.history.back();" style="text-decoration: none;color:#ffffff"><strong>{{trans('messages.keyword_back')}}</strong></a></h1>
             <img class="img-responsive" src="{{asset('images/404_easy.jpg')}}"></img>
         </div>
     </body>

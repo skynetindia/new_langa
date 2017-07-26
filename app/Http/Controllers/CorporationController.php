@@ -18,11 +18,22 @@ class CorporationController extends Controller
 	protected $chiave;
 	protected $stato;
 	protected $logmainsection;
+
+	protected $module;
+	protected $sub_id;
 	
     public function __construct(CorporationRepository $corporations) {
         $this->middleware('auth');
         $this->corporations = $corporations;
 		$this->logmainsection = 'Entity';
+
+		$request = parse_url($_SERVER['REQUEST_URI']);
+		$path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylangaw/', '', $request["path"]), '/') : $request["path"];		
+		$result = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');
+		$current_module = DB::select('select * from modulo where TRIM(BOTH "/" FROM modulo_link) = :link', ['link' => $result]);  
+    	
+        $this->module = (isset($current_module[0]->modulo_sub)) ? $current_module[0]->modulo_sub : 1;
+        $this->sub_id = (isset($current_module[0]->id)) ? $current_module[0]->id : 12;
     }
 	
 	public function aggiornastatocliente(Request $request) {
@@ -49,8 +60,7 @@ class CorporationController extends Controller
 	 */
   public function newclient(Request $request, Corporation $corporation) {
 
-  	if($request->user()->id == 0 ||
-  		 $request->user()->dipartimento == 1) {
+  	if($request->user()->id == 0 || $request->user()->dipartimento == 0 || $request->user()->dipartimento == 1) {
 		  $password = substr(str_shuffle("abcdefghilmnopqrstuvz1234567890"), 0, 7);
 		  $count = DB::table('clienti')->where('email',$corporation->email)->orWhere('name',$corporation->nomereferente)->count();
 		  if($count == '0'){
@@ -118,6 +128,9 @@ class CorporationController extends Controller
 	
 	// My enti : 11-05-2017
     public function myenti(Request $request) {
+    	if(!checkpermission($this->module, $this->sub_id, 'lettura')){
+    		return redirect('/unauthorized');
+    	}
     	return view('corporation', [
             'tabellatipi' => DB::table('masterdatatypes')->get(),
             'tabellastatiemotivi' => DB::table('statiemotivitipi')->get(),
@@ -136,7 +149,11 @@ class CorporationController extends Controller
 
 	public function duplicate(Request $request, Corporation $corporation) {
 
-		$this->authorize('duplicate', $corporation);
+		if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
+		// $this->authorize('duplicate', $corporation);
 		// Duplica ente
 
 		// $request->user()->corporations()->create([
@@ -170,6 +187,11 @@ class CorporationController extends Controller
         }
 	
 	public function update(Request $request, Corporation $corporation) {
+
+		if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
 		$this->validate($request, [
             'nomeazienda' => 'required|max:35',
             'nomereferente' => 'required|max:35',
@@ -239,6 +261,7 @@ class CorporationController extends Controller
 				'indirizzo' => $request->indirizzo,
 				'responsabilelanga' => $request->responsabilelanga,
 				'telefonoresponsabile' => $request->telefonoresponsabile,
+				'responsiblelang_id' => $request->responsabilelangaid,
 				'skype_id'=>$request->skype_id,
 			));
 		
@@ -301,22 +324,24 @@ class CorporationController extends Controller
 		*/
         if(isset($request->ric)) {
 			$appunti = $request->ric;
+
 			$utente = $request->utente;
+			/*$utente = $request->user()->id;*/
 			/*$ricontattare = $request->ricontattare;
 			$alle = $request->alle;
 			$datainserimento = $request->datainserimento;*/
 			$datainserimento = $request->datepicker_to;
+
 			/*$da_data = $request->datepicker_from;*/
 			$banca = $request->banca;
 			$cassa = $request->cassa;
 			$notifiche = $request->notifiche;
 			
-			DB::table('messages')
-					->where('id_ente', $corporation->id)
-					->delete();
+			DB::table('messages')->where('id_ente', $corporation->id)->delete();
+			DB::table('costi')->where('id_ente', $corporation->id)->delete();
 			for($i = 0; $i < count($appunti); $i++) {
 				$frequenza = $request->frequenza;
-				DB::table('messages')->insert([
+				$noteid = DB::table('messages')->insertGetId([
 					'id_ente' => $corporation->id,
 					'id_utente' =>$utente[$i],
 					'appunti' => $appunti[$i],
@@ -329,11 +354,22 @@ class CorporationController extends Controller
 					'frequenza' => isset($frequenza[$i]) ? $frequenza[$i] : "0",
 					'notifiche' => isset($notifiche[$i]) ? $notifiche[$i] : '0',
 				]);
+				$arrdaterange = explode('-', $datainserimento[$i]);
+				DB::table('costi')->insert([
+					'id_ente' => $corporation->id,
+					'oggetto' => isset($appunti[$i]) ? $appunti[$i] : "",
+					'costo' => isset($cassa[$i]) ? $cassa[$i] : '0',
+					'datainserimento' => isset($arrdaterange[0]) ? date('Y-m-d',strtotime($arrdaterange[0])) : '',
+					'id_note'=>$noteid
+				]);
 			}
 		} else {
 			DB::table('messages')
 					->where('id_ente', $corporation->id)
 					->delete();	
+			DB::table('costi')
+					->where('id_ente', $corporation->id)
+					->delete();
 		}
 		
 		/*if(isset($request->oggettocosto)) {
@@ -359,15 +395,15 @@ class CorporationController extends Controller
 
 		if($request->statoemotivo!=null) {
 			// Aggiorno lo stato emotivo
-			$tipo = DB::table('statiemotivitipi')
+			/*$tipo = DB::table('statiemotivitipi')
 				->where('name', $request->statoemotivo)
-				->first();
+				->first();*/
 			DB::table('statiemotivi')
 				->where('id_ente', $corporation->id)
 				->delete();
 			DB::table('statiemotivi')
 				->insert([
-					'id_tipo' => $tipo->id,
+					'id_tipo' => $request->statoemotivo,
 					'id_ente' => $corporation->id
 				]);
 		} else {
@@ -382,7 +418,11 @@ class CorporationController extends Controller
 	
 	public function destroy(Request $request, Corporation $corporation)
 	{
-		$this->authorize('destroy', $corporation);	
+		if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
+		// $this->authorize('destroy', $corporation);	
 
 		DB::table('corporations')
 		  ->where('id', $corporation->id)
@@ -461,6 +501,7 @@ class CorporationController extends Controller
 			'swift'=> isset($request->swift) ? $request->swift : '',
 			'responsabilelanga' => $request->responsabilelanga,
 			'telefonoresponsabile' => isset($request->telefonoresponsabile) ? $request->telefonoresponsabile : '',
+			'responsiblelang_id' => $request->responsabilelangaid,			
 			'skype_id'=> isset($request->skype_id) ? $request->skype_id : '',
 			'user_id'=>$request->user()->id
         ]);
@@ -521,10 +562,7 @@ class CorporationController extends Controller
         if(isset($request->ric)) {
 			$appunti = $request->ric;
 			$utente = $request->utente;
-			/*$ricontattare = $request->ricontattare;
-			$alle = $request->alle;
-			$datainserimento = $request->datainserimento;*/
-
+			/*$utente = $request->user()->id;*/
 			$datainserimento = $request->datepicker_to;
 			/*$da_data = $request->datepicker_from;*/
 			$banca = $request->banca;
@@ -546,17 +584,25 @@ class CorporationController extends Controller
 					'frequenza' => isset($frequenza[$i]) ? $frequenza[$i] : "0",
 					'notifiche' => isset($notifiche[$i]) ? $notifiche[$i] : '0',
 				]);
+
+				$arrdaterange = explode('-', $datainserimento[$i]);
+				DB::table('costi')->insert([
+					'id_ente' => $corp->id,
+					'oggetto' => isset($appunti[$i]) ? $appunti[$i] : "",
+					'costo' => $cassa[$i],
+					'datainserimento' => isset($arrdaterange[0]) ? date('Y-m-d',strtotime($arrdaterange[0])) : '',
+				]);
 			}
 		}
 
 		if($request->statoemotivo!=null) {
 			// Memorizzo lo stato emotivo
-			$tipo = DB::table('statiemotivitipi')
+			/*$tipo = DB::table('statiemotivitipi')
 				->where('name', $request->statoemotivo)
-				->first();
+				->first();*/
 			DB::table('statiemotivi')->insert([
 				'id_ente' => $corp->id,
-				'id_tipo' => $tipo->id,
+				'id_tipo' => $request->statoemotivo,
 			]);
 		}
 
@@ -569,8 +615,8 @@ class CorporationController extends Controller
 	
 	public function modify(Request $request, Corporation $corporation)
 	{
-		//$this->authorize('modify', $corporation);
-
+		
+		//$this->authorize('modify', $corporation);		
 		return view('modificaente', [
 			'action'=>'edit',
 			'corp' => $corporation,
@@ -590,15 +636,11 @@ class CorporationController extends Controller
                                 ->where('id_ente', $corporation->id)
 								->orderBy('id', 'asc')
                                 ->get(),
-			'actionmessages' => DB::table('messages')
-				->where('id_ente', $corporation->id)
-				->get(),
+			'actionmessages' => DB::table('messages')->leftJoin('users', 'users.id', '=', 'messages.id_utente')
+            ->select('users.name as username','messages.*')->where('messages.id_ente', $corporation->id)->get(),
 			'loginuser' => $request->user(),
 			'frequency'=>DB::table('frequenze')->get(),
-			'cost' => DB::table('costi')
-					->where('id_ente', $corporation->id)
-					->orderBy('datainserimento', 'asc')
-					->get()
+			'cost' => DB::table('costi')->where('id_ente', $corporation->id)->orderBy('datainserimento', 'asc')->get()
 		]);
 		/*return view('modificaente', [
 			'corp' => $corporation,
@@ -630,7 +672,10 @@ class CorporationController extends Controller
 
 	public function add(Request $request)
 	{
-		
+		if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
 		/*return view('modificaente', [
 			'action'=>'add',
 			'utenti' => DB::table('users')
@@ -667,10 +712,29 @@ class CorporationController extends Controller
 		]);*/
 	
 	}
-	
+	public function getDetails(Request $request){		
+		$data = DB::table('corporations')
+				/*->join('users', 'corporations.user_id', '=', 'users.id')*/
+				->select('corporations.*')
+				->where('is_deleted','0')
+				->where('corporations.id',$request->entity_id)
+				/*->where('users.is_delete', '=', 0)*/
+				->orderBy('corporations.id', 'desc')
+				->first();
+		if(count($data) > 0){
+			return json_encode($data);
+		}
+		else {
+			return 'fail';
+		}
+	}
 	
 	public function index(Request $request)
 	{
+		if(!checkpermission($this->module, $this->sub_id, 'lettura')){
+    		return redirect('/unauthorized');
+    	}
+    	
 		return $this->show($request);
 	}
 	

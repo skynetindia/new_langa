@@ -177,6 +177,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+		Vsmoraes\Pdf\PdfServiceProvider::class,
 
     ],
 
@@ -228,6 +229,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 		'Form' => Illuminate\Html\FormFacade::class,
 		'Html' => Illuminate\Html\HtmlFacade::class,
+		'PDF' => 'Vsmoraes\Pdf\PdfFacade',
 
     ],
 

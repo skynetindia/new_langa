@@ -29,15 +29,15 @@
   @if(isset($notifica) && $action == 'edit')
     <h1>{{trans('messages.keyword_update_notification')}}</h1><hr>
      <div class="col-md-4">
-    <label>{{trans('messages.keyword_types')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label>{{trans('messages.keyword_types')}}<span class="required">(*)</span></label>
     <input class="form-control" id="type" name="type" value="{{ $notifica->notification_type }}" placeholder="{{trans('messages.keyword_type_of_notification')}}">
   </div>
   <div class="col-md-4">
-    <label> {{trans('messages.keyword_warntime')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label> {{trans('messages.keyword_warntime')}} <span class="required">(*)</span></label>
     <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="{{ $notifica->tempo_avviso }}" placeholder="{{trans('messages.keyword_enterwarntime')}}">
   </div>
   <div class="col-md-4">
-    <label> {{trans('messages.keyword_module')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label> {{trans('messages.keyword_module')}}<span class="required">(*)</span></label>
       <select class="form-control" id="modulo" name="modulo">
         <option></option>
         @foreach($modulo as $modulo)
@@ -74,7 +74,7 @@
   </select>
   </div>
 <div class="col-md-6">
-<label for="ruolo">{{trans('messages.keyword_role')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+<label for="ruolo">{{trans('messages.keyword_role')}} <span class="required">(*)</span></label>
 <?php $ruolo = explode(",", $notifica->ruolo); ?>
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple" required> 
     <option></option>
@@ -119,16 +119,16 @@
   @else
     <h1>{{trans('messages.keyword_addnoti')}}</h1><hr>
   <div class="col-md-4">
-    <label>{{trans('messages.keyword_types')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label>{{trans('messages.keyword_types')}}<span class="required">(*)</span></label>
     <input class="form-control" id="type" name="type" value="" placeholder="{{trans('messages.keyword_type_of_notification')}}">
   </div>
   <div class="col-md-4">
-    <label> {{trans('messages.keyword_warntime')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label> {{trans('messages.keyword_warntime')}}<span class="required">(*)</span></label>
     <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="" placeholder="{{trans('messages.keyword_warntime')}}">
   </div>
   <div class="col-md-4">
 
-    <label> {{trans('messages.keyword_module')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
+    <label> {{trans('messages.keyword_module')}}<span class="required">(*)</span></label>
       <select class="form-control" id="modulo" name="modulo">
         <option></option>
         @foreach($modulo as $modulo)
@@ -151,7 +151,7 @@
   </select>
   </div>
 <div class="col-md-6">
-<label for="ruolo">{{trans('messages.keyword_role')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
+<label for="ruolo">{{trans('messages.keyword_role')}}<span class="required">(*)</span></label>
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple" required>
     <option></option>
     @foreach($ruolo_utente as $ruolo_utente)

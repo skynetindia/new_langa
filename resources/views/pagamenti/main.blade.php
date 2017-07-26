@@ -7,14 +7,13 @@
     </script>
 @endif
 @include('common.errors')
+
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
+
 <script>
 var urlmodifica = "";
 function aggiungiDisposizione() {
@@ -26,8 +25,8 @@ function aggiungiDisposizione() {
         <img src="{{url('images/HEADER1_LT_ACCOUNTING.svg')}}" alt="header image">
     </div>
     <div class="float-right text-right">
-        <h1> {{ trans('messages.keyword_project_design') }} </h1><hr>
-        @if( Auth::user()->id == '0' || Auth::user()->dipartimento == '1' || Auth::user()->dipartimento == '2')
+        <h1> {{ ucwords(trans('messages.keyword_project_design')) }} </h1><hr>
+        @if(checkpermission('5', '20', 'scrittura','true'))
         <div class="btn-group">
           <button class="btn btn-warning" type="button" name="update" title=" {{ trans('messages.keyword_add_new_layout') }} " onclick="aggiungiDisposizione()"><i class="fa fa-plus"></i></button>
         <?php /*<a id="mostra" class="btn btn-warning" name="remove" title=" {{ trans('messages.keyword_display_selected_format') }} " onclick="multipleAction('mostra');">
@@ -44,17 +43,122 @@ function aggiungiDisposizione() {
         </a>*/?>            
         </div>
         @endif
+
+        <?php echo ticketprobelm(); ?>
+
     </div>
 </div>
 
+
+
+<?php 
+
+$request = parse_url($_SERVER['REQUEST_URI']);
+$path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylanganew/', '', $request["path"]), '/') : $request["path"];      
+$result = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');
+$current_module = DB::select('select * from modulo where TRIM(BOTH "/" FROM modulo_link) = :link', ['link' => $result]);
+
+?>
+<!-- Aggiungi nuova disposizione MODALE -->
+<div id="problem-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"> {{ trans('messages.keyword_problem') }} </h4>
+      </div>
+      <div class="modal-body">
+        <p>{{ trans('messages.keyword_your_problems_are_important_to_us') }} ?</p><hr>        
+        <form action="{{url('ticket/problem/store')}}" method="post" name="add_project" id="add_project" enctype="multipart/form-data"> {{ csrf_field() }}  
+
+        In that page you were when the problem occurred?
+        <input type="text" name="page" class="form-control" placeholder="http://betaeasy.langa.tv/enti/myenti"> 
+        <br>
+
+        <input type="hidden" name="module_id" value="<?php echo (isset($current_module[0]->modulo_sub)) ? $current_module[0]->modulo_sub : 0 ?>"> 
+
+        Please describe the error you have found
+        <textarea cols="50" rows="10" name="problem" class="form-control"></textarea>
+        <br>
+
+        Attach a picture
+        <input type="file" name="file" class="form-control"> 
+
+      </div>
+      <div class="modal-footer">
+          <p style="text-align: left;">{{ trans('messages.keyword_we_get_back_to_you') }}
+          </p>
+          LANGA Team        
+          <br><br>
+        <input type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_send') }}">
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div id="problem-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"> {{ trans('messages.keyword_problem') }} </h4>
+      </div>
+      <div class="modal-body">
+      <p>{{ trans('messages.keyword_your_problems_are_important_to_us') }}
+      ? </p>
+
+        <form action="{{url('ticket/problem/store')}}" method="post" name="add_project" id="add_project"> {{ csrf_field() }}   
+        <input type="hidden" name="module_id" value="<?php //echo (isset($current_module[0]->modulo_sub)) ? $current_module[0]->modulo_sub : 0; ?>">         
+       <textarea cols="50" rows="10" name="problem"></textarea>
+      </div>
+      <div class="modal-footer">
+          <p style="text-align: left;">{{ trans('messages.keywordwe_get_back_to_you') }}
+          ? </p>
+          LANGA Team        
+          <br><br>
+        <input type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_send') }}">
+        </form>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- FINE MODALE AGGIUNGI DISPOSIZIONE -->
+
+
 <div class="clearfix"></div>
 <div class="height20"></div>
-    <div class="row">
+    <div class="pagination_invoice" id="pagination_invoice">
+    <div class="row pagamentifolder">
     @foreach($groupdetails as $key => $groupValue)
         <div class="col-md-2">  
             <div class="form-group">
             	<div class="bg-white folder-wrap">
-            	<a href="{{url('pagamenti/mostra/accounting/').'/'.$groupValue->id}}"><img src="{{url('images/folder.jpg')}}"></a><br>
+                <div class="text-right">
+                @if(checkpermission('5', '20', 'scrittura','true'))
+                <button id="edit" onclick="showGroupName('{{$groupValue->groupid}}');" class="btn btn-warning text-right" name="remove" title=""><i class="fa fa-pencil"></i></button>
+                <button id="delete" onclick="deletegroup('{{$groupValue->groupid}}');" class="btn btn-danger text-right" name="remove" title="">
+                    <i class="fa fa-trash"></i>
+                </button>
+                @endif
+                </div><?php
+                $neededObjects = array_filter(
+                        $invoiceDetails,
+                        function ($e) use($groupValue) {
+                            return $e->id_disposizione == $groupValue->id;
+                        }
+                    );        
+                $invoicedetaillink = (count($neededObjects) > 0) ? 'href='.url('pagamenti/mostra/accounting/').'/'.$groupValue->id.'' : '';            
+            	?><a {{$invoicedetaillink}}><img src="{{url('images/folder.jpg')}}">
+                	<div class="dot-main"><?php                     
+                    foreach ($neededObjects as $keyobj => $valueobj) {
+                        ?><div class="dot-green" style="background-color: {{$valueobj->statoemotivo}}"></div><?php
+                    }
+                    //<div class="dot-green"></div><div class="dot-red"></div>
+                    ?></div></a> 
                 <label for="logo" id="lblgroupname_{{$groupValue->groupid}}" onDblClick="showGroupName('<?php echo $groupValue->groupid;?>');" >{{$groupValue->groupname}}</label>                
                 <input type="text" name="groupnameupdate" class="groupnameTextbox form-control" id="groupnameupdate_{{$groupValue->groupid}}" value="{{$groupValue->groupname}}" style="display: none;">
                 <?php /*<button class="btn btn-warning" onclick="editgroup('<?php echo $groupValue->id; ?>')"><i class="fa fa-pencil"></i></button>*/?>              
@@ -62,6 +166,8 @@ function aggiungiDisposizione() {
             </div>
             </div>
     @endforeach
+    </div>    
+    {{ $groupdetails->links() }}
     </div>
     <?php /*<table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/json');?>" data-classes="table table-bordered" id="table">
         <thead>
@@ -89,15 +195,16 @@ function aggiungiDisposizione() {
       <div class="modal-body">
         <form action="{{url('/pagamenti/store')}}" method="post" name="add_project" id="add_project">
         	{{ csrf_field() }}
-        	<label for="nomeprogetto"> {{ trans('messages.keyword_grouping_name') }} <span class="required">(*)</span> </label>
-        	<input id="nomeprogetto" name="nomeprogetto" type="text" class="form-control" value="{{old('nomeprogetto')}}" placeholder="{{trans('messages.keyword_grouping_name_per_project') }} "><br>
+        	<label for="nomeprogetto"> {{ trans('messages.keyword_grouping_name') }}  </label>
+        	<input id="nomeprogetto" name="nomeprogetto" type="text" class="form-control required-input error" value="{{old('nomeprogetto')}}" placeholder="{{trans('messages.keyword_grouping_name_per_project') }} "><br>
+
             <!-- Seleziona progetto -->
-            <label for="idprogetto"> {{ trans('messages.keyword_linktoproject') }} <span class="required">(*)</span> </label>
-            <select id="idprogetto" name="idprogetto" class="js-example-basic-single form-control">
+            <label for="idprogetto"> {{ trans('messages.keyword_linktoproject') }} </label>
+            <select id="idprogetto" name="idprogetto" class="js-example-basic-single form-control required-input error">
                 <option></option>
-                @foreach($progetti as $progetto)
-                	<option value="{{$progetto->id}}">::{{$progetto->id}}<?php echo '/' . substr($progetto->datainizio, -2);?> | {{$progetto->nomeprogetto}}</option>
-                @endforeach
+                <?php if(isset($progetti[0]) && $progetti[0] != ''){ foreach($progetti as $progetto){ ?>
+                	<option value="{{$progetto->id}}">::{{$progetto->id}}<?php echo '/' . substr($progetto->datainizio, -2);?> | {{ ucwords(strtolower($progetto->nomeprogetto)) }}</option>
+                <?php } } ?>
             </select><br><br>
             <!-- fine progetto -->            
       </div>
@@ -148,9 +255,9 @@ var quadri = <?php echo json_encode($quadri); ?>;
                     var grpid = arraygrp[1];                    
                     var linkhref = "{{ url('/pagamenti/modifica/accounting') }}" + '/';
                     $.ajax({
-                        type: "GET",
+                        type: "POST",
                         url : linkhref + grpid,
-                        data:{"nomeprogetto":textboxval},
+                        data:{"_token": "{{ csrf_token() }}","nomeprogetto":textboxval},
                         error: function(url) {                            
                             /*if(url.status==403) {
                                 link.href = "{{ url('/pagamenti/modifica/accounting') }}" + '/' + indici[n];
@@ -191,9 +298,9 @@ var quadri = <?php echo json_encode($quadri); ?>;
             <select id="idprogetto" name="idprogetto" class="js-example-basic-single form-control" >
             <option></option>
 
-            @foreach($progetti as $progetto)
+            <?php if(isset($progetti[0]) && $progetti[0] != ''){ foreach($progetti as $progetto){ ?>
             	<option value="{{$progetto->id}}">::{{$progetto->id}}<?php echo '/' . substr($progetto->datainizio, -2);?> | {{$progetto->nomeprogetto}}</option>
-            @endforeach
+            <?php } } ?>
 
             </select><script type="text/javascript">
 
@@ -219,6 +326,28 @@ var quadri = <?php echo json_encode($quadri); ?>;
 
 <!-- FINE MODALE MODIFICA DISPOSIZIONE -->
 <script>
+
+function problem() {
+    $("#problem-modal").modal();
+}
+function deletegroup(groupid){
+    if(confirm("{{trans('messages.keyword_are_you_sure?')}}")){
+    var linkhref = "{{ url('/pagamenti/accounting/delete') }}" ;
+    $.ajax({
+        type: "POST",
+        url : linkhref,
+        data:{"_token": "{{ csrf_token() }}","groupid":groupid},
+        error: function(url) {                                      
+        },
+        success: function(response){
+           if(response=="true"){
+                window.location.href="{{url('pagamenti')}}";               
+            }
+        }
+    });
+    }
+}
+
 var selezione = [];
 var indici = [];
 var n = 0;
@@ -328,6 +457,29 @@ function multipleAction(act) {
 
 
 <script type="text/javascript">
+
+ $(function() {
+    $('.pagination_invoice').on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        $('#pagination_invoice a').css('color', '#dfecf6');
+        $('#pagination_invoice').html('<div class="loading-gif"><img width="100" height="100" src="{{url('images/loading.gif')}}" /></div>');
+        var url = $(this).attr('href');
+        var arrurl = url.split("?");                        
+        url = "{{url('pagamenti')}}"+"?"+arrurl[1];
+        getArticles(url);
+    });
+
+    function getArticles(url) {
+        $.ajax({
+            url : url
+        }).done(function (data) {
+            $('#pagination_invoice').html(data);
+        }).fail(function () {
+            alert('Articles could not be loaded.');
+        });
+    }
+});
+
 $(document).ready(function() {      
     //validate add project form on keyup and submit
     $("#add_project").validate({        

@@ -5,14 +5,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 <link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
 <script type="text/javascript" src="{{asset('public/scripts/dropzone.js')}}"></script>
+<script type="text/javascript" src="{{asset('public/scripts/jquery.knob.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('public/scripts/jquery.countdownTimer.min.js')}}"></script>
 <link href="{{asset('build/css/circle.css')}}" rel="stylesheet" />
-
 <!-- Radar chart -->
 <!-- <script type="text/javascript" src="http://gc.kis.v2.scr.kaspersky-labs.com/971CFF9C-4385-024E-BA20-CB806B914BAF/main.js" charset="UTF-8"></script> -->
  <script src="http://d3js.org/d3.v3.min.js"></script> 
  <script src="{{asset('public/scripts/RadarChart.js')}}"></script> 
 <!-- end radar chart js -->
-
 
 <script type="text/javascript">
 	$( document ).ready(function() {
@@ -57,7 +57,7 @@
 <div class="clearfix"></div>
 <div class="height20"></div>
 
-<?php echo Form::open(array('url' => '/progetti/modify/project/' . $progetto->id, 'files' => true)) ?>
+<?php echo Form::open(array('url' => '/progetti/modify/project/' . $progetto->id, 'files' => true, 'id'=>'project_edit')) ?>
     <?php $mediaCode = date('dmyhis');?>
     <input type="hidden" name="mediaCode" id="mediaCode" value="{{$mediaCode}}" />
 	{{ csrf_field() }}
@@ -70,7 +70,7 @@
 <?php /*<div class="col-md-12">
 	<h1>{{trans('messages.keyword_editproject')}} <?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?></h1><hr>
 </div>*/?>
-		<div class="col-md-8">
+		<div class="col-md-8 col-sm-12 col-xs-12">
     	    	<script>
 				/*var $ = jQuery.noConflict();
     	    		var clickEvent = new MouseEvent("click", {
@@ -86,7 +86,8 @@
     	    		});
 					*/
     	</script>
-            <label for="preventivo">{{trans('messages.keyword_noproject')}}
+        <div class="form-group project-name">
+            <label for="preventivo"><p>{{trans('messages.keyword_noproject')}}</p>
 				<input type="text" disabled value="<?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?>" class="form-control">
 			</label>
 			<div class="btn-group"><?php           		
@@ -101,29 +102,44 @@
                             <i class="fa fa-file-pdf-o"></i>
                     </a>
                     @endif
-    			<a href="#" class="btn btn-warning">{{trans('messages.keyword_goallentity')}}</a>
-					<div class="float-right">
-    				<a href="#" class="btn btn-warning">{{trans('messages.keyword_onlinereview')}}</a>
-                	</div>
+                    @if(isset($progetto->id_ente) && $progetto->id_ente != "")                    
+    			    <a href="{{url('enti/modify/corporation').'/'.$progetto->id_ente}}" target="_blank" class="btn btn-warning">{{trans('messages.keyword_this_entity')}}</a>				                    
+    				<a onclick="skypecall('{{$progetto->id_ente}}');" class="btn btn-warning">{{trans('messages.keyword_onlinereview')}}</a>
+                    @endif
+                	
                 </div>
-    		
-				<br><label for="nomeprogetto">{{trans('messages.keyword_projectname')}} <span class="required">(*)</span></label>
-        		<input value="{{ $progetto->nomeprogetto }}" class="form-control" type="textarea" name="nomeprogetto" id="nomeprogetto" placeholder="{{trans('messages.keyword_projectname')}}"><br>
-				<label for="lavorazioni">{{trans('messages.keyword_processing')}}</label><br>
+    	</div>
+        	
+            <div class="form-group">
+				<label for="nomeprogetto">{{trans('messages.keyword_projectname')}}</label>
+        		<input value="{{ $progetto->nomeprogetto }}" class="form-control required-input" type="textarea" name="nomeprogetto" id="nomeprogetto" placeholder="{{trans('messages.keyword_projectname')}}">
+            </div>
+                <div class="form-group">
+				    <label for="lavorazioni">{{trans('messages.keyword_processing')}} </label> <br/>
+                    @if(checkpermission('4', '18', 'scrittura','true'))
 	                <a class="btn btn-warning"  id="aggiungiLavorazione"><i class="fa fa-plus"></i></a>
 	                <a class="btn btn-danger" id="eliminaLavorazione"><i class="fa fa-trash"></i></a>
+                    @endif
+                    </div>
+                    
                 <div class="table-responsive">
-                <div class="set-height">
+                <div class="set-height350 edit-project-height">
 	            <table class="table table-bordered">
 	                <thead>
 	                   <th>#</th>
 	                    <th>{{trans('messages.keyword_subject_state')}}</th>
 	                    <th>{{trans('messages.keyword_description')}}</th>	          
+                        <th>{{trans('messages.keyword_processing_comments')}}</th>
 	                    <th>% {{trans('messages.keyword_of_completion')}}</th>
 	                </thead>
 	                <tbody id="lavorazioni">
-	                	<?php $p = 0; ?>
+	                	<?php $p = 0; 
+                        $processingCode = date('dmyhis');?>
 	                    @foreach($lavorazioni as $partecipante)
+                        <?php 
+                            $processingComentdf = DB::table('project_processing_comments')->where('processing_id', $partecipante->id)->first();     
+                            $defaultcode = isset($processingComentdf->code) ? $processingComentdf->code : $processingCode.'_'.$p;
+                        ?>
 	                        <tr>
 	                            <td>
 	                                <input type="checkbox" id="checkNuL{{$p}}" class="selezione"><label for="checkNuL{{$p}}"></label>
@@ -133,15 +149,19 @@
                                 <hr>
                                 <select class="form-control" name="completato[]">
 								@foreach($oggettostato as $key => $oggettostatoval)
-                                	<option value="{{$oggettostatoval->id}}" <?php if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato ) { echo 'selected';}?>>{{ $oggettostatoval->nome }}</option>
+                                  <?php $label = (!empty($oggettostatoval->language_key)) ?  ucwords(strtolower(trans('messages.'.$oggettostatoval->language_key))) : (($oggettostatoval->nome)); ?>
+                               	<option value="{{$oggettostatoval->id}}" <?php if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato ) { echo 'selected';}?>>{{$label}}</option>
                                  @endforeach
                                 </select>
                             </td>
                             <td>
                                 <textarea class="form-control" name="descrizione[]">{{$partecipante->descrizione}}</textarea>
                             </td>
-                           <td>
-                           <div class="c100 <?php if(isset($partecipante->completamento) && $partecipante->completamento != ""){ echo 'p'.$partecipante->completamento;} else { echo 'p0';}?> small boxs counter_<?php echo $partecipante->id;?>" data-name="counter_<?php echo $partecipante->id;?>">
+                            <td><a id="comment_processing{{$p}}" onclick="commentProcessing(this)" val="{{$partecipante->id}}" proc="{{$p}}" class="btn btn-warning btnprocesscomment">{{trans('messages.keyword_review')}}</a>
+                            <input type="hidden" name="processing_code[]" id="processingcode_{{$p}}" value="{{$defaultcode}}"></td>
+                           <td class="bar-progress">
+                           <input id="process{{$p}" class="knob" name="percentvalue[]" value="<?php if(isset($partecipante->completamento) && $partecipante->completamento != ""){ echo $partecipante->completamento;} else { echo '0';}?>" data-width="30%" data-skin="tron" data-thickness=".15" data-fgcolor="#FF851b" data-displayprevious="true" >
+                          <?php /* <div class="c100 <?php if(isset($partecipante->completamento) && $partecipante->completamento != ""){ echo 'p'.$partecipante->completamento;} else { echo 'p0';}?> small boxs counter_<?php echo $partecipante->id;?>" data-name="counter_<?php echo $partecipante->id;?>">
                             <span><p id="percent-value_<?php echo $partecipante->id;?>"><?php if(isset($partecipante->completamento) && $partecipante->completamento != ""){ echo $partecipante->completamento;} else { echo '0';}?></p></span>
                             <input type="hidden" class="hoverhidden" value="0" id="hoverover_<?php echo $partecipante->id;?>">
                             <input type="hidden" value="<?php if(isset($partecipante->completamento) && $partecipante->completamento != ""){ echo $partecipante->completamento;} else { echo '0';}?>" class="completepercent" name="percentvalue[]" id="percentvalue_<?php echo $partecipante->id;?>">
@@ -149,7 +169,7 @@
                                 <div class="bar"></div>
                                 <div class="fill"></div>
                             </div>
-                        </div>
+                        </div>*/?>
                            		
                        		<!-- <section class="progress"> -->  	
 							<?php /*  <div class="progress-radial progress-70 setsize" style="width:60px;height:60px;"> 
@@ -169,45 +189,101 @@
                 				this.value = "<?php echo $partecipante->programmato ?>";
                 			});                			
                 			<?php $p++; ?>							
-							<?php /*var box=$(".box_<?php echo $partecipante->id;?>");
-							var bar=$(".box_<?php echo $partecipante->id;?> .bar");
-							var boxCenter=[box.offset().left+box.width()/2, box.offset().top+box.height()/2];
 							
-							$('.box_<?php echo $partecipante->id;?>').mousemove(function(e){								
-								if( $("#hoverover_<?php echo $partecipante->id;?>").val()==0) 
-								{   
-									$old=$("#percent-value_<?php echo $partecipante->id;?>").text();
-									per=0;    
-									var angle = Math.atan2(e.pageX- boxCenter[0],- (e.pageY- boxCenter[1]) )*(180/Math.PI);	    
-									if(angle<0)	{
-										//console.log(angle,"intial");
-										angle=180+(180 + angle);
-										//console.log(angle,"final");
-									}
-									per=(angle/360)*100;
-									per=parseInt(Math.round(per/2) *2);
-									$("#percent-value_<?php echo $partecipante->id;?>").html(per);
-									box.removeClass('p'+$old);
-									box.addClass('p'+per);
-								}
-							   // box.css({ "-webkit-transform": 'rotate(' + angle + 'deg)'});    
-							   // box.css({ '-moz-transform': 'rotate(' + angle + 'deg)'});
-							   // bar.css({ 'transform': 'rotate(' + angle + 'deg)'});
-								
-							});
-							
-							$('.box_<?php echo $partecipante->id;?>').click(function(e){
-								//alert('hii');
-								if( $("#hoverover_<?php echo $partecipante->id;?>").val()==0) 
-								$("#hoverover_<?php echo $partecipante->id;?>").val(1);
-								else
-							  $("#hoverover_<?php echo $partecipante->id;?>").val(0);
-							});*/?>
 	                            </script>
 	                        </tr>
 	                    @endforeach
 	                </tbody>
-	                <script>					
+	                <script>
+                    function skypecall(entityid){
+                        var link = document.createElement("a");
+                        var clickEvent = new MouseEvent("click", {
+                            "view": window,
+                            "bubbles": true,
+                            "cancelable": false
+                        });
+                     var url = "{{ url('/enti/getdetails') }}" + '/' + entityid;                    
+                        $.ajax({
+                            type: "GET",
+                            url : url,
+                            error: function(url) {                            
+                                if(url.status==403) {                                    
+                                    error = true;
+                                }
+                            },
+                            success:function(url){
+                                if(url!="fail"){
+                                    var obj = jQuery.parseJSON(url);                                 
+                                     if(obj.skype_id != "" && obj.skype_id != null) {   
+
+                                        link.href = "skype:"+obj.skype_id+"?call";                                
+                                        //selezione = undefined;
+                                        link.dispatchEvent(clickEvent);
+                                    }
+                                }
+                            }                         
+                        });              
+                       }
+                       function commentProcessing(e){
+                            var id = $(e).attr('val');
+                            var countid = $(e).attr('proc');
+                            
+
+                            var code = $("#processingcode_"+countid).val();
+                            $("#newComment").modal();
+                            $('#newComment').on('shown.bs.modal', function(){                              
+                                $("#hdprocessingid").val(id);
+                                $("#hdCode").val(code);
+                            });
+                            //if(id != '0') {
+                                var urlD = '<?php echo url('/project/getprocessingcomment'); ?>';
+                                $.ajax({
+                                    url: urlD,
+                                    type: 'post',
+                                    data: { "_token": "{{ csrf_token() }}",id: id,code:code },
+                                    success:function(data) {                                        
+                                        $("#commentlist").html(data);
+                                    }
+                                });
+                            //}
+                       }
+                        $(document).ready(function (e) {            
+                            $("#btnsubmitcomments").on('click', (function (e) { 
+                                var urlfile = '<?php echo url('/projectprocessing/addcomment'); ?>';    
+                                //e.preventDefault();
+                                var formData = new FormData($('#frmComments')[0]);                                 
+                                /*formData.append('_token', '{{ csrf_token() }}');*/
+                                var comments = $("#comments").val();
+                                var processingid = $("#hdprocessingid").val();
+                                var hdCode = $("#hdCode").val();
+                                $('#show_alert_msg').html("");
+                                $.ajax({
+                                    url: urlfile,
+                                    type: "POST",
+                                    data: { "_token": "{{ csrf_token() }}",comments: comments,processingid:processingid,hdCode:hdCode },
+                                    success: function (data) {                        
+                                      if(data =='fail'){
+                                         $('#show_alert_msg').html('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>'+jslang_keyword_the_file_must_be_a_type_of_image+'! </div>');
+                                         $('#frmComments')[0].reset();
+                                      }
+                                      else {
+                                        //$('#frmComments')[0].reset();
+                                        $("#comments").val("");
+                                        $("#newComment").modal('hide');
+                                        //$('#show_alert_msg').html("");
+                                        //$("#frontlogopreview").html(data);
+                                      }
+                                    },
+                                    error: function () {
+                                    }
+                                });
+                            }));
+                        });
+                        /*$('.btnprocesscomment').on("click", function() {
+                            alert($(this).attr('val'));
+                        });*/                        
+                    
+						var jq = jQuery.noConflict();					
 	                    var selezioneLavorazioni = [];
 	                    var nLav = 0;
 	                    var kLav = 0;
@@ -228,13 +304,32 @@
                 			this.blur();
                 			this.value = test;
                 		}
-	            $('#aggiungiLavorazione').on("click", function() {
-                    var countlavorazioni = $('#lavorazioni').children('tr').length;
+	            jq('#aggiungiLavorazione').on("click", function() {
+                    var countlavorazioni = jq('#lavorazioni').children('tr').length;
 	                        var tabella = document.getElementById("lavorazioni");
                 			var tr = document.createElement("tr");
                 			var data = document.createElement("td");
                 			var ora = document.createElement("td");
-                			var check = document.createElement("input");
+                            
+                            var commentTD = document.createElement("td");
+                            var commentBTN = document.createElement("a");
+                            commentBTN.className="btn btn-warning btnprocesscomment";
+                            commentBTN.id="comment_processing"+countlavorazioni;
+                            commentBTN.setAttribute('val', '0');
+                            commentBTN.setAttribute('proc', countlavorazioni);                            
+                            commentBTN.setAttribute('onclick',"commentProcessing(this)");                            
+                            commentBTN.innerHTML="{{trans('messages.keyword_review')}}";
+                            var commentCode = document.createElement("input");
+                            commentCode.type = 'hidden';
+                            commentCode.id = "processingcode_"+countlavorazioni;
+                            commentCode.name = "processing_code["+countlavorazioni+"]";
+                            commentCode.value = "{{$processingCode}}_"+countlavorazioni;
+                            
+                			commentTD.appendChild(commentBTN);
+                            commentTD.appendChild(commentCode);
+                            
+
+                            var check = document.createElement("input");
                             var checkboxLabel = document.createElement("label");                                        
                             checkboxLabel.setAttribute('for', "checkNuL"+countlavorazioni);
                 			var checkbox = document.createElement("td");
@@ -251,24 +346,19 @@
 							<?php	
 							$oggettostatoption = '';						
 							foreach($oggettostato as $key => $oggettostatoval){
-								if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato ) { 
-									$oggettostatoption .='<option value="'.$oggettostatoval->id.'" selected>'.$oggettostatoval->nome.'</option>';
+				                $label = (!empty($oggettostatoval->language_key)) ?  ucwords(strtolower(trans('messages.'.$oggettostatoval->language_key))) : (($oggettostatoval->nome)); 
+								if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato) { 
+									$oggettostatoption .='<option value="'.$oggettostatoval->id.'" selected>'.$label.'</option>';
 								}
 								else {
-                               		$oggettostatoption .='<option value="'.$oggettostatoval->id.'">'.$oggettostatoval->nome.'</option>';
+                               		$oggettostatoption .='<option value="'.$oggettostatoval->id.'">'.$label.'</option>';
 								}
 							}
 							?>
 							select1.innerHTML = '<?php echo $oggettostatoption; ?>';
-                			//var array = ["Coding", "Sleeping", "Eating"];
+                			
                 			compl.appendChild(select1);
                 			
-                			/*for(var i = 0; i < array.length; i++) {
-                				var option = document.createElement("option");
-                				option.value = i;
-                				option.text = array[i];
-                				select1.appendChild(option);
-                			}*/
                 			
                 			var select = document.createElement("select");
                 			
@@ -295,21 +385,23 @@
                         desc.appendChild(descrizione);
 						
                     var progress = document.createElement("td");
-        			var circles = document.createElement("div");
-                    	circles.className = "c100 p0 small boxs counter_"+kLav ;
-						circles.setAttribute('data-name', 'counter_'+kLav)  
-						circles.innerHTML = '<span><p id="percent-value_'+kLav+'">0</p></span><input type="hidden" class="hoverhidden" value="0" id="hoverover_'+kLav+'"><input type="hidden" class="completepercent" value="0" name="percentvalue[]" id="percentvalue_'+kLav+'"><div class="slice"><div class="bar"></div><div class="fill"></div></div>';
-
-                    /*//circles.setAttribute("style", "width:60px;height:60px;");
-                    var setsize = document.createElement("div");
-                    	setsize.className = "overlay setsize"; 
-                   	var p = document.createElement("p");
-                   		p.innerHTML="70%";**/
+        			progress.className="bar-progress";
+					var circles = document.createElement("input");
+					
+					circles.name = "percentvalue[]";
+					circles.id = "process" + kLav;
+					circles.className = "knob";
+					circles.value = 0;
+					circles.setAttribute('data-width', '30%') ;
+					circles.setAttribute('data-skin', 'tron') ;	
+					circles.setAttribute('data-thickness', '.15') ;	
+					circles.setAttribute('data-fgColor', '#FF851b') ;	
+					circles.setAttribute('data-displayPrevious', 'true') ;	
+                    
 
 
                     progress.appendChild(circles);
-                   // circles.appendChild(setsize);
-                   // setsize.appendChild(p);
+                  
                     
             		var appunti = document.createElement("td");	
 
@@ -332,6 +424,7 @@
                             select.className = "form-control";                      
                 			// tr.appendChild(compl);
                 			tr.appendChild(desc);
+                            tr.appendChild(commentTD);
                 			tr.appendChild(progress);
 
                 			var input = document.createElement("input");
@@ -350,14 +443,13 @@
                 			tabella.appendChild(tr);
                 			//$("#datepicker" + kLav).datepicker();
                 			$('.selezione').on("click", function() {
-                				selezioneLavorazioni[nLav] = $(this).parent().parent();
+                				selezioneLavorazioni[nLav] = jq(this).parent().parent();
 				                nLav++;
 							});
-                			$('#impedisci' + kLav).bind("click", impedisciModifica);
+                			jq('#impedisci' + kLav).bind("click", impedisciModifica);
                 			kLav++;
-							progressmove();
-							
-              	var jq = jQuery.noConflict();
+							newfun();
+              
 
 			  	jq(".setsize").each(function() {
 			        jq(this).height(jq(this).width());
@@ -369,152 +461,178 @@
 				
 				
         });
-	                    $('#eliminaLavorazione').on("click", function() {
+	                    jq('#eliminaLavorazione').on("click", function() {
 	                       for(var i = 0; i < nLav; i++) {
 	                           selezioneLavorazioni[i].remove();
 	                       }
 	                       nLav = 0;
 	                    });
-						if($(".boxs").length>0)
+						if(jq(".boxs").length>0)
 							progressmove();							
-						function progressmove(){
-							var box=$(".boxs");
-							var bar=$(".boxs .bar");
-							//var boxCenter=[box.offset().left+box.width()/2, box.offset().top+box.height()/2];
-							
-							box.mousemove(function(e){
-								$class=$(this).data('name');
-								
-								$this=$('.'+$class);
-								var boxCenter=[$this.offset().left+$this.width()/2, $this.offset().top+$this.height()/2];
-								var hoverid = $this.find('p').attr('id');
-								var percenid = $this.find('.hoverhidden').attr('id');
-								var completepercent = $this.find('.completepercent').attr('id');
-								
-
-								if( $this.find("#"+percenid).val()==0) 
-								{   
-									$old=$this.find("#"+hoverid).text();
-									per=0;    
-									var angle = Math.atan2(e.pageX- boxCenter[0],- (e.pageY- boxCenter[1]) )*(180/Math.PI);	    
-									if(angle<0)	{
-										angle=180+(180 + angle);
-									}
-									per=(angle/360)*100;
-									per=parseInt(Math.round(per/2) *2);
-									$this.find("#"+hoverid).html(per);
-									$this.removeClass('p'+$old);
-									$this.addClass('p'+per);
-								}
-							   // box.css({ "-webkit-transform": 'rotate(' + angle + 'deg)'});    
-							   // box.css({ '-moz-transform': 'rotate(' + angle + 'deg)'});
-							   // bar.css({ 'transform': 'rotate(' + angle + 'deg)'});
-								
-							});
-							
-							$('.boxs').on('click',function(e){
-								  $(this).off('click');
-								$class=$(this).data('name');
-								
-								$this=$('.'+$class);
-								var hoverid = $this.find('p').attr('id');
-								var percenid = $this.find('.hoverhidden').attr('id');
-								var completepercent = $this.find('.completepercent').attr('id');
-								
-								var percomp = $this.find("#"+hoverid).text();
-								$("#"+completepercent).val(percomp);
-								//console.log($this.find("#"+percenid).val());
-								if( $this.find("#"+percenid).val()==0) 
-									$this.find("#"+percenid).val(1);
-								else
-								  $this.find("#"+percenid).val(0);
-							});
-						}
+					
 
 	                </script>
+                    
 	            </table>
             </div>
             </div>
-           <div class="row"> <div class="col-md-2" >
-	           <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
-            </div></div>
+            @if(checkpermission('4', '18', 'scrittura','true'))
+           <div class="row"> 
+                <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-desktop" >
+    	           <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+                </div>
+            </div>
+            @endif
 		</div>
 
+        <div class="modal fade" id="newComment" role="dialog" aria-labelledby="modalTitle">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h3 class="modal-title" id="modalTitle">Add Comments </h3>
+                    </div>
+                    <div id="show_alert_msg"></div>
+                    <div class="modal-body">
+                        <!-- Start form to add a new event -->
+                            {!! Form::open(array('url' => '/projectprocessing/addcommen', 'id'=>'frmComments','name'=>'frmComments', 'method'=>'post')) !!}
+                            @include('common.errors')
+                            <div class="" id="commentlist"></div>
+                            <input type="hidden" name="hdprocessingid" id="hdprocessingid" value="0">
+                            <input type="hidden" name="hdCode" id="hdCode" value="0">
+                            <div class="">
+                             <div class="form-group">
+                                <label for="ente" class="control-label">{{ trans('messages.keyword_comment') }}</label>
+                                <textarea class="form-control required-input" name="comments" id="comments" rows="5" cols="10"></textarea>
+                                </div>                    
+                            </div>                    
+                            <br />
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-warning" data-dismiss="modal" aria-label="Close">{{ trans('messages.keyword_close') }}</button>     
+                                @if(checkpermission('4', '18', 'scrittura','true'))
+                                <input type="button" id="btnsubmitcomments" class="btn btn-warning" value=" {{ trans('messages.keyword_save') }} ">
+                                @endif
+                            </div>
+                       {!! Form::close() !!}
+                        <!-- End form to add a new event -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
-		<div class="col-md-4">
-         	<label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
+
+		<div class="col-md-4 col-sm-12 col-xs-12">
+			@if(isset($progetto->datainizio) && !empty($progetto->datainizio))
+            <div class="form-group bg-white pro-counter"> 
+                <div class="height">
+                    <label for="Countdown">{{trans('messages.keyword_countdown')}}</label>
+                </div>
+                <div class="set-height image_upload_div">
+                    <div id="project_timer"></div>
+                </div>
+            </div> 
+            <script>
+            var startdate = "<?php $datainizio = str_replace('/', '-', $progetto->datainizio); echo dateFormate($datainizio,'Y/m/d H:i:s'); ?>";
+            var enddate = "<?php $datafine = str_replace('/', '-', $progetto->datafine); echo dateFormate($datafine,'Y/m/d H:i:s'); ?>";            
+            var currentDate = "<?php echo date('Y/m/d H:i:s');?>";            
+            <?php $date1=date_create($datainizio );
+            $date2=date_create($datafine);
+            $diff=date_diff($date1,$date2);
+            $days = $diff->format("%a");
+            ?>
+            var days = '<?php echo $days;?>';
+            if(startdate <= currentDate){
+                startdate = currentDate;
+            }
+            if(currentDate <= enddate & startdate <= currentDate){
+            var $jc = jQuery.noConflict();
+                $jc( document ).ready(function() {
+                    $jc("#project_timer").countdowntimer({
+                        startDate : startdate,
+                        dateAndTime : enddate,
+                        size : "lg",
+                        regexpMatchFormat: "([0-9]{1,4}):([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})",                        
+                        regexpReplaceWith: "<span>$1</span><span>Days</span>  $2 <span>Hours</span>  $3 <span>Minutes</span> "
+                    });
+                });
+            }
+            else if(startdate > currentDate & currentDate < enddate ){
+                jq("#project_timer").html(days+' Days');
+            }
+            else {                
+                var jq = jQuery.noConflict();
+                jq("#project_timer").html('Due Date');
+            }
+            var jq = jQuery.noConflict();
+            </script>  
+             @endif 
+            <div class="form-group"> <div class="height6"></div>
+             	<label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
                 <select name="statoemotivo" class="form-control" id="statoemotivo">
                     <!-- statoemotivoselezionato -->
-                    <option></option>
-                    @if($statoemotivoselezionato!=null)
+                    <option></option>                    
                         @foreach($statiemotivi as $statoemotivo)
-                            <option @if($statoemotivo->id == $progetto->emotion_stat_id) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{$statoemotivo->name}}</option>
-                        @endforeach
-                    @else
-                        @foreach($statiemotivi as $statoemotivo)
-                            <option value="{{$statoemotivo->id}}" style="background-color:{{$statoemotivo->color}};color:#ffffff" >{{$statoemotivo->name}}</option>
-                        @endforeach
-                    @endif
+                        <?php $label = (!empty($statoemotivo->language_key)) ?  ucwords(strtolower(trans('messages.'.$statoemotivo->language_key))) : ucwords($statoemotivo->name); ?>
+                            <option @if($statoemotivo->id == $progetto->emotion_stat_id) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{$label}}</option>
+                        @endforeach                    
                 </select>
-                <br>
+            </div>   
+               
                 <script>
                 var yourSelect = document.getElementById( "statoemotivo" );
                     document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
-                $('#statoemotivo').on("change", function() {
+                jq('#statoemotivo').on("change", function() {
                     var yourSelect = document.getElementById( "statoemotivo" );
                     document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
                 });
                 </script>
 			<div class="row">            	
-                <div class="col-md-6">
-                <label for="preventivo">{{trans('messages.keyword_starttime')}}</label>
-                    
+                <div class="col-md-6 col-sm-12 col-xs-12">
+                	<div class="form-group">
+               		 	<label for="preventivo">{{trans('messages.keyword_starttime')}}</label>
                         <input value="{{ $progetto->datainizio }}" class="form-control" type="text" name="datainizio" id="datainizio" placeholder="{{trans('messages.keyword_starttime')}}">
+                    </div>    
                 </div>
-                <div class="col-md-6">
-                <label for="preventivo">{{trans('messages.keyword_endtime')}}</label>
+                <div class="col-md-6 col-sm-12 col-xs-12">
+                	<div class="form-group">
+		                <label for="preventivo">{{trans('messages.keyword_endtime')}}</label>
                         <input value="{{ $progetto->datafine }}" class="form-control" type="text" name="datafine" id="datafine" placeholder="{{trans('messages.keyword_endtime')}}">
+                    </div>    
                 </div>
             </div>
             
         		    <script>
-					  /*$( function() {
-					    $( "#slider-range-max" ).slider({
-					      range: "max",
-					      min: 0,
-					      max: 100,
-					      value: {{$progetto->progresso}},
-					      slide: function( event, ui ) {
-					        $( "#amount" ).val( ui.value );
-					      }
-					    });
-					    $( "#amount" ).val( $( "#slider-range-max" ).slider( "value" ) );
-					  } );
-  					*/
-        		    $.datepicker.setDefaults(
-                        $.extend(
+					 
+        		    jq.datepicker.setDefaults(
+                        jq.extend(
                             {'dateFormat':'dd/mm/yy'},
-                            $.datepicker.regional['nl']
+                            jq.datepicker.regional['nl']
                         )
                     );
-        		    $('#datainizio').datepicker();
-        		    $('#datafine').datepicker();					
+        		    jq('#datainizio').datepicker();
+        		    jq('#datafine').datepicker();					
         		    </script>
-        	<br>
+       <div class="height10"></div>
          	<div class="row">
-            <div class="col-md-12">
-            	  <div class="bg-white image-upload-box">
-        	<label> {{trans('messages.keyword_project_graph')}}</label><br> <br> 
-        		<div id="body">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+            	  <div class="bg-white image-upload-box project_graph">
+        			<div class="height10">
+                    <label> {{trans('messages.keyword_project_graph')}}</label></div>
+        		<div id="body" class="project_graph_body">
 				  <div id="chart"></div>
 			    </div>			    
                 </div>
-        	</div><br />
-			<div class="col-md-12">
-				<br><label for="preventivo">{{trans('messages.keyword_sensitivedata')}}:</label>
-				<br><a class="btn btn-warning" id="aggiungiNote"><i class="fa fa-plus"></i></a>
+        	</div>
+			<div class="col-md-12 col-sm-12 col-xs-12">
+				<div class="height10"></div>
+                <div class="form-group">
+                <label for="preventivo">{{trans('messages.keyword_sensitivedata')}}: </label> <br/>
+                    @if(checkpermission('4', '18', 'scrittura','true'))
+				    <a class="btn btn-warning" id="aggiungiNote"><i class="fa fa-plus"></i></a>
 	                <a class="btn btn-danger"  id="eliminaNote"><i class="fa fa-trash"></i></a>
-	        	<br>
+                    @endif
+                    <a class="btn btn-warning" id="btngo">{{trans('messages.keyword_go')}}</a>   
+	        	</div>
 	        </div>
             </div>
             <div class="set-height">
@@ -527,13 +645,14 @@
 		                </thead>
 		                <tbody id="noteprivate">
                         <?php $k = 0; ?>
+                         @if(count($noteprivate) > 0)
 							@foreach($noteprivate as $nota)
 		                        <tr>
 		                            <td>
-		                                <input type="checkbox" id="Sensitiv{{$k}}" class="selezione"><label for="Sensitiv{{$k}}"></label>
+		                                <input type="checkbox" id="Sensitiv{{$k}}" val="{{$k}}" class="selezione"><label for="Sensitiv{{$k}}"></label>
 		                            </td>
 		                            <td>
-		                                <input name="nome[]" class="form-control" value="{{$nota->nome}}">
+		                                <input name="nome[]" id="url_{{$k}}" class="form-control" value="{{$nota->nome}}">
 		                            </td>
 		                            <td>
 		                            	<input name="dett[]" class="form-control" value="{{$nota->user}}">
@@ -545,16 +664,37 @@
 		                            	<input id="datepicker<?php echo $k;?>" type="text" name="scad[]" class="form-control" value="{{$nota->scadenza}}">
 		                            </td> -->
 		                            <script>
-										$("#datepicker<?php echo $k; ?>").datepicker();<?php $k++; ?>
-		                                $('.selezione').on("click", function() {
-	        				                selezioneServizi[nServ] = $(this).parent().parent();
+										jq("#datepicker<?php echo $k; ?>").datepicker();<?php $k++; ?>
+		                                jq('.selezione').on("click", function() {
+	        				                selezioneServizi[nServ] = jq(this).parent().parent();
 	        				                nServ++;
 			                	        });
 		                            </script>
 		                        </tr>
 	                    	@endforeach
+                        @else
+                         @for($i=0;$i< 3;$i++)
+                          <tr>
+                            <td><input class="selezione" id="Sensitiv{{$i}}" val="{{$i}}" type="checkbox"><label for="Sensitiv{{$i}}"></label></td>
+                            <td><input class="form-control" id="url_{{$i}}" name="nome[]" type="text"></td>
+                            <td><input class="form-control" name="dett[]" type="text"></td>
+                            <td><input class="form-control" name="pass[]" type="text"></td>
+                          </tr>
+                        @endfor
+                        @endif
 		                </tbody>
-		                <script>                
+		                <script> 
+                        jq('#btngo').on("click", function() {             
+                        $("input:checkbox[class=selezione]:checked").each(function () {
+                          if($("#url_"+$(this).attr("val")).val() != ""){                  
+                            var url = $("#url_"+$(this).attr("val")).val();
+                            if (!/^(http:|https:)/i.test(url)){
+                                url = "http://" + url;
+                            }
+                            window.open(url, '_blank'); 
+                          }              
+                        });          
+                      });               
 		                    var selezioneServizi = [];
 
 		                    var nServ = 0;
@@ -562,8 +702,8 @@
 							var kServ = <?php echo $k; ?>;
 
 
-		                    $('#aggiungiNote').on("click", function() {
-                                var countnoteprivate = $('#noteprivate').children('tr').length;
+		                    jq('#aggiungiNote').on("click", function() {
+                                var countnoteprivate = jq('#noteprivate').children('tr').length;
 		                       var tab = document.getElementById("noteprivate");
 
 		                        var tr = document.createElement("tr");
@@ -576,6 +716,7 @@
 
 		                        checkbox.className = "selezione";
                                 checkbox.id = "Sensitiv"+countnoteprivate;
+                                checkbox.setAttribute('val',countnoteprivate);
                                 var checkboxlabel = document.createElement("label");
                                 checkboxlabel.for = "Sensitiv"+countnoteprivate;
                                 checkboxlabel.setAttribute('for', "Sensitiv"+countnoteprivate);
@@ -599,6 +740,7 @@
 		                        fileInput.className = "form-control";
 
 		                        fileInput.name = "nome[]";
+                                fileInput.id = "url_"+countnoteprivate;
 
 		                        var dettagli = document.createElement("input");
 
@@ -635,7 +777,7 @@
 
 		                        tab.appendChild(tr);
 
-		                        $('.selezione').on("click", function() {
+		                        jq('.selezione').on("click", function() {
 
 					                selezioneServizi[nServ] = $(this).parent().parent();
 
@@ -643,11 +785,11 @@
 
 			                	});
 								
-								$("#datepicker" + kServ).datepicker();
+								jq("#datepicker" + kServ).datepicker();
 
 		                    });
 
-		                    $('#eliminaNote').on("click", function() {
+		                    jq('#eliminaNote').on("click", function() {
 
 		                       for(var i = 0; i < nServ; i++) {
 
@@ -664,47 +806,36 @@
 		            </table>
                     </div>
                     
-                   <!--  <p>
-  						<label for="progresso">Progresso del progetto </label>
-  						<input type="text" id="amount" name="progresso" style="border:0; color:#f6931f; font-weight:bold; width:25px;">%
-					</p>
-					<div id="slider-range-max"></div>
-                    <br> -->
-			
-			<!-- 	<label for="notetecniche">Note private per il tecnico</label><a onclick="mostraPrivate()" id="mostra"> <i class="fa fa-eye"></i></a>
-        		<textarea rows="2" class="form-control" type="text" name="notetecniche" id="notetecniche" title="Note nascoste, clicca l'occhio per mostrare" placeholder="Note tecniche accordate verbalmente/scritte a mano sul preventivo"></textarea><br>
-
-        		<label for="noteprivate">Note private del tecnico</label><a onclick="mostra()" id="mostra"> <i class="fa fa-eye"></i></a>
-        	    <textarea id="noteenti" style="background-color:#f39538;color:#ffffff" rows="2" title="Note nascoste, clicca l'occhio per mostrare" class="form-control" name="noteprivate" placeholder="Inserisci note tecniche relative al progetto"></textarea> -->
+              
 				<script>
-				$('#notetecniche').on("click", function() {
+				jq('#notetecniche').on("click", function() {
 					this.blur();
 				});
 				
 				var testo = "<?php echo $progetto->noteprivate; ?>";
 				var testoPrivato = "<?php echo $progetto->notetecniche; ?>";
 				function mostra() {
-					if($('#noteenti').val()) {
-						testo = $('#noteenti').val();
-						$('#noteenti').val("");
+					if(jq('#noteenti').val()) {
+						testo = jq('#noteenti').val();
+						jq('#noteenti').val("");
 					} else {
-						$('#noteenti').val(testo);
+						jq('#noteenti').val(testo);
 						testo = "";
 					}
 				}
 				function mostraPrivate() {
-					if($('#notetecniche').val()) {
+					if(jq('#notetecniche').val()) {
 						testoPrivato = $('#notetecniche').val();
-						$('#notetecniche').val("");
+						jq('#notetecniche').val("");
 					} else {
-						$('#notetecniche').val(testoPrivato);
+						jq('#notetecniche').val(testoPrivato);
 						testoPrivato = "";
 					}
 				}
 				function mostra2() {
-					if(!$('#noteenti').val()) {
-						$('#noteenti').val(testo);
-						$('#notetecniche').val(testoPrivato);
+					if(!jq('#noteenti').val()) {
+						jq('#noteenti').val(testo);
+						jq('#notetecniche').val(testoPrivato);
 					}
 				}
 				</script>
@@ -934,16 +1065,20 @@
 	                </script>
 	            </table> -->
   <?php echo Form::close(); ?> 
-         <div class="pull-right col-md-4">
+         <div class="pull-right col-md-4 col-sm-12 col-xs-12">
          <div class="row">
           <div class="col-md-12">
           	<div class="bg-white image-upload-box">
-          <label for="scansione">{{trans('messages.keyword_dropzone_for_multiple_file_upload')}}</label><br>
-        <div class="image_upload_div"><?php echo Form::open(array('url' => 'progetti/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
-                  {{ csrf_field() }}
-                  </form>       
-        </div>
+                <label for="scansione">{{trans('messages.keyword_dropzone_for_multiple_file_upload')}}</label><br/>
+                @if(checkpermission('4', '18', 'scrittura','true'))
+                    <div class="image_upload_div">
+                    <?php echo Form::open(array('url' => 'progetti/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
+                    {{ csrf_field() }}
+                    </form>       
+                    </div>
+                @endif
         <script>
+		var $ = jQuery.noConflict();
         var urlgetfile = '<?php echo url('progetti/getfiles/'.$mediaCode); ?>';
         Dropzone.autoDiscover = false;
         $(".dropzone").each(function() {
@@ -971,6 +1106,19 @@
               $(".quoteFile_"+id).remove();
               }});
         }
+         function sociallinks(id){   
+                    $("#social_id").val(id); 
+                    $.ajax({
+                        url:"{{url('social/image')}}",
+                        type:'post',
+                        data: { "_token": "{{ csrf_token() }}","idval": id },
+                        success:function(data){
+                             $("#socialmedia").modal();
+                             $('#newsocial').html(data);
+                        } 
+                    });        
+                   
+                }
         function updateType(typeid,fileid,checkboxid1){           
             var ischeck = 0;            
             if($('#'+checkboxid1+':checkbox:checked').length > 0){                
@@ -997,8 +1145,25 @@
                     if(isset($progetto->id) && isset($projectmediafiles)){
                     foreach($projectmediafiles as $prev) {
                 $imagPath = url('/storage/app/images/projects/'.$prev->name);
+				 $downloadlink = url('/storage/app/images/projects/'.$prev->name);
+                $filename = $prev->name;            
+                $arrcurrentextension = explode(".", $filename);
+                $extention = end($arrcurrentextension);
+                            
+                $arrextension['docx'] = 'docx-file.jpg';
+                $arrextension['pdf'] = 'pdf-file.jpg';
+                $arrextension['xlsx'] = 'excel.jpg';
+                if(isset($arrextension[$extention])){
+                    $imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);          
+                }
+                
                 $titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";
-                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+                if(checkpermission('4', '18', 'scrittura','true')){
+                    $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+                }
+                else {
+                    $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a>'.$titleDescriptions.'</td></tr>'; 
+                }
                 $html .='<tr class="quoteFile_'.$prev->id.'"><td>';
                 $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();                           
                 foreach($utente_file as $key => $val){
@@ -1009,8 +1174,12 @@
                     }
                     $specailcharcters = array("'", "`");
                     $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-
+                    if(checkpermission('4', '18', 'scrittura','true')){
                     $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    }
+                    else {
+                        $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" disabled readonly  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    }
                 }
                 echo $html .='</td></tr>';
             }
@@ -1019,7 +1188,7 @@
                     <tbody id="files">
                     </tbody>
                     <script>
-                    var $ = jQuery.noConflict();
+                    
                         var selezione = [];
                         var nFile = 0;
                         var kFile = 0;
@@ -1059,20 +1228,20 @@
                 </div>
                 </div>
             </div>
-<!-- 
-	            </table> -->
-		</div>
-        
+            @if(checkpermission('4', '18', 'scrittura','true'))
+            <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-mobile" >
+	           <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+            </div>
+            @endif            
+            <!-- </table> -->
+		</div>        
         <div class="footer-svg">
-      <img src="{{url('images/FOOTER3_ORIZZONTAL_PROJECT.svg')}}" alt="ORIZZONTAL PROJECT">
+            <img src="{{url('images/FOOTER3_ORIZZONTAL_PROJECT.svg')}}" alt="ORIZZONTAL PROJECT">
+        </div>        
+	   </div>
     </div>
-        
-	</div>
-		</div>
-	</div>
-        
+</div>        
 </div><!-- /row -->
-
 <div class="modal fade" id="addMediacommnetmodal" role="dialog" aria-labelledby="modalTitle">
     <div class="modal-dialog modal-l">
         <div class="modal-content">
@@ -1088,12 +1257,12 @@
                     <div class="row">
                         <div class="col-md-12">                               
                             <div class="form-group">
-                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} <span class="required">(*)</span> </label>
-                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
+                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }}  </label>
+                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
                             </div>
                             <div class="form-group">
-                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} <span class="required">(*)</span></label>
-                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
+                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} </label>
+                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
                             </div>
                         </div>
                      </div>
@@ -1106,8 +1275,47 @@
         </div>
     </div>
 </div>
+<div class="modal fade newsocial-popu" id="socialmedia" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-dialog modal-l">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h3 class="modal-title" id="modalTitle">{{trans('messages.keyword_social_media')}}</h3>
+                </div>
+                 <div class="modal-body">
+                <input type="hidden" id="social_id" name="social_id" value="">
+                <div class="row" id="newsocial"><?php 
+                if(isset($socials)){
+                    foreach ($socials as $social) { ?>
+                    <div class="col-md-3 col-sm-4 col-xs-4">
+                    <a href="" class="img-responsive">
+                        <img src="{{ url('storage/app/images/social/'.$social->image)}}" alt="{{$social->title}}">
+                    </a>
+                    </div><?php   
+                    }
+                }
+            ?></div>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript">
 $(document).ready(function() {
+
+        $("#project_edit").validate({            
+            rules: {
+                nomeprogetto: {
+                    required: true
+                }
+            },
+            messages: {
+                nomeprogetto: {
+                    required: "{{trans('messages.keyword_please_enter_projectname')}}"
+                }
+            }
+        });
+
       $("#commnetform").validate({            
             rules: {
                 title: {
@@ -1128,7 +1336,6 @@ $(document).ready(function() {
         });
 
       $(function(){
-
         $('#commnetform').on('submit',function(e){
             $.ajaxSetup({
                 header:$('meta[name="_token"]').attr('content')
@@ -1177,23 +1384,67 @@ counter=0;
 //Data
 var d = [
 		  [
-		  @foreach($chartdetails as $key => $oggettostatoval)		 
-			{axis:"{{ $oggettostatoval->nome }}",value:{{($oggettostatoval->completedPercentage/100)}}},
+		  @foreach($chartdetails as $key => $oggettostatoval)	
+            <?php  $label = (!empty($oggettostatoval->language_key)) ?  ucwords(strtolower(trans('messages.'.$oggettostatoval->language_key))) : (($oggettostatoval->nome));?>
+			{axis:"{{ $label}}",value:{{($oggettostatoval->completedPercentage/100)}}},
 			@endforeach
 		  ]
 		];
+
+//var color = d3.scale.ordinal().range(["#EDC951","#CC333F","#00A0B0"]);
+var color = d3.scale.ordinal().range(["{{$departments->color}}"]);    
 //Options for the Radar chart, other than default
-var mycfg = {
-  w: w,
-  h: h,
-  maxValue: 1.0,
-  levels: 10,
-  ExtraWidthX: 100
-}
+$(function(e) {
+    if($(window).width() <= 500){
+    var w = 200,
+        h = 200;
+
+        var mycfg1 = {
+          w: w,
+          h: h,
+          maxValue: 1.0,
+          levels: 10,
+          ExtraWidthX: 100,
+          color: color,   
+          factor: 1,
+          factorLegend: .85,
+          radians: 2 * Math.PI,
+          opacityArea: 0.5,
+          ToRight: 5,
+          TranslateX: 100,
+          TranslateY: 30,             
+        }
+        RadarChart.draw("#chart", d, mycfg1);
+    }
+    else { 
+     var w = 250,
+        h = 250;
+
+        var mycfg = {
+          w: w,
+          h: h,
+          maxValue: 1.0,
+          levels: 10,
+          ExtraWidthX: 100,
+          color: color  
+            /*radius: 5,    
+             factor: 1,
+             factorLegend: .85,
+             radians: 2 * Math.PI,
+             opacityArea: 0.5,
+             ToRight: 5,
+             TranslateX: 100,
+             TranslateY: 30,
+             ExtraWidthX: 248,
+             ExtraWidthY: 65,*/
+        }
+        RadarChart.draw("#chart", d, mycfg);
+    }
+});
 
 //Call function to draw the Radar chart
 //Will expect that data is in %'s
-RadarChart.draw("#chart", d, mycfg);
+
 
 ////////////////////////////////////////////
 /////////// Initiate legend ////////////////
@@ -1204,6 +1455,7 @@ var svg = d3.select('#body')
 	.append('svg')
 	.attr("width", w+250)
 	.attr("height", h)
+    .attr("viewBox", "0 0 350 215")
 
 //Create the title for the legend
 /*var text = svg.append("text")
@@ -1245,4 +1497,129 @@ var legend = svg.append("g")
 	  .text(function(d) { return d; })
 	  ;	
 </script>
+
+<script>
+  var jn = jQuery.noConflict();
+jn(window).load(function(e) {
+	newfun();  
+	//alert();
+});
+	function newfun()
+	{
+        jn(function(e) {
+           jn(".knob").knob({
+                change : function (value) {
+                    //console.log("change : " + value);
+                },
+                release : function (value) {
+                    //console.log(this.$.attr('value'));
+                    console.log("release : " + value);
+                },
+                cancel : function () {
+                    console.log("cancel : ", this);
+                },
+                /*format : function (value) {
+                 return value + '%';
+                 },*/
+                draw : function () {
+
+                    // "tron" case
+                    if(this.$.data('skin') == 'tron') {
+
+                        this.cursorExt = 0.1;
+
+                        var a = this.arc(this.cv)  // Arc
+                                , pa                   // Previous arc
+                                , r = 1;
+
+                        this.g.lineWidth = this.lineWidth;
+
+                        if (this.o.displayPrevious) {
+                            pa = this.arc(this.v);
+                            this.g.beginPath();
+                            this.g.strokeStyle = this.pColor;
+                            this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, pa.s, pa.e, pa.d);
+                            this.g.stroke();
+                        }
+
+                        this.g.beginPath();
+                        this.g.strokeStyle = r ? this.o.fgColor : this.fgColor ;
+                        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, a.s, a.e, a.d);
+                        this.g.stroke();
+
+                        this.g.lineWidth = 2;
+                        this.g.beginPath();
+                        this.g.strokeStyle = this.o.fgColor;
+                        this.g.arc( this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
+                        this.g.stroke();
+
+                        return false;
+                    }
+                }
+            });
+
+          
+          
+        });
+	}
+    </script>
+     <?php /* <script>
+                    var enddate = "<?php $datafine = str_replace('/', '-', $progetto->datafine); echo dateFormate($datafine,'Y-m-d'),' 00:00:00'; ?>";                                        
+                    // Set the date we're counting down to
+                    var countDownDate = new Date(enddate).getTime();                                       
+                    
+                    // Update the count down every 1 second
+                    var x = setInterval(function() {
+                        var startdate = "<?php $datainizio = str_replace('/', '-', $progetto->datainizio); echo dateFormate($datainizio,'Y-m-d'); ?>";
+                        var startdatestr = '<?php echo strtotime($datainizio);?>';
+                        var currentDatestr = '<?php strtotime(date("Y-m-d"));?>';                                        
+
+                      // Get todays date and time
+                      <?php if(strtotime($datainizio) <= strtotime(date("Y-m-d"))){ ?>
+                         var now = new Date().getTime();
+                        <?php }
+                        else{ 
+                            ?>
+                            var now = new Date("<?php $datainizio = str_replace('/', '-', $progetto->datainizio); echo dateFormate($datainizio,'Y-m-d').' 00:00:00'; ?>").getTime();                         
+                            <?php
+                        }?>
+
+                      /*if(startdatestr <= currentDatestr){
+                         var now = new Date().getTime();
+                      }
+                      else {                        
+                         var now = new Date(startdate).getTime();                         
+                      }*
+                      // Find the distance between now an the count down date
+                     // alert(countDownDate +"-"+ now);
+                      
+                      var distance = countDownDate - now;
+                     
+                      // Time calculations for days, hours, minutes and seconds
+                     var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                     /*   var seconds = Math.floor(distance / 1000);
+                        var minutes = Math.floor(seconds / 60);
+                        var hours = Math.floor(minutes / 60);
+                        var days = Math.floor(hours / 24);
+
+                        hours %= 24;
+                        minutes %= 60;
+                        seconds %= 60;*
+
+                      //Display the result in the element with id="demo"
+                      document.getElementById("project_timer").innerHTML = days + " days " + hours + " hours "
+                      + minutes + " minutes " + seconds + "s ";
+
+                      //If the count down is finished, write some text 
+                      if (distance < 0) {
+                        clearInterval(x);
+                        document.getElementById("project_timer").innerHTML = "EXPIRED";
+                      }
+                    }, 1000);
+
+                    </script>*/?>
 @endsection

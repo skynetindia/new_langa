@@ -2,12 +2,9 @@
 @section('page')
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 <h1>{{trans('messages.keyword_languages')}}</h1><hr>
 <script>
 @if(!empty(Session::get('msg')))
@@ -15,37 +12,31 @@
     document.write(msg);
 @endif
 </script>
-<form action="{{ url('/admin/modify/language') }}" method="GET">
+<?php /*<form action="{{ url('/admin/modify/language') }}" method="GET">
 {{ csrf_field() }}
 <button class="btn btn-warning" type="submit" name="create" title="Add New - Add new language"><i class="fa fa-plus"></i></button>
 </form>
+
 <form action="{{ url('/admin/add/languagetranslation') }}" method="GET" >
 {{ csrf_field() }}
 <button class="btn btn-warning" type="submit" name="create" title="{{trans('messages.keyword_add_phases')}}">{{trans('messages.keyword_add_phases')}}</button>
-</form>
+</form>*/?>
+<a href="{{ url('/admin/modify/language') }}" id="create" class="btn btn-warning" name="create" title="Add New - Add new language"><i class="fa fa-plus"></i></a>
 <!-- Inizio filtraggio miei/tutti -->
-<?php /*@if(isset($miei))
-<a id="miei" href="{{url('/enti/miei')}}" style="display:inline;">
-<button class="button button2" type="button" name="miei" title="Miei - Filtra i tuoi enti" style="background-color:#337AB7;color:#ffffff">Miei</button>
-</a>
-<a id="tutti" href="{{url('/enti')}}" style="display:inline;">
-<button class="button button3" type="button" name="tutti" title="Tutti - Mostra tutti gli enti">Tutti</button>
-</a>
-@else
-<a id="miei" href="{{url('/enti/miei')}}" style="display:inline;">
-<button class="button button2" type="button" name="miei" title="Miei - Filtra i tuoi enti">Miei</button>
-</a>
-<a id="tutti" href="{{url('/enti')}}" style="display:inline;">
-<button class="button button3" type="button" name="tutti" title="Tutti - Mostra tutti gli enti" style="background-color:#D9534F;color:#ffffff">Tutti</button>
-</a>
-@endif */?>
+
 <!-- Fine filtraggio miei/tutti -->
 <a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title="Modifica - Modifica l'ultimo ente selezionato"><i class="fa fa-pencil"></i></a>
 <?php /*<a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
 <button class="btn btn-info" type="button" name="duplicate" title="Duplica - Duplica gli enti selezionati"><i class="fa fa-files-o"></i></button>
 </a>*/?>
 <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="fa fa-trash"></i></a>
+<a href="{{ url('/admin/add/languagetranslation') }}" id="create" class="btn btn-warning" name="create" title="{{trans('messages.keyword_add_phases')}}">{{trans('messages.keyword_add_phases')}}</a>
 <a onclick="multipleAction('updatePhase');" id="modifica" class="btn btn-primary" name="update" title="{{trans('messages.keyword_update_phases')}}">{{trans('messages.keyword_update_phases')}}</a>
+
+<div class="space10"></div>
+
+<div class="panel panel-default">
+<div class="panel-body">
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php  echo url('admin/language/json');?>" data-classes="table table-bordered" id="table">
 <thead>
 <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
@@ -55,6 +46,8 @@
 <th data-field="icon" data-sortable="true">{{trans('messages.keyword_icon')}}</th>
 </thead>
 </table>
+</div>
+</div>
 
 <script>
 var selezione = [];

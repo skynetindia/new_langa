@@ -10,15 +10,40 @@
 | and give it the controller to call when that URI is requested.
 |
 */
+Route::get('/temper', 'HomeController@temp');
 
-Route::get('/', 'HomeController@index')->name('home');
+
+//Route::get('/dashboard', 'HomeController@index')->name('home');
+
 Route::post('dashboard/statistics/year', 'HomeController@statisticdata');
+Route::post('dashboard/statistics/date', 'HomeController@statistic_date');
+
 Route::post('dashboard/weatherautocomplete', 'HomeController@weatherautocomplete');
 Route::post('dashboard/getweatherdetails', 'HomeController@getweatherdetails');
+Route::post('dashboard/getweatherdetails', 'HomeController@getweatherdetails');
 
-/*Route::get('/', function () {
-    return view('welcome');
-});*/
+Route::get('dashboard/getreseller/json', 'HomeController@getjsonreseller');
+/*Route::get('/admin/language/json', 'AdminController@getjsonlanguage');*/
+
+Route::get('/',function(){
+    if(!empty(Session::get('nuovaregistrazione'))) {
+		    return view('welcome');
+    } 
+    elseif(!empty(Session::get('confermaregistrazione'))){
+    	    return view('welcome');		
+    } 
+    elseif (Auth::guest()){
+   	    return view('welcome');	
+    }
+    else{
+    	return Redirect::action('HomeController@index');
+        /*Route::get('/', 'HomeController@index')->name('home');*/
+    }
+});
+Route::get('dashboard/client/charts', 'HomeController@clients');
+Route::get('dashboard/reseller/charts', 'HomeController@reseller');
+Route::post('dashboard/widgetupdate', 'HomeController@widgetupdate');
+Route::post('dashboard/getcalendar', 'HomeController@getCalendarAjax');
 
 Route::get('/unauthorized', function () {
     return view('errors.403');
@@ -33,6 +58,14 @@ Route::auth();
 
 Route::get('/logout', 'Auth\LoginController@logout');
 Route::get('/admin', 'AdminController@index');
+
+Route::get('/filemedia', 'AdminController@filemediamanage');
+Route::post('/admin/globalsetting/store', 'AdminController@storelogotemp');
+Route::post('/admin/globalsetting/save', 'AdminController@savelogos');
+Route::post('/admin/globalsetting/previewlogo', 'AdminController@previewlogo');
+
+
+
 /*===================================== Language section routes =============================== */
 // Lanauge
 Route::get('/admin/language', 'AdminController@language');
@@ -51,6 +84,7 @@ Route::any('/admin/add/languagetranslation', 'AdminController@addtranslation');
 Route::get('/admin/modify/languagetranslation/{id}', 'AdminController@addtranslation');
 Route::post('admin/languagetranslation/store', 'AdminController@savetranslation');
 Route::post('admin/languagetranslation/update/{key}', 'AdminController@updatetranslation');
+Route::any('/admin/searchtranslation', 'AdminController@getpharses');
 
 Route::get('/language-chooser', 'LanguageController@changeLanguage');
 Route::get('/language/', array('before'=> 'csrf','as'=>'language-chooser','uses'=>'LanguageController@changeLanguage'));
@@ -64,7 +98,7 @@ Route::post('/admin/tassonomie/update', 'AdminController@tassonomieUpdate');
 Route::get('/admin/tassonomie/delete/id/{id}', 'AdminController@delete');
 // Stati emotivi enti
 Route::post('/admin/tassonomie/nuovostatoemotivo', 'AdminController@nuovoStatoEmotivo');
-Route::post('/admin/tassonomie/aggiornastatiemotivi', 'AdminController@aggiornaStatiEmotivi');
+Route::post('/admin/tassonomie/aggiornastatiemotivi', 'AdminController@actionEmotionalStae');
 Route::get('/admin/tassonomie/statiemotivi/delete/id/{id}', 'AdminController@deleteStatiEmotivi');
 
 
@@ -95,6 +129,8 @@ Route::get('/admin/taxonomies/processing', 'AdminController@processing');
 Route::post('/admin/taxonomies/addprocessing', 'AdminController@addProcessing');
 Route::post('/admin/taxonomies/updateprocessing', 'AdminController@updateProcessing');
 Route::get('/admin/taxonomies/deleteprocessing/id/{id}', 'AdminController@deleteProcessing');
+Route::post('/admin/taxonomies/updatedepartmentcolor', 'AdminController@updatedepartmentcolor');
+
 
 /*===================================== Payments (Pagamenti) section =============================== */
 // Pagamenti -> Stato emotivo
@@ -117,6 +153,8 @@ Route::get('/enti/newclient/corporation/{corporation}', 'CorporationController@n
 Route::post('/enti/add/', 'CorporationController@add');
 Route::get('/enti/add/', 'CorporationController@add');
 Route::post('/enti/store/', 'CorporationController@store');
+Route::get('/enti/getdetails/{entity_id}', 'CorporationController@getDetails');
+
 
 
 /*==================================================================================================================== */
@@ -124,6 +162,13 @@ Route::post('/enti/store/', 'CorporationController@store');
 Route::get('/admin/utenti', 'AdminController@utenti');
 // get users list json
 Route::get('users/json', 'AdminController@getjsonusers');
+//Change status of user (Active/Deactive)
+Route::get('/admin/user/changestatus/{userid}/{status}', 'AdminController@updateuserstatus');
+
+// show list of clients
+Route::get('/admin/clients', 'AdminController@clients');
+// get client list json
+Route::get('clients/json', 'AdminController@getjsonclients');
 // add/edit user form view
 Route::get('/admin/modify/utente/{utente?}', 'AdminController@modificautente');
 // store user details
@@ -222,6 +267,8 @@ Route::get('/menu/modify/{id}', 'AdminController@menumodify');
 Route::post('/menu/update/{id}', 'AdminController@menuupdate');
 Route::get('/menu/delete/{id}', 'AdminController@menudelete');
 
+Route::get('/admin/menu/changestatus/{menuid}/{status}', 'AdminController@updatemenustatus');
+
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/admin/user/access/{userid}', 'AdminController@access')->name('home');
 
@@ -268,6 +315,8 @@ Route::get('/taxation/delete/{id}', 'AdminController@deletetaxation');
 // get taxation
 Route::get('taxation/json', 'AdminController@getjsontaxation');
 
+Route::get('/taxation/changestatus/{id}/{status}', 'AdminController@updatetaxionstatus');
+
 Route::get('/admin/quiz', 'AdminController@quizdemo');
 Route::post('/admin/quizdemonew', 'AdminController@nuovoquizdemo');
 Route::get('/admin/quizdemodelete/id/{id}', 'AdminController@quizdemodelete');
@@ -306,6 +355,7 @@ Route::get('/estimates/delete/quote/{quote}', 'QuoteController@deleteEstimates')
 Route::get('/estimates/duplicate/quote/{quote}', 'QuoteController@duplicatEstimates');
 Route::get('/estimates/pdf/quote/{quote}', 'QuoteController@pdf');
 Route::get('/estimates/noprezzi/pdf/quote/{quote}', 'QuoteController@pdfnoprice');
+Route::get('/estimates/optional/{quote}', 'QuoteController@eliminaoptional');
 
 /*Route::get('/preventivi/optional/{quote}', 'QuoteController@eliminaoptional');
 Route::post('/preventivo/optional/aggiorna/{id}', 'QuoteController@aggiornaoptional');
@@ -319,6 +369,11 @@ Route::get('/estimates/modify/quote/deletefiles/{id}', 'QuoteController@filedele
 Route::post('/estimates/modify/quote/updatefiletype/{typeid}/{fileid}', 'QuoteController@filetypeupdate');
 Route::get('/estimates/modify/quote/getdefaultfiles/{quote_id}', 'QuoteController@fileget');
 Route::post('/estimates/mediacomment/{code}', 'QuoteController@updatemediaComment');
+Route::post('estimates/quoteconfirm', 'QuoteController@confirmQuote');
+Route::get('estimates/miei/confirmed', 'QuoteController@getJsonMyconfirmedestimates');
+
+Route::get('/estimates/changepublishstatus/{id}/{status}', 'QuoteController@updatepublishstatus');
+
 // user read alert
 Route::get('/alert/user-read', 'AdminController@userreadalert');
 // make comment alert 
@@ -369,11 +424,38 @@ Route::get('/notification/make-comment', 'AdminController@notificationmakecommen
 // user read notification
 Route::get('/notification/user-read', 'AdminController@userreadnotification');
 
+// detail notification json
+Route::get('/notifica/detail/json/{id?}', 'AdminController@detailnotificationjson');
+
 
 // make comment in role wised notification
 Route::get('/note_role/make-comment', 'AdminController@notemakecomment');
 // role wised read notification
 Route::get('/note_role/user-read', 'AdminController@userreadnote');
+
+// show all notification
+Route::get('/notifiche', 'HomeController@mostranotifiche');
+// get list of notifications
+Route::get('/notifiche/json', 'HomeController@getjsonnotifiche');
+
+// user send notification
+Route::get('/send-notification', 'AdminController@sendnotification');
+
+// notification disabled  
+Route::get('/notification-disabled', 'AdminController@notificationdisabled');
+
+// delete notification
+Route::get('/alert/delete/{id}', 'HomeController@deletealert');
+// alert disabled  
+Route::get('/alert-disabled', 'AdminController@alertdisabled');
+
+
+
+// copy data client table to user table
+Route::get('/copy-client', 'AdminController@copyClient');
+// get notification in json
+Route::get('/notification-json', 'AdminController@notificationjson');
+
 
 /* ================================ Login Activity Admin ============================= */
 // show list of users
@@ -392,6 +474,7 @@ Route::post('/calendario/add', 'CalendarioController@store');
 Route::get('/calendario/delete/event/{event}', 'CalendarioController@destroy');
 Route::get('/calendario/edit/event/{event}', 'CalendarioController@edit');
 Route::post('/calendario/update/event/{event}', 'CalendarioController@update');
+Route::get('/calendario/json/{tipo}', 'CalendarioController@jsondata');
 
 /* ================================= Project Route =================================================*/
 // Progetti
@@ -424,6 +507,12 @@ Route::post('/progetti/updatefiletype/{typeid}/{id}', 'ProjectController@filetyp
 Route::get('/progetti/getdefaultfiles/{quote_id}', 'ProjectController@fileget');
 Route::post('/progetti/mediacomment/{code}', 'ProjectController@updatemediaComment');
 
+Route::post('project/getprocessingcomment', 'ProjectController@getprocessingcomment');
+Route::post('projectprocessing/addcomment', 'ProjectController@addprocessingcomment');
+Route::post('project/deleteprocessingcomment', 'ProjectController@deleteprocessingcomment');
+
+
+
 
 /* =============================== Invoice Route =============================== */
 
@@ -441,8 +530,8 @@ Route::get('/pagamenti/tranche/pdf/{id}', 'AccountingController@generapdftranche
 Route::get('/pagamenti/mostra/accounting/{accounting}', 'AccountingController@mostradisposizione');
 // get invoices in json for selected element
 Route::get('/pagamenti/tranche/json/id/{id}', 'AccountingController@getjsontranche');
-// add invoices for selected element
-Route::get('/pagamenti/tranche/add/{id}', 'AccountingController@aggiungitranche');
+// add invoices for selected element (project id)
+Route::get('/pagamenti/tranche/add/{id?}', 'AccountingController@aggiungitranche');
 // store invoice details
 Route::post('/pagamenti/tranche/store', 'AccountingController@salvatranche');
 // delete invoicea
@@ -457,7 +546,13 @@ Route::get('/add/fatture/getfiles/{code}', 'AccountingController@fileget');
 Route::get('/add/fatture/deletefiles/{id}', 'AccountingController@filedelete');
 // update invoice's uploaded file
 Route::post('/add/fatture/updatefiletype/{typeid}/{fileid}', 'AccountingController@filetypeupdate');
-Route::post('/fatture/mediacomment/{code}', 'ProjectController@updatemediaComment');
+
+Route::post('/fatture/mediacomment/{code}', 'AccountingController@updatemediaComment');
+
+Route::get('/pagamenti/linktoproject/{id}', 'AccountingController@linktoproject');
+
+Route::post('pagamenti/accounting/delete', 'AccountingController@deleteinvoicegroup');
+
 
 
 /* =============================== Provisions Route =============================== */
@@ -486,7 +581,7 @@ Route::get('/pagamenti/coordinate', 'AccountingController@mostracoordinate');
 // show stat information
 Route::get('/statistiche/economiche', 'AccountingController@mostrastatistiche');
 // get stat data by type and year
-Route::get('/statistiche/economiche/{anno}', 'AccountingController@statisticheeconomiche');
+Route::get('/statistiche/economiche/{year}', 'AccountingController@statisticheeconomiche');
 // get stat data by date
 Route::post('/statistiche/date', 'AccountingController@statisticheeconomichedate');
 // get cost data in json 
@@ -516,10 +611,17 @@ Route::get('/quiz', 'QuizController@index');
 Route::get('/quiz/stepone', 'QuizController@stepone');
 // store step one details
 Route::post('/storeStepone', 'QuizController@storestepone');
+// check entity
+Route::post('/check/entity', 'QuizController@checkentity');
+// quiz step one payment check
+Route::post('/stepone/checkpayment', 'QuizController@checkpayment');
 // get old ente details
 Route::post('/oldente', 'QuizController@oldente');
 // add new ente details
 Route::post('/newente', 'QuizController@newente');
+// upload logo step one
+Route::post('/upload/logo/', 'QuizController@logoupload');
+
 // step two
 Route::get('/quiz/steptwo/{id}', 'QuizController@steptwo');
 // get details
@@ -534,6 +636,8 @@ Route::post('/storeStepthree', 'QuizController@storeStepthree');
 Route::get('/quiz/stepfour/{id}', 'QuizController@stepfour');
 // store quiz step four data
 Route::post('/storeStepfour', 'QuizController@storestepfour');
+Route::post('/quiz/removecart', 'QuizController@removecart');
+
 // quiz step five
 Route::get('/quiz/stepfive/{id}', 'QuizController@stepfive');
 // store quiz step five details
@@ -541,7 +645,7 @@ Route::post('/storeStepfive', 'QuizController@storestepfive');
 // quiz step five save image
 Route::post('/quiz/stepfive/saveimage', 'QuizController@stepfivesaveimage');
 // quiz step five refresh image
-Route::post('/quiz/stepfive/refresh', 'QuizController@stepfiverefreshimage');
+// Route::post('/quiz/stepfive/refresh', 'QuizController@stepfiverefreshimage');
 // file viewer
 Route::any('/fileviewer/{src}/{type}', 'QuizController@fileviewer');
 // upload file step five
@@ -552,11 +656,121 @@ Route::get('/stepfive/getfiles/{code}', 'QuizController@fileget');
 Route::get('/stepfive/deletefiles/{id}', 'QuizController@filedelete');
 // comment in uploaded file.
 Route::post('/quiz/mediacomment/{code}', 'QuizController@quizupdatemediaComment');
+// quiz step six
+Route::get('/quiz/stepsix/{id}', 'QuizController@stepsix');
+// quiz step six confirm
+Route::post('/stepsix/confirm', 'QuizController@stepsixconfirm');
+// quiz step six send email
+Route::post('/stepsix/send-email', 'QuizController@stepsixSendEmail');
 
-
+// delete notification
+Route::get('/notifiche/delete/{id}', 'HomeController@cancellanotifica');
 // notification delete
 Route::get('/notification/userdelete', 'AdminController@userdeletenotification');
 
 // delete alert 
 Route::get('/alert/userdelete', 'AdminController@userdeletealert');
+
+// quiz step six
+Route::get('/quiz/stepsix/{id}', 'QuizController@stepsix');
+// quiz step six confirm
+Route::post('/stepsix/confirm', 'QuizController@stepsixconfirm');
+// quiz step six send email
+Route::post('/stepsix/send-email', 'QuizController@stepsixSendEmail');
+Route::get('/quiz/getenity', 'QuizController@getentity');
+
+
+// download csv
+Route::get('/download/csv','CommonController@downloadcsv');
+// upload csv
+Route::post('/upload/csv','CommonController@uploadcsv');
+Route::get('/register/step-two', 'CommonController@nextstep');
+Route::post('/registration-step-two', 'CommonController@storesteptwo');
+Route::post('/registration-step-three', 'CommonController@storestepthree');
+Route::post('/registration-step-four', 'CommonController@storestepfour');
+// update role type
+Route::post('/stepfive/updatefiletype/{typeid}/{fileid}', 'QuizController@filetypeupdate');
+
+// quiz step seven
+Route::get('/quiz/stepseven/{id}', 'QuizController@stepseven');
+
+/* ======================= INFO SECTION  ============================= */
+// contact page
+Route::get('/contatti', 'HomeController@mostracontatti');
+// faq
+Route::get('/faq', 'HomeController@mostrafaq');
+// version page
+Route::get('/changelog', 'HomeController@mostrachangelog');
+// notification page from menu
+Route::get('/valutaci', function () { return view('layouts.valutaci'); });
+// send error and bug 
+Route::post('/valutaci/store', 'HomeController@reporterrors');
+
+/* ======================= Dynamic Page ============================= */
+// view list of pages
+Route::get('/admin/pages', 'AdminController@pages');
+// get pages in json format
+Route::get('/json/pages', 'AdminController@pagesjson');
+// add/modify page details
+Route::get('/admin/modify/page', 'AdminController@modifypage');
+
+Route::get('/admin/modify/page/{id}', 'AdminController@modifypage');
+// store page details
+Route::post('/admin/page/store/', 'AdminController@storepage');
+// update page details
+Route::post('/admin/page/update/{id}', 'AdminController@updatepage');
+// delete page
+Route::get('/admin/page/delete/{id}', 'AdminController@deletepage');
+// check page id is_enabled 
+Route::post('/page/is-enabled', 'AdminController@checkpage');
+// view requested page
+Route::get('/info/{page}', 'AdminController@viewpage');
+
+/* ======================= Ticket ============================= */
+// show list of ticket
+Route::get('/tickets/', 'HomeController@tickets');
+// get tockets in json format
+Route::get('/tickets/json', 'HomeController@getticketsjson');
+// add problem ticket
+Route::post('/ticket/problem/store', 'HomeController@problemstore');
+// modify ticket
+Route::get('/ticket/modify/{id}', 'HomeController@ticketmodify');
+// delete ticket
+Route::get('/ticket/delete/{id}', 'HomeController@ticketdelete');
+// store reply of ticket
+Route::post('/store/reply', 'HomeController@storereply');
+
+// update statusof ticket
+Route::post('/ticket/status/update', 'HomeController@ticketupdate');
+
+
+
+// show aff alert form
+Route::get('/alert', 'CommonController@addalert');
+// get alert entity in json
+Route::get('/alert/json', 'CommonController@getalertjson');
+
+Route::post('/alert/store', 'CommonController@storeadminalert');
+
+// quiz comic view
+Route::get('/quiz/comic', 'QuizController@comic');
+// quiz comic add
+Route::post('/quiz/comic/add', 'QuizController@addcomic');
+// quiz comic update
+Route::post('/quiz/comic/update', 'QuizController@updatecomic');
+
+
+Route::get('/social', 'SocialController@index');
+// social view add
+Route::post('/social/add', 'SocialController@addsocial');
+// social view update
+Route::post('/social/update', 'SocialController@updatesocial');
+Route::post('social/image','SocialController@image');
+Route::get('social/share/{id}',"SocialController@share");
+
+Route::get('register/step-two',"CommonController@registerstep2");
+
+Route::get('register/getdepartmentpackage/{departmentid}',"CommonController@getdepartmentpackage");
+
+
 

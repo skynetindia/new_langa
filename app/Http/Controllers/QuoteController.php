@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Repositories\QuoteRepository;
 use App\Repositories\CorporationRepository;
@@ -10,8 +8,8 @@ use Redirect;
 use App\Quote;
 use DB;
 use Storage;
+use Auth;
 use App\Classes\PdfWrapper as PDF;
-
 use App\PDF\QuotationPDF;
 use App\PDF\QuotationPDFNoPrezzi;
 
@@ -21,6 +19,9 @@ class QuoteController extends Controller
 	protected $quotes;
 	protected $corporations;
 	protected $logmainsection;
+
+	protected $module;
+	protected $sub_id;
 	
 	public function __construct(QuoteRepository $quotes, CorporationRepository $corporations)
 	{
@@ -28,6 +29,14 @@ class QuoteController extends Controller
 		$this->quotes = $quotes;		
 		$this->corporations = $corporations;
 		$this->logmainsection = 'Quotes';
+
+		$request = parse_url($_SERVER['REQUEST_URI']);
+		$path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylangaw/', '', $request["path"]), '/') : $request["path"];		
+		$result = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');
+		$current_module = DB::select('select * from modulo where TRIM(BOTH "/" FROM modulo_link) = :link', ['link' => $result]);
+    	
+        $this->module = (isset($current_module[0]->modulo_sub)) ? $current_module[0]->modulo_sub : 3;
+        $this->sub_id = (isset($current_module[0]->id)) ? $current_module[0]->id : 16;
 	}
 	
 	public function filequote(Request $request) {
@@ -47,22 +56,43 @@ class QuoteController extends Controller
 	public function completeListCode(&$preventivi)
 	{
 		$statiemotivi = DB::table('statiemotivipreventivi')->get();
+		
 		foreach($preventivi as $prev) {
 			$id = $prev->id;
-			$prev->id = ':' . $prev->id . '/' . $prev->anno;
+			$yearid=(isset($prev->anno) && $prev->anno!=0)?$prev->anno:date('y');
+			$prev->id = ':' . $prev->id . '/' .$yearid ;
+		
+			$prev->data = str_replace('/', '-', $prev->data);
+			$prev->valenza = str_replace('/', '-', $prev->valenza);
+			$prev->data = dateFormate($prev->data,'d/m/Y');
+			$prev->valenza = dateFormate($prev->valenza,'d/m/Y');			
+			
 			$prev->ente = DB::table('corporations')
 				->where('id', $prev->idente)
 				->first()->nomeazienda;
-			$prev->dipartimento = DB::table('departments')
+			$departmentsP = DB::table('departments')
 				->where('id', $prev->dipartimento )
-				->first()->nomedipartimento;
-			
-			$statoselezionato = DB::table('statipreventivi')
-				->where('id_preventivo', $id)
 				->first();
+			$prev->dipartimento = isset($departmentsP->nomedipartimento) ? $departmentsP->nomedipartimento :"";
+			
+			$Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
+        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+        	/*$arrwhere = ($type === 'Client') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0);*/
+
+        	$checked = ($prev->is_published==1) ? 'checked' : '';
+        	$prev->publishstatus = '<div class="switch"><input name="status" readonly="readonly" disabled="disabled"  id="activestatus_'.$id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$id.'"></label></div>';
+
+        	if(Auth::user()->id == '0' || (Auth::user()->dipartimento == 0) || $prev->user_id == Auth::user()->id){				
+        		$prev->publishstatus = '<div class="switch"><input name="status" onchange="updateStaus('.$id.')" id="activestatus_'.$id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$id.'"></label></div>';
+        	}
+
+			$statoselezionato = DB::table('statipreventivi')->where('id_preventivo', $id)->first();
 			foreach($statiemotivi as $stat) {
 				if($statoselezionato != null){
 					if($statoselezionato->id_tipo == $stat->id) {
+						if(isset($stat->language_key)){
+							$stat->name = (!empty($stat->language_key)) ? trans('messages.'.$stat->language_key) : $stat->name;
+						}
 						if(isset($stat->color)){
 							//$prev->statoemotivo = $stat->name;						
 							$prev->statoemotivo = '<span style="color:'.$stat->color.'">'.$stat->name.'</span>';
@@ -76,6 +106,11 @@ class QuoteController extends Controller
 				}
 			}
 		}
+	}
+
+	public function updatepublishstatus(Request $request) {				
+		$update = DB::table('quotes')->where('id', $request->id)->update(array('is_published' => $request->status));
+		return ($update) ? 'true' : 'false';		
 	}
 
 	public function fileupload(Request $request){		
@@ -104,8 +139,19 @@ class QuoteController extends Controller
 		}		
 		foreach($updateData as $prev) {
 			$imagPath = url('/storage/app/images/quote/'.$prev->name);
+			$downloadlink = url('/storage/app/images/quote/'.$prev->name);
+			$filename = $prev->name;			
+				$arrcurrentextension = explode(".", $filename);
+				$extention = end($arrcurrentextension);
+							
+				$arrextension['docx'] = 'docx-file.jpg';
+				$arrextension['pdf'] = 'pdf-file.jpg';
+				$arrextension['xlsx'] = 'excel.jpg';
+				if(isset($arrextension[$extention])){
+					$imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);			
+				}
 			$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";			
-			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
 
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
@@ -114,12 +160,12 @@ class QuoteController extends Controller
 					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
 					$specailcharcters = array("'", "`");
                     $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 				else {
 					$specailcharcters = array("'", "`");
                     $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 			}
 			echo $html .='</td></tr>';
@@ -132,12 +178,14 @@ class QuoteController extends Controller
 	    echo ($response) ? 'success' :'fail';   				
 		exit;
 	}
+	
 	public function filetypeupdate(Request $request){		 
 		$request->ids = isset($request->ids) ? implode(",",$request->ids) : "";
 		$response = DB::table('media_files')->where('id', $request->fileid)->update(array('type' => $request->ids));	    
 		echo ($response) ? 'success' :'fail';   				
 		exit;
 	}
+	
 	public function updatemediaComment(Request $request){		 		
 		$updateData = DB::table('media_files')->where('code', $request->code)->orderBy('id', 'desc')->first();										
 		$title = $request->title;
@@ -146,27 +194,45 @@ class QuoteController extends Controller
 		echo ($response) ? 'success' :'fail';   				
 		exit;
 	}
+	public function confirmQuote(Request $request){		 				
+		$response = DB::table('quotes')->where('id', $request->id)->update(array('signature' => $request->signature));	    
+		// Get confirm state id
+		$tipo = DB::table('statiemotivipreventivi')->where('id', '6')->first();
+		DB::table('statipreventivi')->where('id_preventivo', $request->id)->delete();
+		DB::table('statipreventivi')->insert([
+				'id_tipo' => $tipo->id,
+				'id_preventivo' => $request->id,
+				'created_at'=>date('Y-m-d H:i:s')
+			]);
+	
+		echo ($response) ? 'success' :'fail';   				
+		exit;
+	}
+	
 	
 	public function getJsonMyestimates(Request $request)
 	{
-		if($request->user()->id == 0) {
+		$particpantid=check_participant();
+		if(($request->user()->id == 0) || ($request->user()->dipartimento == 0)) {
 			$preventivi = DB::table('quotes')
-			->where('is_deleted', 0)
+			->where('is_deleted', 0)			
 			->get();
 			$this->completeListCode($preventivi);
 			return json_encode($preventivi);
 		}
 		else {
+			$Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
+        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+        	$arrwhere = ($type === 'Client') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0); 
+
 			$preventivi = DB::table('quotes')
-				->where('is_deleted', 0)
+				->where($arrwhere)
 				->get();
 			$id = $request->user()->id;
 			foreach($preventivi as $prev) {
-				if($prev->user_id == $id ||
-				   $prev->idutente == $id)
-				   $to_return[] = $prev;
+				if($prev->user_id == $id || $prev->idutente == $id ||in_array($prev->idente,$particpantid))
+				   $to_return[] = $prev;				   
 			}
-				
 			$this->completeListCode($to_return);
 			return json_encode($to_return);
 		}
@@ -184,11 +250,20 @@ class QuoteController extends Controller
 	// Calls the show method
 	public function index(Request $request)
 	{
+		if(!checkpermission($this->module, $this->sub_id, 'lettura')){
+    		return redirect('/unauthorized');
+    	}
+
 		return $this->show($request);
 	}
 	
 	public function myestimates(Request $request)
 	{
+		//is_array(check_participant());
+		if(!checkpermission($this->module, $this->sub_id, 'lettura')){
+    		return redirect('/unauthorized');
+    	}
+
 		return view('estimates.main', [
 			'miei' => 1
 		]);
@@ -208,6 +283,10 @@ class QuoteController extends Controller
 	// Mostra la pagina per aggiungere un nuovo preventivo
 	public function add(Request $request)
 	{
+		if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
 		return view('estimates.add', [
 			'utenti' => DB::table('users')->select('*')->get(),
 			'enti' => $this->corporations->forUser2($request->user()),
@@ -220,10 +299,11 @@ class QuoteController extends Controller
 		]);
 	}
 	
-	// Salvo il preventivo nel DB
+
+
+// Salvo il preventivo nel DB
 	public function store(Request $request)
 	{
-		
 		$validator = Validator::make($request->all(), [
 			'data' => 'required',
 			'oggetto' => 'required|max:150',
@@ -231,7 +311,7 @@ class QuoteController extends Controller
 			'idente'=>'required',
 			'considerazioni' => 'required|max:2000',
 			'valenza' => 'required',
-			'finelavori' => 'required',
+			'finelavori' => 'required'
 		]);
 		
 		if($validator->fails()) {
@@ -322,18 +402,22 @@ class QuoteController extends Controller
 				'legameprogetto' => isset($request->legameprogetto) ? $request->legameprogetto : 0,
 			]);
 			
+			DB::table('media_files')
+				->where('code', $request->mediaCode)
+				->update(array('master_id' => $nuovopreventivo));
+
 			$logs = $this->logmainsection.' -> Add New Quote (ID: '. $nuovopreventivo . ')';
 			storelogs($request->user()->id, $logs);
 
 			if($request->statoemotivo!=null) {
 				// Memorizzo lo stato emotivo
-				$tipo = DB::table('statiemotivipreventivi')
+				/*$tipo = DB::table('statiemotivipreventivi')
 					->where('name', $request->statoemotivo)
-					->first();
-
+					->first();*/
 				DB::table('statipreventivi')->insert([
 					'id_preventivo' => $nuovopreventivo,
-					'id_tipo' => $tipo->id,
+					'id_tipo' => $request->statoemotivo,
+					'created_at'=>date('Y-m-d H:i:s')
 				]);
 			}
 				
@@ -376,19 +460,22 @@ class QuoteController extends Controller
 				$amountper = $request->amountper;
 				$importo = $request->importo;
 				for($i = 0; $i < count($datapay); $i++) {
-
-					DB::table('quote_paymento')->insert([
-						'qp_quote_id' => $nuovopreventivo,
-						'qp_data' => date('Y-m-d',strtotime($datapay[$i])),
-						'qp_percenti' => $amountper[$i],
-						'qp_amnt' => $importo[$i],
-						'qp_entryby' => $request->user()->id,
-					]);
+					if(isset($amountper[$i]) && $amountper[$i] != "" && isset($datapay[$i]) && $datapay[$i] != ""){
+						DB::table('quote_paymento')->insert([
+							'qp_quote_id' => $nuovopreventivo,
+							'qp_data' => date('Y-m-d',strtotime(str_replace('/','-',$datapay[$i]))),
+							'qp_percenti' => $amountper[$i],
+							'qp_amnt' => isset($importo[$i]) ? $importo[$i]:0,
+							'qp_entryby' => $request->user()->id,
+						]);
+					}
 				}
 			}
 
+			
 			// Salvo i pacchetti e gli optional
 			if(isset($request->codici)) {
+				
 				$codice = $request->codici;
 				$oggetto = $request->oggetti;
 				$descrizione = $request->desc;
@@ -399,21 +486,23 @@ class QuoteController extends Controller
 				$cicli = $request->cicli;
 				
 				for($i = 0; $i < count($codice); $i++) {
-					if(!isset($asterisca[$i]) || $asterisca[$i] == 0)
-						$asterisca[$i] = 0;
-					else
+					
+					if(isset($asterisca[$i]) && $asterisca[$i] == 'on')
 						$asterisca[$i] = 1;
+					else
+						$asterisca[$i] = 0;
+					
 					// Salvo l'optional
 					DB::table('optional_preventivi')->insert([
 						'id_preventivo' => $nuovopreventivo,
-						'codice' => $codice[$i],
-						'oggetto' => $oggetto[$i],
+						'codice' => isset($codice[$i]) ? $codice[$i] : "",
+						'oggetto' => isset($oggetto[$i]) ? $oggetto[$i] : "",
 						'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : "",
-						'qta' => $qta[$i],
-						'prezzounitario' => $prezzounitario[$i],
-						'totale' => $totale[$i],
-						'asterisca' => $asterisca[$i],
-						'Ciclicita' => $cicli[$i]
+						'qta' => isset($qta[$i]) ? $qta[$i] : 0,
+						'prezzounitario' => isset($prezzounitario[$i]) ? $prezzounitario[$i] : 0,
+						'totale' => isset($totale[$i]) ? $totale[$i] : 0,
+						'asterisca' => isset($asterisca[$i]) ? $asterisca[$i] : 0,
+						'Ciclicita' => isset($cicli[$i]) ? $cicli[$i] : 0
 					]);
 					
 					$optional = DB::table('optional_preventivi')
@@ -442,7 +531,12 @@ class QuoteController extends Controller
 	// Mostro la pagina di modifica di un preventivo
 	public function modify(Request $request, Quote $quote)
 	{
-		$this->authorize('modify', $quote);
+		/*if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}*/
+
+		// $this->authorize('modify', $quote);
+
 		return view('estimates.modifica', [
 			'preventivo' => DB::table('quotes')
 								->select('*')
@@ -467,7 +561,7 @@ class QuoteController extends Controller
 								->get(),
 			'optional_preventivi' => DB::table('optional_preventivi')
 					->where('id_preventivo', $quote->id)
-					->get(),
+					->get(),					
 			'quote_paymento' => DB::table('quote_paymento')
 					->where('qp_quote_id', $quote->id)
 					->get(),
@@ -477,17 +571,23 @@ class QuoteController extends Controller
 				->where('id_preventivo', $quote->id)
 				->first()
 		]);
-	}
-	
+	}	
+
+
 	// Salvo le modifiche di un preventivo
 	public function update(Request $request, Quote $quote)
 	{
-		$this->authorize('modify', $quote);
+		if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
+		// $this->authorize('modify', $quote);	
+		
 		$validator = Validator::make($request->all(), [
 			'data' => 'required',
-			'oggetto' => 'required|max:150',
+			'oggetto' => 'required|max:150',	
 			'dipartimento' => 'required',
-			/*'metodo' => 'required|max:1000',*/
+			'idente'=>'required',
 			'considerazioni' => 'required|max:2000',
 			'valenza' => 'required',
 			'finelavori' => 'required'
@@ -599,16 +699,17 @@ class QuoteController extends Controller
 
 		if($request->statoemotivo!=null) {
 			// Aggiorno lo stato emotivo
-			$tipo = DB::table('statiemotivipreventivi')
+			/*$tipo = DB::table('statiemotivipreventivi')
 				->where('name', $request->statoemotivo)
-				->first();
+				->first();*/
 			DB::table('statipreventivi')
 				->where('id_preventivo', $quote->id)
 				->delete();
 			DB::table('statipreventivi')
 				->insert([
-					'id_tipo' => $tipo->id,
-					'id_preventivo' => $quote->id
+					'id_tipo' => $request->statoemotivo,
+					'id_preventivo' => $quote->id,
+					'created_at'=>date('Y-m-d H:i:s')
 				]);
 		}
 		
@@ -645,27 +746,34 @@ class QuoteController extends Controller
 				]);
 			}
 		}
+
+		DB::table('quote_paymento')->where('qp_quote_id', $quote->id)->delete();
 		if(isset($request->datapay)) {
-			DB::table('quote_paymento')
-				->where('qp_quote_id', $quote->id)
-				->delete();
+			
 			$datapay = $request->datapay;
 			$amountper = $request->amountper;
 			$importo = $request->importo;
-			for($i = 0; $i < count($datapay); $i++) {
-
-				DB::table('quote_paymento')->insert([
-					'qp_quote_id' => $quote->id,
-					'qp_data' => date('Y-m-d',strtotime($datapay[$i])),
-					'qp_percenti' => $amountper[$i],
-					'qp_amnt' => $importo[$i],
-					'qp_entryby' => $request->user()->id,
-				]);
+			var_dump($datapay);
+			for($i = 0; $i < count($datapay); $i++) {				
+				if(isset($amountper[$i]) && $amountper[$i] != "" && isset($datapay[$i]) && $datapay[$i] != ""){
+					$datapay[$i] = str_replace('/', '-', $datapay[$i]);				
+					DB::table('quote_paymento')->insert([
+						'qp_quote_id' => $quote->id,
+						'qp_data' => date('Y-m-d',strtotime($datapay[$i])),
+						'qp_percenti' => isset($amountper[$i]) ? $amountper[$i] : '',
+						'qp_amnt' => isset($importo[$i]) ? $importo[$i]:0,
+						'qp_entryby' => $request->user()->id,
+					]);
+				}
 			}
 		}
 		
 		// Salvo i pacchetti e gli optional
 		if(isset($request->codici)) {
+			DB::table('optional_preventivi')
+			->where('id_preventivo', $quote->id)
+			->delete();
+			
 			$codice = $request->codici;
 			$oggetto = $request->oggetti;
 			$descrizione = $request->desc;
@@ -677,28 +785,28 @@ class QuoteController extends Controller
 			$cicli = $request->cicli;
 			
 			for($i = 0; $i < count($codice); $i++) {
-				if(!isset($asterisca[$i]) || $asterisca[$i] == 0)
-					$asterisca[$i] = 0;
-				else
+				if(isset($asterisca[$i]) && $asterisca[$i] == 'on')
 					$asterisca[$i] = 1;
+				else
+					$asterisca[$i] = 0;
+
 				// Salvo l'optional
 				DB::table('optional_preventivi')->insert([
 					'id_preventivo' => $quote->id,
-					'codice' => $codice[$i],
-					'oggetto' => $oggetto[$i],
+					'codice' => isset($codice[$i]) ? $codice[$i] : "",
+					'oggetto' => isset($oggetto[$i]) ? $oggetto[$i] : "",
 					'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : "",
-					'qta' => $qta[$i],
-					'prezzounitario' => $prezzounitario[$i],
-					'totale' => $totale[$i],
-					/*'ordine' => $ordine[$i],*/
-					'asterisca' => $asterisca[$i],
-					'Ciclicita' => isset($cicli[$i]) ? $cicli[$i] : ""
+					'qta' => isset($qta[$i]) ? $qta[$i] : 0,
+					'prezzounitario' => isset($prezzounitario[$i]) ? $prezzounitario[$i] : 0,
+					'totale' => isset($totale[$i]) ? $totale[$i] : 0,
+					'asterisca' => isset($asterisca[$i]) ? $asterisca[$i] : 0,
+					'Ciclicita' => isset($cicli[$i]) ? $cicli[$i] : 0
 				]);
 				
 				$optional = DB::table('optional_preventivi')
-								->select('codice')
-								->where('codice', $codice[$i])
-								->first();
+					->select('codice')
+					->where('codice', $codice[$i])
+					->first();
 								
 				// Collego l'optional al preventivo
 				DB::table('tabellaoptionalpreventivi')->insert([
@@ -715,11 +823,14 @@ class QuoteController extends Controller
 		return Redirect::back()
 				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_estimated_edited_correctly').'</div>');
 	}
-	
 	// Elimina un preventivo
 	public function deleteEstimates(Request $request, Quote $quote)
 	{
-		$this->authorize('destroy', $quote);
+		if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
+		// $this->authorize('destroy', $quote);
 
 		DB::table('quotes')
 			->where('id', $quote->id)
@@ -743,54 +854,65 @@ class QuoteController extends Controller
 				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_optional_deleted_correctly').'</div>');
 	}
 	
-	public function eliminaoptional(Request $request, Quote $quote)
+public function eliminaoptional(Request $request, Quote $quote)
 	{
 		return view('estimates.optional', [
 			'preventivo' => $quote,
+			'frequency'=>DB::table('frequenze')->get(),
 			'optional' => DB::table('optional_preventivi')
-							->where('id_preventivo', $quote->id)
-							->get(),
+				->where('id_preventivo', $quote->id)
+				->get(),
 		]);
 	}
 	
 	public function aggiornaoptional(Request $request)
-	{
+	{ 
+	
 		DB::table('optional_preventivi')
 			->where('id_preventivo', $request->id)
 			->delete();
-
+		
 		  $ordine = $request->ord;
-		  $oggetto = $request->oggetti;
+		  $oggetto = $request->oggetti;		  
 		  $descrizione = $request->desc;
 		  $qta = $request->qt;
 		  $prezzounitario = $request->pru;
 		  $totale = $request->tot;
 		  $asterisca = $request->ast;
-		  $Ciclicita = array_reverse($request->cicli);
+		  $Ciclicita = $request->cicli;
+	  
 		  for($i = 0; $i < count($ordine); $i++) {
-			if(!isset($asterisca[$i]) || $asterisca[$i] == 0)
-				$asterisca[$i] = 0;
-			else
+		  	
+			if(isset($asterisca[$i]))
 				$asterisca[$i] = 1;
+			else
+				$asterisca[$i] = 0;
+		  
 			// Salvo l'optional
 			DB::table('optional_preventivi')->insert([
+
 			  'id_preventivo' => $request->id,
 			  'ordine' => $ordine[$i],
-			  'oggetto' => $oggetto[$i],
-			  'descrizione' => $descrizione[$i],
-			  'qta' => $qta[$i],
-			  'prezzounitario' => $prezzounitario[$i],
-			  'totale' => $totale[$i],
-			  'asterisca' => $asterisca[$i],
+			  'oggetto' => isset($oggetto[$i]) ? $oggetto[$i] : '',
+			  'descrizione' => isset( $descrizione[$i]) ? $descrizione[$i] : '',
+			  'qta' => isset($qta[$i]) ? $qta[$i] : 0,
+			  'prezzounitario' => isset($prezzounitario[$i]) ? $prezzounitario[$i] : 0,
+			  'totale' => isset($totale[$i]) ? $totale[$i] : 0,
+			  'asterisca' => isset($asterisca[$i]) ? $asterisca[$i] : 0,
 			  'Ciclicita' => isset($Ciclicita[$i]) ? $Ciclicita[$i] : ""
 			]);
 		  }		
+		  
 		return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.	keyword_optional_modified_correctly').'</div>');
 	}
 	
 	public function duplicatEstimates(Request $request, Quote $quote)
 	{
-		$this->authorize('duplicate', $quote);
+		if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
+		// $this->authorize('duplicate', $quote);
 
 		// $id = $request->user()->quotes()->create([
 		$id = DB::table('quotes')->insertGetId([
@@ -836,6 +958,16 @@ class QuoteController extends Controller
 				]);
 		}
 
+		$tipo = DB::table('statiemotivipreventivi')
+					->where('id', '8')
+					->first();
+
+		DB::table('statipreventivi')->insert([
+			'id_preventivo' => $id,
+			'id_tipo' => $tipo->id,
+			'created_at'=>date('Y-m-d H:i:s')
+		]);
+
 		return Redirect::back()
 				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_duplicate_quote_correctly').'</div>');
 	}
@@ -865,6 +997,10 @@ class QuoteController extends Controller
 	
 	public function pdf(Request $request, Quote $quote)
 	{		
+		if(!checkpermission($this->module, $this->sub_id, 'lettura')){
+    		return redirect('/unauthorized');
+    	}
+    	
 		$preventivo = DB::table('quotes')->where('id', $quote->id)->first();		
 		$ente = DB::table('corporations')->where('id', $preventivo->idente)->first();
 		$utente = DB::table('users')->where('id', $preventivo->user_id)->first();
@@ -875,6 +1011,8 @@ class QuoteController extends Controller
 		}
 		$ownerDepartments = DB::table('departments')->where('id', $preventivo->dipartimento)->first();
 		$optional_preventivi = DB::table('optional_preventivi')->where('id_preventivo', $preventivo->id)->get();
+		$taxation = DB::table('tassazione')->where('is_active',0)->get();
+
 			
 		$pdf = new PDF('utf-8');
 		$pdf->mirrorMargins(1);
@@ -900,6 +1038,7 @@ class QuoteController extends Controller
 			'optional_preventivi'=>$optional_preventivi]);
 		echo $footer;
 		exit;*/
+
 		$pdf->loadView('pdf.quotation', [
 			'preventivo' =>$preventivo,										
 			'ente' => $ente,
@@ -907,7 +1046,8 @@ class QuoteController extends Controller
 			'ente_DA' => $ente_DA,
 			'owner'=>$ownerDepartments,
 			'responsabile'=>$responsabile,
-			'optional_preventivi'=>$optional_preventivi]);
+			'optional_preventivi'=>$optional_preventivi,
+			'taxation'=>$taxation]);
 		
 		$logs = $this->logmainsection.' -> Generate pdf for Quote -> (ID: '. $quote->id .')';
 		storelogs($request->user()->id, $logs);
@@ -915,5 +1055,36 @@ class QuoteController extends Controller
 		/*$pdf->download('test.pdf');*/
 		$pdf->stream('quote.pdf');				
 	
+	}
+	
+	public function getJsonMyconfirmedestimates(Request $request)
+	{
+		if(($request->user()->id == 0) || ($request->user()->dipartimento == 0)){
+			$quotes = DB::table('quotes')->where('is_deleted', 0)
+            ->where('user_id', $request->user()->id)->get();
+		} else {
+			$quotes = DB::table('quotes')->where('is_deleted', 0)
+            ->where('user_id', $request->user()->id)->get();
+		}
+
+		$jsonQuotes[] = '';
+		foreach($quotes as $quote) {
+
+			$check = DB::table('statipreventivi')
+            ->join('statiemotivipreventivi', 'statipreventivi.id_tipo', '=', 'statiemotivipreventivi.id')
+            ->select('statipreventivi.*', 'statiemotivipreventivi.*')
+            ->where('statipreventivi.id_preventivo', $quote->id)
+            ->where('statiemotivipreventivi.id', '6')->first();
+
+            if($check){
+            	$quote->ente = DB::table('corporations')
+					->where('id', $quote->idente)
+					->first()->nomeazienda;
+            	$jsonQuotes[] = $quote;
+            }
+			
+		}
+
+		return json_encode($jsonQuotes);
 	}
 }

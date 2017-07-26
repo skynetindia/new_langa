@@ -1,32 +1,19 @@
 @extends('layouts.app')
 @section('content')
 
-<style>
-tr:hover {
-	background: #f39538;
-}
-.selected {
-	font-weight: bold;
-	font-size: 16px;
-}
-th {
-	cursor: pointer;
-}
-</style>
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 
 <script type="text/javascript" src="{{ asset('public/scripts/moment.js') }}"></script>
-
 <script type="text/javascript" src="{{ asset('public/scripts/daterangepicker.js') }}"></script>
-
 <script src="{{ asset('public/js/chart/chart-bundle.js') }}"></script>
-
 <script src="{{ asset('public/js/chart/chart.js') }}"></script>
 
-<link rel="stylesheet" href="{{ asset('public/js/bootstrap-table/table.css') }}">
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 
-<script src="{{ asset('public/js/bootstrap-table/table.js') }}"></script>
+<!--<link rel="stylesheet" href="{{ asset('public/js/bootstrap-table/table.css') }}">
+<script src="{{ asset('public/js/bootstrap-table/table.js') }}"></script>-->
 
 <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
 
@@ -34,15 +21,16 @@ th {
 
 <link rel="stylesheet" type="text/css" href="{{ asset('public/js/daterangepicker/daterangepicker.css') }}" />
 
-<div class="col-md-12">
-	<div class="col-md-8">
+<div class="height20"></div>
+<div class="row">
+	<div class="col-md-8 col-sm-12 col-xs-12">
         <div class="btn-group">
-            <h3 style="display:inline"><a href='{{url("/statistiche/economiche") . '/' . ($year - 1)}}'><i class="fa fa-arrow-left"></i>{{$year - 1}}</a></h3>
-            <h3 style="display:inline;color:#f37f0d"> {{$year}} </h3><h3 style="display:inline"><a href='{{url("/statistiche/economiche") . '/' . ($year + 1)}}'>{{$year + 1}}<i class="fa fa-arrow-right"></i></a></h3>
+            <h3 class="inline"><a href='{{url("/statistiche/economiche") . '/' . ($year - 1)}}'><i class="fa fa-arrow-left"></i>{{$year - 1}}</a></h3>
+            <h3 class="inline orange"> {{$year}} </h3><h3 class="inline"><a href='{{url("/statistiche/economiche") . '/' . ($year + 1)}}'>{{$year + 1}}<i class="fa fa-arrow-right"></i></a></h3>
         </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-4 col-sm-12 col-xs-12">
 
      <!--    <span class="datapicker-icon">
             <i class="fa fa-calendar" aria-hidden="true"></i>
@@ -51,7 +39,7 @@ th {
             <input type="text" id="datepicker_to" name="datepicker_to[]" class="form-control" value="">
         </span> -->
 
-        <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc;">
+        <div id="reportrange" class="pull-right reportrange pull-left-mobile" >
             <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
             <span id="daterange"></span> <b class="caret"></b>
         </div>
@@ -61,9 +49,41 @@ th {
 
 </div>
 
-<div class="canvas-holder" id="stat">
+
+<div class="stat-graph row">
+<div class="canvas-holder stat" id="stat">
+	<div class="col-md-10 col-sm-12 col-xs-12">
 	<canvas id="myChart" width="1080" height="540" style="display: block; width: 1080px; height: 540px;"></canvas>
+    </div>
 </div>
+<div class="right-side-info">
+        <div class="col-md-2 col-sm-12 col-xs-12">
+        <hr>
+
+        <div class="info-1">
+            <h5> costo </h5> 
+            <h1> <?php  echo array_sum($statistics['expense']); ?> <b> € </b> </h1> 
+            <span><?php echo getLastCostPercentage($year,'1');?>% </span>  From last month 
+        </div> 
+        
+        <div class="info-2"> 
+            <h5> ricavo </h5> 
+            <h1> <?php echo array_sum($statistics['revenue']); ?> <b> € </b> </h1>
+            <span> <?php echo getLastRevenuePercentage($year,'1');?>% </span>  From last month 
+        </div> 
+        
+        <div class="info-3"> 
+            <h5> guadagno </h5>
+            <h1> <?php echo array_sum($statistics['earn']); ?> <b> € </b> </h1>
+            <span> <?php echo getLastProfitPercentage($year,'1');?>% </span>  From last month
+        </div> 
+		</div>
+
+    </div>
+
+
+</div>
+
 
 <script>
 var ctx = $("#myChart");
@@ -151,31 +171,45 @@ var myLineChart = new Chart(ctx, {
 });
 </script>
 
-<div class="col-md-12">
-	<div class="col-md-5">
-    	<h4> {{ trans('messages.keyword_costs') }} </h4><hr>
+
+<div class="clearfix"></div>
+<div class="height50"></div>
+
+<div class="statis-economic row">
+
+	<div class="col-md-6 col-sm-12 col-xs-12">
+    	<h4> {{ ucwords(trans('messages.keyword_costs')) }} </h4><hr>
+        @if(checkpermission('5', '20', 'scrittura','true'))
         <div class="btn-group">
-        	<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
-            	<button class="btn btn-primary" type="button" name="update" title="{{ trans('messages.keyword_edit_last_selected_format') }}"><i class="fa fa-pencil"></i></button>
+        	<a onclick="multipleAction('modify');" id="modifica" name="update" title="{{ trans('messages.keyword_edit_last_selected_format') }}" class="btn btn-primary">
+	            <i class="fa fa-pencil"></i>
             </a>
-            <a id="delete" onclick="multipleAction('delete');" style="display:inline;">
-            	<button class="btn btn-danger" type="button" name="remove" title="{{ trans('messages.keyword_delete_last_selected_lauout') }}"><i class="fa fa-eraser"></i></button>
+            <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title="{{ trans('messages.keyword_delete_last_selected_lauout') }}">
+				<i class="fa fa-trash"></i>
             </a>
         </div>
+        @endif
+      
+      <div class="space30"></div>
+        
+        <div class="panel panel-default">
+        <div class="panel-body mb16">
     	<table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('costi/json');?>" data-classes="table table-bordered" id="table">
             <thead>
                 <th data-field="id" data-sortable="true">
-                {{ trans('messages.keyword_code') }} 
+                {{ ucwords(trans('messages.keyword_code')) }} </th>
                 <th data-field="ente" data-sortable="true">
-                {{ trans('messages.keyword_entity') }} 
+                {{ ucwords(trans('messages.keyword_entity')) }} </th>
                 <th data-field="oggetto" data-sortable="true">
-                {{ trans('messages.keyword_object') }} 
+                {{ ucwords(trans('messages.keyword_object')) }} </th>
                 <th data-field="costo" data-sortable="true"> 
-                {{ trans('messages.keyword_cost') }} 
+                {{ ucwords(trans('messages.keyword_cost')) }} </th>
                 <th data-field="datainserimento" data-sortable="true">
-                {{ trans('messages.keyword_insertion_date') }} 
+                {{ ucwords(trans('messages.keyword_insertion_date')) }} </th>
             </thead>
         </table>
+     
+        
         <!-- COSTI -->
 
 <!-- change variable name for case 'delete' like n to n2 And indici to indici2-->
@@ -186,27 +220,32 @@ var myLineChart = new Chart(ctx, {
 			var n2 = 0;
 			
 			$('#table').on('click-row.bs.table', function (row, tr, el) {
-				var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
-				if (!selezione2[cod]) {
-					$(el[0]).addClass("selected");
-					selezione2[cod] = cod;
-					indici2[n2] = cod;
-					n2++;
-
-				} else {
-					$(el[0]).removeClass("selected");
-					selezione2[cod] = undefined;
-					for(var i = 0; i < n; i++) {
-						if(indici2[i] == cod) {
-							for(var x = i; x < indici2.length - 1; x++)
-								indici2[x] = indici2[x + 1];
-							break;	
-						}
-					}
-					n--;
-				}
-			});
-			function check() { return confirm(" {{ trans('messages.keyword_sure') }}: " + n2  + " {{ trans('messages.keyword_costs') }} ?"); }
+                var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
+                if (!selezione2[cod]) {
+                    $('#table tr.selected').removeClass("selected");       
+                    $(el[0]).addClass("selected");
+                    selezione2[cod] = cod;
+                    indici2[n] = cod;
+                    n2++;
+                } else {
+                    $(el[0]).removeClass("selected");
+                    selezione2[cod] = undefined;
+                    for(var i = 0; i < n2; i++) {
+                        if(indici2[i] == cod) {
+                            for(var x = i; x < indici2.length - 1; x++)
+                                indici2[x] = indici2[x + 1];
+                            break;  
+                        }
+                    }
+                    n2--;
+                    $('#table tr.selected').removeClass("selected");       
+                    $(el[0]).addClass("selected");
+                    selezione2[cod] = cod;
+                    indici2[n] = cod;
+                    n2++;
+                }
+            })
+			function check() { return confirm(" {{ trans('messages.keyword_sure') }} {{ trans('messages.keyword_costs') }} ?"); }
 			function multipleAction(act) {
 				var link = document.createElement("a");
 				var clickEvent = new MouseEvent("click", {
@@ -217,91 +256,87 @@ var myLineChart = new Chart(ctx, {
 				var error = false;
 
 					switch(act) {
-						case 'delete':
-							link.href = "{{ url('/costo/delete/') }}" + '/';
-							if(check() && n2!=0) {
+	case 'delete':
+		link.href = "{{ url('/costo/delete/') }}" + '/';
+		if(check() && n2!=0) {
+            n2--;
+			link.href = "{{ url('/costo/delete') }}" + '/' + indici2[n];
+			link.dispatchEvent(clickEvent);
+			n2 = 0;
+            selezione2 = undefined;
+            link.dispatchEvent(clickEvent);
 
-								for(var i = 0; i < n2; i++) {
-                                
-									$.ajax({
-
-										type: "GET",
-										url : link.href + indici2[i],
-
-										error: function(url) {
-
-											if(url.status==403) {
-												link.href = "{{ url('/costo/delete') }}" + '/' + indici2[n];
-												link.dispatchEvent(clickEvent);
-											} 
-
-										}
-
-									});
-								}
-                                
-								selezione2 = undefined;
-								setTimeout(function(){location.reload();},100*n);
-								n = 0;
-							}
-						break;
-						case 'modify':
-							if(n2 != 0) {
-								n2--;
-								link.target = "new";
-								link.href = "{{ url('/costi/modify') }}" + '/' + indici2[n];
-								n2 = 0;
-								selezione2 = undefined;
-								link.dispatchEvent(clickEvent);
-							}
-						break;
+		}
+    	break;
+    	case 'modify':
+    		if(n2 != 0) {
+    			n2--;
+    			link.target = "new";
+    			link.href = "{{ url('/costi/modify') }}" + '/' + indici2[n];
+    			n2 = 0;
+    			selezione2 = undefined;
+    			link.dispatchEvent(clickEvent);
+    		}
+    	break;
 					}
 			}
 		</script>
         <!-- FINE COSTI -->
+        
+           </div>
+        </div>
     </div>
-    <div class="col-md-5">
-    	<h4> {{ trans('messages.keyword_revenues') }} </h4><hr>
+    <div class="col-md-6 col-sm-12 col-xs-12">
+    	<h4> {{ ucwords(trans('messages.keyword_revenues')) }} </h4><hr>
+        @if(checkpermission('5', '20', 'scrittura','true'))
         <div class="btn-group">
-<a onclick="mAction('modify');" id="modifica" style="display:inline;">
-<button class="btn btn-primary" type="button" name="update" title=" {{ trans('messages.keyword_edit_last_selected_format') }}"><i class="fa fa-pencil"></i></button>
+<a onclick="mAction('modify');" id="modifica" class="btn btn-primary" name="update" title=" {{ trans('messages.keyword_edit_last_selected_format') }}">
+	<i class="fa fa-pencil"></i>
 </a>
-<a id="duplicate" onclick="mAction('duplicate');" style="display:inline;">
-<button class="btn btn-info" type="button" name="duplicate" title=" {{ trans('messages.keyword_duplicates_selected_layouts') }} "><i class="fa fa-files-o"></i></button>
+<a id="duplicate" onclick="mAction('duplicate');" class="btn btn-info" name="duplicate" title=" {{ trans('messages.keyword_duplicates_selected_layouts') }} ">
+	<i class="fa fa-files-o"></i>
 </a>    
-<a id="delete" onclick="mAction('delete');" style="display:inline;">
-<button class="btn btn-danger" type="button" name="remove" title=" {{ trans('messages.keyword_delete_last_selected_lauout') }} "><i class="fa fa-eraser"></i></button>
+<a id="delete" onclick="mAction('delete');" class="btn btn-danger" name="remove" title=" {{ trans('messages.keyword_delete_last_selected_lauout') }} ">
+	<i class="fa fa-trash"></i>
 </a>
-<a id="pdf" onclick="mAction('pdf');" style="display:inline;">
-<button class="btn" type="button" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} "><i class="fa fa-file-pdf-o"></i></button>
+<a id="pdf" onclick="mAction('pdf');" class="btn" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} ">
+	<i class="fa fa-file-pdf-o"></i>
 </a>
 </div>
+@endif
+
+
+  <div class="space30"></div>
+        
+        <div class="panel panel-default">
+        <div class="panel-body one-line-table mb16">
+
         <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/tranche/json');?>" data-classes="table table-bordered" id="tabella">
         <thead>
         	<th data-field="idfattura" data-sortable="true"> 
-            {{ trans('messages.keyword_invoicenumber') }}  
+            {{ ucwords(trans('messages.keyword_invoicenumber')) }}  </th>
             <th data-field="id" data-sortable="true"> 
-            {{ trans('messages.keyword_no_disposition') }} 
+            {{ ucwords(trans('messages.keyword_no_disposition')) }} </th>
             <th data-field="nomequadro" data-sortable="true">
-            {{ trans('messages.keyword_picturename') }} 
+            {{ ucwords(trans('messages.keyword_picturename')) }} </th>
             <th data-field="tipo" data-sortable="true">
-            {{ trans('messages.keyword_type') }} 
+            {{ ucwords(trans('messages.keyword_type')) }} </th>
             <th data-field="datascadenza" data-sortable="true">
-            {{ trans('messages.keyword_deadline') }} 
+            {{ ucwords(trans('messages.keyword_deadline')) }} </th>
             <th data-field="percentuale" data-sortable="true">
-            % 
+            % </th>
             <th data-field="netto" data-sortable="true">
-            {{ trans('messages.keyword_net') }} 
+            {{ ucwords(trans('messages.keyword_net')) }} </th>
             <th data-field="scontoaggiuntivo" data-sortable="true">
-            {{ trans('messages.keyword_additional_discount') }} 
+            {{ ucwords(trans('messages.keyword_additional_discount')) }} </th>
             <th data-field="imponibile" data-sortable="true"> 
-            {{ trans('messages.keyword_taxable') }} 
+            {{ ucwords(trans('messages.keyword_taxable')) }} </th>
             <th data-field="prezzoiva" data-sortable="true"> 
-            {{ trans('messages.keyword_vat_price') }} 
+            {{ ucwords(trans('messages.keyword_vat_price')) }} </th>
             <th data-field="dapagare" data-sortable="true">
-            {{ trans('messages.keyword_topay') }} 
+            {{ ucwords(trans('messages.keyword_topay')) }} </th>
             <th data-field="statoemotivo" data-sortable="true">
-            {{ trans('messages.keyword_emotional_state') }} 
+            {{ ucwords(trans('messages.keyword_emotional_state')) }} </th>
         </thead>
     </table>
     <script>
@@ -312,10 +347,11 @@ var n = 0;
 $('#tabella').on('click-row.bs.table', function (row, tr, el) {
 	var cod = /\d+/.exec($(el[0]).children()[1].innerHTML);
 	if (!selezione[cod]) {
+            $('#tabella tr.selected').removeClass("selected");  
 		$(el[0]).addClass("selected");
 		selezione[cod] = cod;
 		indici[n] = cod;
-		n++;
+		n++;  
 	} else {
 		$(el[0]).removeClass("selected");
 		selezione[cod] = undefined;
@@ -327,12 +363,22 @@ $('#tabella').on('click-row.bs.table', function (row, tr, el) {
 			}
 		}
 		n--;
-	}
+
+        $('#tabella tr.selected').removeClass("selected");       
+    $(el[0]).addClass("selected");
+    selezione[cod] = cod;
+    indici[n] = cod;
+    n++;
+	}    
 });
 
 
 
-function check2() { return confirm("{{ trans('messages.keyword_sure') }}: " + n + " {{ trans('messages.keyword_revenues') }} / {{ trans('messages.keyword_provisions') }} ?"); }
+
+
+
+
+function check2() { return confirm("{{ trans('messages.keyword_sure') }} {{ trans('messages.keyword_revenues') }} / {{ trans('messages.keyword_provisions') }} ?"); }
 function mAction(act) {
 	var link = document.createElement("a");
 	var clickEvent = new MouseEvent("click", {
@@ -342,25 +388,20 @@ function mAction(act) {
 	});
 	var error = false;
 		switch(act) {
-			case 'delete':
-				link.href = "{{ url('/pagamenti/tranche/delete/') }}" + '/';
-				if(check2() && n!=0) {
-                                    for(var i = 0; i < n; i++) {
-                                        $.ajax({
-                                            type: "GET",
-                                            url : link.href + indici[i],
-                                            error: function(url) {
-                                                if(url.status==403) {
-                                                    link.href = "{{ url('/pagamenti/tranche/delete/') }}" + '/' + indici[n];
-                                                    link.dispatchEvent(clickEvent);
-                                                } 
-                                            }
-                                        });
-                                    }
-                                    selezione = undefined;
-                                    setTimeout(function(){location.reload();},100*n);
-                                    n = 0;
-                                }
+
+        case 'delete':
+        link.href = "{{ url('/pagamenti/tranche/delete/') }}" + '/';
+        if(check2() && n!=0) {
+            n--;
+            link.href = "{{ url('/pagamenti/tranche/delete') }}" + '/' + indici[n];
+            link.dispatchEvent(clickEvent);
+            n = 0;
+            selezione = undefined;
+            link.dispatchEvent(clickEvent);
+
+        }
+
+			
 			break;
 			case 'modify':
                 if(n != 0) {
@@ -409,31 +450,10 @@ function mAction(act) {
     <!-- fine RICAVI -->
     </div>
     
-    <div class="col-md-2">
-        <h4> </h4><hr>
+    </div></div>
 
-        <div>
-            <h5 style="color: red"> costo </h5> 
-            <h1 style="color: red"> <?php // echo $spese_total; ?> <b> € </b> </h1> 
-            <span style="color: red"> +3% </span>  From last week 
-        </div> 
-        <br>
-        <div> 
-            <h5 style="color: DARKGREEN"> ricavo </h5> 
-            <h1 style="color: DARKGREEN"> <?php //echo $ricavi_total; ?> <b> € </b> </h1>
-            <span style="color: DARKGREEN"> +3% </span>  From last week 
-        </div> 
-        <br>       
-        <div> 
-            <h5 style="color: DARKORANGE"> guadagno </h5>
-            <h1 style="color: DARKORANGE"> <?php //echo $guadagno_total; ?> <b> € </b> </h1>
-            <span style="color: DARKORANGE"> +3% </span>  From last week 
-        </div> 
-
-    </div>
 
 </div>
-
 
 
  <script type="text/javascript">

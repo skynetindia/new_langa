@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><?php 
+$arrSettings = adminSettings();
+?>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <!-- Meta, title, CSS, favicons, etc. -->
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="shortcut icon" href="{{asset('favicon.png')}}">
+
+<link rel="shortcut icon" href="{{ (isset($arrSettings->frontfavicon) && !empty($arrSettings->frontfavicon)) ? asset('storage/app/images/logo/'.$arrSettings->frontfavicon) :  url('favicon.png')}} ">
 <title>Easy LANGA</title>
 
 <!-- Bootstrap -->
@@ -15,14 +18,15 @@
 <link href="{{asset('/vendors/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet">
 <!-- Custom Theme Style -->
 <link href="{{asset('/build/css/custom.min.css')}}" rel="stylesheet">
-
 <!-- Font -->
 <link rel="stylesheet" href="{{asset('public/css/stylesheet.css')}}">
 <!-- Select2 Css -->
 <link rel="stylesheet" href="{{asset('public/css/select2.min.css')}}">
+<link rel="stylesheet" href="{{asset('public/js/datepicker/css/datepicker.css')}}">
+
 </head>
 <body class="<?php if(!Auth::guest()){ echo "nav-md";}?>">
-<div class="container <?php if(!Auth::guest()){ echo "body";}?>">
+<div class="container <?php if(!Auth::guest()){ echo "body";} else{echo 'register-wrap';}?>">
 <?php $logged = false; ?>
 @if (!Auth::guest())
 <?php $logged = true; ?>
@@ -33,7 +37,7 @@
   <div class="main_container">
   <div class="col-md-3 left_col">
     <div class="left_col scroll-view">
-      <div class="navbar nav_title"> <a href="{{url('/')}}" class="site_title md"><img src="{{asset('images/LOGO_Easy_LANGA_without_contour.svg')}}" class="easy_fron_logo" alt="Easy Langa" class="img" > </a>
+      <div class="navbar nav_title"> <a href="{{url('/')}}" class="site_title md"><img src="<?php echo (isset($arrSettings->frontlogo) && !empty($arrSettings->frontlogo)) ? asset('storage/app/images/logo/'.$arrSettings->frontlogo) :  asset('images/LOGO_Easy_LANGA_without_contour.svg');?>" class="easy_fron_logo" alt="Easy Langa" class="img" > </a>
       	<a href="{{url('/')}}" class="site_title sm"><img src="{{asset('images/easy-logo.svg')}}" alt="Easy Langa" class="img" > </a>
        </div>       
       <br>      
@@ -44,119 +48,177 @@
       <ul class="nav side-menu">
       <li><a href="{{url('/')}}"><img src="{{url('images/BACHECA.svg')}}" alt="Bacheca" class="menu-icon"> {{trans('messages.keyword_dashboard')}}</a>
       </li><?php
-        $module = DB::table('modulo')
-          ->where('modulo_sub', null)
-          ->where('type', 1)
-          ->orderBy('frontpriority')
-          ->orderBy('id')
-          ->get();
-
+        $module = DB::table('modulo')->where('modulo_sub', null)->where('type', 1)->orderBy('frontpriority')->orderBy('id')->get();
         foreach ($module as $module) {
           $modulo = ucfirst(strtolower($module->modulo));
-          $submodule = DB::table('modulo')
-            ->where('modulo_sub', $module->id)
+          $submodule = DB::table('modulo')->where('modulo_sub', $module->id)->get();          
+          if($submodule->isEmpty() && !checkpermission($module->id, 0, 'lettura')){
+            continue;
+          }
+          if( $module->modulo == "STATISTICHE"){ 
+            ?><br><h3>{{trans('messages.keyword_secondary')}}</h3><br><?php 
+          }
+        if($submodule->isEmpty()){           
+          if ( $module->modulo == "MAPPE" ) {
+            $whereid = explode(',',Auth::user()->id_ente);
+		        $enti_partecipanti = DB::table('enti_partecipanti')->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
+                ->where('enti_partecipanti.id_user', Auth::user()->id)                
+                ->groupBy('id_user')->get()->toArray();
+            if(isset($enti_partecipanti[0]) && ($enti_partecipanti[0] != '' || $enti_partecipanti != '')){
+              $entiids = [];
+              foreach ($enti_partecipanti as $value) {
+                  $entiids[] = $value->id_ente;
+              }
+              //$entiids = implode(',', $entiids);
+              $whereid = array_merge($entiids,$whereid);
+            }
+          DB::enableQueryLog();
+           $arrEntiwhere = array('is_deleted'=>'0','users.is_delete'=>'0','corporations.is_approvato'=>1);   
+           $enti = DB::table('corporations')
+            ->join('users', 'corporations.user_id', '=', 'users.id')            
+            ->select('corporations.*')
+            ->where($arrEntiwhere)
+            ->where(function ($query) use ($whereid)  {                
+                $query->whereIn('corporations.id', $whereid)
+                      ->orWhere('corporations.user_id', Auth::user()->id);
+            })            
+            ->orderBy('corporations.id', 'desc')
             ->get();
-        
-          if( $module->modulo == "STATISTICHE"){ ?>
-            <br>
-            <h3>{{trans('messages.keyword_secondary')}}</h3>
-            <br>
-
-          <?php }
-
-      if($submodule->isEmpty()){  ?>
-         <?php if ( $module->modulo == "MAPPE" ) { ?>
+            $queries = DB::getQueryLog();
+            $last_query = end($queries);
+            //print_r($last_query);
+            $arrCurrentLocations = getLocationInfoByIp();
+            $currentlocation = isset($arrCurrentLocations['city']) ? $arrCurrentLocations['city'] : "";
+            $currentlocation .= isset($arrCurrentLocations['country']) ? ", ".$arrCurrentLocations['country'] : "";
+          ?>
          <li>
          <a><img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" >{{ trans('messages.'.$module->phase_key) }}
             <span class="fa fa-chevron-down"></span>
           </a> 
-            <ul class="nav child_menu">
+            <ul class="nav child_menu mapmenu">
                 <div class="container-fluid col-md-12" style="background:#2A3F54;color:#ffffff">
                       <form action="http://maps.google.com/maps" onsubmit="punto()" method="get" target="new">
                           <div>
-                            <div class="col-md-12">
-                              <div class="col-md-6">
-                                  <br><br><input style="display:inline" class="form-control" style="color:#000000;max-width:250px;" type="text" name="saddr" placeholder="Da">
+                            <div class="menu_map">
+                              <div class="col-md-12">
+                                  <br><br><input style="display:inline" class="form-control" onkeyup="changetextlocationval()" style="color:#000000;max-width:250px;" type="text" name="saddrhd" id="saddrhd" placeholder="{{ trans('messages.keyword_from') }}">
+                                  <input type="hidden" name="saddr" id="saddr" value="{{$currentlocation}}">
                               </div>
                               <br>
-                              <div class="col-md-6">
-                                  <br><input style="display:inline" class="form-control" style="color:#000000;max-width:250px;" type="text" name="daddr" placeholder="A">
-                              </div>
+                                <div class="col-md-12">
+                                  <br>
+                                  <select name="daddr" id="mapfromaddress" class="form-control">                        
+                                    @foreach($enti as $ente)
+                                      @if($ente->indirizzo != "")
+                                       <option value="{{$ente->indirizzo}}">{{$ente->id.' | '.$ente->nomeazienda}}</option>
+                                      @endif
+                                    @endforeach
+                                  </select>
+                                </div>
                               <div class="col-md-12">
-                                  <input style="display:inline" type="hidden" id="prova" name="daddr">
-                                  <br><input style="display:inline;background:#f37f0d; color:#ffffff;" class="form-control" type="submit" value="Go"><br><br><br>
+                                  <input style="display:inline" type="hidden" id="prova" name="daddr1">
+                                  <br><input style="display:inline;background:#f37f0d; color:#ffffff;" class="form-control" type="submit" value="{{ trans('messages.keyword_go') }}"><br><br><br>
                               </div>
                           </div>
                       </div>
                   </form>     
               </div>
               </ul>
-            </li>
-
-          <?php } else {  ?>
-             <li><a href="<?php if(isset($module->modulo_link)) { echo url("$module->modulo_link"); } ?>"> <img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" > 
-            {{ trans('messages.'.$module->phase_key) }} <?php } ?>
-          </a> </li>       
-
-        <?php  } else {  ?>  
-
-        <li>
-          <a ><img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" > {{ trans('messages.'.$module->phase_key) }} 
-            <span class="fa fa-chevron-down"></span>
-          </a>                                  
-          
-          <ul class="nav child_menu">
-    <?php
-          if ($submodule) {
-            foreach ($submodule as $submodule) {
-
-              $subsubmodule = DB::table('modulo')
-                ->where('modulo_sub', $submodule->id)
-                ->get();
-              
-          if ($subsubmodule->isEmpty()) { 
-    ?>    
-          <li><a href="{{url("$submodule->modulo_link")}}">{{ trans('messages.'.$submodule->phase_key) }}</a></li>
-    <?php
-          }
-
-          else {
-    ?>
-            <li><a <?php if(!empty($submodule->modulo_link)) { ?> href="<?php echo url("$submodule->modulo_link"); ?>" <?php } ?> >{{ trans('messages.'.$submodule->phase_key) }} <span class="fa fa-chevron-down"> </span> </a>
-              <ul class="nav child_menu">
-    <?php
-            foreach ($subsubmodule as $subsubmodule1) {
-    ?>
-            <li>
-            <a href="{{url("$subsubmodule1->modulo_link")}}">{{ trans('messages.'.$subsubmodule1->phase_key) }} </a>
-            </li>
-
-    <?php
-           }
-    ?>
-              </ul>    
-            </li>
-    <?php
+            </li><?php 
+            } 
+            else { 
+              ?><li><a href="<?php if(isset($module->modulo_link)) { echo url("$module->modulo_link"); } ?>"> <img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon" > {{ trans('messages.'.$module->phase_key) }}</a></li><?php 
+              } 
+            } 
+            else {  
+              ?><li><a><img src="{{asset('storage/app/images/'.$module->image)}}" class="menu-icon">{{trans('messages.'.$module->phase_key)}}<span class="fa fa-chevron-down"></span></a>                                            
+              <ul class="nav child_menu"><?php
+              if ($submodule) {
+                foreach ($submodule as $submodule) {
+                  if(!checkpermission($module->id, $submodule->id, 'lettura')) {
+                    continue;
+                  }              
+                  $subsubmodule = DB::table('modulo')->where('modulo_sub', $submodule->id)->get();              
+                  if ($subsubmodule->isEmpty()) { 
+                    ?><li><a href="{{url("$submodule->modulo_link")}}">{{ trans('messages.'.$submodule->phase_key) }}</a></li><?php
+                  }
+                  else {
+                    ?><li><a <?php if(!empty($submodule->modulo_link)) { ?> href="<?php echo url("$submodule->modulo_link"); ?>" <?php } ?> >{{ trans('messages.'.$submodule->phase_key) }} <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu"><?php
+                      foreach ($subsubmodule as $subsubmodule1) {
+                         ?><li><a href="{{url("$subsubmodule1->modulo_link")}}">{{trans('messages.'.$subsubmodule1->phase_key)}}</a></li><?php
+                      }
+                    ?></ul></li><?php
+                  }
+              }
+               ?></ul>
+            </li><?php
             }
         }
-    ?> 
-              </ul>
-            </li>
-    <?php
-            }
-        }
-
       }
-    ?>
-        </div>
+    ?></div><?php 
+  $request = parse_url($_SERVER['REQUEST_URI']);
+  $path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylangaw/', '', $request["path"]), '/') : $request["path"]; 
+  
+  $result = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');
+  $result=trim($result,'/');
+  $comic = DB::table('quiz_comic')->where('url', $result)->first();
+  if(isset($comic)){
+    $language_transalation = DB::table('language_transalation')->where('language_key', $comic->lang_key)->first();
+  }
+
+
+    $menulink = trim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');       
+    if(!empty($menulink)){
+      $moduldetails = DB::select('select * from modulo where TRIM(BOTH "/" FROM modulo_link) = :link', ['link' => $menulink]);          
+      if(count($moduldetails) > 0){
+        $arrwheret = array('code'=>$value = session('locale'),'language_key'=>$moduldetails[0]->tutorial_lang_key);
+        $language_transalationmenu = DB::table('language_transalation')->where($arrwheret)->first();
+      }
+    }    
+/*?>
+@if(count($moduldetails) > 0 && $moduldetails[0]->avatar_image != "")
+<div class="clearfix"></div>
+<div class="quiz-footer-svg" onClick="avataranimation(this);">
+  <div class="quiz-tips"><h1><?php echo (isset($moduldetails[0]->phase_key)) ? trans('messages.'.$moduldetails[0]->phase_key) : ''; ?> </h1><p> <?php echo (isset($language_transalationmenu->language_value)) ? $language_transalationmenu->language_value : ''; ?> </p></div>
+  <div class="footer-svg">
+    <img src="<?php echo (isset($moduldetails[0]->avatar_image) && $moduldetails[0]->avatar_image != "") ? url('/storage/app/images/modulavtar/'.$moduldetails[0]->avatar_image) : '' ?>" alt="Quiz"> 
+  </div>
+</div>
+
+@elseif($path=='quiz')
+*/
+if (strpos($path, 'quiz') !== false) {?>
+<div class="quiz-footer-svg" onClick="avataranimation(this);">
+  <div class="quiz-tips"><h1><?php echo (isset($comic->title)) ? $comic->title : ''; ?> </h1><p> <?php echo (isset($language_transalation->language_value)) ? $language_transalation->language_value : ''; ?> </p></div>
+  <div class="footer-svg">
+    <img src="<?php echo (isset($comic->image)) ? url('/storage/app/images/quiz/'.$comic->image) : '' ?>" alt="Quiz"> 
+  </div>
+</div>
+<?php }
+ /*@endif*/?>
+<script>
+function avataranimation($this){
+	if($this.classList.contains('show'))
+	{
+		$this.classList.remove('show');
+	}
+	else
+	{
+		$this.classList.add('show');
+	}
+}
+</script>
 
     </div>
 
       <!-- /sidebar menu -->
 
 
-      <script type="text/javascript">
-        
+      <script type="text/javascript">                                  
+        function changetextlocationval(){
+          $("#saddr").val($("#saddrhd").val());    
+        }
             function toggleFullScreen() {
               if ((document.fullScreenElement && document.fullScreenElement !== null) ||    
                (!document.mozFullScreen && !document.webkitIsFullScreen)) {
@@ -181,9 +243,12 @@
 
             </script>
       <!-- /menu footer buttons -->
-      <div class="sidebar-footer hidden-small"> <a href="{{url('/')}}" data-toggle="tooltip" data-placement="top" title="Home"> <span class="fa fa-home" aria-hidden="true"> </span> </a> <a href="http://www.client.easy.langa.tv/" target=_"blank" data-toggle="tooltip" data-placement="top" title="Client LANGA"> <span class="fa fa-th-large" aria-hidden="true"></span> </a> <a href="http://www.reseller.easy.langa.tv/" target=_"blank" data-toggle="tooltip" data-placement="top" title="Reseller LANGA"> <span class="fa fa-th" aria-hidden="true"></span> </a> <a href="http://www.betaeasy.langa.tv/" target="_blank" data-toggle="tooltip" data-placement="top" title="Easy Beta"><span> β</span> </a>
+      <div class="sidebar-footer hidden-small">
+      
+
+       <a href="{{url('/')}}" data-toggle="tooltip" data-placement="top" title="Home"> <span class="fa fa-home" aria-hidden="true"> </span> </a> <a href="{{url('/valutaci')}}" data-toggle="tooltip" data-placement="top" title="Valutaci!"> <span class="fa fa-th-large" aria-hidden="true"></span> </a> <a href="{{url('/tickets')}}" data-toggle="tooltip" data-placement="top" title="Tickets"> <span class="fa fa-th" aria-hidden="true"></span> </a> <a href="http://www.betaeasy.langa.tv/" target="_blank" data-toggle="tooltip" data-placement="top" title="Easy Beta"><span> β</span> </a>
         <hr>
-        <a href="{{url('/profilo')}}" data-toggle="tooltip" data-placement="top" title="Profilo"> <span class="fa fa-user" aria-hidden="true"> </span>  </a> <a onclick="toggleFullScreen();" data-toggle="tooltip" data-placement="top" title="FullScreen"> <span class="fa fa-arrows-alt" aria-hidden="true"></span> </a> <a href="{{url('/cestino')}}" data-toggle="tooltip" data-placement="top" title="Cestino"> <span class="fa fa-trash" aria-hidden="true"></span> </a> <a href="{{url('/logout')}}" data-toggle="tooltip" data-placement="top" title="Logout"> <span class="fa fa-sign-out" aria-hidden="true"></span> </a> </div>
+        <a href="{{url('/profilo')}}" data-toggle="tooltip" data-placement="top" title="Profilo"> <span class="fa fa-user" aria-hidden="true"> </span>  </a> <a onclick="toggleFullScreen();" data-toggle="tooltip" data-placement="top" title="FullScreen"> <span class="fa fa-arrows-alt" aria-hidden="true"></span> </a> <a href="{{url('/trash')}}" data-toggle="tooltip" data-placement="top" title="Cestino"> <span class="fa fa-trash" aria-hidden="true"></span> </a> <a href="{{url('/logout')}}" data-toggle="tooltip" data-placement="top" title="Logout"> <span class="fa fa-sign-out" aria-hidden="true"></span> </a> </div>
       <!-- /menu footer buttons --> 
     </div>
   </div>
@@ -210,7 +275,9 @@
             <ul class="dropdown-menu dropdown-usermenu pull-right">
               <li><a href="{{url('/profilo')}}"><i class="fa fa fa-user pull-right"></i> {{trans('messages.keyword_profile')}}</a></li>
               <li><a href="{{url('/faq')}}"><i class="fa fa-question pull-right"></i> {{trans('messages.keyword_help')}}</a></li>
+              @if(Auth::user()->id == 0)
               <li> <a href="{{url('/admin')}}"> <span class="badge bg-red pull-right fa fa-lock pull-right">  admin </span> <span>{{trans('messages.keyword_settings')}}</span> </a></li>
+              @endif
               <li><a href="{{url('/logout')}}"><i class="fa fa-sign-out pull-right"></i> {{trans('messages.keyword_logout')}}</a></li>
             </ul>
           </li>
@@ -495,7 +562,7 @@
             return mktime(0, 0, 0, $mese, $giorno, $anno);
           }
 
-          for($i = 0; $i < count($notifiche) - 1; $i++) {
+         /* for($i = 0; $i < count($notifiche) - 1; $i++) {
             for($k = $i + 1; $k < count($notifiche); $k++) {
               if(inSecondi($notifiche[$i]) < inSecondi($notifiche[$k])) {
                 $tmp = $notifiche[$i];
@@ -503,7 +570,7 @@
                 $notifiche[$k] = $tmp;
               }
             }
-          }
+          }*/
 
 		?>
 
@@ -516,8 +583,19 @@
 	          ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
 	          ->where('user_id', $userId)
 	          ->where('is_enabled', 0)
+	          ->where('is_deleted', 0)
 	          ->orderBy('data_lettura', 'asc')	         
-	          ->get(); 
+	          ->get();
+
+	        $alerts = DB::table('inviare_avviso')
+	          ->leftjoin('alert', 'inviare_avviso.alert_id', '=', 'alert.alert_id')
+	          ->select(DB::raw('inviare_avviso.*, alert.alert_id as alrt_id, alert.nome_alert, alert.messaggio'))
+	          ->where('user_id', $userId)
+	          ->where('is_enabled', 0)
+	          ->where('is_deleted', 0)
+	          ->where('alert.is_system_info', '1')
+	          ->orderBy('data_lettura', 'asc')	         
+	          ->get();  
 		?>
 
 
@@ -562,7 +640,31 @@
 	         </div>
 			</div>
 			<?php $i++; ?>
-          	@endforeach	    
+          	@endforeach	 
+
+          	@foreach($alerts as $alert)
+			  <?php 
+	            $date = $alert->created_at; 
+	            $date = date_format(new DateTime($date), 'D-m-Y H:i:s'); 
+	          ?>	
+
+			<div class="chkbox-blk" >
+
+            <div class="chkbox"><input class="alertcheckgrp" type="checkbox" onclick="alertdisable(<?php echo $alert->id; ?>);" value="<?php echo $alert->id; ?>" id="alert2<?php echo $i; ?>">
+				<label for="alert2<?php echo $i; ?>"> notifi2 </label>
+			</div>
+
+			<div class="info">
+    	  		<a href="{{url('/alert/delete') . '/' . $alert->id}}" onclick="return confirm('{{ trans('messages.keyword_sure_to_disable_notification')}}?')">
+          		<span> {{$alert->nome_alert}} </span>
+          		<span class="time"> {{ $date }} </span>
+          		<div class="message"> {{$alert->messaggio}} </div>
+                </a>
+	         </div>
+			</div>
+			<?php $i++; ?>
+          	@endforeach	   
+
           	</div>
             <div class="btn-blk">
                 <button class="btn btn-submit" id="disabled"> 
@@ -600,144 +702,183 @@
           </li>
 
           <li><?php
+          $valueCode = session('locale');
 				$allLanguages = DB::table('languages')
 							->select('*')
 							->where('is_deleted', '0')
 							->get();	
-				?><select id="languageSwicher" class="form-control"><?php
+      $currentLanguages = DB::table('languages')
+              ->select('*')
+              ->where('code', $valueCode)
+              ->first();  
+        
+				?><div class='selectBox'>
+            <span class='selected'>{{$currentLanguages->original_name}}</span>
+            <span class='selectArrow'><img src="{{url('storage/app/images/languageicon/').'/'.$currentLanguages->icon}}" height="30" width="30"></span>
+            <div class="selectOptions">
+            @foreach($allLanguages as $langs)
+              <span class="selectOption" value="{{$langs->code}}">{{$langs->original_name}} <img src="{{url('storage/app/images/languageicon/').'/'.$langs->icon}}" height="30" width="30"></span>
+             @endforeach 
+            </div>
+          </div>
+        <?php /*<select id="languageSwicher" class="form-control"><?php
 					foreach($allLanguages as $langs){			
 					  $value = session('locale');
-						?><option value="<?php echo $langs->code; ?>" <?php if($value == $langs->code) { echo 'selected';}?>><?php echo $langs->original_name;?></option><?php 
+						?><option value="<?php echo $langs->code; ?>" <?php if($valueCode == $langs->code) { echo 'selected';}?>><?php echo $langs->original_name;?></option><?php 
 					}
-                 ?></select>
+                 ?></select>*/?>
                 </li>
         </ul>
       </nav>
     </div>
   
   </div>
+
   <!-- /top navigation --> 
   @endif 
 
 
   <!-- Content -->
 
+  <!-- Content -->
+
   <div class="right_col" role="main">
 
-  	<div class="row">
+  	<div class="row alert-div">
   		
   	<?php
 
-        $userId = Auth::id();
-
+        $userId = Auth::id(); $today = date("Y-m-d");
         $alert = DB::table('inviare_avviso')
           ->join('alert', 'inviare_avviso.alert_id', '=', 'alert.alert_id')
-          ->where('user_id', $userId)
-          ->where('conferma', '!=', 'LETTO')
-          ->get();            
+          ->leftjoin('alert_tipo', 'alert.tipo_alert', '=', 'alert_tipo.id_tipo')
+          ->select('inviare_avviso.*','alert.*','alert_tipo.color')
+          ->where('user_id', $userId)->where('is_deleted', 0)
+          ->where('alert.created_at', '=', $today)->groupBy('alert.alert_id')
+          ->where('alert.is_system_info', '1')
+          ->get(); 
+
+        $i = 1; 
     ?>
-
-      <!-- <div id="success_message"></div> -->
-
-        <div class="col-md-6">
-
+       
   <?php foreach ($alert as $alert) {  ?>
 
-          <div class="alert alert-warning">
+  		<div class="col-md-6 main_class_alert"> 
 
-            <div id="myalert" class="comment" > 
-
-            <b style="font-size: 16px;"> {{ $alert->nome_alert }} </b>
-
-              <div id="alert_comment" style="display: none;font-weight: bold;"> 
-
-                <p style="text-indent:40px;">
-                  {{ $alert->  messaggio }}  
-                </p>
-                  
-                <textarea class="form-control" id="alert_messaggio" rows="4" cols="5" style="color: black"></textarea> 
-
-                <input type="hidden" id="alert_id" name="" value="{{ $alert->alert_id  }}">
-                <input type="hidden" id="user_id" name="" value="{{ $userId  }}">
-                
-                <br>
-                <button id="alert_send" value="send" style="color: black">
-                Send
-                </button>
-
-              </div>
-            </div>
-
-          </div>
-
-  <?php } ?>
-
-        </div>
-
-    </div>
-
-
-    <!-- Notification -->
-
-   
-    <div class="row">
-    	
-    <?php
-		$userId = Auth::id();
-		$today = date("Y-m-d");
-		$notifications = DB::table('invia_notifica')
-          ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
-          ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc, notifica.created_at'))
-          ->where('user_id', $userId)
-          ->where('is_deleted', 0)
-          ->where('notifica.created_at', '=', $today)
-          ->orderBy('data_lettura', 'asc')	         
-          ->get(); 
-       	
-       	$i =1;
- 		foreach ($notifications as $notification) { ?>
-
-  		<div class="col-md-6" <?php if($notification->id_ente != null) { ?> style="float: right;" <?php  } ?> >
-
-          <div class="alert alert-<?php if($notification->id_ente != null) { ?>danger <?php  } else { ?>info <?php } ?> ">
-
-          	<button type="button" class="close notification-close" aria-label="Close">
+  			<button data-id="alert_comment<?php echo $i; ?>" id="myclose<?php echo $i; ?>" type="button" class="close alert_close" aria-label="Close" onclick="myalertclose(this.id, <?php echo $i; ?>)"> 
 				<span aria-hidden="true">&times;</span>
 			</button>
 
-            <div id="myrolenote<?php echo $i; ?>" class="comment">
+	  		<div data-value="alert_comment<?php echo $i; ?>" class="myalert" id="myalert<?php echo $i; ?>" onclick="myalert(this.id, <?php echo $i; ?>)">
 
-            <b style="font-size: 16px;"> {{ $notification->notification_type }} </b>
+	          	<div class="alert" style="background-color: {{$alert->color}}">
+					<div class="alert-heading">	<b style="font-size: 16px;"> {{ $alert->nome_alert }} </b></div>
+                 <div class="clearfix"></div>
+              <div id="alert_comment<?php echo $i; ?>" class="alert_comment" style="display: none;font-weight: bold;"> 
+                <p>
+                  {{ $alert->messaggio }}  
+                </p>                  
+                <textarea class="form-control alert_msg_textbox" id="alert_messaggio<?php echo $i; ?>" rows="4" cols="5" style="color: black"><?php if(isset($alert->comment)){ echo $alert->comment; } ?></textarea> 
+                <input type="hidden" class="alert_id" id="alert_id<?php echo $i; ?>" name="" value="{{ $alert->alert_id  }}">
+                <input type="hidden" id="user_id" name="" value="{{ $userId  }}">
+                <input type="hidden" id="user_alert_id" name="" value="{{ $alert->id  }}">
+                
+               
+              <div class="alert-btn text-right">  <button class="btn btn-warning" id="alert_send<?php echo $i; ?>" value="send" >
+                Send
+                </button></div>
 
-              <div class="rolenote_comment" id="rolenote_comment<?php echo $i; ?>" style="display: none;font-weight: bold;"> 
+          
+
+       		</div>
+            
+            <div class="clearfix"></div>
+                    
+				</div>		
+
+			</div>
+
+            
+
+        </div>
+
+  <?php $i++; } ?>
+
+    </div>
+
+    <!-- Notification -->
+
+    <div class="row notification-div">
+    	
+    <?php
+		$userId = Auth::id(); $today = date("Y-m-d");
+		$notifications = DB::table('invia_notifica')
+          ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
+          ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc, notifica.created_at'))
+          ->where('user_id', $userId)->where('is_deleted', 0)
+          ->where('notifica.created_at', '=', $today)
+          ->groupBy('notification_id')    
+          ->get(); 
+
+       	$i = 1; ?>
+
+       	
+ 		<?php foreach ($notifications as $notification) { ?>
+
+		<div class="col-md-6 main_class_notification">
+
+			<button data-id="rolenote_comment<?php echo $i; ?>" type="button" class="close notification_close" aria-label="Close" onclick="mynotificationclose(this.id, <?php echo $i; ?>)">
+				<span aria-hidden="true">&times;</span>
+			</button>
+
+ 			<div data-value="rolenote_comment<?php echo $i; ?>" id="myrolenote<?php echo $i; ?>" onclick="mynotification(this.id, <?php echo $i; ?>)">
+
+	      		<div class="alert alert-<?php if($notification->id_ente != null) { ?>danger <?php  } else { ?>info <?php } ?> " >
+					<b style="font-size: 16px;"> {{ $notification->notification_type }} </b>
+				</div>
+
+			</div>
+
+			<div class="alert-<?php if($notification->id_ente != null) { ?>danger <?php  } else { ?>info <?php } ?>"  >
+      
+            	<div class="rolenote_comment" id="rolenote_comment<?php echo $i; ?>" style="display: none;font-weight: bold;"> 
 
                 <p style="text-indent:40px;">
                   {{ $notification->notification_desc }}  
                 </p>
                   
-                <textarea class="form-control rolenote_messaggio" id="rolenote_messaggio<?php echo $i; ?>" rows="4" cols="5" style="color: black"> <?php 
-                if(isset($notification->comment)) { echo $notification->comment; } ?>
-                </textarea> 
+                <textarea class="form-control rolenote_messaggio" id="rolenote_messaggio<?php echo $i; ?>" rows="4" cols="5" style="color: black"><?php if(isset($notification->comment)){ echo $notification->comment; } ?></textarea> 
 
                 <input type="hidden" class="notification_id" id="notification_id<?php echo $i; ?>" name="" value="{{ $notification->noti_id  }}">
                 <input type="hidden" id="user_id" name="" value="{{ $userId  }}">
                 
                 <br>
-                <button class="noti_send" id="noti_send" value="send" style="color: black">
+                <button class="noti_send" id="noti_send<?php echo $i; ?>" value="send" style="color: black">
                 Send
                 </button>
 
-              </div>
-            </div>
+            	</div>
 
-          </div>
+        	</div>
 
-    	</div>
+      	</div>
 
   <?php $i++; } ?>
 
-    </div><?php ?>
+    </div><?php 
+    	$request = parse_url($_SERVER['REQUEST_URI']);
+		$path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylangaw/', '', $request["path"]), '/') : $request["path"];		
+		//$result = trim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');		
+		$c = explode('/',$path);
+		$last = explode('/', end($c));		
 
+		$path = preg_replace('/[0-9]+/', '', $path);
+		$result = trim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');							
+
+		$arrPageurl = array('enti/myenti','enti','enti/add','enti/modify/corporation','pagamenti','pagamenti/mostra/accounting','pagamenti/tranche/modifica','pagamenti/tranche/add','pagamenti/tranche/elenco','pagamenti/coordinate');
+		$class = (in_array($result, $arrPageurl)) ? 'left_breadcrumbs' : '';
+    ?>
+    <div class="front_breadcrumbs {{$class}}"><?php echo getbreadcrumbs(); ?></div>
     <div class="row tile_count">
       <div class="container-fluid"> @yield('content') </div>
     </div>
@@ -747,7 +888,7 @@
   <!-- footer content -->
   <footer>
     <div class="pull-right">
-      <p><small>2016 © Easy <strong>LANGA</strong> da e per <a href="http://www.langa.tv/"><strong>LANGA Group</strong></a></small><small><a href="http://easy.langa.tv/changelog"> versione 1.04  </a></small></p>
+      <p><small>2017 © Easy <strong>LANGA</strong> da e per <a href="http://www.langa.tv/"><strong>LANGA Group</strong></a></small><small><a href="http://easy.langa.tv/changelog"> versione 1.04  </a></small></p>
      </div>
     <div class="clearfix"></div>
    <!-- </div>-->
@@ -760,6 +901,7 @@
 <script src="{{asset('/vendors/jquery/dist/jquery.min.js')}}"></script> 
 <!-- Bootstrap --> 
 <script src="{{asset('/vendors/bootstrap/dist/js/bootstrap.min.js')}}"></script> 
+<script src="{{asset('public/js/datepicker/js/bootstrap-datepicker.js')}}"></script> 
 
 <!-- jQuery validation js --> 
 <script src="{{ url('public/scripts/jquery.validate.min.js')}}"></script> 
@@ -770,12 +912,37 @@
 
 <!-- Custom Theme Scripts --> 
 <script src="{{asset('/build/js/custom.js')}}"></script> 
+<script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
 <script type="text/javascript">
-
+  $(".alert_msg_textbox").click(function( event ) {
+    event.stopPropagation();
+    // Do something
+  })
+    $("#mapfromaddress").select2({dropdownParent: $('.menu_map')});                                                              
 		function setclass(i) {		
 
 			var arr_id = [];
+
 			$(".checkgrp:checked").each(function() {
+			    arr_id.push($(this).val());
+			});
+
+			$('#disabled').on('click', function(e) { 		 
+				$.ajax({
+	              	type:'GET',
+	              	data: { 'arr_id': arr_id },
+	              	url: '{{ url('notification-disabled') }}',
+	                success:function(data) {              
+	              		location.reload();
+	                }
+            	});	
+			});
+		}
+
+		function alertdisable(i) {		
+
+			var arr_id = [];
+			$(".alertcheckgrp:checked").each(function() {
 			    arr_id.push($(this).val());
 			});
 			
@@ -783,8 +950,8 @@
 				$.ajax({
 	              	type:'GET',
 	              	data: { 'arr_id': arr_id },
-	              	url: '{{ url('notification-disabled') }}',
-	                success:function(data) {              
+	              	url: '{{ url('alert-disabled') }}',
+	                success:function(data) {            
 	              		location.reload();
 	                }
             	});	
@@ -809,133 +976,137 @@
 		$('#view-all').on('click', function(e) { 		 
 			window.location.replace(path_url);			
 		});
-			
-      	$(document).ready(function(){
+		
+		function myalert(id, i){
 
-          $('#myalert').on('click', function(e) {  
+			$this = $("#"+id);
+			$data = $this.data("value");          	
+          	$('#'+$data).toggle();
 
-            $('#alert_comment').css({
-                'display': 'block'
-            });
-
-            e.preventDefault();
-
-            var alert_id = $("#alert_id").val(); 
+  	        var alert_id = $("#alert_id"+i).val();
             var user_id = $("#user_id").val();
-
             $.ajax({
 
               type:'GET',
-              data: {
-                      'alert_id': alert_id,
-                      'user_id': user_id
-                    },
-              url: '{{ url('alert/user-read') }}',
+              data: { 'alert_id': alert_id, 'user_id': user_id },
+              url: '{{ url('alert/user-read') }}',              
+              success:function(data) { }
+
+            });
+
+            $("#alert_send"+i).click(function(e){
+
+            	var messaggio = $("#alert_messaggio"+i).val(); 
+            	var alert_id = $("#alert_id"+i).val();
+            	var user_id = $("#user_id").val();
+              var user_alert_id = $("#user_alert_id").val();
               
-              success:function(data) {
-                // console.log(data);
-                //  $('#success_message').html(data);                     
-              }
-
+	            $.ajax({
+	              type:'GET',
+	              data: { 'messaggio': messaggio, 'alert_id': alert_id, 'user_id': user_id,'user_alert_id':user_alert_id },
+	              url: '{{ url('alert/make-comment') }}',
+	              success:function(data) {
+	                location.reload();	
+	              }
+	            });
             });
+      	}
 
-          });
+      	function myalertclose(id, i){
+			$this = $("#"+id);
+			$data = $this.data("id");
 
-          $("#alert_send").click(function(e){
-     
-            e.preventDefault();
+			var alert_id = $("#alert_id"+i).val();
+            var user_id = $("#user_id").val();
+			
+		    $.ajax({
+		      type:'GET',
+		      data: { 'alert_id': alert_id, 'user_id': user_id },
+		      url: '{{ url('alert/userdelete') }}',
+		      success:function(data) {
+		        location.reload();
+		      }
+		    });
+		}
 
-            var messaggio = $("#alert_messaggio").val(); 
-            var alert_id = $("#alert_id").val();
+      	function mynotification(id, i){
+
+      		$this = $("#"+id);
+			$data = $this.data("value");          	
+          	$('#'+$data).toggle();
+
+  	        var notification_id = $("#notification_id"+i).val(); 
             var user_id = $("#user_id").val();
 
             $.ajax({
-              type:'GET',
-              data: { 'messaggio': messaggio, 'alert_id': alert_id, 'user_id': user_id },
-              url: '{{ url('alert/make-comment') }}',
-              success:function(data) {
-                location.reload();
-              }
-
-            });
-
-          });
-
-          $('.comment').on('click', function(e) {  
-
-            var id = $(this).children('.rolenote_comment').attr('id');         
-	      	$('#'+id).css({
-	            'display': 'block'
-	        });
-
-            e.preventDefault();
-
-            var id = $(this).find('.notification_id').attr('id');
-            var notification_id = $(this).find('.notification_id').val();
-            var user_id = $("#user_id").val();
-
-            $.ajax({
-
               type:'GET',
               data: { 'notification_id': notification_id, 'user_id': user_id },
               url: '{{ url('notification/user-read') }}',              
-              success:function(data) {
-                console.log(data);                    
-              }
-
+              success:function(data) { }
             });
 
-          });
+            $("#noti_send"+i).click(function(e){
 
-           $(".noti_send").click(function(e){ 
+            	var messaggio = $("#rolenote_messaggio"+i).val(); 
+            	var notification_id = $("#notification_id"+i).val();
+            	var user_id = $("#user_id").val();
 
-            e.preventDefault();
-
-            var messaggio = $(this).parent().find('.rolenote_messaggio').val();           
-            var notification_id = $(this).parent().find('.notification_id').val();
-            var user_id = $("#user_id").val();
-
-            $.ajax({
-              type:'GET',
-              data: {
-                      'messaggio': messaggio,
-                      'notification_id': notification_id,
-                      'user_id': user_id
-                    },
-              url: '{{ url('notification/make-comment') }}',
-
-              success:function(data) {
-                location.reload();
-              }
-
+	            $.ajax({
+		            type:'GET',
+		            data: { 'messaggio': messaggio, 'notification_id': notification_id,
+		                      'user_id': user_id },
+              		url: '{{ url('notification/make-comment') }}',
+	              	success:function(data) {
+	                	location.reload();
+	              	}
+	            });
             });
+      	}
 
-          });    
+  		function mynotificationclose(id, i){
+			$this = $("#"+id);
+			$data = $this.data("id");
 
-          $(".notification-close").click(function(e){     
-
-            e.preventDefault();
-            var nextClass = $(this).next().attr('id');
-            var notification_id = $('#'+nextClass).find('.notification_id').val();
+			var notification_id = $("#notification_id"+i).val(); 
             var user_id = $("#user_id").val();
-
-            $.ajax({
-
+			
+		    $.ajax({
               type:'GET',
               data: { 'notification_id': notification_id, 'user_id': user_id },
               url: '{{ url('notification/userdelete') }}',
               success:function(data) {
                 location.reload();
               }
-
             });
+		}
 
-          });              
-
-      });
-
+	  	function strcap(str){
+	    	var pieces = str.toLowerCase().split(" ");
+		    for ( var i = 0; i < pieces.length; i++ )		    {
+		        var j = pieces[i].charAt(0).toUpperCase();
+		        pieces[i] = j + pieces[i].substr(1);
+		    }
+		    return pieces.join(" ");		}
+			$(window).load(function()
+			{
+				var height=$('.right_col').height();
+				$('#sidebar-menu ').height(height);
+			});
     </script>
+     <script type='text/javascript'>
+      $(document).ready(function() {
+        var currentlang = '<?php echo session('locale'); ?>';
+        languageSelectBoxes(currentlang);
+        /* This section is used to hide he parent menu that no child menu */
+        $(".child_menu").each(function() {
+          if($(this).find('li').length == 0 && !$(this).hasClass('mapmenu')){
+              $(this).parent('li').remove();
+          }
+        });
+        //alert($(".child_menu").length);
+      });            
+    </script>
+    @include('common.languagesjs')
 
-    
 </body>
 </html>

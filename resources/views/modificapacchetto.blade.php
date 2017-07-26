@@ -16,7 +16,8 @@
 <?php echo Form::open(array('url' => '/admin/tassonomie/update/pacchetto' . "/$pacchetto->id", 'files' => true, 'id'=>'package_editform', 'name'=>'package_editform')) ?>
 	{{ csrf_field() }}
 	<!-- colonna a sinistra -->
-	<div class="col-md-4">
+    <div class="row ">
+	<div class="col-md-4 col-sm-12 col-xs-12">
         <div class="form-group">
 		  <label for="code"> {{ trans('messages.keyword_code') }}  <span class="required">(*)</span></label>
 		  <input value="{{ $pacchetto->code }}" class="form-control" type="text" name="code" id="code" placeholder=" {{ trans('messages.keyword_code') }}">
@@ -25,19 +26,38 @@
 		
 	</div> 
 	<!-- colonna centrale -->
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
         <div class="form-group">
 		  <label for="label"> {{ trans('messages.keyword_name') }}  <span class="required">(*)</span></label>
 		  <input value="{{ $pacchetto->label }}" class="form-control" type="text" name="label" id="label" placeholder=" {{ trans('messages.keyword_name') }}">
         </div>                
 	</div>
 	<!-- colonna a destra -->
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
         <div class="form-group">
             <label for="logo"> {{ trans('messages.keyword_logo') }} </label>
 		  <?php echo Form::file('logo', ['class' => 'form-control']); ?>
         </div>
 	</div>
+      
+      <div class="col-md-4 col-sm-12 col-xs-12">
+        <div class="form-group">
+            <label for="department"> {{ trans('messages.keyword_department') }} </label>
+            <select class="form-control" name="department" id="department">
+                <option value="0">---Select---</option>
+                @foreach($department as $keyd => $vald)
+                <option value="{{$vald->id}}" <?php echo ($vald->id == $pacchetto->departments_id) ? 'selected' :'';  ?>>{{$vald->nomedipartimento}}</option>
+                @endforeach
+            </select>
+        </div>
+        </div>
+        <div class="col-md-4 col-sm-12 col-xs-12">
+        <div class="form-group">
+            <label for="description"> {{ trans('messages.keyword_description') }} </label>
+            <textarea class="form-control" name="description" id="description">{{ $pacchetto->description }}</textarea>
+        </div>
+        </div>
+      
 
         <div class="col-md-12">
             <div class="table-responsive">
@@ -72,6 +92,7 @@
 		<button type="submit" class="btn btn-warning"> {{ trans('messages.keyword_save') }} </button>
         <div class="space50"> </div>
 	</div>
+    </div>
     <div class="footer-svg">
         <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
     </div>

@@ -1,30 +1,43 @@
 @extends('layouts.app')
-
 @section('content')
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-
+<script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
 <!-- Include Date Range Picker -->
 <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
 <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.1.62/jquery.inputmask.bundle.js"></script>
 
 <!--<link href="{{asset('build/js/jquery.datetimepicker.min.css')}}" rel="stylesheet">
 <script src="{{asset('build/js/jquery.datetimepicker.full.js')}}"></script>-->
 
 <div class="header-left-same">
-<div class="header-svg text-left">
+<div class="header-svg text-left float-left">
 	<img src="{{url('images/HEADER1-LT_ENTITY.svg')}}" alt="header image">
 </div>
-<div class="float-right">
-<h1><?php echo (isset($action) && $action=='add') ? trans('messages.keyword_add_entity') : trans('messages.keyword_edit_entity'); ?></h1><hr>
+<div class="float-right text-right">
+<h1><?php echo (isset($action) && $action=='add') ? trans('messages.keyword_add_entity') : trans('messages.keyword_edit_entity'); ?></h1>
+<hr>
+@if(isset($corp->logo))
+<div class="profile-block-top">
+        <div class="inline profile-user">
+        <img src="{{url('/storage/app/images/').'/'.$corp->logo}}" class="img-responsive" ></img>
+        </div>
+        <div class="height10"></div>
+		<div class="btn-blk">
+         <h4 class="inline">  {{trans('messages.keyword_code')}}: {{$corp->id}}</h4>
+		@if(checkpermission('1', '12', 'scrittura','true'))
+		<button onclick="mostra2()" id="btnSubmiTop" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+		@endif
+        </div>
+	</div>
+@endif
 </div>
 </div>
 <div class="clearfix"></div>
 <?php $loginuser = collect($loginuser)->toArray();?>
-
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -33,7 +46,7 @@
 @endif
 @include('common.errors')
 @if(isset($corp->logo))
-<div class="row">
+<!--<div class="row">
 <div class="container-fluid col-md-10">
 	<div class="inline profile-user">
  	<img src="{{url('/storage/app/images/').'/'.$corp->logo}}" class="img-responsive" ></img><h4 class="inline">  {{trans('messages.keyword_code')}}: {{$corp->id}}</h4>
@@ -45,8 +58,10 @@
 		<button onclick="mostra2()" id="btnSubmiTop" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
 		@endif
 	</div>
-</div>   
-        <hr>
+</div>   --->
+
+
+
     
 @endif
 <?php /*<div class="container-fluid col-md-12" style="background:#2a3f54;color:#ffffff"><br>
@@ -76,25 +91,24 @@ else {
 
 ?>
 	{{ csrf_field() }}
-       
+   
 <!-- inizio chiamata -->
 <script type="text/javascript">var $j = jQuery.noConflict();</script>
 @if($action == 'edit')
   <div class="row">
 	<div class="col-md-12 tpbtm10">
 		<h4>{{trans('messages.keyword_note')}} ({{trans('messages.keyword_conversations')}}, {{trans('messages.keyword_costs')}}, {{trans('messages.keyword_notes')}},..)</h4>
+		@if(checkpermission('1', '12', 'scrittura','true'))
 		<a id="creaNuovaChiamata" class="btn btn-warning" name="create" title="{{trans('messages.keyword_create_new')}}"><i class="fa fa-plus"></i></a>
 		<a class="btn btn-danger" id="removeNote"  name="remove" title="{{trans('messages.keyword_delete_label')}}"><i class="fa fa-trash"></i></a>
+		@endif
 		<div class="table-editable tpbtm10 set-height350">
-			<table class="table table-striped table-bordered">
+			<table class="table table-striped table-bordered note_conversations">
 			<thead>
-				<th width="2%">#</th>
-				<th width="13%">{{trans('messages.keyword_user')}}</th>
-                <th width="20%">{{trans('messages.keyword_notes')}}</th>
-                <th width="20%">{{trans('messages.keyword_date')}}</th>
-                <th width="10%">{{trans('messages.keyword_bank')}}</th>
-                <th width="10%">{{trans('messages.keyword_case')}}</th>
-                <th width="20%">{{trans('messages.keyword_frequency')}}</th>
+				<th width="2%">#</th>				
+                <th width="60%">{{trans('messages.keyword_notes')}}</th>
+                <th width="25%">{{trans('messages.keyword_period')}} & {{trans('messages.keyword_frequency')}}</th>
+                <th width="8%"><div><span>+</span><span>-</span></div>T</th>                
                 <th width="5%">{{trans('messages.keyword_notifications')}}</th>               
 				<?php /*<th>Ricontattare il giorno
 				<th>Alle
@@ -117,10 +131,14 @@ else {
 					@foreach($actionmessages as $i => $actionmessages)
 						<tr>
 						<td>
-							<input type="checkbox" id="<?php echo 'checkNo'.$i;?>" class="selezione_note">
+							<input type="checkbox" onchange="checkboxevent(this.id)" id="<?php echo 'checkNo'.$i;?>" class="selezione_note">
 							<label for="<?php echo 'checkNo'.$i;?>"></label>
 						</td>
-                        <td><select class="form-control" id="utenti<?php echo $i; ?>"  name="utente[]"  class="form-control" >
+						<td>
+							<textarea id="editable<?php echo $i; ?>" name="ric[]" class="form-control" placeholder="{{trans('messages.keyword_notes')}}"><?php echo isset($actionmessages->appunti) ? $actionmessages->appunti : ""; ?></textarea>
+							<?php /*<input type="text" id="editable<?php echo $i; ?>" name="ric[]" class="form-control" value="<?php echo isset($actionmessages->appunti) ? $actionmessages->appunti : ""; ?>" placeholder="{{trans('messages.keyword_notes')}}">*/?>
+						</td>
+                        <?php /*<td><select class="form-control" id="utenti<?php echo $i; ?>"  name="utente[]"  class="form-control" >
                         @if(isset($action) && $action == 'add')
                         <option>{{trans('messages.keyword_no_participants')}}</option>
                          @foreach($users as $utente)
@@ -140,27 +158,28 @@ else {
                             @endforeach
                         @endif
 	        	        </select>
-						</td>
+						</td>*/?>
+						
 						<td>
-							<input type="text" id="editable<?php echo $i; ?>" name="ric[]" class="form-control" value="<?php echo isset($actionmessages->appunti) ? $actionmessages->appunti : ""; ?>">
-						</td>
-						<td>
-							<span class="datapicker-icon"><i class="fa fa-calendar" aria-hidden="true"></i></span> <span class="select-date"><input type="text" id="datepicker_to<?php echo $i; ?>" name="datepicker_to[]" class="form-control" value="<?php echo $actionmessages->datainserimento; ?>"></span>                            
+							<div><span class="datapicker-icon"><i class="fa fa-calendar" aria-hidden="true"></i></span> <span class="select-date"><input type="text" id="datepicker_to<?php echo $i; ?>" name="datepicker_to[]" class="form-control" value="<?php echo $actionmessages->datainserimento; ?>"></span></div>
+							<select name="frequenza[<?php echo $i; ?>]" class="form-control">
+                        	@foreach($frequency as $frequencyval)
+                        	<option value="{{ $frequencyval->rinnovo }}" <?php if($frequencyval->rinnovo == $actionmessages->frequenza){ echo 'selected';}?>><?php echo $frequencyval->rinnovo.' Days'; ?></option>
+                        	@endforeach
+                        	</select>                           
 						</td>
                         <td>
-							<input type="text" name="banca[]" class="form-control" value="<?php echo isset($actionmessages->banca) ? $actionmessages->banca : ""; ?>">
-						</td>
-                        <td>
-							<input type="text" name="cassa[]" class="form-control" value="<?php echo isset($actionmessages->cassa) ? $actionmessages->cassa : ""; ?>">
-						</td>
-                        <td><?php 
-                        	$arrFrequen = array('1_M'=>'1 M.','2_M'=>'2 M.','3_M'=>'3 M.','6_M'=>'6 M.','1_A'=>'1 A.');
-							foreach($frequency as $frequencyval) {
-                        		?><div class="cust-radio"><input type="radio" name="frequenza[<?php echo $i; ?>]" <?php if($frequencyval->rinnovo == $actionmessages->frequenza){ echo 'checked';}?> id="frequenza_<?php echo $i.$frequencyval->rinnovo; ?>" value="{{ $frequencyval->rinnovo }}" />
-                                <label for="frequenza_<?php echo $i.$frequencyval->rinnovo; ?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div> <?php
-							}
-						?></td>
+							<input type="text" name="banca[]" class="form-control" value="<?php echo isset($actionmessages->banca) ? $actionmessages->banca : ""; ?>" placeholder="{{trans('messages.keyword_bank')}}">
+							<input type="text" name="cassa[]" class="form-control" value="<?php echo isset($actionmessages->cassa) ? $actionmessages->cassa : ""; ?>" placeholder="{{trans('messages.keyword_case')}}">
+						</td>                        
+                       <?php /* <td><select name="frequenza[<?php echo $i; ?>]" class="form-control">
+                        	@foreach($frequency as $frequencyval)
+                        	<option value="{{ $frequencyval->rinnovo }}" <?php if($frequencyval->rinnovo == $actionmessages->frequenza){ echo 'selected';}?>><?php echo $frequencyval->rinnovo.' Days'; ?></option>
+                        	@endforeach
+                        </select>
+                       </td>*/?>
 						<td><div class="switch"><input type="checkbox" name="notifiche[<?php echo $i;?>]" id="notifiche_<?php echo $i;?>" value="1" <?php if(isset($actionmessages->notifiche) && $actionmessages->notifiche == '1') { echo 'checked';}?>/><label for="notifiche_<?php echo $i;?>"></label></div>
+						<div>{{$actionmessages->username}}<input type="hidden" id="utente{{$actionmessages->id_utente}}" name="utente[]" value="{{$actionmessages->id_utente}}"></div>
                         </td>
 						<?php /*<td>
 							<input type="text" id="impedisci<?php echo $i; ?>" name="datainserimento[]" class="form-control " value="<?php echo $actionmessages->datainserimento; ?>">
@@ -192,8 +211,7 @@ else {
 				</tbody>
 			</table>
 		</div>
-		<script>
-		
+		<script>		
 		$j('#removeNote').on("click", function() {
 			$j('.selezione_note:checked').parents("tr").remove();
 			/*var inputs = $j(".selezione_note");
@@ -220,50 +238,15 @@ else {
 			/*lenght = $j('#tb').length();*/
 			var count = $j('#tb').children('tr').length;
 			var tr = '<tr>';
-			var td = '<td><input type="checkbox" id="checkNu'+count+'" class="selezione_note"><label for="checkNu'+count+'">  </label></td>';
-				td +='<td><select class="form-control" id="utenti'+count+'" name="utente[]"  class="form-control">';
-                td +='<?php 
-				        if(isset($action) && $action == 'add'){
-                         foreach($users as $utente){
-                            ?><option value="{{$utente->id}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $utente->id ){ echo 'selected';}?>>{{$utente->id.' | '.$utente->name}}</option><?php
-						 }
-						}
-						else {
-							?><option>{{trans('messages.keyword_no_participants')}}</option><?php
-                            foreach($participant as $partecipante) {
-                            ?><option value="{{$partecipante->id_user}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $partecipante->id_user ){ echo 'selected';}?>><?php
-                             foreach($users as $utente){
-                                 if($utente->id == $partecipante->id_user){
-                                    echo $partecipante->id_user.' | '.$utente->name;
-	                                 break;
-								 }
-							 }
-                            ?></option><?php 
-							}
-					}
-				
-				/*foreach($users as $utente){
-                	    ?><option value="<?php echo $utente->id;?>"><?php echo $utente->name;?></option><?php
-					}*/
-					
-
-	        	    ?></select></td>';				
-				td +='<td><input type="text" id="editable'+count+'" name="ric[]" class="form-control" value=""></td>';
-				td +='<td><span class="datapicker-icon"><i class="fa fa-calendar" aria-hidden="true"></i></span><span class="select-date"><input type="text" id="datepicker_to'+count+'" name="datepicker_to[]" class="form-control" value=""></span></td>';
-				td +='<td><input type="text" name="banca[]" class="form-control" value=""></td>';
-                td +='<td><input type="text" name="cassa[]" class="form-control" value=""></td>';
-                td +='<td><?php 
-                        	$arrFrequen = array('1_M'=>'1 M.','2_M'=>'2 M.','3_M'=>'3 M.','6_M'=>'6 M.','1_A'=>'1 A.');
-							/*foreach($frequency as $frequencyval) {
-                        		?><div class="cust-radio"><input type="radio" name="frequenza[<?php echo $i; ?>]" <?php if($frequencyval->rinnovo == $actionmessages->frequenza){ echo 'checked';}?> id="frequenza_<?php echo $i.$frequencyval->rinnovo; ?>" value="{{ $frequencyval->rinnovo }}" />
-                                <label for="frequenza_<?php echo $i.$frequencyval->rinnovo; ?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div> <?php
-							}*/
-
+			var td = '<td><input type="checkbox" onchange="checkboxevent(this.id)" id="checkNu'+count+'" class="selezione_note"><label for="checkNu'+count+'">  </label></td>';				
+				td +='<td><textarea id="editable'+count+'" name="ric[]" class="form-control" placeholder="{{trans('messages.keyword_notes')}}"></textarea></td>';
+				td +='<td><div><span class="datapicker-icon"><i class="fa fa-calendar" aria-hidden="true"></i></span><span class="select-date"><input type="text" id="datepicker_to'+count+'" name="datepicker_to[]" class="form-control" value=""></span></div><select class="form-control" name="frequenza['+count+']"><?php                         	
 							foreach($frequency as $key => $frequencyval){
-                        		?><div class="cust-radio"><input type="radio" <?php if($key=='0'){echo 'checked';}?> name="frequenza['+count+']" id="frequenza_'+count+'<?php echo $frequencyval->rinnovo;?>" value="{{ $frequencyval->rinnovo }}" /><label for="frequenza_'+count+'<?php echo $frequencyval->rinnovo;?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div><?php
+                        		?><option <?php if($key=='0'){echo 'selected';}?> value="{{ $frequencyval->rinnovo }}"><?php echo $frequencyval->rinnovo.' Days'; ?></option><?php
 							}
 						?></td>';
-				td +='<td><div class="switch"><input type="checkbox" id="notifiche_'+count+'" name="notifiche['+count+']" value="1" /> <label for="notifiche_'+count+'"></label></div></td>';
+				td +='<td><input type="text" name="banca[]" class="form-control" value="" placeholder="{{trans('messages.keyword_bank')}}"><input type="text" name="cassa[]" class="form-control" value="" placeholder="{{trans('messages.keyword_case')}}"></td>';                
+				td +='<td><div class="switch"><input type="checkbox" id="notifiche_'+count+'" name="notifiche['+count+']" value="1" /> <label for="notifiche_'+count+'"></label></div><div>{{Auth::user()->name}}<input type="hidden" id="utente'+count+'" name="utente['+count+']" value="{{Auth::user()->id}}" ></div></td>';
 				tr += td+'</tr>'
 			$j("#tb").append(tr);	
 			$j("#datepicker_to"+ count).daterangepicker({
@@ -281,6 +264,7 @@ else {
 			});
 			//$j('#impedisci' + k).bind("click", impedisciModifica);
 			k++;
+			
 			/*			
 			var tabella = document.getElementById("tb");
 			var tr = document.createElement("tr");
@@ -348,22 +332,44 @@ else {
 	<!-- fine chiamata -->
 	<!-- colonna a sinistra -->
   <div class="row">
-	<div class="col-md-4">
-		<label for="nomeazienda">{{trans('messages.keyword_company_name')}} <span class="required">(*)</span></label>
-		<input value="{{ isset($corp->nomeazienda) ? $corp->nomeazienda : old('nomeazienda')}}" class="form-control" type="text" name="nomeazienda" id="nomeazienda" placeholder="{{trans('messages.keyword_company_name')}}"><br>
-		<label for="nomereferente">{{trans('messages.keyword_reference_name')}} <span class="required">(*)</span></label>
-		<input value="{{ isset($corp->nomereferente) ? $corp->nomereferente : old('nomereferente')}}" class="form-control" type="text" name="nomereferente" id="nomereferente" placeholder="{{trans('messages.keyword_reference_name')}}"><br>
-		<label for="telefonoazienda">{{trans('messages.keyword_primary_phone')}} <span class="required">(*)</span></label>
-		<input value="{{ isset($corp->telefonoazienda) ? $corp->telefonoazienda : old('telefonoazienda')}}" class="form-control" type="text" name="telefonoazienda" id="telefonoazienda" placeholder="{{trans('messages.keyword_primary_phone')}}"><br>
-		<label for="email">{{trans('messages.keyword_primary_email')}} <span class="required">(*)</span></label>
-		<input value="{{isset($corp->email) ? $corp->email : old('email')}}" class="form-control" type="email" name="email" id="email" placeholder="{{trans('messages.keyword_primary_email')}}"><br>
+	<div class="col-md-6">
+    	<div class="form-group">
+		<label for="nomeazienda">{{trans('messages.keyword_company_name')}}</label>
+		<input value="{{ isset($corp->nomeazienda) ? $corp->nomeazienda : old('nomeazienda')}}" maxlength="35" class="form-control required-input" type="text" name="nomeazienda" id="nomeazienda" placeholder="{{trans('messages.keyword_company_name')}}">
+        </div>
+        <div class="form-group">
+		<label for="nomereferente">{{trans('messages.keyword_reference_name')}}</label>
+		<input value="{{ isset($corp->nomereferente) ? $corp->nomereferente : old('nomereferente')}}" maxlength="35" class="form-control required-input" type="text" name="nomereferente" id="nomereferente" placeholder="{{trans('messages.keyword_reference_name')}}">
+        </div>
+        <div class="form-group">
+		<label for="telefonoazienda">{{trans('messages.keyword_primary_phone')}}</label>
+		<input value="{{ isset($corp->telefonoazienda) ? $corp->telefonoazienda : old('telefonoazienda')}}" maxlength="15" class="form-control required-input" type="text" name="telefonoazienda" id="telefonoazienda" placeholder="{{trans('messages.keyword_primary_phone')}}">
+        </div>
+        <div class="form-group">
+		<label for="email">{{trans('messages.keyword_primary_email')}}</label>
+		<input value="{{isset($corp->email) ? $corp->email : old('email')}}" class="form-control required-input" type="email" name="email" id="email" placeholder="{{trans('messages.keyword_primary_email')}}">
 		<datalist id="settori"></datalist>
-		<label for="settore">{{trans('messages.keyword_sector')}} <span class="required">(*)</span></label>
-		<input value="{{isset($corp->settore) ? $corp->settore : old('settore')}}" list="settori" class="form-control" type="text" id="settore" name="settore" placeholder="{{trans('messages.keyword_seek_an_industry')}}"><br>				
+        </div>
+        <div class="form-group">
+		<label for="settore">{{trans('messages.keyword_sector')}} </label>
+		<?php 
+		$arrSector = json_decode(file_get_contents(asset('public/json/settori.json')));		
+		?>
+		<select class="form-control select2_sector required-input" id="settore" name="settore">
+		<option></option>
+		@foreach($arrSector as $keysector => $valsector)			
+			<option value="{{$valsector}}" <?php echo (isset($corp->settore) && $corp->settore == $valsector) ? 'selected' : '';  ?>>{{$valsector}}</option>
+		@endforeach
+		</select>
+		<?php /*<input value="{{isset($corp->settore) ? $corp->settore : old('settore')}}" list="settori" class="form-control required-input" type="text" id="settore" name="settore" placeholder="{{trans('messages.keyword_seek_an_industry')}}">*/?>
+		<script type="text/javascript">
+    		$j(".select2_sector").select2({ containerCssClass : "required-input" });
+		</script>
+        </div>
 	</div>
-     <div class="col-md-8">
-	<div class=""><label>{{trans('messages.keyword_address')}} <span class="required">(*)</span></label><br>
-	 <input value="{{ isset($corp->indirizzo) ? $corp->indirizzo : old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text"
+     <div class="col-md-6">
+	<div class=""><div class=""><label>{{trans('messages.keyword_address')}} </label></div>
+	 <input value="{{ isset($corp->indirizzo) ? $corp->indirizzo : old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls required-input" type="text"
         placeholder="{{trans('messages.keyword_enter_an_address')}} (*)">
     <div id="type-selector" class="controls">
       <input type="radio" name="type" id="changetype-all" checked="checked">
@@ -385,28 +391,36 @@ else {
 	@if($action=='edit')
     <div class="row">
 	<div class="col-md-6">
-		<br>
+		<div class="form-group">
 		<label for="cellulareazienda">{{trans('messages.keyword_secondary_telephone')}} </label>
-		<input value="{{isset($corp->cellulareazienda) ? $corp->cellulareazienda : ""}}" class="form-control" type="text" name="cellulareazienda" id="cellulareazienda" placeholder="{{trans('messages.keyword_secondary_telephone')}}"><br>
+		<input value="{{isset($corp->cellulareazienda) ? $corp->cellulareazienda : ""}}" class="form-control" maxlength="15" type="text" name="cellulareazienda" id="cellulareazienda" placeholder="{{trans('messages.keyword_secondary_telephone')}}">
+        </div>
+        <div class="form-group">
 		<label for="emailsecondaria">{{trans('messages.keyword_secondary_email')}}</label>
-		<input value="{{isset($corp->emailsecondaria) ? $corp->emailsecondaria : old('emailsecondaria')}}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="{{trans('messages.keyword_secondary_email')}}"><br>
+		<input value="{{isset($corp->emailsecondaria) ? $corp->emailsecondaria : old('emailsecondaria')}}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="{{trans('messages.keyword_secondary_email')}}">
+        </div>
+        <div class="form-group">
 		<label for="fax">Fax</label>
-		<input value="{{isset($corp->fax) ? $corp->fax :""}}" class="form-control" type="text" name="fax" id="fax" placeholder="Fax"><br>
+		<input value="{{isset($corp->fax) ? $corp->fax :""}}" maxlength="15" class="form-control" type="text" name="fax" id="fax" placeholder="Fax">
+        </div>
+        <div class="form-group">
 		<label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
 		<select name="statoemotivo" class="form-control" id="statoemotivo">
 			<!-- selectedemotionState -->
 			<option></option>
 			@if($selectedemotionState!=null)
 				@foreach($emotionState as $statoemotivo)
-					<option @if($statoemotivo->id == $selectedemotionState->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+				<?php $label = (!empty($statoemotivo->language_key)) ?  ucwords(strtolower(trans('messages.'.$statoemotivo->language_key))) : (($statoemotivo->name)); ?>
+					<option @if($statoemotivo->id == $selectedemotionState->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{$label}}</option>
 				@endforeach
 			@else
 				@foreach($emotionState as $statoemotivo)
-					<option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
+				<?php $label = (!empty($statoemotivo->language_key)) ?  ucwords(strtolower(trans('messages.'.$statoemotivo->language_key))) : ucwords(strtolower($statoemotivo->name)); ?>
+					<option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{$label}}</option>
 				@endforeach
 			@endif
 		</select>
-		<br>
+        </div>
 		<script>
 		var yourSelect = document.getElementById( "statoemotivo" );
 			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
@@ -418,18 +432,26 @@ else {
 	</div>
 	<!-- colonna a destra -->
 	<div class="col-md-6">
-		<br>
+		<div class="form-group">
 		<label for="piva">{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}</label>
-		<input value="{{isset($corp->piva) ? $corp->piva : ""}}" class="form-control" type="text" name="piva" id="piva" placeholder="{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}"><br>
+		<input value="{{isset($corp->piva) ? $corp->piva : ""}}" class="form-control" type="text" name="piva" id="piva" placeholder="{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}">
+        </div>
+        <div class="form-group">
 		<label for="cf">{{trans('messages.keyword_credit_card')}} </label>
-		<input value="{{isset($corp->cf) ? $corp->cf : ""}}" class="form-control" type="text" name="cf" id="cf" placeholder="{{trans('messages.keyword_credit_card')}}"><br>
+		<input value="{{isset($corp->cf) ? $corp->cf : ""}}" maxlength="15" class="form-control" type="text" name="cf" id="cf" placeholder="{{trans('messages.keyword_credit_card')}}">
+        </div>
+        <div class="form-group">
 		<label for="iban">IBAN</label>
-		<input value="{{isset($corp->iban) ? $corp->iban : ""}}" class="form-control" type="text" name="iban" id="iban" placeholder="IBAN"><br>
-        <label for="swift">Swift</label>
-		<input value="{{isset($corp->swift) ? $corp->swift : ""}}" class="form-control" type="text" name="swift" id="swift" placeholder="swift"><br>
-		<br>
+		<input value="{{isset($corp->iban) ? $corp->iban : ""}}" class="form-control" type="text" name="iban" id="iban" placeholder="IBAN">
+        </div>
+        <div class="form-group">
+        <label for="swift">{{trans('messages.keyword_swift')}}</label>
+		<input value="{{isset($corp->swift) ? $corp->swift : ""}}" class="form-control" type="text" name="swift" id="swift" placeholder="{{trans('messages.keyword_swift')}}">
+        </div>
 	</div></div>
 	@endif
+ 
+ 
  
   <div class="row">
    <?php /*<div class="col-md-4">
@@ -456,29 +478,85 @@ else {
 	</script>
     
     <div class="col-md-6">
-    	<!-- sede legale -->
-        <br><label for="sedelegale">{{trans('messages.keyword_registered_office')}}</label>
-        	<textarea rows="9" title="{{trans('messages.keyword_headquarters_estimate')}}" class="form-control" name="sedelegale" id="sedelegale" placeholder="{{trans('messages.keyword_registered_office')}}">{{ isset($corp->sedelegale) ? $corp->sedelegale : old('sedelegale')  }}</textarea>
+      <div class="row modifica-set-textarea">
+      	<div class="col-md-6">
+    		<!-- sede legale -->
+        	<div class="form-group"><label for="sedelegale">{{trans('messages.keyword_registered_office')}}</label>
+        		<textarea rows="9" title="{{trans('messages.keyword_headquarters_estimate')}}" class="form-control" name="sedelegale" id="sedelegale" placeholder="{{trans('messages.keyword_registered_office')}}">{{ isset($corp->sedelegale) ? $corp->sedelegale : old('sedelegale')  }}</textarea></div>
+        </div>
+          <div class="col-md-6">
+        	<div class="form-group"><label for="indirizzospedizione">{{trans('messages.keyword_shipping_address')}}</label>
+        	<textarea rows="9" title="Sede dell'ente che verrà riporata nel preventivo" class="form-control" name="indirizzospedizione" id="indirizzospedizione" placeholder="{{trans('messages.keyword_shipping_address')}}">{{ isset($corp->indirizzospedizione) ? $corp->indirizzospedizione :  old('sedelegale') }}</textarea>
+            </div>
+        </div>
+        
+        
+        
+          <div class="col-md-12"> <label for="partecipanti">{{trans('messages.keyword_participants')}}</label></div>
+	            <div class="col-md-10">
+                	<div class="form-group">
+                   
+	                <select class="form-control" id="utenti">
+                	    @foreach($users as $utente)
+                	    <option value="{{$utente->id}}">{{$utente->id.' | '.ucwords(strtolower($utente->name)) }}</option>
+                	    @endforeach
+        	        </select>
+                    </div>
+	            </div>
+	            @if(checkpermission('1', '12', 'scrittura','true'))
+	            <div class="col-md-2 text-right button-marg0">
+	                <a class="btn btn-warning" id="aggiungiPartecipante"><i class="fa fa-plus"></i></a>
+	                <a class="btn btn-danger"  id="elimina"><i class="fa fa-trash"></i></a>
+	            </div>
+	            @endif
+	        
+        
+       
+        
         <!-- /sede legale -->
+       </div> 
     </div>
+    
+    
     <div class="col-md-6">
     	<!-- logo resp tel participant -->
-		<br><label for="skype_id">Skype Id</label>
-		<input value="{{isset($corp->skype_id) ? $corp->skype_id : old('skype_id')}}" class="form-control" type="text" name="skype_id" id="skype_id" placeholder="Skype Id">
-		
-	<label for="{{trans('messages.keyword_logo')}}">{{trans('messages.keyword_logo')}}</label>
-	<?php echo Form::file('logo', ['class' => 'form-control']); ?><br>
+		<div class="form-group">
+        	<label for="skype_id">Skype Id</label>
+			<input value="{{isset($corp->skype_id) ? $corp->skype_id : old('skype_id')}}" class="form-control" type="text" name="skype_id" id="skype_id" placeholder="Skype Id">
+        </div>
+		<div class="form-group">
+        	<div class="row">
+            	<div class="col-md-10">
+                    <label for="{{trans('messages.keyword_logo')}}">{{trans('messages.keyword_logo')}}</label>
+                    <?php echo Form::file('logo', ['class' => 'form-control','id'=>'logo']); ?>
+                    <label for="logo" generated="true" class="error none" id="logo_validatio_msg"></label>
+                </div>
+                <div class="col-md-2 logopreview" id="logopreview"> <div class="img-border-preview" style="<?php echo (isset($corp->logo)) ? 'display:block' :'display:none';?>"> <?php if(isset($corp->logo)) { ?> <img src="{{url('/storage/app/images/').'/'.$corp->logo}}" height="100" width="100" class="img-responsive" ><?php } ?>
+                </div></div>
+                
+            </div>    
+        </div>    
     
-    <label for="responsabilelanga">{{trans('messages.keyword_responsible')}} LANGA <span class="required">(*)</span></label>
-		<select title="{{trans('messages.keyword_responsible_associated_body')}}" name="responsabilelanga" id="responsabilelanga" class="form-control" 
+    
+    <div class="row">
+    <div class="col-md-6">
+    	<div class="form-group">
+    <label for="responsabilelanga">{{trans('messages.keyword_responsible')}} LANGA</label>
+		<select title="{{trans('messages.keyword_responsible_associated_body')}}" name="responsabilelanga" id="responsabilelanga" class="form-control required-input" 
 		 onchange="trovaTelefono()">
 			<option value="">-- {{trans('messages.keyword_select')}} --</option>
 			@for($i = 1; $i < count($users); $i++)
-				<option value="{{$users[$i]->name}}" @if(isset($corp->responsabilelanga) && $corp->responsabilelanga == $users[$i]->name) selected @endif >{{ $users[$i]->id.' | '.$users[$i]->name }}</option>
+				<option val="{{ $users[$i]->id}}" value="{{$users[$i]->name}}" @if(isset($corp->responsabilelanga) && $corp->responsabilelanga == $users[$i]->name) selected @endif >{{ $users[$i]->id.' | '.ucwords(strtolower($users[$i]->name)) }}</option>
 			@endfor
 		</select>
-        <br><label for="telefonoresponsabile">{{trans('messages.keyword_responsible_phone_langa')}}</label>
-		<input class="form-control" type="text" name="telefonoresponsabile" value="<?php if(isset($corp->telefonoresponsabile)){ echo $corp->telefonoresponsabile;}?>" readonly id="telefonoresponsabile" placeholder="{{trans('messages.keyword_responsible_phone_langa')}}" /><br>
+        	</div>
+        	<input type="hidden" name="responsabilelangaid" id="responsabilelangaid" value="<?php echo isset($corp->responsiblelang_id) ? $corp->responsiblelang_id : '0';?>">
+    </div>    
+     <div class="col-md-6">
+     	<div class="form-group">
+     	 
+     <label for="telefonoresponsabile">{{trans('messages.keyword_responsible_phone_langa')}}</label>
+		<input class="form-control" type="text" name="telefonoresponsabile" value="<?php if(isset($corp->telefonoresponsabile)){ echo $corp->telefonoresponsabile;}?>" readonly id="telefonoresponsabile" placeholder="{{trans('messages.keyword_responsible_phone_langa')}}" />
 
 		<?php /*<div title="Se Sì, ente mostrato solamente all'utente che l'ha creato e all'admin" style="text-align:right">
 			<label for="privato">Ente Privato?</label>
@@ -488,13 +566,16 @@ else {
 			No <input type="radio" @if(isset($corp->id_cliente) && $corp->id_cliente == 0) checked @endif value="0" name="cliente">
 			Sì <input type="radio" @if(isset($corp->id_cliente) && $corp->id_cliente != 0) checked @endif value="1" name="cliente">
 		</div>*/?>
+        	</div>
+    </div>
+    </div>
+    
         
 	    </div><!-- FINE 3 COLONNE (NOTE SEDE LOGO/RESP/TEL/PARTECIPANTI) -->
   </div>
   @if($action=='edit')
 <div class="row">
-	<div class="col-md-12">
-    <div class="row">
+	
     	<?php /*?><div class="col-md-4">
 	<br><label for="tipi[]">Tipo</label><br>
 		<!-- tipiselezionati -->
@@ -520,32 +601,12 @@ else {
 		</tr>
 		</table>
 	</div></div><?php */?>
-    <div class="col-md-6">
-        	<br><label for="indirizzospedizione">{{trans('messages.keyword_shipping_address')}}</label>
-        	<textarea rows="9" title="Sede dell'ente che verrà riporata nel preventivo" class="form-control" name="indirizzospedizione" id="indirizzospedizione" placeholder="{{trans('messages.keyword_shipping_address')}}">{{ isset($corp->indirizzospedizione) ? $corp->indirizzospedizione :  old('sedelegale') }}</textarea>
-        </div>
-		
-	<div class="col-md-6">
-     		<br><label for="partecipanti">{{trans('messages.keyword_participants')}}</label><br>
-	        
-              <div class="row">
-            <div class="col-md-12">
-            	  <div class="row">
-	            <div class="col-xs-6">
-	                <select class="form-control" id="utenti">
-                	    @foreach($users as $utente)
-                	    <option value="{{$utente->id}}">{{$utente->id.' | '.$utente->name}}</option>
-                	    @endforeach
-        	        </select>
-	            </div>
-	            <div class="col-xs-6">
-	                <a class="btn btn-warning" id="aggiungiPartecipante"><i class="fa fa-plus"></i></a>
-	                <a class="btn btn-danger"  id="elimina"><i class="fa fa-trash"></i></a>
-	            </div>
-	        </div><br>
+	<div class="col-md-12">
+     		
+	      
          
-            <div class="row">
-	        <div class="col-md-12 set-height">
+            
+	        <div class="set-height">
 	            <table class="table table-striped table-bordered">
 	                <thead>
 	                    <th>#</th>
@@ -557,7 +618,7 @@ else {
 						@foreach($participant as $partecipante)
 	                        <tr>
 	                            <td>
-	                                <input type="checkbox" id="partecipantichk_<?php echo $partecipante->id_user.$ip;?>" class="selezione">
+	                                <input type="checkbox" onchange="checkboxevent(this.id)" id="partecipantichk_<?php echo $partecipante->id_user.$ip;?>" class="selezione">
 	                                <label for="partecipantichk_<?php echo $partecipante->id_user.$ip;?>"></label>
 	                            </td>
 	                            <td>
@@ -588,6 +649,7 @@ else {
 	                </tbody>
 
 	                <script>
+
 	                    var selezione = [];
 	                    var n = 0;
 	                    var k = 0;
@@ -597,11 +659,15 @@ else {
 	                        var check = document.createElement("td");
 	                        var checkbox = document.createElement("input");
 	                        checkbox.id = "partecipantichk"+$j("#utenti option:selected").val()+k;
-	                         var checkboxlabel = document.createElement("label");
+
+	                        var checkboxlabel = document.createElement("label");
 	                        checkboxlabel.for = "partecipantichk"+$j("#utenti option:selected").val()+k;
 							checkboxlabel.setAttribute('for', "partecipantichk"+$j("#utenti option:selected").val()+k);
 	                        checkbox.type = "checkbox";
 	                        checkbox.className = "selezione";
+	                        checkbox.onchange="checkboxevent(this.id)";
+	                        checkbox.setAttribute('onchange','checkboxevent(this.id)');
+
 	                       
 	                        check.appendChild(checkbox);
 	                        check.appendChild(checkboxlabel);
@@ -661,13 +727,13 @@ else {
 	                </script>
 	            </table>
 	        </div></div>
-            </div></div></div>
-        </div></div></div>
+            </div>
+       
         @endif
       <!-- /partecipanti -->
 
 <script>
-	setTimeout(function() {
+	<?php /*setTimeout(function() {
 		var cellulari = ["<?php
 			for($i=1;$i<count($users);$i++) {
 				if($i == count($users) - 1)
@@ -693,7 +759,7 @@ else {
 				}
 			}
 			$j('#telefonoresponsabile').val(cellulari[k]);
-	}, 100);
+	}, 100);*/?>
 	function trovaTelefono() {
 		var cellulari = ["<?php
 			for($i=1;$i<count($users);$i++) {
@@ -720,6 +786,8 @@ else {
 				}
 			}
 			$j('#telefonoresponsabile').val(cellulari[k]);
+			var responsabilelangaId = $j("#responsabilelanga option:selected" ).attr('val');
+			$j("#responsabilelangaid").val(responsabilelangaId);			
 	}
 </script>
 <?php /*?><div class="col-md-12">
@@ -862,13 +930,20 @@ else {
             <!-- FINE COSTI -->
 			
  </div><?php */?>
- <div class="col-md-6 tpbtm10">
- </div>
+
+<div class="row"> 
+<div class="col-md-6 tpbtm10">
+</div>
 <div class="col-md-6 tpbtm10 text-right">
-		@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '2')
-		<button onclick="mostra2()" id="btnSubmitEnti" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+		@if(checkpermission('1', '12', 'scrittura','true'))
+		<button onclick="mostra2()" id="btnSubmitEnti" type="submit" class="btn btn-warning marg0">{{trans('messages.keyword_save')}}</button>
 		@endif
-	</div>
+</div>
+</div>
+    
+    
+    
+    
 <div class="footer-svg">
   <img src="{{url('images/FOOTER3-ORIZZONTAL_ENTITY.svg')}}" alt="footer enti image">
 </div>
@@ -885,7 +960,7 @@ $j('#btnSubmiTop').on("click", function() {
 	$j("#btnSubmitEnti").click();
 });
 // Carica i settori nel datalist dal file.json
-var datalist = document.getElementById("settori");
+/*var datalist = document.getElementById("settori");
 var xhr = new XMLHttpRequest();
 xhr.onreadystatechange = function(response) {
 	if (xhr.readyState === 4 && xhr.status === 200) {
@@ -898,7 +973,7 @@ xhr.onreadystatechange = function(response) {
     }
 }
 xhr.open('GET', "{{ asset('public/json/settori.json') }}", true);
-xhr.send();
+xhr.send();*/
 </script>
 <script>
       // This example requires the Places library. Include the libraries=places
@@ -1004,11 +1079,11 @@ xhr.send();
                 telefonoazienda: {
                     required: true,                    
                     maxlength: 15,
-                    digits: true
+                   
                 },
                 cellulareazienda:{
                 	maxlength: 15,
-                    digits: true	
+                    //digits: true	
                 },
                 fax:{
                 	maxlength: 15,
@@ -1037,50 +1112,146 @@ xhr.send();
             },
             messages: {
                 nomeazienda: {
-                    required: "<?php echo trans('messages.keyword_please_enter_company_name');?>",
-                    maxlength: "<?php echo trans('messages.keyword_company_name_must_be_less_than_35_characters');?>"
+                    required: "<?php echo stringformate(trans('messages.keyword_please_enter_company_name'));?>",
+                    maxlength: "<?php echo stringformate(trans('messages.keyword_company_name_must_be_less_than_35_characters'));?>"
                 },
                 nomereferente: {
-					required: "<?php echo trans('messages.keyword_please_enter_reference_name');?>",
-                    maxlength: "<?php echo trans('messages.keyword_the_reference_name_must_be_less_than_35_characters');?>"
+					required: "<?php echo stringformate(trans('messages.keyword_please_enter_reference_name'));?>",
+                    maxlength: "<?php echo stringformate(trans('messages.keyword_the_reference_name_must_be_less_than_35_characters'));?>"
                 },
                 telefonoazienda: {
-                    required: "<?php echo trans('messages.keyword_please_enter_primary_phone'); ?>",                    
-                    maxlength: "<?php echo trans('messages.keyword_primary_phone_must_be_less_than_15');?>",
-                    digits:"<?php echo trans('messages.keyword_please_enter_valid_number');?>",
+                    required: "<?php echo stringformate(trans('messages.keyword_please_enter_primary_phone')); ?>",                    
+                    maxlength: "<?php echo stringformate(trans('messages.keyword_primary_phone_must_be_less_than_15'));?>",
+                   // digits:"<?php //echo stringformate(trans('messages.keyword_please_enter_valid_number'));?>",
                 },
                 cellulareazienda: {                  
-                    maxlength: "<?php echo trans('messages.keyword_number_must_be_less_than_15');?>",
-                    digits:"<?php echo trans('messages.keyword_please_enter_valid_number');?>",
+                    maxlength: "<?php echo stringformate(trans('messages.keyword_number_must_be_less_than_15'));?>",
+                   // digits:"<?php //echo stringformate(trans('messages.keyword_please_enter_valid_number'));?>",
                 },
                 cf:{
-                 	maxlength: "<?php echo trans('messages.keyword_number_must_be_less_than_19');?>",
-                    digits:"<?php echo trans('messages.keyword_please_enter_valid_number');?>",
+                 	maxlength: "<?php echo stringformate(trans('messages.keyword_number_must_be_less_than_19'));?>",
+                    digits:"<?php echo stringformate(trans('messages.keyword_please_enter_valid_number'));?>",
                 },                	
                 fax:{
-                	maxlength: "<?php echo trans('messages.keyword_number_must_be_less_than_15');?>",
-                    digits:"<?php echo trans('messages.keyword_please_enter_valid_number');?>",
+                	maxlength: "<?php echo stringformate(trans('messages.keyword_number_must_be_less_than_15'));?>",
+                    digits:"<?php echo stringformate(trans('messages.keyword_please_enter_valid_number'));?>",
                 },
                 email: {
-                    required: "<?php echo trans('messages.keyword_please_enter_primary_email');?>",   
-                    email: "<?php echo trans('messages.keyword_please_enter_a_valid_primary_email');?>"                 
+                    required: "<?php echo stringformate(trans('messages.keyword_please_enter_primary_email'));?>",   
+                    email: "<?php echo stringformate(trans('messages.keyword_please_enter_a_valid_primary_email'));?>"                 
                 },
                 emailsecondaria: {
-                    email: "<?php echo trans('messages.keyword_enter_a_valid_secondary_email');?>"
+                    email: "<?php echo stringformate(trans('messages.keyword_enter_a_valid_secondary_email'));?>"
                 },
                 responsabilelanga: {   
-                    required: "<?php echo trans('messages.keyword_please_select_a_responsabile_langa');?>"                
+                    required: "<?php echo stringformate(trans('messages.keyword_please_select_a_responsabile_langa'));?>"                
                 },
 				indirizzo:{
-					required: "<?php echo trans('messages.keyword_please_enter_a_address');?>"                
+					required: "<?php echo stringformate(trans('messages.keyword_please_enter_a_address'));?>"                
 				},
 				settore:{
-					required: "<?php echo trans('messages.keyword_please_select_a_sector');?>"                
+					required: "<?php echo stringformate(trans('messages.keyword_please_select_a_sector'));?>"                
 				}
             }
 
         });
+
+
+        var selezione = [];
+var indici = [];
+var n = 0;
+
+/*$(".selezione_note input[type=checkbox]:checked").each(function() {
+	alert("cc");
+    $(this).closest("tr").addClass("selected");
+});*/
+
+/*$(".selezione_note input[type=checkbox]").on("change", function() {	
+	alert("cc");
+    $(this).closest("tr").toggleClass("selected");
+});*/
+
+$('.table').on('click-row.bs.table', function (row, tr, el) {
+	alert("cc");
+    var cod = $(el[0]).children()[0].innerHTML;
+	if (!selezione[cod]) {        
+        $('#table tr.selected').removeClass("selected");       
+		$(el[0]).addClass("selected");
+		selezione[cod] = cod;
+		indici[n] = cod;
+		n++;
+	} else {        
+		$(el[0]).removeClass("selected");
+		selezione[cod] = undefined;
+		for(var i = 0; i < n; i++) {
+			if(indici[i] == cod) {
+				for(var x = i; x < indici.length - 1; x++)
+					indici[x] = indici[x + 1];
+				break;	
+			}
+		}
+		n--;
+
+        $('#table tr.selected').removeClass("selected");       
+        $(el[0]).addClass("selected");
+        selezione[cod] = cod;
+        indici[n] = cod;
+        n++;
+	}
+});
+
+
 	  });
+function checkboxevent(id){		
+	$this=$('#'+id);
+	//$('.selezione_note:checkbox').change(function(){	
+	    if($this.is(":checked")) {    	
+	    	$this.closest("tr").addClass("selected");
+	    } else {    	
+	        $this.closest("tr").removeClass("selected");
+	    }
+	//});
+}
+
+var $jp = jQuery.noConflict();
+function readURL(input) {
+if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+    	$jp('#logopreview').html(' <div class="img-border-preview" style="display:block;"> <img height="100" width="100" src="'+e.target.result+'"></div>');
+        /*$('#logopreview').attr('src', e.target.result);*/
+    }
+    reader.readAsDataURL(input.files[0]);
+    }
+}
+
+$jp("#logo").change(function(){	
+	var ext = $(this).val().split('.').pop().toLowerCase();
+	var filessize = this.files[0].size/1024/1024;/*MB*/		
+	if(($.inArray(ext, ['gif','png','jpg','jpeg','svg']) == -1) || (filessize > 2)) {
+		$(this).val("");
+		$("#logo_validatio_msg").show();
+		$("#logo_validatio_msg").html("{{ trans('messages.keyword_please_upload_a_valid__image') }}");	    
+	}
+	else {
+		$("#logo_validatio_msg").html("");	    
+		readURL(this);	
+	}
+});
+$jp(window).load(function()
+{
+   var phones = [{ "mask": "(###) ###-####"}, { "mask": "(###) ###-##############"}];
+    $jp('#telefonoazienda').inputmask({ 
+        mask: phones, 
+        greedy: false, 
+        definitions: { '#': { validator: "[0-9]", cardinality: 1}} });
+
+ $jp('#cellulareazienda').inputmask({ 
+        mask: phones, 
+        greedy: false, 
+        definitions: { '#': { validator: "[0-9]", cardinality: 1}} });
+});
+
     </script>
 	<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&sensor=false&libraries=places&callback=initMap"
         async defer></script>-->

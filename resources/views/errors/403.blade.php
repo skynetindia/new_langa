@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Azione non autorizzata.</title>
+        <title>{{trans('messages.keyword_unauthorized_action.')}}</title>
 <link rel="shortcut icon" href="{{asset('public/favicon.ico')}}" />
         <link rel="stylesheet" href="{{asset('public/css/stylesheet.css')}}">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
@@ -22,8 +22,8 @@
     </head>
     <body>
 		<div class="container">
-			<h1 style="text-align:center;color:#ffffff">Non ti è permesso l'accesso, torna 
-			<a href="javascript:window.history.back();" style="text-decoration: none;color:#ffffff"><strong>indietro da qui</strong></a></h1>
+			<h1 style="text-align:center;color:#ffffff">{{trans('messages.keyword_you_are_not_allowed_access,_come_back')}} 
+			<a href="javascript:window.history.back();" style="text-decoration: none;color:#ffffff"><strong>{{trans('messages.keyword_back_from_here')}}</strong></a></h1>
             <img class="img-responsive" src="{{asset('images/403_easy.jpg')}}"></img>
         </div>
     </body>

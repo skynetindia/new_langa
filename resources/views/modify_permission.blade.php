@@ -13,33 +13,37 @@
     document.write(msg);
     </script> 
 @endif
+<div class="res-role-permission">
 
 <h1>{{ trans('messages.keyword_permission') }}</h1>
 <hr>
 <h5>{{ trans('messages.keyword_profiling') }} Easy <b> LANGA </b></h5>
 <hr>
-<?php $ruolo = DB::table('ruolo_utente')->where('is_delete', '=', 0)->get(); ?>
+<?php $ruolo = DB::table('ruolo_utente')->where('is_delete', '=', 0)->where('ruolo_id', '!=', '0')->get(); ?>
 <?php echo Form::open(array('url' => '/store-permessi', 'id' => 'addroleform', 'name' => 'addroleform' )) ?>
-<div class="col-md-12 text-right">
-<div class="col-md-6"></div>
+
+<div class="row">
+<div class="col-md-12 col-sm-12 col-xs-12 text-right">
+
 <?php $currentRoleName = "";?>
   @if(isset($ruolo_id))    
-    <div class="col-md-3 form-group permission-role">
+    <div class="form-group permission-role">
     <label for="dipartimento">{{ trans('messages.keyword_profiling') }} <span class="required">(*)</span></label>
     <select id="nome_ruolo" class="form-control" name="nome_ruolo">
           @foreach($ruolo as $ruolo)
           <?php if($ruolo_id==$ruolo->ruolo_id){
               $currentRoleName = $ruolo->nome_ruolo;
             }
-          ?><option  value="{{ $ruolo->ruolo_id }}" <?php echo ($ruolo_id==$ruolo->ruolo_id) ? 'selected="selected"':'';?>>{{ $ruolo->nome_ruolo }}</option>      
+          ?><option  value="{{ $ruolo->ruolo_id }}" <?php echo ($ruolo_id==$ruolo->ruolo_id) ? 'selected="selected"':'';?>>{{ ucwords(strtolower($ruolo->nome_ruolo)) }}</option>      
           @endforeach
     </select>
   </div>  
   @endif 
-  <div class="col-md-3 form-group permission-role">
+  <div class="form-group permission-role">
   <label for="dipartimento">{{trans('messages.keyword_profiling_name')}} <span class="required">(*)</span></label>
-    <input type="text" name="new_ruolo" class="form-control pull-left" value="{{$currentRoleName}}" placeholder="{{trans('messages.keyword_profiling_name')}}">
+    <input type="text" name="new_ruolo" class="form-control pull-left" value="{{ ucwords(strtolower($currentRoleName)) }}" placeholder="{{trans('messages.keyword_profiling_name')}}">
   </div>
+</div>
 </div>
 <?php
 
@@ -217,8 +221,8 @@
 </script>
 <div class="row">
 <div class="col-md-12">
-<div class="space30"></div>
   <button type="submit" class="btn btn-warning">{{ trans('messages.keyword_save') }}</button>
+</div>
 </div>
 </div>
 <?php echo Form::close(); ?> 

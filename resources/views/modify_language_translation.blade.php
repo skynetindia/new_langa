@@ -1,11 +1,27 @@
 @extends('adminHome')
 @section('page') 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script> 
+
+<?php /*<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>*/?>
+
+  
 <!--<link href="{{asset('build/js/jquery.datetimepicker.min.css')}}" rel="stylesheet">
 <script src="{{asset('build/js/jquery.datetimepicker.full.js')}}"></script>-->
+<div class="row">
+<div class="col-sm-6">
 <h1><?php echo (isset($language_transalation->language_key) ) ? trans('messages.keyword_edit_language_translation') : trans('messages.keyword_add').' '.trans('messages.keyword_language_translation');  ?></h1>
+</div>
+<div class="col-sm-6">
+        <div class="form-group">
+          <label>{{trans('messages.keyword_search')}}</label>
+          <input type="text" class="form-control" id="txtsearchpharse" value="">           
+        </div>
+      </div>
+      </div>
 <hr>
 @if(!empty(Session::get('msg'))) 
 <script>
@@ -35,7 +51,7 @@ else {
            <input type="hidden" name="nextrecordid" value="{{isset($NextRecord[0]->id) ? $NextRecord[0]->id : '' }}">
            <input type="hidden" name="previouserecordid" value="{{isset($PreviouseRecord[0]->id) ? $PreviouseRecord[0]->id : '' }}">
         </div>
-      </div>
+      </div>      
       <div class="col-sm-12">
         <div class="form-group">
           <ul class="nav nav-tabs">
@@ -85,7 +101,7 @@ else {
   <a href="{{url('/admin/languagetranslation/').'/'.$language_selected->id}}" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a>
   @endif
 </div>
-<?php echo Form::close(); ?> 
+<?php echo Form::close(); ?>   
 <script>
 function punto() {
 	$('#prova').val($('#pac-input').val());
@@ -142,4 +158,163 @@ xhr.send();
         });
 	  });
     </script> 
+<?php /*<strong><hr></strong>
+<a href="{{ url('/admin/add/languagetranslation') }}" id="create" class="btn btn-warning" name="create" title=" {{trans('messages.keyword_create_a_new_language')}}"><i class="fa fa-plus"></i>  </a>
+
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" name="update" title=" {{trans('messages.keyword_edit_last_selected_format')}}"><i class="fa fa-pencil"></i>  </a>
+  <?php /*<a id="duplicate" onclick="multipleAction('duplicate');" style="display:inline;">
+<button class="btn btn-info" type="button" name="duplicate" title="Duplica - Duplica gli enti selezionati"><i class="fa fa-files-o"></i></button>
+</a>*?>
+  <a id="delete" onclick="multipleAction('delete');" class="btn btn-danger" name="remove" title=" {{trans('messages.keyword_delete_selected_format')}} "><i class="fa fa-trash"></i></a> 
+
+<table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php  echo url('admin/languagetranslation/json').'/'.$language_transalation->code;?>" data-classes="table table-bordered" id="table">
+  <thead>
+  <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
+    <th data-field="language_label" data-sortable="true">{{trans('messages.keyword_language_label')}}</th>
+    <th data-field="language_value" data-sortable="true">{{trans('messages.keyword_language_phase')}}</th>
+    <th data-field="language_key" data-sortable="true">{{trans('messages.keyword_phrase_key')}}</th>
+      </thead>
+</table>
+*/?>
+<script>
+var selezione = [];
+var indici = [];
+var n = 0;
+
+$('#table').on('click-row.bs.table', function (row, tr, el) {
+  var cod = $(el[0]).children()[0].innerHTML;
+  if (!selezione[cod]) {
+        $('#table tr.selected').removeClass("selected");       
+    $(el[0]).addClass("selected");
+    selezione[cod] = cod;
+    indici[n] = cod;
+    n++;
+  } else {
+    $(el[0]).removeClass("selected");
+    selezione[cod] = undefined;
+    for(var i = 0; i < n; i++) {
+      if(indici[i] == cod) {
+        for(var x = i; x < indici.length - 1; x++)
+          indici[x] = indici[x + 1];
+        break;  
+      }
+    }
+    n--;
+        $('#table tr.selected').removeClass("selected");       
+        $(el[0]).addClass("selected");
+        selezione[cod] = cod;
+        indici[n] = cod;
+        n++;
+  }
+});
+
+
+function check() {
+
+  return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}}: " + n + " {{trans('messages.keyword_language_phrases')}}?");
+}
+function multipleAction(act) {
+  var link = document.createElement("a");
+  var clickEvent = new MouseEvent("click", {
+      "view": window,
+      "bubbles": true,
+      "cancelable": false
+  });
+        var error = false;
+    switch(act) {
+      case 'delete':
+                                
+        link.href = "{{ url('/admin/languagetranslation/delete') }}" + '/';
+        if(check() && n!= 0) {
+                        for(var i = 0; i < n; i++) {                            
+                            $.ajax({
+                                type: "GET",
+                                url : link.href + indici[i],
+                                error: function(url) {
+                                    
+                                    if(url.status==403) {
+                                        link.href = "{{ url('/admin/languagetranslation/delete') }}" + '/' + indici[n];
+                                        link.dispatchEvent(clickEvent);
+                                        error = true;
+                                    }
+                                }                                
+                            });
+                        }                        
+                        selezione = undefined;
+                        if(error === false)
+                            setTimeout(function(){location.reload();},100*n);
+              
+            n = 0;
+                    }
+          
+      break;
+      case 'modify':
+                if(n != 0) {
+          n--;
+          link.href = "{{ url('/admin/modify/languagetranslation') }}" + '/' + indici[n];
+          n = 0;
+          selezione = undefined;
+          link.dispatchEvent(clickEvent);
+        }
+      break;
+            case 'newclient':
+                if(n!=0) {
+                    n--;
+                    link.href = "{{ url('/enti/nuovocliente/corporation') }}" + '/' + indici[n];
+                    n = 0;
+                    selezione = undefined;
+                    link.dispatchEvent(clickEvent);
+                }
+            break;
+      case 'duplicate':
+        link.href = "{{ url('/enti/duplicate/corporation') }}" + '/';
+                                for(var i = 0; i < n; i++) {
+                                        $.ajax({
+                                            type: "GET",
+                                            url : link.href + indici[i],
+                                            error: function(url) {
+                                                if(url.status==403) {
+                          window.location.href = "{{ url('/enti/duplicate/corporation') }}" + '/' + indici[n];
+                                                    error = true;
+                                                } 
+                                            }
+                                        });
+                                    }
+                                    selezione = undefined;
+                                    
+                                if(error === false)
+                                    setTimeout(function(){location.reload();},100*n);
+                  
+                n = 0;
+      break;
+    }
+}
+
+</script> 
+
+<script>
+  var $j = jQuery.noConflict();
+  $j( function() {
+    $j("#txtsearchpharse").autocomplete({
+      source: function( request, response ) {
+        $j.ajax( {
+          url: "{{url('admin/searchtranslation/')}}",
+          dataType: "json",
+          type: 'post',
+          data: { "_token": "{{ csrf_token() }}",type: type },
+          success:function(data){                               
+               $('#preview_content').html(data);
+          }
+        } );
+      },
+      minLength: 2,
+      select: function( event, ui ) {
+        var id = ui.item.id;
+        var url = '{{url('admin/modify/languagetranslation')}}';        
+        window.location.href= url+'/'+id;        
+      }
+    } );
+  } );
+  </script>
+
 @endsection

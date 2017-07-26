@@ -3,32 +3,27 @@
 <h1> {{ trans('messages.keyword_discountbonus') }}</h1><hr>
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
+
 <script>
   $(function(){
         $("table").stupidtable();
     });
-    
-    
 @if(!empty(Session::get('msg')))
-
-
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
     document.write(msg);
-
 @endif
 </script>
-
 <a onclick="multipleAction('add');" id="modifica" name="update" class="btn btn-warning"  title="{{ trans('messages.keyword_addbonus') }}"><i class="glyphicon glyphicon-plus"></i></a>
 <div class="space10"></div>
 <a onclick="multipleAction('modify');" id="modifica" name="update" class="btn btn-primary"  title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a>
 <a id="delete" class="btn btn-danger" name="remove" title="{{ trans('messages.keyword_delete') }}" onclick="multipleAction('delete');"><i class="fa fa-trash"></i></a>
-<div class="space30"></div>
+<div class="space10"></div>
+
+<div class="panel panel-default">
+<div class="panel-body">
 <div class="table-responsive table-custom-design">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('/admin/scontibonus/json') }}" data-classes="table table-bordered" id="table">
         <thead>
@@ -46,6 +41,10 @@
     </table>
     
 </div>
+</div>
+</div>
+
+
 <div class="footer-svg">
   <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
 </div>

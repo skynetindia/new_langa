@@ -461,3 +461,52 @@ $(document).ready(function() {
 		});
     });
 });
+
+function languageSelectBoxes(currentlang){
+
+        $('div.selectBox').each(function(){
+          //$(this).children('span.selected').html($(this).children('div.selectOptions').children('span.selectOption:first').html());
+          //$(this).attr('value',$(this).children('div.selectOptions').children('span.selectOption:first').attr('value'));
+          $(this).attr('value',currentlang);
+          
+          $(this).children('span.selected,span.selectArrow').click(function(){
+            if($(this).parent().children('div.selectOptions').css('display') == 'none'){
+              $(this).parent().children('div.selectOptions').css('display','block');
+            }
+            else
+            {
+              $(this).parent().children('div.selectOptions').css('display','none');
+            }
+          });          
+          $(this).find('span.selectOption').click(function(){            
+            $(this).parent().css('display','none');       
+            var selectlangimg = $(this).html();     
+            //var selectlang1 = selectlang.replace(/<img.*?\/>/, ''); 
+            $(this).closest('div.selectBox').attr('value',$(this).attr('value'));            
+            $(this).parent().siblings('span.selected').html($(this).text());
+            var locale =$(this).attr('value');
+              //var _token = $("input[name=_token]").val();
+              var saveData = $.ajax({
+                type: "GET",
+                url: jsbaseurl+"/language",
+                data: {locale:locale},
+                dataType: "json",
+                success: function(resultData){
+                  
+                },
+                complete: function(){
+                  window.location.reload(true);
+                }
+              });
+          });
+        });       
+      }
+	  
+$(document).mouseup(function(e) {
+    var container = $("div.selectOptions");
+    // if the target of the click isn't the container nor a descendant of the container
+    if (!container.is(e.target) && container.has(e.target).length === 0) {
+        container.hide();
+    }
+});
+

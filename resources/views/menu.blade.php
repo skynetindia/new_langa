@@ -8,26 +8,31 @@
 @endif
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
+
 <h1>{{trans('messages.keyword_menu')}}</h1><hr>
-<form action="{{ url('/menu/add') }}" method="post">
+<!--<form action="{{ url('/menu/add') }}" method="post">
     {{ csrf_field() }}
-    <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo preventivo"><i class="fa fa-plus"></i></button>
-</form>
+    <button class="btn btn-warning" type="submit" name="create" title=" {{trans('messages.keyword_create_a_new_menu')}} "><i class="fa fa-plus"></i></button>
+</form>-->
 <div class="btn-group margin-r8">
-    <a class="btn btn-primary" onclick="multipleAction('modify');" id="modifica">
+    <a class="btn btn-warning" href="{{ url('/menu/add') }}" id="create" title=" {{trans('messages.keyword_create_a_new_menu')}}">
+<i class="fa fa-plus"></i>
+    </a>
+    <a class="btn btn-primary" onclick="multipleAction('modify');" id="modifica" title=" {{trans('messages.keyword_edit_last_selected_format')}}">
         <i class="fa fa-pencil"></i>
     </a>
-    <a class="btn btn-danger" id="delete" onclick="multipleAction('delete');">
+    <a class="btn btn-danger" id="delete" onclick="multipleAction('delete');" title=" {{trans('messages.keyword_delete_selected_format')}} ">
         <i class="fa fa-trash"></i>
     </a>
 </div>
-<br><br>
+
+<div class="space10"></div>
+
+<div class="panel panel-default">
+<div class="panel-body">
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('menu/json'); ?>" data-classes="table table-bordered" id="table">
     <thead>
     <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
@@ -41,6 +46,9 @@
     
     </thead>
 </table>
+</div>
+</div>
+
 <script>
     var selezione = [];
     var indici = [];
@@ -125,6 +133,21 @@
                 }
                 break;
         }
+    }
+	 function updateStaus(menuid){
+         var url = "{{ url('/admin/menu/changestatus') }}" + '/';
+         var status = '1';
+        if ($("#activestatus_"+menuid).is(':checked')) {
+            status = '0';
+        }
+        $.ajax({
+            type: "GET",
+            url: url + menuid +'/'+status,
+            error: function (url) {                
+            },
+            success:function (data) {             
+            }
+         });
     }
 </script>
 

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><?php 
+$arrSettings = adminSettings();
+?>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <!-- Meta, title, CSS, favicons, etc. -->
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="shortcut icon" href="{{url('favicon.png')}}">
+<link rel="shortcut icon" href="{{ (isset($arrSettings->adminfavicon) && !empty($arrSettings->adminfavicon)) ? asset('storage/app/images/logo/'.$arrSettings->adminfavicon) :  url('favicon.png')}} ">
 <title>Admin LANGA</title>
 
 <!-- Bootstrap -->
@@ -18,6 +20,81 @@
 
 <!-- Font -->
 <link rel="stylesheet" href="{{asset('public/css/stylesheet.css')}}">
+<style type='text/css'>
+      div.selectBox
+      {
+        position:relative;
+        display:inline-block;
+        cursor:default;
+        text-align:left;
+        line-height:30px;
+        clear:both;
+        color:#888;
+      }
+      span.selected
+      {
+        width:167px;
+        text-indent:20px;
+        border:1px solid #ccc;
+        border-right:none;
+        border-top-left-radius:5px;
+        border-bottom-left-radius:5px;
+        background:#f6f6f6;
+        overflow:hidden;
+      }
+      span.selectArrow
+      {
+        width:30px;
+        border:1px solid #60abf8;
+        border-top-right-radius:5px;
+        border-bottom-right-radius:5px;
+        text-align:center;
+        font-size:20px;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+        background:#4096ee;
+      }
+      
+      span.selectArrow,span.selected
+      {
+        position:relative;
+        float:left;
+        height:30px;
+        z-index:1;
+      }
+      
+      div.selectOptions
+      {
+        position:absolute;
+        top:28px;
+        left:0;
+        width:198px;
+        border:1px solid #ccc;
+        border-bottom-right-radius:5px;
+        border-bottom-left-radius:5px;
+        overflow:hidden;
+        background:#f6f6f6;
+        padding-top:2px;
+        display:none;
+      }
+        
+      span.selectOption
+      {
+        display:block;
+        width:80%;
+        line-height:20px;
+        padding:5px 10%;
+      }
+      
+      span.selectOption:hover
+      {
+        color:#f6f6f6;
+        background:#4096ee; 
+      }     
+    </style>
 </head>
 <?php $logged = false; ?>
 @if (!Auth::guest())
@@ -30,7 +107,7 @@
   <div class="main_container">
   <div class="col-md-3 left_col">
     <div class="left_col scroll-view">
-      <div class="navbar nav_title"> <a href="{{url('/admin/')}}" class="site_title md"><img src="{{asset('images/LOGO-Admin-LANGA.svg')}}" alt="admin Langa" class="img" > </a> <a href="{{url('/admin/')}}" class="site_title sm"><img src="{{asset('images/admin-logo.svg')}}" alt="admin Langa" class="img" > </a> </div>
+      <div class="navbar nav_title"> <a href="{{url('/admin/')}}" class="site_title md"><img src="{{ (isset($arrSettings->adminlogo) && !empty($arrSettings->adminlogo)) ? asset('storage/app/images/logo/'.$arrSettings->adminlogo) :  asset('images/LOGO-Admin-LANGA.svg')}}" alt="admin Langa" class="img" > </a> <a href="{{url('/admin/')}}" class="site_title sm"><img src="{{asset('images/admin-logo.svg')}}" alt="admin Langa" class="img" > </a> </div>
       
       <!-- sidebar menu -->
       <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
@@ -257,7 +334,7 @@
         </div>
            
           </li>
-          <li><?php
+          <li><?php /*
 				$allLanguages = DB::table('languages')
 							->select('*')
 							->where('is_deleted', '0')
@@ -267,7 +344,19 @@
 					  $value = session('locale');
 						?><option value="<?php echo $langs->code; ?>" <?php if($value == $langs->code) { echo 'selected';}?>><?php echo $langs->original_name;?></option><?php 
 					}
-                 ?></select>
+                 ?></select>*/                 
+				$valueCode = session('locale');
+				$allLanguages = DB::table('languages')->select('*')->where('is_deleted', '0')->get();	
+				$currentLanguages = DB::table('languages')->select('*')->where('code', $valueCode)->first();  				
+				?><div class='selectBox'>
+                    <span class='selected'>{{$currentLanguages->original_name}}</span>
+                    <span class='selectArrow'><img src="{{url('storage/app/images/languageicon/').'/'.$currentLanguages->icon}}" height="30" width="30"></span>
+                    <div class="selectOptions">
+                    @foreach($allLanguages as $langs)
+                      <span class="selectOption" value="{{$langs->code}}">{{$langs->original_name}} <img src="{{url('storage/app/images/languageicon/').'/'.$langs->icon}}" height="30" width="30"></span>
+                     @endforeach 
+                    </div>
+                  </div>
                 </li>
         </ul>
       </nav>
@@ -278,7 +367,9 @@
   <!-- Content -->
   <div class="right_col" role="main">
     <div class="row tile_count">
-      <div class="col-md-12"> @yield('page') </div>
+      <div class="col-md-12">
+		<div class="admin_breadcrumbs">{!! getbreadcrumbs() !!}</div>
+       @yield('page') </div>
     </div>
   </div>
   <!-- /content --> 
@@ -301,7 +392,14 @@
 
 <!-- Custom Theme Scripts -->
 <!-- <script src="{{asset('build/js/custom.min.js')}}"></script> -->
-
 <script src="{{asset('/build/js/custom.js')}}"></script>
+<script type='text/javascript'>
+      $(document).ready(function() {
+        var currentlang = '<?php echo session('locale'); ?>';
+        languageSelectBoxes(currentlang);
+      });      
+      
+    </script>
+@include('common.languagesjs');
 </body>
 </html>

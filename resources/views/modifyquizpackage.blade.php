@@ -53,41 +53,47 @@
   ?>
     {{ csrf_field() }}
     <!-- colonna a sinistra -->  
-   <div class="col-md-6">
+    
+    <div class="row">
+    
+   <div class="col-md-6 col-sm-12 col-xs-12">
     <div class="form-group">
       <label for="name">{{trans('messages.keyword_package_name')}} <span class="required">(*)</span></label>
       <input value="{{ isset($pacchetto_data[0]->nome_pacchetto) ? $pacchetto_data[0]->nome_pacchetto : "" }}" class="form-control" type="text" name="nome_pacchetto" id="nome_pacchetto" placeholder="{{trans('messages.keyword_package_name')}}">
     </div>  
     <div class="form-group">                
-      <label for="colore">{{trans('messages.keyword_total_pages')}} <span class="required">(*)</span></label>
+      <label for="colore">{{trans('messages.keyword_total_pages')}} <p style="color:#f37f0d;display:inline">(*)</p></label>
       <input value="{{ isset($pacchetto_data[0]->pagine_totali) ? $pacchetto_data[0]->pagine_totali : ""}}" class="form-control no-alpha" type="text" name="pagine_totali" id="pagine_totali" placeholder="{{trans('messages.keyword_total_pages')}}"><br>    
     </div>
     </div>
     <!-- colonna centrale -->
-      <div class="col-md-6">           
+      <div class="col-md-6 col-sm-12 col-xs-12">           
           <div class="form-group">
-            <label for="colore">{{trans('messages.keyword_package_price')}} <span class="required">(*)</span></label>
+            <label for="colore">{{trans('messages.keyword_package_price')}}<p style="color:#f37f0d;display:inline">(*)</p></label>
  	   <input value="{{ isset($pacchetto_data[0]->prezzo_pacchetto) ? $pacchetto_data[0]->prezzo_pacchetto : ""}}" class="form-control no-alpha" type="text" name="prezzo_pacchetto" id="prezzo_pacchetto" placeholder="{{trans('messages.keyword_package_price')}}">
      </div>     
     <div class="form-group">      
- 	     <label for="email">{{trans('messages.keyword_per_price_page')}} </label> <span class="required">(*)</span></label>
+ 	     <label for="email">{{trans('messages.keyword_per_price_page')}} </label><p style="color:#f37f0d;display:inline"> (*) </p></label>
     	  <input value="{{isset($pacchetto_data[0]->per_pagina_prezzo) ? $pacchetto_data[0]->per_pagina_prezzo : ""}}" class="form-control no-alpha" type="text" name="per_pagina_prezzo" id="per_pagina_prezzo" placeholder="{{trans('messages.keyword_per_price_page')}}">
        </div>
       </div>
     <!-- colonna a destra -->    
-	 <div class="col-md-12">
+	 <div class="col-md-12 col-sm-12 col-xs-12">
 		<button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
     <div class="space50"> </div>
+    
+    </div>
+    
 	</div>
   <div class="footer-svg">
     <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">
   </div>
-  <?php echo Form::close(); ?>  
-  <script>
-  $('.ciao').on("click", function() {
-      $(this).children()[0].click();
-  });
-  $(document).ready(function() {
+    <?php echo Form::close(); ?>  
+<script>
+$('.ciao').on("click", function() {
+    $(this).children()[0].click();
+});
+$(document).ready(function() {
         // validate signup form on keyup and submit
         $("#package_modification").validate({
             rules: {

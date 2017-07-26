@@ -15,18 +15,16 @@ document.write(msg);
 </script>
 @endif
 
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
-
-    <a onclick="multipleAction('add');" id="add" class="btn btn-warning" name="add" title="{{ trans('messages.keyword_adduser') }}"><i class="glyphicon glyphicon-plus"></i></a>
-    <div class="space10"></div>
+    <a onclick="multipleAction('add');" id="add" class="btn btn-warning" name="add" title="{{ trans('messages.keyword_adduser') }}"><i class="glyphicon glyphicon-plus"></i></a>    
         <a class="btn btn-primary" onclick="multipleAction('modify');" id="modifica" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a>
-        <a id="delete" class="btn btn-danger"  onclick="multipleAction('delete');" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="fa fa-trash"></i></a>
+        <a id="delete" class="btn btn-danger" onclick="multipleAction('delete');" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="fa fa-trash"></i></a>
+<div class="space10"></div>
+<div class="panel panel-default">
+<div class="panel-body">
 
 <div class="table-responsive table-custom-design">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('users/json') }}" data-classes="table table-bordered" id="table">
@@ -46,12 +44,17 @@ document.write(msg);
             {{ trans('messages.keyword_cell') }} </th>
         <th data-field="id_ente" data-sortable="true">
             {{ trans('messages.keyword_entity') }}</th>
+        <th data-field="status" data-sortable="true">
+            {{ trans('messages.keyword_active') }}</th>
         <th data-field="button" data-sortable="true">
             {{ trans('messages.keyword_access') }}</th>
         </thead>
 
     </table>
 
+</div>
+
+</div>
 </div>
 
 <script>
@@ -89,6 +92,21 @@ document.write(msg);
 
     function check() {
         return confirm("{{ trans('messages.keyword_sure') }} " + n + " {{ trans('messages.keyword_users') }} ?");
+    }
+    function updateStaus(userid){
+         var url = "{{ url('/admin/user/changestatus') }}" + '/';
+         var status = '1';
+        if ($("#activestatus_"+userid).is(':checked')) {
+            status = '0';
+        }
+        $.ajax({
+            type: "GET",
+            url: url + userid +'/'+status,
+            error: function (url) {                
+            },
+            success:function (data) {             
+            }
+         });
     }
     function multipleAction(act) {
         var error = false;

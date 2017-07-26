@@ -43,13 +43,10 @@
     <div class="modal-content">
       <div class="modal-header">
         <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
-                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-             
+                 <button type="button" class="btnclose close" data-dismiss="modal">&times;</button>             
             <h3 class="modal-title" id="modalTitle"> {{ trans('messages.keyword_editevent') }} </h3>
       </div>   
       <div class="modal-body">
-          
-
             <!-- Start form to modify an event -->
             @include('common.errors')
             <form action="{{ url('/calendario/update/event/' . $event->id) }}" method="post" id="eventeditform" name="eventeditform">
@@ -57,20 +54,20 @@
               {{ csrf_field() }}
                                 @include('common.errors')
                     <div class="row">
-                    <div class="form-group col-md-10">
-                <label for="ente" class="control-label">{{ trans('messages.keyword_entity') }} <span class="required">(*)</span></label>
+                    <div class="form-group col-md-12 col-sm-12 col-xs-12">
+                <label for="ente" class="control-label">{{ trans('messages.keyword_entity') }}</label>
             <select name="ente" id="ente" class="js-example-basic-single form-control">
           <option selected></option>
             @foreach($enti as $ente)
                             @if($ente->id == $event->id_ente)
-                                <option selected value="{{$ente->id}}">{{$ente->nomeazienda}} | {{$ente->nomereferente}}</option>
+                                <option selected value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomereferente}}</option>
                             @else
-                <option value="{{$ente->id}}">{{$ente->nomeazienda}} | {{$ente->nomereferente}}</option>
+                <option value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomereferente}}</option>
                                                 @endif
             @endforeach
           </select><script type="text/javascript">
 
-                        $(".js-example-basic-single").select2();
+                        $(".js-example-basic-single").select2({ containerCssClass : "required-input" });
 
                     </script>
             
@@ -79,98 +76,79 @@
       </div>
 
             <div class="row">
-                        <div class="col-md-5">                               
+                        <div class="col-md-5 col-sm-12 col-xs-12">                               
                         <div class="form-group">
-                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }} <span class="required">(*)</span> </label>
-                            <input value=" {{ $event->titolo }}" type="text" name="titolo" id="titolo" class="form-control" placeholder=" {{ trans('messages.keyword_appointmenttodiscuss') }} ">
+                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }}</label>
+                            <input value=" {{ $event->titolo }}" type="text" name="titolo" id="titolo" class="form-control required-input" placeholder=" {{ trans('messages.keyword_appointmenttodiscuss') }} ">
                         </div>
     
                         <div class="form-group">
-                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} <span class="required">(*)</span> </label>
-                            <textarea rows="4" name="dettagli" id="dettagli" class="form-control" placeholder="{{ trans('messages.keyword_generalinformation') }}"> {{ $event->dettagli }}</textarea>
+                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} </label>
+                            <textarea rows="4" name="dettagli" id="dettagli" class="form-control required-input" placeholder="{{ trans('messages.keyword_generalinformation') }}"> {{ $event->dettagli }}</textarea>
                         </div>
-                        </div>
-                        <div class="col-md-7">
-                        <label>{{ trans('messages.keyword_appointmentaddress') }} <span class="required">(*)</span></label><br>
-                            <input value="{{ $event->dove }}" id="dove" name="dove" class="controls" type="text" placeholder="{{ trans('messages.keyword_appointmentaddress') }}  (*)">
-
-                        <div id="type-selector1" class="controls1" size="50">
-                          <input type="radio" name="type" id="changetype-all" checked="checked">
-                          <label for="changetype-all"> {{ trans('messages.keyword_all') }} </label>
-                          <input type="radio" name="type" id="changetype-establishment">
-                          <label for="changetype-establishment"> {{ trans('messages.keyword_companies') }} </label>
-                          <input type="radio" name="type" id="changetype-address">
-                          <label for="changetype-address"> {{ trans('messages.keyword_addresses') }} </label>
-                          <input type="radio" name="type" id="changetype-geocode">
-                          <label for="changetype-geocode"> {{ trans('messages.keyword_cap') }} </label>
-                       </div>
-                       
-                         <div id="map1"></div>
-                        </div>  
-                       
-                     </div>
-
-
-                   <div class="row">
-                    <fieldset>
-                  	<!--  <legend> {{ trans('messages.keyword_schedule') }} </legend>-->
-                  
-                        <div class="col-md-6">                      
-                             <h4> {{ trans('messages.keyword_schedule') }} </h4>                 
-                        <label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} <span class="required">(*)</span> </label> 
-                        <div class="input-group">
-							  <span class="input-group-addon cal-addon" id="basic-addon1"><i class="fa fa-calendar" aria-hidden="true"></i></span>
-                       			 <input value="{{ old('giorno') }}" type="text" name="giorno" id="giorno" class="form-control">
-                        </div>
+                        <div class="form-group">
+                        <label for="giorno" class="control-label"> {{ trans('messages.keyword_schedule') }} </label>
+                          <div class="input-group">
+                             <span class="input-group-addon cal-addon" id="basic-addon1"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                             <input value="<?php echo ($event->mese.'/'.$event->giorno.'/'.$event->anno).' '.$event->sh.' - '.$event->meseFine.'/'.$event->giornoFine.'/'.$event->annoFine.'/'.$event->eh ;?>" type="text" name="giorno" id="giorno" class="form-control required-input">
+                          </div>
                                     <script>
                                     $("#giorno").daterangepicker({
                                       autoApply: true,
-                                      timePicker: true,
+                                      timePicker: false,
                                       drops:"up",
                                       timePickerIncrement: 30,
                                       locale: {
                                         format: 'MM/DD/YYYY h:mm A'
                                       }
                                       });
-                                    </script>
-                                 </div>   
-                                <div class="col-md-6">
-                                <h4> {{ trans('messages.keyword_notification') }} </h4>
-                                
-                                    
-                                    <div class="row">
-                                    	<div class="col-md-6">
+                                    </script> 
+                        </div>
+                        <div class="form-group">
+                        <label>{{ trans('messages.keyword_notification') }}</label>                                
+                        <div class="row">
+                                      <div class="col-md-6 col-sm-6 col-xs-12">
                                             <div class="caleder-notification">
-                                            	<div class="switch">
+                                              <div class="switch">
                                                     <span> {{ trans('messages.keyword_sendnotification') }}</span>
                                                     <input type="checkbox" class="form-control input-check" <?php echo (isset($event->notifica) && $event->notifica == '1') ? 'checked' : ''; ?>  value="1" name="notifica" id="notifica">
                                                     <label for="notifica" class="checkbox-inline"> </label>
                                                 </div>    
-                                    		</div>
                                         </div>
-                                        <div class="col-md-6">
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
                                             <div class="caleder-notification">                  
-												<div class="switch">                                            	
+                        <div class="switch">                                              
                                                     <span>{{ trans('messages.keyword_private') }}</span>
                                                     <input type="checkbox" class="form-control input-check" <?php echo (isset($event->privato) && $event->privato == '1') ? 'checked' : ''; ?> value="1" name="privato" id="privato">
                                                      <label for="privato" class="checkbox-inline"></label>
                                                  </div>    
-                                        	</div>
+                                          </div>
                                         </div>    
                                     </div>        
-                                    
-                                    <br>
-                                    
-                                    
-                                </div>
-                                </div>
-                            </fieldset>
-                       
-<div class="height20"></div>
-                  
+                        </div>
+                        </div>
+                        <div class="col-md-7 col-sm-12 col-xs-12">
+                          <label>{{ trans('messages.keyword_appointmentaddress') }}</label><br>
+                            <input value="{{ $event->dove }}" id="dove" name="dove" class="controls required-input" type="text" placeholder="{{ trans('messages.keyword_appointmentaddress') }}  (*)">
 
-              <div class="modal-footer">
-                <input type="submit" class="btn btn-warning" value=" {{ trans('messages.keyword_save&exit') }} ">
+                          <div id="type-selector1" class="controls1" size="50">
+                            <input type="radio" name="type" id="changetype-all" checked="checked">
+                            <label for="changetype-all"> {{ trans('messages.keyword_all') }} </label>
+                            <input type="radio" name="type" id="changetype-establishment">
+                            <label for="changetype-establishment"> {{ trans('messages.keyword_companies') }} </label>
+                            <input type="radio" name="type" id="changetype-address">
+                            <label for="changetype-address"> {{ trans('messages.keyword_addresses') }} </label>
+                            <input type="radio" name="type" id="changetype-geocode">
+                            <label for="changetype-geocode"> {{ trans('messages.keyword_cap') }} </label>
+                          </div>                       
+                         <div id="map1"></div>
+                        </div>                         
+                     </div>
+                     <br />
+              <div class="modal-footer padding-right0">                
+                <button type="button" class="btn btn-warning btnclose">{{ trans('messages.keyword_close') }}</button>     
+                <input type="submit" class="btn btn-warning" value=" {{ trans('messages.keyword_save') }} ">
               </div>
             </form>
           </div>
@@ -190,6 +168,10 @@
 
       
 <script>
+ $(".btnclose").click(function(e){
+	   window.location="{{url('calendario/'.Auth::user()->id)}}"
+   });
+
 function conferma(e) {
   var confirmation = confirm("Sei sicuro?") ;
     if (!confirmation)
@@ -197,14 +179,18 @@ function conferma(e) {
   return confirmation ;
 }
 setTimeout(function(){
-  $('#editEvent').modal('show');
+  $('#editEvent').modal({
+    backdrop: 'static',
+    keyboard: false
+  });
+  //$('#editEvent').modal('show');
     initMap2();
 }, 100);
 
 $('body').bind('click', function() {
   setTimeout(function(){
-  $('#editEvent').modal('show');
-    initMap2();
+  //$('#editEvent').modal('show');
+  //  initMap2();
 }, 1000);
 });
 
@@ -466,7 +452,8 @@ $('body').bind('click', function() {
 
     <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script> -->
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places" async defer></script>
+    <?php /*<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&libraries=places" async defer></script>*/?>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&libraries=places&callback=initMap" async defer></script>
 
 
 
@@ -510,7 +497,7 @@ $(document).ready(function() {
 
         });
   });
-
+  
 </script>
 
 </body>

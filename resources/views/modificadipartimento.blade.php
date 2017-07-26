@@ -17,7 +17,7 @@
   <div> </div>
 </div>
 <div class="row">
-  <div class="col-md-6"> <img src="http://easy.langa.tv/storage/app/images/<?php echo $dipartimento->logo; ?>" class="option-image">
+  <div class="col-md-6"> <img src="{{url('/storage/app/images/').'/'.$dipartimento->logo}}" class="option-image">
     <h1 class="option-heading"> {{trans("messages.keyword_code")}}: {{$dipartimento->id}}</h1>
   </div>
 </div>
@@ -243,8 +243,9 @@ xhr.send();
         setupClickListener('changetype-geocode', ['geocode']);
       }
     </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script>
-<!--	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL_rtMv03GNmWgYfQkcGPPOsQ43LGun-0&libraries=places&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script>
+    <!--	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL_rtMv03GNmWgYfQkcGPPOsQ43LGun-0&libraries=places&callback=initMap"
         async defer></script>-->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&libraries=places&callback=initMap" async defer></script>
         
 @endsection

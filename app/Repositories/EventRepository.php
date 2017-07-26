@@ -17,7 +17,7 @@ class EventRepository
     public function forUser(User $user, $month, $year)
     {
 		//print_r($user);
-       if($user->id == 0)
+       if($user->id == 0 || $user->dipartimento == 0)
            return DB::table('events')->where('meseFine', '>=', $month)
             ->where('annoFine', '>=', $year)
             ->orderBy('giorno', 'asc')
@@ -31,7 +31,7 @@ class EventRepository
 	
 	public function forUser2(User $user, $month, $year)
     {
-       if($user->id == 0)
+       if($user->id == 0 || $user->dipartimento == 0)
            return DB::table('events')->where('meseFine', '>=', $month)
             ->where('annoFine', '>=', $year)
             ->orderBy('giorno', 'asc')
@@ -45,7 +45,7 @@ class EventRepository
 	
 	public function findEvent(User $user, $id)
 	{
-            if($user->id == 0)
+         if($user->id == 0 || $user->dipartimento == 0)
            return Event::where([
 			'id' => $id,
 		])

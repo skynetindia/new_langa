@@ -6,25 +6,18 @@
     document.write(msg);
     </script>
 @endif
-
 @include('common.errors')
 
-
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
-
-
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 <div class="main-blade">
 <div class="header-right">
 
 <div class="float-left">
     <h1>{{trans('messages.keyword_quotes')}}</h1><hr>
-    @if(Auth::user()->dipartimento == '1' || Auth::user()->dipartimento == '2')
+    @if(checkpermission('3', '16', 'scrittura','true'))
     <form action="{{ url('/estimates/add') }}" method="post">
         {{ csrf_field() }}
         <button class="btn btn-warning" type="submit" name="create" title="{{trans('messages.keyword_create_new_-_add_a_new_estimate')}}"><i class="fa fa-plus"></i></button>
@@ -48,7 +41,7 @@
     </a>
     @endif
     <!-- Fine filtraggio miei/tutti -->
-    @if( Auth::user()->id == '0' || Auth::user()->dipartimento == '1' || Auth::user()->dipartimento == '2')
+    @if(checkpermission('3', '16', 'scrittura','true'))
     <div class="btn-group">
         <a onclick="multipleAction('modify');" id="modifica" class="btn btn-warning" name="update" title="{{trans('messages.keyword_edit_the_last_selected_estimate')}}">
             <i class="fa fa-pencil"></i>
@@ -66,7 +59,19 @@
              <i class="fa fa-file-pdf-o"></i>
         </a>
     </div>
+    @else
+    <div class="btn-group">
+      <a onclick="multipleAction('modify');" id="modifica" class="btn btn-warning" name="update" title="{{trans('messages.keyword_edit_the_last_selected_estimate')}}">
+            <i class="fa fa-info"></i>
+      </a>
+      <a id="pdf" onclick="multipleAction('pdf');"  class="btn" name="pdf" title="{{trans('messages.keyword_general_pdf_of_selected_quotes')}}">
+             <i class="fa fa-file-pdf-o"></i>
+       </a>
+    </div>
     @endif
+
+   <?php echo ticketprobelm(); ?>
+
     </div>
 </div>
 <div class="header-svg">
@@ -76,9 +81,96 @@
 </div>
 </div>
 
+<?php 
+
+$request = parse_url($_SERVER['REQUEST_URI']);
+$path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylanganew/', '', $request["path"]), '/') : $request["path"];      
+$result = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');
+$result=trim($result,'/');
+$current_module = DB::select('select * from modulo where TRIM(BOTH "/" FROM modulo_link) = :link', ['link' => $result]);
+
+?>
+<!-- Aggiungi nuova disposizione MODALE -->
+
+<div id="problem-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"> {{ trans('messages.keyword_problem') }} </h4>
+      </div>
+      <div class="modal-body">
+
+        <p>
+        {{ trans('messages.keyword_your_problems_are_important_to_us') }} ? 
+        </p>
+
+        <hr>        
+
+        <form action="{{url('ticket/problem/store')}}" method="post" name="add_project" id="add_project" enctype="multipart/form-data"> {{ csrf_field() }}  
+
+        In that page you were when the problem occurred?
+        <input type="text" name="page" class="form-control" placeholder="http://betaeasy.langa.tv/enti/myenti"> 
+        <br>
+
+        <input type="hidden" name="module_id" value="<?php echo (isset($current_module[0]->modulo_sub)) ? $current_module[0]->modulo_sub : 0 ?>"> 
+
+        Please describe the error you have found
+        <textarea cols="50" rows="10" name="problem" class="form-control"></textarea>
+        <br>
+
+        Attach a picture
+        <input type="file" name="file" class="form-control"> 
+
+      </div>
+      <div class="modal-footer">
+          <p style="text-align: left;">{{ trans('messages.keyword_we_get_back_to_you') }}
+          </p>
+          LANGA Team        
+          <br><br>
+        <input type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_send') }}">
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div id="problem-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"> {{ trans('messages.keyword_problem') }} </h4>
+      </div>
+      <div class="modal-body">
+      <p>{{ trans('messages.keyword_your_problems_are_important_to_us') }}
+      ? </p>
+
+        <form action="{{url('ticket/problem/store')}}" method="post" name="add_project" id="add_project"> {{ csrf_field() }}   
+        <input type="hidden" name="module_id" value="<?php //echo (isset($current_module[0]->modulo_sub)) ? $current_module[0]->modulo_sub : 0; ?>">         
+       <textarea cols="50" rows="10" name="problem"></textarea>
+      </div>
+      <div class="modal-footer">
+          <p style="text-align: left;">{{ trans('messages.keywordwe_get_back_to_you') }}
+          ? </p>
+          LANGA Team        
+          <br><br>
+        <input type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_send') }}">
+        </form>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- FINE MODALE AGGIUNGI DISPOSIZIONE -->
+
+
 <div class="clearfix"></div>
 
-<br>
+<div class="panel panel-default">
+	<div class="panel-body">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php if(isset($miei)) echo url('estimates/miei/json'); else echo url('/estimates/json');?>" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="id" data-sortable="true">{{trans('messages.keyword_no_estimate')}}</th>
@@ -88,13 +180,26 @@
             <th data-field="valenza" data-sortable="true">{{trans('messages.keyword_expiry_date')}}</th>
             <th data-field="dipartimento" data-sortable="true">{{trans('messages.keyword_department')}}</th>
             <th data-field="finelavori" data-sortable="true">{{trans('messages.keyword_end_date_works')}}</th>
-            <th data-field="statoemotivo" data-sortable="true">{{trans('messages.keyword_emotional_state')}}</th>
-        </thead>
+            <th data-field="statoemotivo" data-sortable="true">{{trans('messages.keyword_emotional_state')}}</th><?php              
+            $Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
+            $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";            
+            if($type != 'Client'){
+              ?><th data-field="publishstatus" data-sortable="true">{{trans('messages.keyword_is_published')}}</th><?php 
+            }
+            ?></thead>
     </table>    
+    </div>
+</div>    
+    
     <div class="footer-svg">
         <img src="{{url('images/FOOTER3-ORIZZONTAL_QUOTES.svg')}}" alt="avvisi">
     </div>
 <script>
+
+function problem() {
+    $("#problem-modal").modal();
+}
+
 var selezione = [];
 var indici = [];
 var n = 0;
@@ -127,6 +232,22 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 });
 
 function check() { return confirm("<?php echo trans('messages.keyword_are_you_sure_you_want_to_delete:'); ?>" + n + " <?php echo trans('messages.keyword_quotes');?>?"); }
+
+function updateStaus(id){
+     var url = "{{ url('/estimates/changepublishstatus') }}" + '/';
+     var status = '0';
+     if ($("#activestatus_"+id).is(':checked')) {
+           status = '1';
+        }
+        $.ajax({
+            type: "GET",
+            url: url + id +'/'+status,
+            error: function (url) {                
+            },
+            success:function (data) {             
+            }
+         });
+    }
 function multipleAction(act) {
 	var error = false;
 	var link = document.createElement("a");

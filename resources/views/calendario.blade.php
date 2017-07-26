@@ -17,171 +17,60 @@
 
 <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
 
+<link href="{{asset('public/js/calander/fullcalendar.min.css')}}" rel='stylesheet' />
+<link href="{{asset('public/js/calander/fullcalendar.print.min.css')}}" rel='stylesheet' media='print' />
+
 <div class="cale">
 
 <div class="header-right">
     <div class="float-left">
         <h1> {{ trans('messages.keyword_calendar') }}</h1>
-        <a class="btn btn-warning" style="color:#ffffff;text-decoration: none" onclick="aggiungiEvento()" title="{{ trans('messages.keyword_addnewevent') }} "><i class="fa fa-plus"></i></a>
+            @if(checkpermission('2', '14', 'scrittura'))
+            <a class="btn btn-warning" style="color:#ffffff;text-decoration: none" onclick="aggiungiEvento()" title="{{ trans('messages.keyword_addnewevent') }} "><i class="fa fa-plus"></i></a>
+            @endif
 
-<a id="miei" class="button button2" href="{{url('/calendario/0')}}" name="miei" title="{{ trans('messages.keyword_eventfilter') }}">
-	{{ trans('messages.keyword_my') }}
-</a>
-<a id="tutti" class="button button3" href="{{url('/calendario/1')}}"  name="tutti" title="{{ trans('messages.keyword_allevent') }} ">
- {{ trans('messages.keyword_all') }}
-</a>
-
-
-<hr>
-        
-    </div>
-    
+            <a id="miei" class="button button2" href="{{url('/calendario/0')}}" name="miei" title="{{ trans('messages.keyword_eventfilter') }}">
+            	{{ trans('messages.keyword_my') }}
+            </a>
+            <a id="tutti" class="button button3" href="{{url('/calendario/1')}}"  name="tutti" title="{{ trans('messages.keyword_allevent') }} ">
+             {{ trans('messages.keyword_all') }}
+            </a>
+            <a id="deadlines" class="button button2" href="{{url('/calendario/2')}}" name="miei" title="{{ trans('messages.keyword_eventfilter') }}">
+                Deadlines
+            </a>
+            <hr>    
+    </div>    
     <div class="header-svg">
-        <img src="http://betaeasy.langa.tv/images/HEADER2-RT_CALENDAR.svg" alt="header image">
-    </div>
-    
+        <img src="{{url('images/HEADER2-RT_CALENDAR.svg')}}" alt="header image">
+    </div>    
 </div>
-
-
 <div class="clearfix"></div>
-
-
-
-
 <div class="wrapper">
 <div class="table-responsive">
-
-	<table class="table calender-tbl table-striped table-bordered">
-
-		<tr><td colspan="5">
-
-		<?php
-
-			if($month == 1) {
-
-				$link1 = "/calendario/show/" . $tipo . "/day/0/month/12/year/" . ($year - 1);
-
-				$link2 = "/calendario/show/" . $tipo . "/day/0/month/" . ($month+1) . "/year/" . $year;
-
-			} else if($month == 12) {
-
-				$link1 = "/calendario/show/" . $tipo . "/day/0/month/" . ($month-1) . "/year/" . $year;
-
-				$link2 = "/calendario/show/" . $tipo . "/day/0/month/1/year/" . ($year + 1);
-
-			} else {
-
-				$link1 = "/calendario/show/" . $tipo . "/day/0/month/" . ($month-1) . "/year/" . $year;
-
-				$link2 = "/calendario/show/" . $tipo . "/day/0/month/" . ($month+1) . "/year/" . $year;
-
-			}
-			
-		?>
-
-		<a href="{{ url($link1) }}"><span class="glyphicon glyphicon-chevron-left"></span>{{ $nomiMesi[$month-1] or $nomiMesi[12] }} </a>
-
-		{{ $nomiMesi[$month] }} {{ $year }}
-
-		<a href="{{ url($link2) }}"> {{ $nomiMesi[$month+1] or $nomiMesi[1] }}<span class="glyphicon glyphicon-chevron-right"></span></a></td></tr>
-
-		<tr>
-		@for ($i = 1; $i <= $giorniMese; $i++)
-
-			<td class="day"<?php if($i == $day) echo " style='color:#fff;background: #f37f0d;'"; ?> onclick="mostraEventi(<?php echo $i; ?>)">
-
-				{{ $i }}
-
-				<br>
-
-				<?php $giorno = strftime('%A', mktime(0, 0, 0, $month, $i, $year));
-                if($giorno == "Monday")
-					$giorno = trans('messages.keyword_mon');
-				else if($giorno == "Tuesday")
-					$giorno = trans('messages.keyword_tues');
-				else if($giorno == "Wednesday")
-					$giorno = trans('messages.keyword_wed');
-				else if($giorno == "Thursday")
-					$giorno = trans('messages.keyword_thur');
-				else if($giorno == "Friday")
-					$giorno = trans('messages.keyword_fri');
-				else if($giorno == "Saturday")
-					$giorno = trans('messages.keyword_sat');
-				else if($giorno == "Sunday")
-					$giorno = trans('messages.keyword_sun');
-                echo $giorno;
-				$elenco_eventi = [];
-				
-                ?>
-                <hr>
-
-				<table>
-                	<tr style="color:#fff">
-					@foreach ($events as $event)
-						@if($year == $event->annoFine)
-                        	@if($month <= $event->meseFine)
-                            	<?php 
-									$utente = DB::table('users')
-												->where('id', $event->user_id)
-												->first();									
-									$colore = (isset($utente->color))?$utente->color:'#fff';
-								?>
-                            	@if($month == $event->mese)
-                                	@if($i >= $event->giorno)
-                                    	@if($event->mese == $event->meseFine)
-                                        	@if($i <= $event->giornoFine)
-                                    			<td class="pointer" style="background-color:<?php echo $colore; ?>"> • </td>
-                                                <?php $event->color = $colore ?>
-                                                <?php $event->utente = (isset($utente->name))?$utente->name:'' ?>
-                                            @endif
-                                        @else
-                                        	<td class="pointer" style="background-color:<?php echo $colore; ?>"> • </td>
-                                            <?php $event->color = $colore ?>
-                                            <?php $event->utente = (isset($utente->name))?$utente->name:'' ?>
-                                        @endif
-                                    @endif
-                                @elseif($month == $event->meseFine)
-                                	@if($i <= $event->giornoFine)
-                                    	<td class="pointer" style="background-color:<?php echo $colore; ?>"> • </td>
-                                        <?php $event->color = $colore ?>
-                                        <?php $event->utente = (isset($utente->name))?$utente->name:'' ?>
-                                    @endif
-                                @elseif($month > $event->mese && $month < $event->meseFine)
-                                	<td class="pointer" style="background-color:<?php echo $colore; ?>"> • </td>
-                                    <?php $event->color = $colore ?>
-                                    <?php $event->utente = (isset($utente->name))?$utente->name:'' ?>
-                                @endif
-                            @endif
-                        @endif
+	@foreach ($events as $event)
+    <?php 
+			$utente = DB::table('users')
+			->where('id', $event->user_id)
+			->first();									
+			$colore = (isset($utente->color))?$utente->color:'#666';
+			$event->color = $colore;
+			$event->utente = (isset($utente->name))?$utente->name:'' ;?>
 					@endforeach
-                    </tr>
-				</table>
-
-			</td>
-
-			@if ($i % 5 == 0)
-
-				</tr><tr>
-
-			@endif
-
-		@endfor
-
-		</tr>
-
-	</table>
+                    
+                        
+	<div id='calendar'></div>
 
 
 
 
 <div class="footer-svg">
-  <img src="http://betaeasy.langa.tv/images/FOOTER3-ORIZZONTAL_CALENDAR.svg" alt="footer enti image">
+  <img src="{{url('images/FOOTER3-ORIZZONTAL_CALENDAR.svg')}}" alt="footer enti image">
 </div>
 
 
 
 </div>
-
+<div id="scrollfucs"></div>
 <div id="push" class="none">
     <div id="content"></div>
 </div>
@@ -214,8 +103,8 @@
                                 @include('common.errors')
 						<div class="row">
                          <div class="form-group col-md-10">
-        				<label for="ente" class="control-label">{{ trans('messages.keyword_entity') }} <span class="required">(*)</span> </label>
-						<select name="ente" id="ente" class="js-example-basic-single form-control">
+        				<label for="ente" class="control-label">{{ trans('messages.keyword_entity') }}</label>
+						<select name="ente" id="ente" class="js-example-basic-single form-control required-input">
 						@foreach($enti as $ente)
                                                 @if(!empty(Session::get('error_code')) && Session::get('error_code') == 5)
                                                     <option selected value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}} | {{$ente->nomereferente}}</option>
@@ -224,31 +113,74 @@
                                                 @endif
 						@endforeach
 						</select><script type="text/javascript">
-									$(".js-example-basic-single").select2();
+									$(".js-example-basic-single").select2({ containerCssClass : "required-input" });
 								</script>
         			</div>
-					<div class="form-group col-md-2"> <div class="space25"></div>
+					<div class="form-group col-md-2 text-right"> <div class="space25"></div>
 						<a onclick="nuovoEnte()" class="btn btn-warning"> {{ trans('messages.keyword_addente') }} </a>
 					</div>
                     </div>
            			<div class="row">
 						<div class="col-md-5">                               
                         <div class="form-group">
-                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }} <span class="required">(*)</span> </label>
-                            <input value="{{ old('titolo') }}" type="text" name="titolo" id="titolo" class="form-control" placeholder="{{ trans('messages.keyword_appointmenttodiscuss') }} ">
+                            <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }}</label>
+                            <input value="{{ old('titolo') }}" type="text" name="titolo" id="titolo" class="form-control required-input" placeholder="{{ trans('messages.keyword_appointmenttodiscuss') }} ">
                         </div>
     
                         <?php /*<div class="form-group">         				
                             <input value="{{ old('dove') }}" type="text" name="dove" id="dove" class="form-control" placeholder="{{ trans('messages.keyword_appointmentaddress') }} ">                      
                         </div> */?>                  
                         <div class="form-group">
-                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }} <span class="required">(*)</span></label>
-                            <textarea rows="4" name="dettagli" id="dettagli" class="form-control" placeholder="{{ trans('messages.keyword_generalinformation') }} ">{{ old('dettagli') }}</textarea>
+                            <label for="dettagli" class="control-label"> {{ trans('messages.keyword_details') }}</label>
+                            <textarea rows="4" name="dettagli" id="dettagli" class="form-control required-input" placeholder="{{ trans('messages.keyword_generalinformation') }} ">{{ old('dettagli') }}</textarea>
                         </div>
+                        <div class="form-group">
+                        <label for="dettagli" class="control-label"> {{ trans('messages.keyword_schedule') }}</label>
+                        <div class="input-group">
+                              <span class="input-group-addon cal-addon" id="basic-addon1"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                              <input value="{{ old('giorno') }}" type="text" name="giorno" id="giorno" class="form-control required-input">
+                        </div>      
+                                    <script>
+                                    $("#giorno").daterangepicker({
+                                    autoApply: true,
+                                    timePicker: true,
+                                    drops:"up",
+                                    timePickerIncrement: 30,
+                                    locale: {
+                                        format: 'MM/DD/YYYY h:mm A'
+                                    }
+                                    });
+                                    </script>
+                        </div>                       
+                        <div class="form-group">
+                        
+                                <label>{{ trans('messages.keyword_notification') }}</label>                                
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="caleder-notification">
+                                                <div class="switch">
+                                                    <span> {{ trans('messages.keyword_sendnotification') }} </span>
+                                                    <input type="checkbox" class="form-control input-check" value="1" name="notifica" id="notifica">                              
+                                                    <label for="notifica" class="checkbox-inline"> </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="caleder-notification">
+                                                <div class="switch">
+                                                 <span> {{ trans('messages.keyword_private') }} </span>
+                                                <input type="checkbox" class="form-control input-check" value="1" name="privato" id="privato">
+                                                <label for="privato" class="checkbox-inline"> </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                        </div>
+
                     	</div>
                     	<div class="col-md-7">
-                            <label>{{ trans('messages.keyword_appointmentaddress') }} <span class="required">(*)</span></label><br>
-                            <input value="" id="dove" name="dove" class="controls" type="text" placeholder="{{ trans('messages.keyword_appointmentaddress') }}  (*)">
+                            <label>{{ trans('messages.keyword_appointmentaddress') }}</label><br>
+                            <input value="" id="dove" name="dove" class="controls required-input" type="text" placeholder="{{ trans('messages.keyword_appointmentaddress') }}  (*)">
 
                     	<div id="type-selector1" class="controls1" size="50">
 						  <input type="radio" name="type" id="changetype-all" checked="checked">
@@ -265,13 +197,13 @@
                         </div>	
     	               
                      </div>
-                     <div class="row">
+                     <?php /*<div class="row">
         			<fieldset>
         		 <!--	<legend> {{ trans('messages.keyword_schedule') }} </legend>-->
 			
 						<div class="col-md-6">						
                              <h4> {{ trans('messages.keyword_schedule') }} </h4>                 
-        				<?php /*<label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} <span class="required">(*)</span> </label> */?>
+        				<?php /*<label for="giorno" class="control-label"> {{ trans('messages.keyword_from') }} <span class="required">(*)</span> </label> *?>
         				<div class="input-group">
 							  <span class="input-group-addon cal-addon" id="basic-addon1"><i class="fa fa-calendar" aria-hidden="true"></i></span>
                               <input value="{{ old('giorno') }}" type="text" name="giorno" id="giorno" class="form-control">
@@ -318,12 +250,10 @@
                                 
                                 
         			</fieldset>
-                                        </div><br />
-
+                                        </div>*/?><br />
         			<div class="modal-footer">
-
-        				<input type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_submit') }} ">
-
+                        <button type="button" class="btn btn-warning" data-dismiss="modal" aria-label="Close">{{ trans('messages.keyword_close') }}</button>     
+                        <input type="submit" class="btn btn-warning" value=" {{ trans('messages.keyword_save') }} ">
       				</div>
 
         		</form>
@@ -381,41 +311,41 @@
 
         			<div class="form-group">
 
-        				<label for="nomeazienda" class="control-label"> {{ trans('messages.keyword_compname') }} <span class="required">(*)</span></label> 
+        				<label for="nomeazienda" class="control-label"> {{ trans('messages.keyword_compname') }}</label> 
 
-        				<input value="{{ old('nomeazienda') }}" type="text" name="nomeazienda" placeholder="{{ trans('messages.keyword_compname') }}" id="nomeazienda" class="form-control">
-
-        			</div>
-
-					<div class="form-group">
-
-        				<label for="nomereferente" class="control-label"> {{ trans('messages.keyword_refname') }}  <span class="required">(*)</span></label> 
-
-        				<input value="{{ old('nomereferente') }}" type="text" name="nomereferente" placeholder="{{ trans('messages.keyword_refname') }}" id="nomereferente" class="form-control">
+        				<input value="{{ old('nomeazienda') }}" type="text" name="nomeazienda" placeholder="{{ trans('messages.keyword_compname') }}" id="nomeazienda" class="form-control required-input">
 
         			</div>
 
 					<div class="form-group">
 
-        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }} <span class="required">(*)</span></label>
+        				<label for="nomereferente" class="control-label"> {{ trans('messages.keyword_refname') }}</label> 
 
-        				<input value="{{ old('telefonoazienda') }}" type="text" name="telefonoazienda" placeholder="{{ trans('messages.keyword_comptele') }}" id="telefonoazienda" class="form-control">
-
-        			</div>
-
-					<div class="form-group">
-
-        				<label for="email" class="control-label">{{ trans('messages.keyword_email') }} <span class="required">(*)</span></label> 
-
-        				<input value="{{ old('email') }}" type="email" name="email" id="email" class="form-control" placeholder="{{ trans('messages.keyword_email') }}">
+        				<input value="{{ old('nomereferente') }}" type="text" name="nomereferente" placeholder="{{ trans('messages.keyword_refname') }}" id="nomereferente" class="form-control required-input">
 
         			</div>
 
 					<div class="form-group">
 
-                                            <label for="indirizzo" class="control-label">{{ trans('messages.keyword_addresses') }}<span class="required">(*)</span></label> 
+        				<label for="telefonoazienda" class="control-label"> {{ trans('messages.keyword_comptele') }}</label>
 
-        				<input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text"
+        				<input value="{{ old('telefonoazienda') }}" type="text" name="telefonoazienda" placeholder="{{ trans('messages.keyword_comptele') }}" id="telefonoazienda" class="form-control required-input">
+
+        			</div>
+
+					<div class="form-group">
+
+        				<label for="email" class="control-label">{{ trans('messages.keyword_email') }} </label> 
+
+        				<input value="{{ old('email') }}" type="email" name="email" id="email" class="form-control required-input" placeholder="{{ trans('messages.keyword_email') }}">
+
+        			</div>
+
+					<div class="form-group">
+
+                                            <label for="indirizzo" class="control-label">{{ trans('messages.keyword_addresses') }}</label> 
+
+        				<input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls required-input" type="text"
 
 							placeholder="{{ trans('messages.keyword_addresses') }}    ">
 
@@ -451,9 +381,9 @@
 
                 <div class="form-group">
 
-                    <br>  <label for="responsabilelanga">{{ trans('messages.keyword_responsible') }} LANGA <span class="required">(*)</span></label>
+                    <br>  <label for="responsabilelanga">{{ trans('messages.keyword_responsible') }} LANGA </label>
 
-                <select title="Responsabile associato a questo ente" name="responsabilelanga" id="responsabilelanga" class="form-control" onchange="trovaTelefono()">
+                <select title="Responsabile associato a questo ente" name="responsabilelanga" id="responsabilelanga" class="form-control required-input" onchange="trovaTelefono()">
 
                         <option></option>
 
@@ -465,9 +395,9 @@
 
                 </select>
 
-                    <br><label for="telefonoresponsabile">{{ trans('messages.keyword_responsiblephone') }} <span class="required">(*)</span></label>
+                    <br><label for="telefonoresponsabile">{{ trans('messages.keyword_responsiblephone') }}</label>
 
-                <input value="{{ old('telefonoresponsabile') }}" class="form-control" type="text" name="telefonoresponsabile" id="telefonoresponsabile" placeholder="{{ trans('messages.keyword_responsiblephone') }}"><br>
+                <input value="{{ old('telefonoresponsabile') }}" class="form-control required-input" type="text" name="telefonoresponsabile" id="telefonoresponsabile" placeholder="{{ trans('messages.keyword_responsiblephone') }}"><br>
 
                 <script>
 
@@ -575,10 +505,14 @@
 <script>
 
 
-function aggiungiEvento() {
+function aggiungiEvento(selecteddate) {    
+
   $( "#newEvent" ).modal();
 	$('#newEvent').on('shown.bs.modal', function(){
-	  initMap2();
+	  initMap2();             
+      if (typeof selecteddate != 'undefined'){        
+        $("#giorno").val(selecteddate+' - '+selecteddate);
+      }
     });
 }
 
@@ -890,19 +824,27 @@ function nuovoEnte() {
 	<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script>
    	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap2" async defer></script>-->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&libraries=places&callback=initMap" async defer></script>
+    <?php $arrCurrentLocations = getLocationInfoByIp();
+    $currentlocation = isset($arrCurrentLocations['city']) ? $arrCurrentLocations['city'] : "";
+    $currentlocation .= isset($arrCurrentLocations['country']) ? ", ".$arrCurrentLocations['country'] : "";?>
+<?php
+    //echo json_encode($projects);
+    // exit;
+    ?>
 <script>
 var eventi = <?php echo json_encode($events); ?>;
+var estimates = <?php echo json_encode($estimates); ?>;
+var projects = <?php echo json_encode($projects); ?>;
+var invoices = <?php echo json_encode($invoices); ?>;
+
 var eventiDaStampare = [];
 var tipo = <?php echo $tipo; ?>;
 
 function removeAllChildren(theParent){
-
     // Create the Range object
     var rangeObj = new Range();
-
     // Select all of theParent's children
     rangeObj.selectNodeContents(theParent);
-
     // Delete everything that is selected
     rangeObj.deleteContents();
 }
@@ -913,7 +855,7 @@ function mostraEventi(giorno) {
 	content.children().remove();
 	eventiDaStampare = [];
 	var year = <?php echo $year; ?>;
-	var month = <?php echo $month; ?>;
+	var month = <?php echo $month; ?>;  
 	
 	for(var i = 0; i < eventi.length; i++) {
 		if(year <= eventi[i]["annoFine"]) {
@@ -983,9 +925,12 @@ function mostraEventi(giorno) {
         /* geo Location form */
         var geolocationForm = document.createElement("form");
         geolocationForm.action = "http://maps.google.com/maps";
-        geolocationForm.onsubmit = "punto()";   
+       // geolocationForm.onsubmit = "locationfrm(this.id)";   
+       // geolocationForm.setAttribute('onsubmit','locationfrm(this.id)');
         geolocationForm.method = "get";
         geolocationForm.target = "new";
+        geolocationForm.id = "frm"+eventiDaStampare[i]["id"];       
+       
         
         /* geo Location form button */
         var geolocationbutton = document.createElement("button");
@@ -993,13 +938,22 @@ function mostraEventi(giorno) {
         geolocationbutton.type = 'submit';
         geolocationbutton.className = 'btn btn-warning geolocationbutton';
         geolocationbutton.innerHTML = '{{ trans('messages.keyword_go') }}';
-    
-        
+            
         var geolocationBox = document.createElement("input");
         geolocationBox.type='text';
-        geolocationBox.name='saddr';
-        geolocationBox.id='geolocationPlaces';
+        //geolocationBox.name='saddr';
+        geolocationBox.id='geolocationPlaces_'+eventiDaStampare[i]["id"];
+        geolocationBox.className='geolocationPlaces';
+        var currentlocation = '';
+        //geolocationBox.value='{{ $currentlocation}}';
+         geolocationBox.setAttribute('onkeyup','changetextlocationval('+eventiDaStampare[i]["id"]+')');
         
+        var geolocationsAddr = document.createElement("input");
+        geolocationsAddr.type='hidden';
+        geolocationsAddr.name='saddr';
+        geolocationsAddr.value = '{{ $currentlocation}}';
+        geolocationsAddr.id='geolocationshdAddress_'+eventiDaStampare[i]["id"];
+
         var geolocationEventAddr = document.createElement("input");
         geolocationEventAddr.type='hidden';
         geolocationEventAddr.name='daddr';
@@ -1025,6 +979,7 @@ function mostraEventi(giorno) {
         striscia.appendChild(utente);
         striscia.appendChild(elimina);
         geolocationForm.appendChild(geolocationBox);
+        geolocationForm.appendChild(geolocationsAddr);        
         geolocationForm.appendChild(geolocationEventAddr);      
         geolocationForm.appendChild(geolocationbutton);
         
@@ -1033,6 +988,15 @@ function mostraEventi(giorno) {
         link.appendChild(striscia);
         content.append(link);
         k++;
+
+        var psconsole = $('#'+'geolocationPlaces_'+eventiDaStampare[i]["id"]);
+        var psconsole = $('#scrollfucs');
+         $('html, body').animate({
+                        scrollTop: psconsole.offset().top
+                    }, 1000);
+        $('#'+'geolocationPlaces_'+eventiDaStampare[i]["id"]).focus();
+        /*if(psconsole.length)
+           psconsole.scrollTop(psconsole[0].scrollHeight - psconsole.height());*/
     }
 	
 	if(k == 0) {
@@ -1040,8 +1004,17 @@ function mostraEventi(giorno) {
 		var testo = document.createTextNode("{{ trans('messages.keyword_noeventsforthisday') }}");
 		el.appendChild(testo);
 		content.append(el);	
+        var psconsole = $('#scrollfucs');
+         $('html, body').animate({
+                        scrollTop: psconsole.offset().top
+                    }, 1000);
+        //window.scrollTo(0,document.body.scrollHeight);
 	}	
 }
+function changetextlocationval(id){
+  $("#geolocationshdAddress_"+id).val($("#geolocationPlaces_"+id).val());    
+}
+
 /*$("#mainlink a").click(function(e) {
    e.stopPropagation();
 })*/
@@ -1152,7 +1125,207 @@ $(document).ready(function() {
         });
   });
 
-</script>
 
+
+</script>
+<script src="{{asset('public/js/calander/lib/moment.min.js')}}"></script>
+<script src="{{asset('public/js/calander/lib/jquery.min.js')}}"></script>
+<script src="{{asset('public/js/calander/fullcalendar.min.js')}}"></script>
+<script>
+jq223 = jQuery.noConflict(false);
+	jq223(document).ready(function() {	
+		jq223('#calendar').fullCalendar({
+			header: {
+				left: 'prevYear,prev, today,next,nextYear',
+				center: 'title',
+				right: 'month,agendaWeek,agendaDay,listWeek'
+			},
+			defaultDate: "<?php echo date('Y-m-d',time())?>",
+			editable: true,
+			navLinks: true, // can click day/week names to navigate views
+			eventLimit: true, // allow "more" link when too many events
+			events: {
+				url: "{{url('/calendario/json/'.$tipo)}}",
+				error: function() {
+					jq223('#script-warning').show();
+				}
+			},
+			loading: function(bool) {				
+				jq223('#loading').toggle(bool);
+			},
+            eventRender: function (events, element) {                
+                element.attr('href', 'javascript:void(0);');
+                element.click(function() {
+                //console.log(events.id);            
+               //alert(element);
+                    /*mostraEventi(moment(events.start).format('D'));*/
+                    showevents(moment(events.start).format('DD-MM-YYYY'),events.id);                                                                
+                    detailsAllother(moment(events.start).format('DD-MM-YYYY'),events.id);
+                });
+            },
+            dayClick: function(date, events, view) {                
+                var selecteddate = moment(date).format('MM/DD/YYYY h:mm A');                                
+                aggiungiEvento(selecteddate)
+               /* if (jsEvent.target.classList.contains('fc-bgevent')) {
+                    alert('Click Background Event Area');
+                }*/
+            }
+		});
+		
+	});
+
+/* Details display for estimates,project, invoice */
+$ = jQuery.noConflict(false);
+function detailsAllother(selectdate,selectedid){
+    $('#push').show();
+    /* Estimates  */
+    $.each(estimates, function( key, value) {
+        var new_date = moment(value.valenza, "DD-MM-YYYY").add('days', 10);
+        new_date = moment(new_date).format('DD-MM-YYYY');
+                 
+        //finelavori 
+        if(selectdate == new_date) {
+            var selectedEventStye = "";
+            if(selectedid == value.id){
+                selectedEventStye = 'border: 3px solid #337ab7';
+            }
+            if(value.color == ""){
+                value.color='#ff851b';
+            }
+            
+            var detailHtml = '<div style="background-color: '+value.color+';'+selectedEventStye+'" class="striscia"><a href="{{url('/estimates/modify/quote/')}}/'+value.id+'" id="mainlink"><div class="orario">Quote :'+value.id+'/'+value.anno+'</div><div>'+value.oggetto+'</div><div>{{trans('messages.keyword_valenza')}} : '+value.valenza+'</div><div>{{trans('messages.keyword_end_date_works')}} : '+value.finelavori+'</div></a></div>'; 
+            $('#content').find('h3').remove();
+            $('#content').append(detailHtml);
+        }     
+    });
+
+    /* Projects */
+    $.each(projects, function( key, value) {
+        var new_date = moment(value.datafine, "DD-MM-YYYY").add('days', 0);
+         new_date = moment(new_date).format('DD-MM-YYYY');                 
+        //finelavori 
+        if(selectdate == new_date) {
+            var selectedEventStye = "";
+            if(selectedid == value.id){
+                selectedEventStye = 'border: 3px solid #337ab7';
+            }
+            if(value.color == ""){
+                value.color='#ff851b';
+            }
+            var proyear = value.datainizio;
+            proyear = proyear.slice(-2);            
+            var detailHtml = '<div style="background-color: '+value.color+';'+selectedEventStye+'" class="striscia"><a href="{{url('/progetti/modify/project/')}}/'+value.id+'" id="mainlink"><div class="orario">Project :'+value.id+'/'+proyear+'</div><div>'+value.nomeprogetto+'</div><div>{{trans('messages.keyword_starttime')}} : '+value.datainizio+'</div><div>{{trans('messages.keyword_endtime')}} : '+value.datafine+'</div></a></div>'; 
+            $('#content').find('h3').remove();
+            $('#content').append(detailHtml);
+        }     
+    });
+    
+    /* Projects */
+    $.each(invoices, function( key, value) {
+        var new_date = moment(value.datascadenza, "DD-MM-YYYY").add('days', 0);
+        new_date = moment(new_date).format('DD-MM-YYYY');                 
+        
+        if(selectdate == new_date) {
+            var selectedEventStye = "";
+            if(selectedid == value.id){
+                selectedEventStye = 'border: 3px solid #337ab7';
+            }
+            if(value.color == ""){
+                value.color='#ff851b';
+            }
+            var invyear = value.datascadenza;
+            invyear = invyear.slice(-2);            
+            var detailHtml = '<div style="background-color: '+value.color+';'+selectedEventStye+'" class="striscia"><a href="{{url('/pagamenti/tranche/modifica/')}}/'+value.id+'" id="mainlink"><div class="orario">Invoice :'+value.idfattura+'</div><div>{{trans('messages.keyword_on_the_base')}} : '+value.base+'</div><div>{{trans('messages.keyword_issue_of_the')}} : '+value.emissione+'</div><div>{{trans('messages.keyword_expiry_date_invoice')}} : '+value.datascadenza+'</div></a></div>'; 
+            $('#content').find('h3').remove();
+            $('#content').append(detailHtml);
+        }     
+    });
+
+    
+    /* var psconsole = $('#content');
+         $('html, body').animate({
+                        scrollTop: psconsole.offset().top
+                    }, 1000);*/
+}
+function showevents(selectdate,eventid){
+    $('#content').html("");
+    $.each(eventi, function( key, value) {
+        var startday = value.giorno;
+        var startmonth = value.mese;
+        var endday = value.giornoFine;
+        var endmonth = value.meseFine;
+        var startyear = value.anno;
+        var endyear = value.annoFine;
+
+        var starttime = value.sh
+        var endtime = value.eh
+
+        var stardate = startday+'-'+startmonth+'-'+startyear;
+        var enddate = endday+'-'+endmonth+'-'+endyear;
+
+        var stardate = moment(stardate, "DD-MM-YYYY");
+        var enddate = moment(enddate, "DD-MM-YYYY");
+
+        var arrselected = selectdate.split("-");
+        var selecteddate = arrselected[0]+'-'+arrselected[1]+'-'+arrselected[2];
+        var selecteddate = moment(selecteddate, "DD-MM-YYYY");
+        
+        
+       var fDate,lDate,cDate;
+        fDate = Date.parse(stardate);
+        lDate = Date.parse(enddate);
+        cDate = Date.parse(selecteddate);
+
+       if((cDate <= lDate && cDate >= fDate)) {            
+        if(value.utente == ""){
+            value.utente = '-';
+        }        
+        var confms = "return confirm('{{trans('messages.keyword_suredeleteevent')}}')";
+        var selectedEventStye = "";
+        if(eventid == value.id){
+            selectedEventStye = 'border: 3px solid #337ab7';
+        }
+        if(value.color == ""){
+            value.color='#ff851b';
+        }
+        var Htmldetails = '<div style="background-color: '+value.color+';'+selectedEventStye+'" id="event_detail_list_'+value.id+'" class="striscia"><a href="{{url('calendario/edit/event')}}/'+value.id+'" id="mainlink"><div class="orario">'+startday+'/'+startmonth+' - '+endday+'/'+endmonth+' | '+starttime+' - '+endtime+'</div><div>'+value.ente+'</div><div>'+value.dove+'</div><div>'+value.titolo+'</div><div>'+value.utente+'</div></a><a href="{{url('calendario/delete/event/')}}/'+value.id+'" onclick="'+confms+'" class="btn btn-danger btn-sm elimina"><span class="fa fa-trash"></span></a><form action="http://maps.google.com/maps" method="get" target="new" id="frm'+value.id+'"><input id="geolocationPlaces_'+value.id+'" class="geolocationbox form-control" onkeyup="changetextlocationval('+value.id+')" type="text"><input name="saddr" value="{{$currentlocation}}" id="geolocationshdAddress_'+value.id+'" type="hidden"><input name="daddr" value="'+value.dove+'" id="geolocationEventAddress" type="hidden"><button type="submit" class="btn btn-warning geolocationbutton">Go</button></form></div>';
+
+        /*var Htmldetails = '<a href="{{url('calendario/edit/event')}}/'+value.id+'" id="mainlink"><div id="innerdetaildiv_'+value.id+'" style="background-color: '+value.color+'" class="striscia"><div class="orario">'+startday+'/'+startmonth+' - '+endday+'/'+endmonth+' | '+starttime+' - '+endtime+'</div><div>'+value.ente+'</div><div>'+value.dove+'</div><div>'+value.titolo+'</div><div>'+value.utente+'</div></div></a>';
+        
+        var innerdetails = '<a href="{{url('calendario/delete/event/')}}/'+value.id+'" class="btn btn-danger btn-sm elimina"><span class="fa fa-trash"></span></a><form action="http://maps.google.com/maps" method="get" target="new" id="frm'+value.id+'"><input id="geolocationPlaces_'+value.id+'" class="geolocationbox form-control" onkeyup="changetextlocationval('+value.id+')" type="text"><input name="saddr" value="{{$currentlocation}}" id="geolocationshdAddress_'+value.id+'" type="hidden"><input name="daddr" value="'+value.dove+'" id="geolocationEventAddress" type="hidden"><button type="submit" class="btn btn-warning geolocationbutton">Go</button></form>';*/
+
+            //$('#content').find('h3').remove();
+            $('#content').append(Htmldetails);
+            //$('#innerdetaildiv_'+value.id+'').append(innerdetails);
+
+            
+        }     
+    });
+
+    //geolocationBox.onclick = function(e) {e.preventDefault();};
+    //elimina.onclick = function(e) {check = confirm("{{ trans('messages.keyword_suredeleteevent') }} "); if(!check) e.preventDefault();};
+    var psconsole = $('#scrollfucs');
+    $('html, body').animate({
+                        scrollTop: psconsole.offset().top
+                    }, 1000);
+}
+/*$( "a" ).click(function( event ) {
+  event.preventDefault();
+  $( "<div>" )
+    .append( "default " + event.type + " prevented" )
+    .appendTo( "#log" );
+});*/
+ $(".geolocationbox").click( function(e){
+     e.stopPropagation();
+            e.preventDefault();               
+    });
+
+/*$(".fc-day").click( function(e){
+    alert("cc");
+});*/
+
+
+
+</script>
 @endsection
 

@@ -16,20 +16,26 @@ class ProjectRepository
 				// ->get();
 
     	$data = DB::table('projects')
-    			->join('users', 'projects.user_id', '=', 'users.id')
+    			->join('users', 'projects.user_id', '=', 'users.id')    			    			
     			->select(DB::raw('projects.*, users.id as uid, users.is_delete'))
 				->where('is_deleted','0')
 				->where('users.is_delete', '=', 0)
 				->orderBy('projects.id', 'asc')
 				->get();
 		
-		foreach($data as $data) {
-				if($data->statoemotivo != ""){
-					$statiemotivitipi = DB::table('statiemotivitipi')->where('id',$data->emotion_stat_id)->orderBy('id', 'asc')->first();
+			foreach($data as $data) {
+				if($data->statoemotivo != "") {
+					$statiemotivitipi = DB::table('statiemotiviprogetti')->where('id',$data->statoemotivo)->orderBy('id', 'asc')->first();
+					
+					if(isset($statiemotivitipi->language_key)){
+						$statiemotivitipi->name = (!empty($statiemotivitipi->language_key)) ? trans('messages.'.$statiemotivitipi->language_key) : $statiemotivitipi->name;
+					}
 					if(isset($statiemotivitipi->color)){
 						$data->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.$statiemotivitipi->name.'</span>';
 					}					
 				}
+				$data->datainizio = (isset($data->datainizio) && !empty($data->datainizio)) ? dateFormate(str_replace('/', '-', $data->datainizio)) : "";
+				$data->datafine = (isset($data->datafine) && !empty($data->datafine)) ? dateFormate(str_replace('/', '-', $data->datafine)) : "";
 				$ente_return[] = $data;	
 			}	
 			return $ente_return;
@@ -41,7 +47,7 @@ class ProjectRepository
 	//miei
 	public function forUser2(User $user)
     {
-       if($user->id == 0) {
+       if($user->id == 0 || $user->dipartimento == 0) {
 
     // 	 $data = DB::table('projects')
 				// ->where('is_deleted','0')
@@ -59,12 +65,18 @@ class ProjectRepository
 			foreach($data as $data) {				
 
 				if($data->statoemotivo != ""){
-					$statiemotivitipi = DB::table('statiemotivitipi')->where('id',$data->emotion_stat_id)->orderBy('id', 'asc')->first();
-					$data->statoemotivo = isset($statiemotivitipi->name) ? '<span style="color:">'.$statiemotivitipi->name.'</span>' : '-';
+					$statiemotivitipi = DB::table('statiemotiviprogetti')->where('id',$data->emotion_stat_id)->orderBy('id', 'asc')->first();
+					/*$data->statoemotivo = isset($statiemotivitipi->name) ? '<span style="color:">'.$statiemotivitipi->name.'</span>' : '-';*/
+					if(isset($statiemotivitipi->language_key)){
+						$data->statoemotivo = (!empty($statiemotivitipi->language_key)) ? trans('messages.'.$statiemotivitipi->language_key) : $statiemotivitipi->name;
+					}
+					
 					if(isset($statiemotivitipi->color)){
 						$data->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.$statiemotivitipi->name.'</span>';
 					}					
 				}
+				$data->datainizio = (isset($data->datainizio) && !empty($data->datainizio)) ? dateFormate(str_replace('/', '-', $data->datainizio)) : "";
+				$data->datafine = (isset($data->datafine) && !empty($data->datafine)) ? dateFormate(str_replace('/', '-', $data->datafine)) : "";
 				$ente_return[] = $data;	
 			}	
 			return $ente_return;
@@ -83,18 +95,35 @@ class ProjectRepository
 		// 	->orWhere('user_id', $user->id)
 		// 	->orderBy('id', 'asc')
 		// 	->get();
+		$progetti[] = '';
+		$prog_return = [];
+			if(!$partecipanti->isEmpty()){
+			$progetti = Project::join('users', 'projects.user_id', '=', 'users.id')
+				->select(DB::raw('projects.*, users.id as uid, users.is_delete'))
+				->whereIn('projects.id', json_decode(json_encode($partecipanti), true))
+				->orWhere('projects.user_id', $user->id)
+				->where('users.is_delete', '=', 0)
+				->orderBy('projects.id', 'asc')
+				->get();
+			$prog_return=[];
+			foreach($progetti as $prog) {
+				if($prog->is_deleted == 0){
+					if($prog->statoemotivo != ""){
+						$statiemotivitipi = DB::table('statiemotiviprogetti')->where('id',$prog->emotion_stat_id)->orderBy('id', 'asc')->first();
+						//$prog->statoemotivo = isset($statiemotivitipi->name) ? '<span style="color:">'.$statiemotivitipi->name.'</span>' : '-';
+						if(isset($statiemotivitipi->language_key)){
+							$prog->statoemotivo = (!empty($statiemotivitipi->language_key)) ? trans('messages.'.$statiemotivitipi->language_key) : $statiemotivitipi->name;
+						}
 
-		$progetti = Project::join('users', 'projects.user_id', '=', 'users.id')
-			->select(DB::raw('projects.*, users.id as uid, users.is_delete'))
-			->whereIn('projects.id', json_decode(json_encode($partecipanti), true))
-			->orWhere('projects.user_id', $user->id)
-			->where('users.is_delete', '=', 0)
-			->orderBy('projects.id', 'asc')
-			->get();
-		
-		foreach($progetti as $prog) {
-			if($prog->is_deleted == 0)
-				$prog_return[] = $prog;	
+						if(isset($statiemotivitipi->color)){
+							$prog->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.$statiemotivitipi->name.'</span>';
+						}					
+					}
+					$prog->datainizio = (isset($prog->datainizio) && !empty($prog->datainizio)) ? dateFormate(str_replace('/', '-', $prog->datainizio)) : "";
+					$prog->datafine = (isset($prog->datafine) && !empty($prog->datafine)) ? dateFormate(str_replace('/', '-', $prog->datafine)) : "";
+					$prog_return[] = $prog;
+				}
+			}
 		}
 				
 		return $prog_return;

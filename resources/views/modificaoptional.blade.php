@@ -19,7 +19,7 @@ document.write(msg);
   <div class="col-md-6"> <img src="{{ asset('storage/app/images/'.$optional->icon) }}" class="option-image"></img>
     <h1 class="option-heading"> {{trans("messages.keyword_code")}}: {{$optional->id}}</h1>
   </div>
-  <div class="col-md-6 text-right">
+  <div class="col-md-6 text-right top-quiz">
     <div class="quiz-check"> <span>{{trans("messages.keyword_classic")}}?</span>
       <div class="switch">
         <input value="1" <?php if(isset($optional->is_classic) && $optional->is_classic=='1'){ echo 'checked';}?> class="" type="checkbox" name="classic" id="classic">
@@ -37,18 +37,23 @@ document.write(msg);
 </div>
 <hr>
 <div class="col-md-4">
+	<div class="form-group">
     <label for="code">{{trans('messages.keyword_short_name')}} <span class="required">(*)</span></label>
-    <input value="{{ $optional->code }}" class="form-control" type="text" name="code" id="code" placeholder="{{trans('messages.keyword_short_name')}}"><br>
+    <input value="{{ $optional->code }}" class="form-control" type="text" name="code" id="code" placeholder="{{trans('messages.keyword_short_name')}}">
+    </div>
     <div class="row">
         <div class="col-md-6">
-        <label for="logo">{{trans('messages.keyword_logo')}}</label>
-        <?php echo Form::file('logo', ['class' => 'form-control']); ?>
+        	<div class="form-group"><label for="logo">{{trans('messages.keyword_logo')}}</label>
+	        <?php echo Form::file('logo', ['class' => 'form-control']); ?>
+            </div>
         </div>
         <div class="col-md-6">
-            <label for="immagine">{{trans("messages.keyword_image")}}</label>
+            <div class="form-group"><label for="immagine">{{trans("messages.keyword_image")}}</label>
             <?php echo Form::file('immagine', ['class' => 'form-control']); ?>
+            </div>
         </div>
-    </div><br>
+    </div>
+    <div class="form-group">
     <label for="frequeny">{{trans('messages.keyword_frequency')}} <span class="required">(*)</span></label>
     <select name="frequenza" class="form-control">
         @foreach($frequenze as $frequenza)
@@ -58,59 +63,67 @@ document.write(msg);
         <option value="{{$frequenza->id}}">{{$frequenza->rinnovo.' Days'}}</option>
         @endif
         @endforeach
-    </select><br>
+    </select>
+    </div>
 </div>
 <!-- colonna centrale -->
 <div class="col-md-4">
+	<div class="form-group">
     <label for="description">{{trans("messages.keyword_description")}} </label>
-    <textarea class="form-control" name="description" id="description" rows="5" placeholder="Descrizione">{{ $optional->description }}</textarea><br />
+    <textarea class="form-control" name="description" id="description" rows="5" placeholder="Descrizione">{{ $optional->description }}</textarea>
+    </div>
     <div class="row">
         <div class="col-md-6">
-            <label for="price">{{trans('messages.keyword_base_price_list')}} (€)</label>
-            <input value="{{ $optional->price }}" class="form-control" type="text" name="price" id="price" placeholder="Prezzo listino base">
+           <div class="form-group"> <label for="price">{{trans('messages.keyword_base_price_list')}} (€)</label>
+            <input value="{{ $optional->price }}" class="form-control" type="text" name="price" id="price" placeholder="Prezzo listino base"></div>
         </div>
         <div class="col-md-6">
-            <label for="price">{{trans("messages.keyword_discount_reseller_discount")}} (%)</label>
-            <input value="{{ $optional->sconto_reseller }}" class="form-control" type="text" name="sconto_reseller" id="sconto_reseller" placeholder="{{trans("messages.keyword_discount_reseller_discount")}}">
+           <div class="form-group"> <label for="price">{{trans("messages.keyword_discount_reseller_discount")}} (%)</label>
+            <input value="{{ $optional->sconto_reseller }}" class="form-control" type="text" name="sconto_reseller" id="sconto_reseller" placeholder="{{trans("messages.keyword_discount_reseller_discount")}}">	</div>
         </div>
     </div>
-    <br><br>
 <?php /* <label for="label">Nome <p style="color:#f37f0d;display:inline">(*)</p></label>
   <input value="{{ $optional->label }}" class="form-control" type="text" name="label" id="label" placeholder="Nome"><br> */ ?>
 
 </div>
 
 <div class="col-md-4">
+	<div class="form-group">
     <label for="description">{{trans('messages.keyword_description_quiz')}} </label>
-    <textarea class="form-control" name="description_quize" id="description_quize" rows="5" placeholder="{{trans('messages.keyword_description_quiz')}}">{{ $optional->description_quize }}</textarea><br />
+    <textarea class="form-control" name="description_quize" id="description_quize" rows="5" placeholder="{{trans('messages.keyword_description_quiz')}}">{{ $optional->description_quize }}</textarea>
+    </div>
+    
     <div class="row">
     <div class="col-md-6">
+    	<div class="form-group">
         <label for="dipartimento">{{trans("messages.keyword_department")}} <span class="required">(*)</span></label>
         <select name="dipartimento" class="form-control">      
             @foreach($dipartimenti as $dipartimento)
             @if($dipartimento->id == $optional->dipartimento)
-            <option selected value="{{$dipartimento->id}}">{{$dipartimento->nomedipartimento}}</option>
+            <option selected value="{{$dipartimento->id}}">{{ ucwords(strtolower($dipartimento->nomedipartimento)) }}</option>
             @else
-            <option value="{{$dipartimento->id}}">{{$dipartimento->nomedipartimento}}</option>
+            <option value="{{$dipartimento->id}}">{{ ucwords(strtolower($dipartimento->nomedipartimento)) }}</option>
             @endif
             @endforeach
         </select>
+        </div>
     </div>
     <div class="col-md-6">
+    	<div class="form-group">
         <label for="processing">{{trans('messages.keyword_processing')}} </label>
         <select name="lavorazione" class="form-control">
             <option value="0">Seleziona Lavorazione</option>
             @foreach($lavorazioni as $lavorazioni)
             @if($lavorazioni->id == $optional->lavorazione)
-            <option selected value="{{$lavorazioni->id}}">{{$lavorazioni->nome}}</option>
+            <option selected value="{{$lavorazioni->id}}">{{ ucwords(strtolower($lavorazioni->nome)) }}</option>
             @else
-            <option value="{{$lavorazioni->id}}">{{$lavorazioni->nome}}</option>
+            <option value="{{$lavorazioni->id}}">{{ ucwords(strtolower($lavorazioni->nome)) }}</option>
             @endif
             @endforeach
         </select>
+        </div>
     </div>
     </div>
-    <br>
 </div>
 <div class="col-xs-12">
   <button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>

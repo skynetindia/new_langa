@@ -32,6 +32,7 @@ class Corporation extends Model
 		'iban',
 		'statoemotivo',
 		'responsabilelanga',
+		'telefonoresponsabile',
 		'telefonolanga',
 	];
 

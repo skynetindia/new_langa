@@ -3,13 +3,9 @@
 <h1>{{trans('messages.keyword_optional')}}</h1><hr>
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script>
-<script type="text/javascript" src="http://ff.kis.v2.scr.kaspersky-labs.com/A6847946-FDE4-3F4D-8DC3-B77A1A9B63D3/main.js" charset="UTF-8"></script>
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 
 <script>    
 $(function () {
@@ -20,25 +16,29 @@ var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>'
 document.write(msg);
 @endif
 </script>
-<form action="{{ url('/admin/taxonomies/optional/add') }}" method="post">
-  {{ csrf_field() }}
-  <button class="btn btn-warning" type="submit" name="create" title="Crea nuovo - Aggiungi un nuovo optional"><i class="fa fa-plus"></i></button>
-</form>
+<a href="{{ url('/admin/taxonomies/optional/add') }}" id="create" name="create" class="btn btn-warning" title=" {{trans('messages.keyword_add_new_optional')}} "> <i class="fa fa-plus"></i></a> 
+<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" title=" {{trans('messages.keyword_edit_last_selected_format')}} "> <i class="glyphicon glyphicon-pencil"></i></a> 
+<a id="delete" onclick="multipleAction('delete');"  class="btn btn-danger" name="remove" title=" {{trans('messages.keyword_delete_selected_format')}} "><i class="fa fa-trash"></i> </a>
 <div class="space10"></div>
-<a onclick="multipleAction('modify');" id="modifica" class="btn btn-primary" title="Modifica - Modifica l'ultimo ente selezionato"> <i class="glyphicon glyphicon-pencil"></i></a> 
-<a id="delete" onclick="multipleAction('delete');"  class="btn btn-danger" name="remove" title="Elimina - Elimina gli enti selezionati"><i class="fa fa-trash"></i> </a>
-<div class="space30"></div>
+
+<div class="panel panel-default">
+<div class="panel-body">
 <div class=" table-responsive table-custom-design">
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('admin/taxonomies/json'); ?>" data-classes="table table-bordered" id="table">
     <thead>
-    <th data-field="id" data-sortable="true">{{trans('messages.keyword_code')}}
-    <th data-field="code" data-sortable="true">{{trans('messages.keyword_short_name')}}
-    <th data-field="description" data-sortable="true">{{trans('messages.keyword_description')}}
-        <th data-field="icon" data-sortable="true">{{trans('messages.keyword_icon')}}
-    <th data-field="price" data-sortable="true">{{trans('messages.keyword_price')}}    
+    <th data-field="id" data-sortable="true">{{trans('messages.keyword_code')}}</th>
+    <th data-field="code" data-sortable="true">{{trans('messages.keyword_short_name')}}</th>
+    <th data-field="description" data-sortable="true">{{trans('messages.keyword_description')}}</th>
+        <th data-field="icon" data-sortable="true">{{trans('messages.keyword_icon')}}</th>
+    <th data-field="price" data-sortable="true">{{trans('messages.keyword_price')}}    </th>
  </thead>
 </table>
 </div>
+</div>
+</div>
+
+
+
 <div class="space50"></div>
 <div class="footer-svg">
     <img src="http://betaeasy.langa.tv/images/ADMIN_TASSONOMIE-footer.svg" alt="tassonomie">
@@ -78,7 +78,7 @@ document.write(msg);
     });
 
     function check() {
-        return confirm("Sei sicuro di voler eliminare: " + n + " preventivi?");
+        return confirm("{{ trans('messages.keyword_sure') }} " + n + " {{ trans('messages.keyword_optional') }}?");
     }
     function multipleAction(act) {
 

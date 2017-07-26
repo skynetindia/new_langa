@@ -7,6 +7,11 @@
 <link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
 <script type="text/javascript" src="{{asset('public/scripts/dropzone.js')}}"></script>
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
+<?php /*<script src="{{asset('public/scripts/signature.js')}}"></script>*/?>
+
+<script src="{{asset('public/scripts/jquery.signature.js')}}"></script>
+<script src="{{asset('public/scripts/excanvas.js')}}"></script>
+
 <div class="modifica-blade-estimate">
 @if(!empty(Session::get('msg')))
     <script>
@@ -32,47 +37,63 @@
          $.datepicker.regional['nl']
     )
 );</script>
+
+
+<div class="clearfix"></div>
+<div class="height20"></div>
+
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-8 col-sm-12 col-xs-12">
     <?php echo Form::open(array('url' => '/estimates/modify/quote' . '/' . $preventivo->id, 'files' => true, 'name' => 'edit_estimate', 'id' => 'edit_estimate')) ?>
     <?php $mediaCode = date('dmyhis');?>
 {{ csrf_field() }}
 <input type="hidden" name="idutente" value="{{$preventivo->idutente}}">
 <input type="hidden" name="mediaCode" id="mediaCode" value="{{$mediaCode}}" />
-<?php $selectedVal = 'NON CONFERMATO'; ?>
+<?php $selectedVal = '8'; ?>
 @if($statoemotivoselezionato!=null)
 	@foreach($statiemotivi as $statoemotivo)
 		@if($statoemotivo->id == $statoemotivoselezionato->id_tipo) 
-	        <?php $selectedVal = $statoemotivo->name; ?>        	 
+	        <?php $selectedVal = $statoemotivo->id; ?>        	 
        	@endif 
 	@endforeach
 @endif
 <input type="hidden" id="hdstatoemotivo" name="statoemotivo" value="{{$selectedVal}}" />
 <input type="hidden" id="hdPrezzo" name="prezzo" value="{{$preventivo->prezzo_confermato}}" />
+<input type="hidden" name="signature" id="signatureJSON" value="<?php echo $preventivo->signature; ?>">
 
 	<div class="row">
-    	<div class="col-md-12">
+    	<div class="col-md-12 col-sm-12 col-xs-12">
+        	<div class="form-group">
         <label for="id"> {{ trans('messages.keyword_noquote') }} 
 			<input disabled value=":{{$preventivo->id}}/{{$preventivo->anno}}" type="text" id="id" name="id" placeholder="{{ trans('messages.keyword_budget_code') }} " class="form-control">
 		</label>
-		<div class="btn-group btn-group-top-space">
+		<div class="btn-group btn-group-top-space margin-right-left-space">
         	<a target="new" href="{{url('/estimates/pdf/quote/') . '/' . $preventivo->id}}" class="btn btn-default" title="{{trans('messages.keyword_see_budget')}} "><i class="fa fa-file-pdf-o"></i></a>
         </div>
 
         <div class="btn-group">
-            <a target="new" href="{{ url('enti/myenti') }}" class="btn btn-warning" title=" {{ trans('messages.keyword_gotoentity') }} "> {{ trans('messages.keyword_gotoentity') }}</a>
+            <a target="new" href="{{ url('enti/modify/corporation').'/'.$preventivo->idente }}" class="btn btn-warning" title=" {{ trans('messages.keyword_gotoentity') }} "> {{ trans('messages.keyword_gotoentity') }}</a>
         </div>
-
+			</div>
         </div>
     </div>    
         
-        <br>
-		<label for="oggetto"> {{ trans('messages.keyword_quotename') }} <span class="required">(*)</span></label>
-        <input value="{{$preventivo->oggetto}}" type="text" id="oggetto" name="oggetto" placeholder=" {{ trans('messages.keyword_subject_of_budget') }}" class="form-control"><br>
+        
+	<div class="row">
+    	<div class="col-md-12 col-sm-12 col-xs-12">
+        	<div class="form-group">	
+        <label for="oggetto"> {{ trans('messages.keyword_quotename') }}</label>
+        <input value="{{$preventivo->oggetto}}" type="text" id="oggetto" name="oggetto" placeholder=" {{ trans('messages.keyword_subject_of_budget') }}" class="form-control required-input">
+        	</div>
+        </div>
+    </div>    
+        
+        
         <div class="row">
-    			<div class="col-md-4">
-    				<label for="dipartimento"> {{ trans('messages.keyword_from') }} <span class="required">(*)</span></label>
-                        <select name="dipartimento" class="js-example-basic-single form-control">
+    			<div class="col-md-4 col-sm-12 col-xs-12">
+                	<div class="form-group">
+    				<label for="dipartimento"> {{ trans('messages.keyword_from') }}</label>
+                        <select name="dipartimento" class="js-example-basic-single_from form-control required-input">
                             <option selected></option>
                             @foreach($dipartimenti as $dipartimento)   
                                 @if($dipartimento->id == $preventivo->dipartimento)
@@ -82,78 +103,120 @@
                                 @endif
                             @endforeach
                         </select>
+                        </div>
+                        <label for="dipartimento" generated="true" class="error"></label>
     			</div>
-    			<div class="col-md-4">
+    			<div class="col-md-4 col-sm-12 col-xs-12">
+                	<div class="form-group">
     				<label for="idente"> {{ trans('messages.keyword_to') }} </label>
-                    <select name="idente" class="js-example-basic-single form-control">
+                    <select name="idente" class="js-example-basic-single_to form-control required-input">
                         <option selected></option>
                         @foreach($enti as $ente)
                             @if($ente->id == $preventivo->idente)
-                                <option selected value="{{$ente->id}}">{{$ente->nomeazienda}} | {{$ente->nomereferente}}</option>
+                                <option selected value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomereferente}}</option>
                             @else
-                                <option value="{{$ente->id}}">{{$ente->nomeazienda}}</option>
+                                <option value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
                             @endif
                         @endforeach
                     </select><script type="text/javascript">
 
-    $(".js-example-basic-single").select2();
+    $(".js-example-basic-single_from").select2({ containerCssClass : "required-input" });
+    $(".js-example-basic-single_to").select2({ containerCssClass : "required-input" });
 
 </script>
     			</div>
+                <label for="idente" generated="true" class="error"></label>
+                	</div>
     			
-    			<div class="col-md-4">
-    				<label for="data"> {{ trans('messages.keyword_date') }} <span class="required">(*)</span> </label> 
-                    <input value="{{$preventivo->data}}"type="text" id="data" name="data" placeholder=" {{ trans('messages.keyword_date_creation_quote') }}" class="form-control"><br>
+    			<div class="col-md-4 col-sm-12 col-xs-12">
+	                	<div class="form-group">
+    				<label for="data"> {{ trans('messages.keyword_date') }}</label> 
+                    <input value="{{$preventivo->data}}" type="text" id="data" name="data" placeholder=" {{ trans('messages.keyword_date_creation_quote') }}" class="form-control required-input">
+                    	</div>
     			</div>
         </div>
 
 		<div class="row">
 
-    	<div class="col-md-12"><h4> {{ trans('messages.keyword_packages_and_optional') }} </h4><hr></div>
-    <div class="col-md-2">    
-    	<div class="space20"></div>    
-       
+    	<div class="col-md-12 col-sm-12 col-xs-12"><h4> {{ trans('messages.keyword_packages_and_optional') }} </h4><hr></div>
+ 
+ @if(checkpermission('3', '16', 'scrittura','true'))
+ <div class="col-md-12 set-mannualy-width-estimates-modifica col-sm-12 col-xs-12">
+    <div class="btn-blk">    
+    	<div class="space20"></div>   
+        <?php /*<a target="new" href="{{url('/estimates/optional') . '/' . $preventivo->id}}" class="btn btn-info"><i class="fa fa-info"></i></a>*/?>
 	    <a class="btn btn-warning"  id="add"><i class="fa fa-plus"></i></a>
 	    <a class="btn btn-danger"  id="delete"><i class="fa fa-trash"></i></a>
     </div>
-    <div class="col-md-5">
+    
+    <div class="select-box">
+    	<div class="form-group">
             <label> {{ trans('messages.keyword_list_of_packages') }} </label>
-        <select id="pacchetti" class="js-example-basic-single form-control">
+        <select id="pacchetti" name="" class="js-example-basic-single form-control">
             <option></option>
             @foreach($pacchetti as $pacchetto)
                 <option value="{{$pacchetto->id}}">{{$pacchetto->label}}</option>
             @endforeach
         </select>
+        </div>
     </div>
-    <div class="col-md-5">
+    
+    <div class="select-box">
+    	<div class="form-group">
             <label> {{ trans('messages.keyword_optional_list') }} </label>
         <select id="optional" class="js-example-basic-single form-control">
             <option></option>
             @foreach($optional as $opt)
-                <option value="{{$opt->id}}">{{$opt->label}}</option>
+                <option value="{{$opt->id}}">{{$opt->code}}</option>
             @endforeach
         </select><script type="text/javascript">
 
     $(".js-example-basic-single").select2();
 
 </script>
+		</div>
     </div>
+  </div>
+  @endif  
     
-    <div class="col-md-12">
-        <br>
-        <div class="set-height">
-        <table id="table" class="table table-bordered">
+    
+    
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="height10"></div>
+        <div class="set-height450">
+        <table id="table" class="table table-bordered packages_and_optional">
             <thead>
                 <th>#</th>            
-                <th> {{ trans('messages.keyword_object') }} </th>
-                <th> {{ trans('messages.keyword_description') }} </th>
-                <th> {{ trans('messages.keyword_qty') }} </th>
-                <th> {{ trans('messages.keyword_unit_price') }} </th>
-                <th> {{ trans('messages.keyword_subtotal') }} </tH>
-                <th> {{ trans('messages.keyword_cyclicity') }} </th>
-                <th> {{ trans('messages.keyword_asterisca') }} </th>
+                <th> {{ trans('messages.keyword_object') }}, {{ trans('messages.keyword_qty') }}, {{ trans('messages.keyword_unit_price') }} </th>
+                <th> {{ trans('messages.keyword_description') }} </th>                
+                <th> {{ trans('messages.keyword_subtotal') }}, {{ trans('messages.keyword_cyclicity') }}, {{ trans('messages.keyword_asterisca') }}</th>                
             </thead>
             <tbody id="tabella">
+            @foreach($optional_preventivi as $keyopp => $valopp)
+            <tr>
+                <td><input class="selezione" id="checkNuL{{$valopp->id}}" type="checkbox"><label for="checkNuL{{$valopp->id}}"></label>
+                    <input value="{{$valopp->id}}" name="codici[]" class="form-control" type="hidden"></td>
+                <td><input name="oggetti[]" class="form-control" type="text" value="{{$valopp->oggetto}}">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12 col-xs-12"><input name="qt[]" class="form-control qt" type="number" value="{{$valopp->qta}}"></div>
+                        <div class="col-md-6 col-sm-12 col-xs-12"><input name="pru[]" class="form-control pr" type="number" value="{{$valopp->prezzounitario}}"></div>
+                    </div>
+                </td>
+                <td><textarea name="desc[]" class="form-control">{{$valopp->descrizione}}</textarea></td>                
+                <td><input name="tot[]" class="form-control tot" type="number" value="{{$valopp->totale}}">
+                <div class="row">
+                        <div class="col-md-6 col-sm-12 col-xs-12"><select name="cicli[]" class="form-control">
+                @foreach($frequency as $key => $frequencyval)
+                <option value="{{$frequencyval->id}}" <?php if($valopp->Ciclicita==$frequencyval->id){ echo 'selected';}?>>{{ $frequencyval->rinnovo .' '. trans('messages.keyword_days') }} </option>
+                @endforeach
+                </select></div>
+                        <div class="col-md-6 col-sm-12 col-xs-12">
+                        <div class="switch"><input name="ast[{{$keyopp}}]" id="ast{{$valopp->id}}" type="checkbox" <?php if($valopp->asterisca=='1'){ echo 'checked';} ?>><label for="ast{{$valopp->id}}"></label></div>
+                        </div>
+                    </div>
+                </td>                
+            </tr>
+            @endforeach
             </tbody>
         </table>
         </div>
@@ -169,6 +232,7 @@
         var optionalPackLength = Object.keys(optionalPack).length;
         count=0;
         $('#pacchetti').on("change", function() {
+            
             var id = $('#pacchetti').val();
             var counttr = $('#tabella').children('tr').length;
             for(var i = 0; i < pacchettiLength; i++) {
@@ -210,7 +274,7 @@
                                     codiceInput.className ="form-control";
                                     codice.appendChild(codiceInput);*/
                                     
-									 var codiceInput = document.createElement("input");
+									var codiceInput = document.createElement("input");
                                     codiceInput.type = "hidden";
                                     codiceInput.value = count+1;
                                     codiceInput.name = "codici[]";
@@ -219,33 +283,35 @@
 									
                                     // Oggetto
                                     var label = optional[k]['label'];
+                                    var code = optional[k]['code'];
                                     var oggetto = document.createElement("td");
                                     var input = document.createElement("input");
                                     input.type = "text";
-                                    input.value = label;
+                                    input.value = code;
                                     input.name = "oggetti[]";
                                     input.className ="form-control";
                                     oggetto.appendChild(input);
+
+                                    var oggettorow = document.createElement("div");
+                                    oggettorow.className="row";
+                                    var oggettodiv1 = document.createElement("div");
+                                    oggettodiv1.className="col-md-6";
+                                    var oggettodiv2 = document.createElement("div");
+                                    oggettodiv2.className="col-md-6";
+
+                                    oggettorow.appendChild(oggettodiv1);
+                                    oggettorow.appendChild(oggettodiv2);
                                     
-                                    // Descrizione
-                                    var desc = optional[k]['description'];
-                                    var descrizione = document.createElement("td");
-                                    var inputDesc = document.createElement("input");
-                                    inputDesc.type = "text";
-                                    inputDesc.name = "desc[]";
-                                    inputDesc.value = desc;
-                                    inputDesc.className = "form-control";
-                                    descrizione.appendChild(inputDesc);
-                                    
-                                    // Q.tà
+                                     // Q.tà
                                     var qt = document.createElement("input");
                                     qt.type = "number";
                                     var tdQt = document.createElement("td");
                                     qt.value = 1;
                                     qt.name = "qt[]";
                                     qt.className = "form-control qt";
-                                    tdQt.appendChild(qt);
-                                    
+                                    //tdQt.appendChild(qt);
+                                    oggettodiv1.appendChild(qt);
+
                                     // Prezzo unitario
                                     var prez = optional[k]['price'];
                                     var prezzo = document.createElement("td");
@@ -254,8 +320,31 @@
                                     inputPrezzo.value = prez;
                                     inputPrezzo.name = "pru[]";
                                     inputPrezzo.className = "form-control pr";
-                                    prezzo.appendChild(inputPrezzo);
+                                    //prezzo.appendChild(inputPrezzo);
+                                    oggettodiv2.appendChild(inputPrezzo);
+                                    oggetto.appendChild(oggettorow);
+
+
+                                    // Descrizione
+                                    var desc = optional[k]['description'];
+                                    var descrizione = document.createElement("td");
+                                    var inputDesc = document.createElement("textarea");
+                                    //inputDesc.type = "textarea";
+                                    inputDesc.name = "desc[]";
+                                    inputDesc.value = desc;
+                                    inputDesc.className = "form-control";
+                                    descrizione.appendChild(inputDesc);
                                     
+                                    var totalerow = document.createElement("div");
+                                    totalerow.className="row";
+                                    var totalediv1 = document.createElement("div");
+                                    totalediv1.className="col-md-6";
+                                    var totalediv2 = document.createElement("div");
+                                    totalediv2.className="col-md-6";
+
+                                    totalerow.appendChild(totalediv1);
+                                    totalerow.appendChild(totalediv2);
+
                                     // Totale
                                     var totale = document.createElement("input");
                                     totale.type = "number";
@@ -264,62 +353,58 @@
                                     totale.name = "tot[]";
                                     totale.className = "form-control tot";
                                     tdTot.appendChild(totale);
+
+                                     var freqtd = document.createElement("td");
+                                    var select = document.createElement("select");
+                                    select.name = "cicli[]";
+                                    select.className = "form-control";          
+                                    var selectfrequency = optional[k]['frequenza'];                   
+                                    var freq='';
+                                    <?php 
+                                        $freq = '';
+                                        foreach($frequency as $key => $frequencyval){
+                                            ?> 
+                                            var frequencuid = '<?php echo $frequencyval->id;?>';
+                                            var vselected = '';                        
+                                            if(frequencuid == selectfrequency){
+                                                vselected = 'selected';
+                                            }
+
+                                            freq +='<option value="<?php echo $frequencyval->id;?>" '+vselected+'><?php echo $frequencyval->rinnovo. ' '. trans('messages.keyword_days'); ?></option>';
+                                            <?php 
+                                        }
+                                    ?>
+                                    select.innerHTML = freq;
+                                    totalediv1.appendChild(select);
                                     
-                                    // Asterisca
-									/*var select1 = document.createElement("select");
-									var compl = document.createElement("td");
-									select1.name = "ast[]";
-									select1.className = "form-control";
-									var array = ["No", "Si"];
-									compl.appendChild(select1);
-									
-									for(var i = 0; i < array.length; i++) {
-										var option = document.createElement("option");
-										option.value = i;
-										option.text = array[i];
-										select1.appendChild(option);
-									}
-									*/
-									
-									var ciclicita = document.createElement("td");
-                                    var ciclicitatd ='<?php                            
-                                    foreach($frequency as $key => $frequencyval){
-                                    ?><div class="cust-radio"><input type="radio" <?php if($key=='0'){echo 'checked';}?> name="cicli['+counttr+k+']" id="frequenza_'+counttr+k+'<?php echo $frequencyval->rinnovo;?>" value="{{ $frequencyval->rinnovo }}" /><label for="frequenza_'+counttr+k+'<?php echo $frequencyval->rinnovo;?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div><?php
-                            }
-                        ?>';
-                                    ciclicita.innerHTML = ciclicitatd;
-									
-									// Asterisca
-									/*var check = document.createElement("input");
-									check.type = "checkbox";
-									var compl = document.createElement("td");
-									check.name = "ast[]";
-									compl.appendChild(check);
-									//tr.appendChild(tdAst);*/
-                                    var compl = document.createElement("td");
+
+                                   // var compl = document.createElement("td");
                                     var checkdiv = document.createElement("div");
                                     checkdiv.className = "switch";
                                     var check = document.createElement("input");
                                     check.type = "checkbox";
-                                    check.name = "ast[]";
-                                    check.id = "ast"+counttr;
+                                    check.name = "ast["+counttr+"]";
+                                    check.id = "ast"+count;
+                                                                      
                                     var checkLabel = document.createElement("label");
                                     checkLabel.for="ast"+counttr;
                                     checkLabel.setAttribute('for', "ast"+counttr);
                                     checkdiv.appendChild(check);
                                     checkdiv.appendChild(checkLabel);									
-									compl.appendChild(checkdiv);
+									totalediv2.appendChild(checkdiv);                                    
 									
+                                    tdTot.appendChild(totalerow);
+
 									tr.appendChild(td);
 									//tr.appendChild(qt1);
 									//tr.appendChild(codice);
 									tr.appendChild(oggetto);
 									tr.appendChild(descrizione);
-									tr.appendChild(tdQt);
-									tr.appendChild(prezzo);
+									//tr.appendChild(tdQt);
+									//tr.appendChild(prezzo);
 									tr.appendChild(tdTot);
-                                    tr.appendChild(ciclicita);
-									tr.appendChild(compl);
+                                    //tr.appendChild(freqtd);
+									//tr.appendChild(compl);
 									
                                     // Aggiungo la nuova riga
                                     tabella.appendChild(tr);
@@ -329,7 +414,7 @@
                         }
                     }
                     break;
-                }
+                } 
             }
         });
         
@@ -355,13 +440,24 @@
                     td.appendChild(checkboxlabel);                    
                     tr.appendChild(td);
 					var ordine = document.createElement("input");
-                                    ordine.type = "number";
-                                    var qt1 = document.createElement("td");
-                                    ordine.value = 1;
-                                    ordine.name = "ordine[]";
-                                    ordine.className = "form-control";
-                                   // qt1.appendChild(ordine);
-					//tr.appendChild(qt1);
+                    ordine.type = "number";
+                    var qt1 = document.createElement("td");
+                    ordine.value = 1;
+                    ordine.name = "ordine[]";
+                    ordine.className = "form-control";
+                   // qt1.appendChild(ordine);
+	               //tr.appendChild(qt1);
+
+                var oggettorow = document.createElement("div");
+                    oggettorow.className="row";
+                    var oggettodiv1 = document.createElement("div");
+                    oggettodiv1.className="col-md-6";
+                    var oggettodiv2 = document.createElement("div");
+                    oggettodiv2.className="col-md-6";
+
+                    oggettorow.appendChild(oggettodiv1);
+                    oggettorow.appendChild(oggettodiv2);
+
                     // Codice
                     var idogg = optional[k]['id'];
                     var codice = document.createElement("td");
@@ -374,33 +470,27 @@
                     //tr.appendChild(codice);
                     // Oggetto
                     var label = optional[k]['label'];
+                    var code = optional[k]['code'];
                     var oggetto = document.createElement("td");
                     var input = document.createElement("input");
                     input.type = "text";
-                    input.value = label;
+                    input.value = code;
                     input.name = "oggetti[]";
                     input.className ="form-control";
                     oggetto.appendChild(input);
-                    tr.appendChild(oggetto);
-                    // Descrizione
-                    var desc = optional[k]['description'];
-                    var descrizione = document.createElement("td");
-                    var inputDesc = document.createElement("input");
-                    inputDesc.type = "text";
-                    inputDesc.name = "desc[]";
-                    inputDesc.value = desc;
-                    inputDesc.className = "form-control";
-                    descrizione.appendChild(inputDesc);
-                    tr.appendChild(descrizione);
-                    // Q.tà
+                    oggetto.appendChild(oggettorow);
+                    
+
+                     // Q.tà
                     var qt = document.createElement("input");
                     qt.type = "number";
                     var tdQt = document.createElement("td");
                     qt.value = 1;
                     qt.name = "qt[]";
                     qt.className = "form-control qt";
-                    tdQt.appendChild(qt);
-                    tr.appendChild(tdQt);
+                    oggettodiv1.appendChild(qt);
+                    //tr.appendChild(tdQt);
+
                     // Prezzo unitario
                     var prez = optional[k]['price'];
                     var prezzo = document.createElement("td");
@@ -409,34 +499,75 @@
                     inputPrezzo.value = prez;
                     inputPrezzo.name = "pru[]";
                     inputPrezzo.className = "form-control pr";
-                    prezzo.appendChild(inputPrezzo);
-                    tr.appendChild(prezzo);
+                    //prezzo.appendChild(inputPrezzo);
+                    oggettodiv2.appendChild(inputPrezzo);
+                    //tr.appendChild(prezzo);
+
+                    tr.appendChild(oggetto);
+
+                    // Descrizione
+                    var desc = optional[k]['description'];
+                    var descrizione = document.createElement("td");
+                    var inputDesc = document.createElement("textarea");
+                    //inputDesc.type = "text";
+                    inputDesc.name = "desc[]";
+                    inputDesc.value = desc;
+                    inputDesc.className = "form-control";
+                    descrizione.appendChild(inputDesc);
+                    tr.appendChild(descrizione);
+                   
+                    var totalerow = document.createElement("div");
+                        totalerow.className="row";
+                        var totalediv1 = document.createElement("div");
+                        totalediv1.className="col-md-6";
+                        var totalediv2 = document.createElement("div");
+                        totalediv2.className="col-md-6";
+
+                        totalerow.appendChild(totalediv1);
+                        totalerow.appendChild(totalediv2);
+                    
                     // Totale
                     var totale = document.createElement("input");
                     totale.type = "number";
                     var tdTot = document.createElement("td");
                     totale.value = prez;
                     totale.name = "tot[]";
-                    totale.className = "form-control tot";
+                    totale.className = "form-control tot";                    
                     tdTot.appendChild(totale);
-                    tr.appendChild(tdTot);
-					
-					
-                    var ciclicita = document.createElement("td");
-                     var ciclicitatd ='<?php                            
-                                    foreach($frequency as $key => $frequencyval){
-                                    ?><div class="cust-radio"><input type="radio" <?php if($key=='0'){echo 'checked';}?> name="cicli['+counttr+']" id="frequenza_'+counttr+k+'<?php echo $frequencyval->rinnovo;?>" value="{{ $frequencyval->rinnovo }}" /><label for="frequenza_'+counttr+k+'<?php echo $frequencyval->rinnovo;?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div><?php
+                    tr.appendChild(tdTot);					
+
+					var freqtd = document.createElement("td");
+                    var select = document.createElement("select");
+                    select.name = "cicli[]";
+                    select.className = "form-control";          
+                    var selectfrequency = optional[k]['frequenza'];
+                   
+                    var freq='';
+                    <?php 
+                        $freq = '';
+                        foreach($frequency as $key => $frequencyval){
+                            ?> 
+                            var frequencuid = '<?php echo $frequencyval->id;?>';
+                            var vselected = '';                        
+                            if(frequencuid == selectfrequency){
+                                vselected = 'selected';
                             }
-                        ?>';
-                    ciclicita.innerHTML = ciclicitatd;
-                    tr.appendChild(ciclicita);
+
+                            freq +='<option value="<?php echo $frequencyval->id;?>" '+vselected+'><?php echo $frequencyval->rinnovo. ' '. trans('messages.keyword_days'); ?></option>';
+                            <?php 
+                        }
+                    ?>
+                    //select.innerHTML = '<?php //echo $freq; ?>';
+                    select.innerHTML = freq;                    
+                    totalediv1.appendChild(select);
+                   // tr.appendChild(freqtd);
 					
                     // Asterisca
                     var checkdiv = document.createElement("div");
                     checkdiv.className = "switch";
                     var check = document.createElement("input");
                     check.type = "checkbox";
-                    check.name = "ast[]";
+                    check.name = "ast["+counttr+"]";
                     check.id = "ast"+counttr;
                     var checkLabel = document.createElement("label");
                     checkLabel.for="ast"+counttr;
@@ -444,10 +575,8 @@
                     checkdiv.appendChild(check);
                     checkdiv.appendChild(checkLabel);
 
-                    var tdAst = document.createElement("td");                    
-                    tdAst.appendChild(checkdiv);
-                    tr.appendChild(tdAst);
-                    // Aggiungo la nuova riga
+                    totalediv2.appendChild(checkdiv);                    
+                    tdTot.appendChild(totalerow);
                     tabella.appendChild(tr);   
 					count++;          
                 }
@@ -481,26 +610,48 @@
             codiceInput.className ="form-control";
             codice.appendChild(codiceInput);
             //tr.appendChild(codice);
+
 			var ordine = document.createElement("input");
-                                    ordine.type = "number";
-                                    var qt1 = document.createElement("td");
-                                    ordine.value = 1;
-                                    ordine.name = "ordine[]";
-                                    ordine.className = "form-control";
-                                   // qt1.appendChild(ordine);
+            ordine.type = "number";
+            var qt1 = document.createElement("td");
+            ordine.value = 1;
+            ordine.name = "ordine[]";
+            ordine.className = "form-control";
+           // qt1.appendChild(ordine);
 			//tr.appendChild(qt1);
+
+            var oggettorow = document.createElement("div");
+                oggettorow.className="row";
+                var oggettodiv1 = document.createElement("div");
+                oggettodiv1.className="col-md-6";
+                var oggettodiv2 = document.createElement("div");
+                oggettodiv2.className="col-md-6";
+
+                oggettorow.appendChild(oggettodiv1);
+                oggettorow.appendChild(oggettodiv2);
+
+            var codiceInput = document.createElement("input");
+            codiceInput.type = "hidden";
+            codiceInput.value = count+1;
+            codiceInput.name = "codici[]";
+            codiceInput.className ="form-control";
+            td.appendChild(codiceInput);
+
+
             // Oggetto
             var oggetto = document.createElement("td");
             var input = document.createElement("input");
             input.type = "text";
             input.name = "oggetti[]";
             input.className ="form-control";
-            oggetto.appendChild(input);
+            oggetto.appendChild(input);            
+            oggetto.appendChild(oggettorow);
             tr.appendChild(oggetto);
+
             // Descrizione
             var descrizione = document.createElement("td");
-            var inputDesc = document.createElement("input");
-            inputDesc.type = "text";
+            var inputDesc = document.createElement("textarea");
+            //inputDesc.type = "text";
             inputDesc.name = "desc[]";
             inputDesc.className = "form-control";
             descrizione.appendChild(inputDesc);
@@ -511,16 +662,18 @@
             var tdQt = document.createElement("td");
             qt.name = "qt[]";
             qt.className = "form-control qt";
-            tdQt.appendChild(qt);
-            tr.appendChild(tdQt);
+            oggettodiv1.appendChild(qt);
+            //tr.appendChild(tdQt);
             // Prezzo unitario
             var prezzo = document.createElement("td");
             var inputPrezzo = document.createElement("input");
             inputPrezzo.type = "number";
             inputPrezzo.name = "pru[]";
             inputPrezzo.className = "form-control pr";
-            prezzo.appendChild(inputPrezzo);
-            tr.appendChild(prezzo);
+            //prezzo.appendChild(inputPrezzo);
+            //tr.appendChild(prezzo);
+            oggettodiv2.appendChild(inputPrezzo);
+
             // Totale
             var totale = document.createElement("input");
             totale.type = "number";
@@ -529,38 +682,37 @@
             totale.className = "form-control tot";
             tdTot.appendChild(totale);
             tr.appendChild(tdTot);
+
+            var totalerow = document.createElement("div");
+            totalerow.className="row";
+            var totalediv1 = document.createElement("div");
+            totalediv1.className="col-md-6";
+            var totalediv2 = document.createElement("div");
+            totalediv2.className="col-md-6";
+
+            totalerow.appendChild(totalediv1);
+            totalerow.appendChild(totalediv2);        
 			
-			 var radio1_optional = document.createElement("input");
-            radio1_optional.type = "radio";
-
-            var radio2_optional = document.createElement("input");
-            radio2_optional.type = "radio";
-
-            var radio3_optional = document.createElement("input");
-            radio3_optional.type = "radio";
-
-            var radio4_optional = document.createElement("input");
-            radio4_optional.type = "radio";
-
-            var radio5_optional = document.createElement("input");
-            radio5_optional.type = "radio";
-
-            var ciclicita_optional = document.createElement("td");
-            var ciclicitatd ='<?php                            
-              foreach($frequency as $key => $frequencyval){
-                ?><div class="cust-radio"><input type="radio" <?php if($key=='0'){echo 'checked';}?> name="cicli['+counttr+']" id="frequenza_'+counttr+'<?php echo $frequencyval->rinnovo;?>" value="{{ $frequencyval->rinnovo }}" /><label for="frequenza_'+counttr+'<?php echo $frequencyval->rinnovo;?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div><?php
-            }?>';
-           ciclicita_optional.innerHTML = ciclicitatd;
-           
-
-            tr.appendChild(ciclicita_optional);
+			var freqtd = document.createElement("td");            
+            var select = document.createElement("select");            
+            select.name = "cicli[]";
+            select.className = "form-control";          
+            <?php 
+                $freq = '';
+                foreach($frequency as $key => $frequencyval){
+                     $freq .='<option value="'.$frequencyval->id.'">'.$frequencyval->rinnovo. ' '. trans('messages.keyword_days') .'</option>';
+                }
+            ?>
+            select.innerHTML = '<?php echo $freq; ?>';            
+            totalediv1.appendChild(select);
+            //tr.appendChild(freqtd);
 			
             // Asterisca
             var checkdiv = document.createElement("div");
             checkdiv.className = "switch";
             var check = document.createElement("input");
             check.type = "checkbox";
-            check.name = "ast[]";
+            check.name = "ast["+counttr+"]";
             check.id = "ast"+counttr;
             var checkLabel = document.createElement("label");
             checkLabel.for="ast"+counttr;
@@ -568,11 +720,12 @@
             checkdiv.appendChild(check);
             checkdiv.appendChild(checkLabel);
             
-
-            var tdAst = document.createElement("td");
+            //var tdAst = document.createElement("td");            
+            //tdAst.appendChild(checkdiv);
+            totalediv2.appendChild(checkdiv);
+            tdTot.appendChild(totalerow);
             
-            tdAst.appendChild(checkdiv);
-            tr.appendChild(tdAst);
+            //tr.appendChild(tdAst);
             // Aggiungo la nuova riga
             tabella.appendChild(tr);  
 			count++;
@@ -628,24 +781,21 @@
         
         
 		<div class="row">
-			<div class="col-md-4">
-				<label for="considerazioni"> {{ trans('messages.keyword_considerations') }} <span class="required">(*)</span></label>
-    <textarea id="considerazioni" name="considerazioni" placeholder=" {{ trans('messages.keyword_budget_considerations') }} " class="form-control">{{$preventivo->considerazioni}}</textarea><br>
-				<label for="valenza"> {{ trans('messages.keyword_valenza') }}<span class="required">(*)</span> </label>
-    <input value="{{$preventivo->valenza}}" type="text" id="valenza" name="valenza" placeholder=" {{ trans('messages.valency_budget') }} " class="form-control"><br>
-				
-                
-                <div class="row"><div class="col-sm-12"><label for="subtotale"> {{ trans('messages.keyword_total') }}  <span class="required">(€)</span><a onclick="calcola()" class="" title="Compilazione assistita">  {{ trans('messages.keyword_click') }}  <i class="fa fa-info"></i> {{ trans('messages.keyword_for_compilation') }} </a></label>
-    <input value="{{$preventivo->subtotale}}" step=any type="number" id="subtotale" name="subtotale" placeholder="{{ trans('messages.keyword_initial_price') }} " class="form-control" title=" {{ trans('messages.keyword_initial_value_calculated_individual_packages') }} ">   <br/> </div></div>
-                
-                
-                <label for="scontoagente"> {{ trans('messages.keyword_agent_discount') }}  <span class="required">(%)</span></label>
-    <input value="{{$preventivo->scontoagente}}" type="number" step=any id="scontoagente" name="scontoagente" placeholder=" {{ trans('messages.keyword_agent_discount_-_calculated_on_the_total') }} " class="form-control" title="% {{ trans('messages.keyword_of_maximum_discount_attributable_user') }} "><br>
-				
             
+            <div class="col-lg-12 col-md-12">
+            	<div class="row">
+                <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+	            	<div class="form-group">
+				<label for="considerazioni"> {{ trans('messages.keyword_considerations') }}</label>
+			    <textarea id="considerazioni" name="considerazioni" placeholder=" {{ trans('messages.keyword_budget_considerations') }} " class="form-control required-input considerazioni">{{$preventivo->considerazioni}}</textarea>
+    				</div>
+                    <div class="form-group">
+				<label for="valenza"> {{ trans('messages.keyword_valenza') }}</label>
+			    <input value="{{$preventivo->valenza}}" type="text" id="valenza" name="valenza" placeholder=" {{ trans('messages.valency_budget') }} " class="form-control required-input">
+    				</div>
 				
-                 <label for="totale"> {{ trans('messages.keyword_discounted_total') }}  <span class="required">(€)</span></label>
-    <input value="{{$preventivo->totale}}" type="number" step=any id="totale" name="totale" placeholder=" {{ trans('messages.keyword_total_price') }} " class="form-control" title="{{ trans('messages.keyword_discounted_value_or_overwritten_value') }} "><br>
+                
+               
                  
     
     
@@ -667,6 +817,21 @@
 			$('#notetecniche').val(testoTecnico);
 		}
 	}
+    /*Append the payment method to original forms */
+    $('#edit_estimate').submit(function(){ //listen for submit event
+        //var queryString = $('#frmpayments').serialize();
+        /*var paymentMethodhtml = $("#paymethod").html();
+        $('#edit_estimate').append(queryString);*/
+        var x = $("#frmpayments").serializeArray();        
+        if($('#edit_estimate').valid() && x != "") {                
+            $.each(x, function(i, field){         
+                var ht="<input type='text' name='"+field.name+"' value='"+field.value+"' style='display:none;'>";
+                $("#edit_estimate").append(ht);
+            });         
+        }       
+        return true;
+    }); 
+    
 	</script>
                 
     <script>
@@ -693,55 +858,171 @@
       </script>            
                 
                 
-            <button onclick="mostra2()" type="submit" class="btn btn-warning">{{ trans('messages.keyword_save') }} </button>    
+          
                 
 			</div>
-            
-            
-			<div class="col-md-4">
-				<label for="noteimportanti"> {{ trans('messages.keyword_important_notes') }} </label>
-    <textarea id="noteimportanti" name="noteimportanti" placeholder=" {{ trans('messages.keyword_important_notes') }} " class="form-control">{{$preventivo->noteimportanti}}</textarea><br>
-				<label for="finelavori"> {{ trans('messages.keyword_end_date_works') }} <span class="required">(*)</span></label>
-    <input value="{{$preventivo->finelavori}}" type="text" id="finelavori" name="finelavori" placeholder=" {{ trans('messages.keyword_date_expected_end_of_work') }} " class="form-control"><br>
-				
-                <div class="row"><div class="col-sm-12"><div class="height80"></div></div></div>
+                <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                    <label for="noteimportanti"> {{ trans('messages.keyword_important_notes') }} </label>
+                    <textarea id="noteimportanti" name="noteimportanti" placeholder=" {{ trans('messages.keyword_important_notes') }} " class="form-control noteimportanti">{{$preventivo->noteimportanti}}</textarea>
+                    </div>
+                   
+                   <div class="form-group"> 
+                    <label for="finelavori"> {{ trans('messages.keyword_end_date_works') }} </label>
+                    <input value="{{$preventivo->finelavori}}" type="text" id="finelavori" name="finelavori" placeholder=" {{ trans('messages.keyword_date_expected_end_of_work') }} " class="form-control required-input">
+                    </div>
+                </div>
                 
+                
+                
+            
+            	
+            
+            
+            	 <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                <div class="form-group">
+                <label for="scontoagente"> {{ trans('messages.keyword_agent_discount') }}  <span class="required">(%)</span></label>
+			    <input value="{{$preventivo->scontoagente}}" type="number" step=any id="scontoagente" name="scontoagente" placeholder=" {{ trans('messages.keyword_agent_discount_-_calculated_on_the_total') }} " class="form-control" title="% {{ trans('messages.keyword_of_maximum_discount_attributable_user') }} ">
+    			</div>
+				</div>
+            
+            	<div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+               <div class="form-group">  
                 <label for="scontobonus"> {{ trans('messages.keyword_agent_discount_discount') }}  <span class="required">(%)</span></label>
-    <input value="{{$preventivo->scontobonus}}" type="number" step=any id="scontobonus" name="scontobonus" placeholder=" {{ trans('messages.keyword_calculated_on_the_total_already_discounted') }} " class="form-control" title="% {{ trans('messages.keyword_discounted_by_the_retailer') }} "><br>
-    
-    
+    <input value="{{$preventivo->scontobonus}}" type="number" step=any id="scontobonus" name="scontobonus" placeholder=" {{ trans('messages.keyword_calculated_on_the_total_already_discounted') }} " class="form-control" title="% {{ trans('messages.keyword_discounted_by_the_retailer') }} ">
+    			</div>
+    		</div>
+            
+                	
+                    
+                    <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                	<div class="form-group">
+                    <label for="subtotale"> {{ trans('messages.keyword_total') }}  <span class="required">(€)</span><a onclick="calcola()" class="" title="Compilazione assistita">  {{ trans('messages.keyword_click') }}  <i class="fa fa-info"></i> {{ trans('messages.keyword_for_compilation') }} </a></label>
+    <input value="{{$preventivo->subtotale}}" step=any type="number" id="subtotale" name="subtotale" placeholder="{{ trans('messages.keyword_initial_price') }} " class="form-control" title=" {{ trans('messages.keyword_initial_value_calculated_individual_packages') }} "> 
+    				</div> </div>
+                
+                <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+				<div class="form-group">
+                 <label for="totale"> {{ trans('messages.keyword_discounted_total') }}  <span class="required">(€)</span></label>
+    <input value="{{$preventivo->totale}}" type="number" step=any id="totale" name="totale" placeholder=" {{ trans('messages.keyword_total_price') }} " class="form-control" title="{{ trans('messages.keyword_discounted_value_or_overwritten_value') }} ">
+    			</div>
+            </div>
+            
+            
+            
+            
+            <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+    			<div class="form-group"> 
        <label for="totaledapagare"> {{ trans('messages.keyword_topay') }}  <span class="required">(€)</span></label>
-    <input value="{{$preventivo->totaledapagare}}" type="number" step=any id="totaledapagare" name="totaledapagare" placeholder=" {{ trans('messages.   keyword_total_price_to_be_paid') }} " class="form-control" title=" {{ trans('messages.keyword_value_to_be_entered_for_any_rounding') }} "><br>
+    <input value="{{$preventivo->totaledapagare}}" type="number" step=any id="totaledapagare" name="totaledapagare" placeholder=" {{ trans('messages.keyword_total_price_to_be_paid') }} " class="form-control" title=" {{ trans('messages.keyword_value_to_be_entered_for_any_rounding') }} ">
+    			</div>
     
-   
+            </div>
+            <div id="extrafields"></div>
+             
+            </div>
+            </div>
+		</div>
+        </form>
+        
+        
+        @if(checkpermission('3', '16', 'scrittura','true'))
+       <div class="row">
+           <div class="col-md-12 col-sm-12 col-xs-12 mb16 show-desktop"> 
+            <button onclick="mostra2()" type="submit" class="btn btn-warning">{{ trans('messages.keyword_save') }}</button>
+           </div>
+       </div>
+       @endif
+        
+	</div>
     
-			</div>
+	<div class="col-md-4 col-sm-12 col-xs-12">	
+        <div class="form-group bg-white signature-wrap"> 
+            <div class="height">                
+                <label for="signature1">{{trans('messages.keyword_customer_signature')}}</label>
+                @if(isset($statoemotivoselezionato->id_tipo) && $statoemotivoselezionato->id_tipo != '6' && (checkpermission('3', '16', 'scrittura','true')))
+                <div class="text-right"><a class="btn btn-warning" id="confirmsignature">{{trans('messages.keyword_confirm')}}</a>
+                <a class="btn btn-danger" id="clearsignature">{{trans('messages.keyword_clear_label')}}</a></div>
+                @endif
+            </div>
+            <div class="set-height image_upload_div">                
+                <div id="signature1"> </div>                
+            </div>
+        </div> 
+         
+		<div class="form-group">
+			<label for="statoemotivo"> {{ trans('messages.keyword_emotional_state') }} </label>
+            <select name="statoemotivo" class="form-control" id="statoemotivo">
+                <!-- statoemotivoselezionato -->
+                @if($statoemotivoselezionato!=null)
+                    @foreach($statiemotivi as $statoemotivo)
+                    <?php $label = (!empty($statoemotivo->language_key)) ?  ucwords(strtolower(trans('messages.'.$statoemotivo->language_key))) : (($statoemotivo->name)); ?>
+                        <option @if($statoemotivo->id == $statoemotivoselezionato->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->id}}">{{wordformate($label)}}</option>
+                    @endforeach
+                @else
+                    @foreach($statiemotivi as $statoemotivo)
+                    <?php $label = (!empty($statoemotivo->language_key)) ?  ucwords(strtolower(trans('messages.'.$statoemotivo->language_key))) : (($statoemotivo->name)); ?>
+                        <option  value="{{$statoemotivo->id}}">{{wordformate($label)}}</option>
+                    @endforeach
+                @endif
+            </select>
+		</div>
+		<script>
+		var yourSelect = document.getElementById( "statoemotivo" );
+		document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
+		$('#statoemotivo').on("change", function() {
+			var yourSelect = document.getElementById( "statoemotivo" );
+			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
+			$("#hdstatoemotivo").val($(this).val());
+		});		
+		</script>
+     <div class="row">   <div class="col-md-12 col-sm-12 col-xs-12" id="prezzo">
+			<div class="form-group">
+                <label for="prezzo"> {{ trans('messages.keyword_confirmpriceto') }} :</label>
+                <input type="textarea" id="prezzo_confermato" name="prezzo" class="form-control" value="{{$preventivo->prezzo_confermato}}">
+            </div>
             
             
-			<div class="col-md-4">
+            
+            
+            <div class="estimate-add-tbl">
 				<label for="metodo"> {{ trans('messages.keyword_payment_method') }} </label>
-                 <a class="btn btn-warning" id="addpay"><i class="fa fa-plus"></i></a>
-	    <a class="btn btn-danger" id="deletepay"><i class="fa fa-trash"></i></a>
+                @if(checkpermission('3', '16', 'scrittura','true'))
+                    <a class="btn btn-warning" id="addpay"><i class="fa fa-plus"></i></a>
+	               <a class="btn btn-danger" id="deletepay"><i class="fa fa-trash"></i></a>
+                @endif
+
     <div id="paymethod">
-    	<div class="set-height">
-    		<table class="table table-striped table-bordered" >
-	               
+    <form id="frmpayments">
+    	<div class="set-height-paymethod">
+    		<table class="table table-striped table-bordered">	               
 	                <tbody id="filespay">
+                    @if(count($quote_paymento) > 0)
                     @foreach($quote_paymento as $quote_paymento)
                     <tr>
+                    <?php  ?>
                     	<td><input class="selezione" id="payment_{{ $quote_paymento->qp_id}}" type="checkbox"><label for="payment_{{ $quote_paymento->qp_id}}"></label></td>
-                        <td><input class="form-control datapicker" name="datapay[]" value="{{ $quote_paymento->qp_data}}" id="datapay{{ $quote_paymento->qp_id }}" placeholder="Data" type="text"></td>
+                        <td><input class="form-control datapicker" name="datapay[]" value="{{ date('d/m/Y',strtotime($quote_paymento->qp_data)) }}" id="datapay{{ $quote_paymento->qp_id }}" placeholder="Data" type="text"></td>
                         <td><input class="form-control" name="amountper[]" placeholder="%" value="{{ $quote_paymento->qp_percenti}}" type="text"></td>
                         <td><input class="form-control" name="importo[]" placeholder="importo" value="{{ $quote_paymento->qp_amnt}}" type="text"></td>
                     </tr>
                     @endforeach
+                    @else
+                     @for($i=0;$i< 3;$i++)
+                    <tr><td><input class="selezione" id="payment_{{$i}}" type="checkbox"><label for="payment_{{$i}}"></label></td>
+                        <td><input class="form-control datapicker" name="datapay[]" value="" id="datapay{{$i}}" placeholder="Data" type="text"></td>
+                        <td><input class="form-control" name="amountper[]" placeholder="%" value="" type="text"></td>
+                        <td><input class="form-control" name="importo[]" placeholder="importo" value="" type="text"></td>
+                    </tr>
+                    @endfor
+                    @endif
 	                </tbody>
 	                <script>
 
 	                var $j = jQuery.noConflict();
 	                    var selezioneFile3 = [];
 	                    var nFile3 = 0;
-	                    var kFile3 = 0;
+	                    var kFile3 = 3;
 	                    $j('#addpay').on("click", function() {
 	                        var tab = document.getElementById("filespay");
 	                        var tr = document.createElement("tr");
@@ -789,7 +1070,8 @@
 				                selezioneFile3[nFile3] = $(this).parent().parent();
 				                nFile3++;
 		                	});
-							  $j('.datapicker').datepicker();
+							
+                            $j('.datapicker').datepicker();
 	                    });
 
 	                    $j('#eliminaFile2').on("click", function() {
@@ -831,48 +1113,17 @@
                     });                      
  var $ = jQuery.noConflict();
 	                </script>
-	            </table></div></div>
+	            </table></div></form></div>
   
 			</div>
-		</div>
-		
-        
-  
             
-        </form>
-	</div>
-	<div class="col-md-4">
-	
-
-		<label for="statoemotivo"> {{ trans('messages.keyword_emotional_state') }} </label>
-		<select name="statoemotivo" class="form-control" id="statoemotivo">
-            <!-- statoemotivoselezionato -->
-            @if($statoemotivoselezionato!=null)
-                @foreach($statiemotivi as $statoemotivo)
-                    <option @if($statoemotivo->id == $statoemotivoselezionato->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
-                @endforeach
-            @else
-                @foreach($statiemotivi as $statoemotivo)
-                    <option  value="{{$statoemotivo->name}}">{{$statoemotivo->name}}</option>
-                @endforeach
-            @endif
-        </select>
-		<br>
-		<script>
-		var yourSelect = document.getElementById( "statoemotivo" );
-		document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
-		$('#statoemotivo').on("change", function() {
-			var yourSelect = document.getElementById( "statoemotivo" );
-			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
-			$("#hdstatoemotivo").val($(this).val());
-		});		
-		</script>
-     <div class="row">   <div class="col-md-12" id="prezzo" <?php if((Auth::user()->dipartimento == 2 ) || (Auth::user()->id == 0 )){ ?>  <?php } else{?> <?php }?>>
-
-            <label for="prezzo"> {{ trans('messages.keyword_confirmpriceto') }} :</label>
-            <br>            
-            <input type="textarea" id="prezzo_confermato" name="prezzo" class="form-control" value="{{$preventivo->prezzo_confermato}}">
-            <br>
+            
+            
+            
+            
+            
+            
+            
 
         </div></div><script>
 		$('#prezzo_confermato').on("change", function() {
@@ -881,19 +1132,25 @@
         </script>
 
 		<div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 col-sm-12 col-xs-12">
             	<div class="bg-white modifica-blade-estimate-upload">
+                	
+                    <div class="form-group">
 	        <label for="scansione"> 
-            {{ trans('messages.keyword_attach_administrative_file') }} </label><br>
-	      
+            {{ trans('messages.keyword_attach_administrative_file') }} </label>
+	      			</div>
+                    
             <div class="row">
-	        <div class="col-md-12">
-            	<div class="image_upload_div">
+	        <div class="col-md-12 col-sm-12 col-xs-12">
+            	@if(checkpermission('3', '16', 'scrittura','true'))
+                <div class="image_upload_div">
                 <?php echo Form::open(array('url' => '/estimates/modify/quote/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
                         {{ csrf_field() }}
                         <input type="hidden" name="idpreventivo" name="idpreventivo" value="{{ $preventivo->id }}">
     			</form>				
-				</div><script>
+				</div>
+                @endif
+                <script>
 				var urlgetfile = '<?php echo url('/estimates/modify/quote/getfiles/'.$mediaCode); ?>';
 
 				Dropzone.autoDiscover = false;
@@ -921,6 +1178,21 @@
 							$(".quoteFile_"+id).remove();
 					    }});
 				}
+				
+				 function sociallinks(id){   
+                    $("#social_id").val(id); 
+					$.ajax({
+						url:"{{url('social/image')}}",
+						type:'post',
+						data: { "_token": "{{ csrf_token() }}","idval": id },
+                        success:function(data){
+							 $("#socialmedia").modal();
+							 $('#newsocial').html(data);
+                        } 
+					});        
+                   
+                }
+				
                 function updateType(typeid,fileid,checkboxid1){           
                     var ischeck = 0;            
                     if($('#'+checkboxid1+':checkbox:checked').length > 0){                
@@ -948,8 +1220,24 @@
 					if(isset($preventivo->id) && isset($quotefiles)){
 					foreach($quotefiles as $prev) {
         				$imagPath = url('/storage/app/images/quote/'.$prev->name);
+                        $downloadlink = url('/storage/app/images/quote/'.$prev->name);
+                        $filename = $prev->name;            
+                        $arrcurrentextension = explode(".", $filename);
+                        $extention = end($arrcurrentextension);
+                                    
+                        $arrextension['docx'] = 'docx-file.jpg';
+                        $arrextension['pdf'] = 'pdf-file.jpg';
+                        $arrextension['xlsx'] = 'excel.jpg';
+                        if(isset($arrextension[$extention])){
+                            $imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);          
+                        }
                         $titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";
-        				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+        				if(checkpermission('3', '16', 'scrittura','true')){
+                        $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+                        }
+                        else {
+                         $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a>'.$titleDescriptions.'</td></tr>';   
+                        }
         				$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
         				$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();							
         				foreach($utente_file as $key => $val){
@@ -960,8 +1248,12 @@
                             }
                             $specailcharcters = array("'", "`");
                             $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-
+                            if(checkpermission('3', '16', 'scrittura','true')){    
                             $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                            }
+                            else {
+                                $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" disabled readyonly value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                            }
         				}
         				echo $html .='</td></tr>';
 			         }
@@ -1016,6 +1308,11 @@
             </div>
             
 	</div>
+    
+    @if(checkpermission('3', '16', 'scrittura','true'))
+    <div class="col-md-12 col-sm-12 col-xs-12 mb16 show-mobile"> <button onclick="mostra2()" type="submit" class="btn btn-warning">{{ trans('messages.keyword_save') }} </button></div>
+    @endif
+    
 </div>
 
 </div>
@@ -1038,12 +1335,12 @@
                     <div class="row">
                         <div class="col-md-12">                               
                             <div class="form-group">
-                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} <span class="required">(*)</span> </label>
-                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
+                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }}</label>
+                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
                             </div>
                             <div class="form-group">
-                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} <span class="required">(*)</span></label>
-                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
+                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }}</label>
+                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
                             </div>
                         </div>
                      </div>
@@ -1056,26 +1353,95 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade newsocial-popu" id="socialmedia" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-dialog modal-l">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h3 class="modal-title" id="modalTitle">{{trans('messages.keyword_social_media')}}</h3>
+                </div>
+				 <div class="modal-body">
+                <input type="hidden" id="social_id" name="social_id" value="">
+				<div class="row" id="newsocial">
+            <?php 
+
+                if(isset($socials)){
+                    foreach ($socials as $social) { ?>
+                    <div class="col-md-3 col-sm-4 col-xs-4">
+                    <a href="" class="img-responsive">
+                        <img src="{{ url('storage/app/images/social/'.$social->image)}}" alt="{{$social->title}}">
+                    </a>
+                    </div>    
+                <?php   
+                    }
+                }
+            ?>
+            </div>
+                  
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript">
 $(document).ready(function() {
-      $("#commnetform").validate({            
-            rules: {
-                title: {
-                    required: true
-                },
-                descriptions: {
-                    required: true                    
-                }
-            },
-            messages: {
-                title: {
-                    required: "{{trans('messages.keyword_please_enter_a_title')}}"
-                },
-                descriptions: {
-                    required: "{{trans('messages.keyword_please_enter_a_description')}}"
-                }
-            }
-        });
+      $("#edit_estimate").validate({            
+      rules: {
+         dipartimento: {
+             required: true
+         },
+         idente: {
+             required: true                    
+         },
+         considerazioni: {
+             required: true                    
+         },
+         valenza: {
+             required: true                    
+         },
+         finelavori: {
+             required: true                    
+         },
+         data: {
+             required: true                    
+         },
+         oggetto: {
+             required: true                    
+         },
+         amountper: {
+             digits: true                    
+         }
+      },
+      messages: {
+         dipartimento: {
+            required: "{{stringformate(trans('messages.keyword_please_select_from'))}}"
+         },
+         idente: {
+            required: "{{stringformate(trans('messages.keyword_please_select_to'))}}"
+         },
+         considerazioni: {
+            required: "{{stringformate(trans('messages.keyword_please_enter_considerations'))}}"
+         },
+         valenza: {
+            required: "{{stringformate(trans('messages.keyword_please_select_valency'))}}"
+         },
+         finelavori: {
+            required:"{{stringformate(trans('messages.keyword_please_select_end_date'))}}"
+         },
+         data: {
+             required:"{{stringformate(trans('messages.keyword_please_select_date'))}}"
+         },
+         oggetto: {
+             required:"{{stringformate(trans('messages.keyword_please_enter_a_quotenm'))}}"
+         },
+         amountper: {
+             required:"{{stringformate(trans('messages.keyword_only_digits_allowed'))}}"
+         }
+      }
+
+    });
 
       $(function(){
         $('#commnetform').on('submit',function(e){
@@ -1121,7 +1487,67 @@ $('#data').datepicker();
 $('#valenza').datepicker();
 $('#finelavori').datepicker();
 $('.datapicker').datepicker();
-
 </script> 
+
+<script type="text/javascript">
+    //var $js = jQuery.noConflict();
+    //$(function() {
+        //$.extend($.kbw.signature.options, {color: '#0000ff'});
+        $('#signature1').signature({ 
+            change: function(event, ui) {                 
+            }/*,
+            syncField: '#signatureJSON'*/
+        });          
+            var $js = jQuery.noConflict();
+            $js('#clearsignature').click(function() { 
+                $js('#signature1').signature('clear'); 
+            }); 
+            $js('#confirmsignature').click(function() {
+                //if($js('#signature1').signature('isEmpty')){
+                    if(confirm("{{trans('messages.keyword_are_you_sure?')}}")){                       
+                        $js("#signatureJSON").val("");
+                        var signature = $js('#signature1').signature('toJSON')
+                        $js("#signatureJSON").val(signature);                    
+                        confirmQuotes(signature);
+                    }
+                /*}
+                else {
+                    alert("Please signature to confirm quote");
+                }*/                
+            });             
+            /*
+            $('#svg').click(function() {
+                alert($('#sig').signature('toSVG'));
+            });*/
+    //});
+     var currentsignature = '<?php echo $preventivo->signature; ?>';
+     var currentEmotionst = '<?php echo $statoemotivoselezionato->id_tipo;?>';
+     var issuperadmin = '<?php echo Auth::user()->id;?>';
+     var issuperadmintype = '<?php echo Auth::user()->dipartimento;?>'; 
+     if(currentEmotionst == '6' && issuperadmin != '0' && issuperadmintype != '0'){        
+        $js("#statoemotivo").prop("disabled", true);
+        $js('#signature1').signature('disable');
+     }
+     if(currentsignature != "") {                        
+        $js('#signature1').signature('disable');
+        $js('#signature1').signature('draw', currentsignature);
+     }
+     
+
+    
+    function confirmQuotes(signature){
+        var quoteId = '<?php echo $preventivo->id;?>';    
+        var urlD = '<?php echo url('/estimates/quoteconfirm/'); ?>';
+        $.ajax({
+            url: urlD,
+            type: 'post',
+            data: { "_token": "{{ csrf_token() }}",signature: signature,id:quoteId },
+            success:function(data){
+                window.location.reload(true);
+            }
+        });
+    }
+
+</script>
 
 @endsection

@@ -7,26 +7,33 @@ use App\Corporation;
 
 class CorporationRepository
 {
-	// I miei enti
 	public function forUser(User $user)
     {		
-        if($user->id == 0) {
+        if($user->id == 0 || $user->dipartimento == 0) {
 			/*$data = Corporation::where('is_deleted', 0)->orderBy('id', 'asc')->get();*/			
 			$data = DB::table('corporations')
 				->join('users', 'corporations.user_id', '=', 'users.id')
 				->select('corporations.*')
 				->where('is_deleted','0')
 				->where('users.is_delete', '=', 0)
+				->where('corporations.is_approvato', 1)
 				->orderBy('corporations.id', 'asc')
 				->get();
-				
+
 			foreach($data as $data) {				
 				if($data->statoemotivo != ""){
-					$statiemotivitipi = DB::table('statiemotivitipi')->where('name',$data->statoemotivo)->orderBy('id', 'asc')->first();
+					$statiemotivitipi = DB::table('statiemotivitipi')->where('id',$data->statoemotivo)->orderBy('id', 'asc')->first();
+					if(isset($statiemotivitipi->language_key)){
+						$data->statoemotivo = (!empty($statiemotivitipi->language_key)) ? trans('messages.'.$statiemotivitipi->language_key) : $statiemotivitipi->name;
+					}
 					if(isset($statiemotivitipi->color)){
-						$data->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.$data->statoemotivo.'</span>';
+						$data->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.ucwords(strtolower($data->statoemotivo)).'</span>';
 					}
 				}
+				$data->nomeazienda = ucwords(strtolower($data->nomeazienda));
+				$data->nomereferente = ucwords(strtolower($data->nomereferente));
+				$data->settore = ucwords(strtolower($data->settore));
+				$data->responsabilelanga = ucwords(strtolower($data->responsabilelanga));				
 				$ente_return[] = $data;	
 			}	
 			return $ente_return;
@@ -37,7 +44,7 @@ class CorporationRepository
 				->where('id_user', $user->id)
 				->orderBy('id', 'asc')
 				->get();
-				
+			$ente_return = [];
 			$enti = Corporation::where('privato', 0)
 					->select('corporations.*')
 					->whereIn('id', json_decode(json_encode($partecipanti), true))
@@ -49,14 +56,24 @@ class CorporationRepository
 			foreach($enti as $ente) {				
 				if($ente->is_deleted == 0){
 					if($ente->statoemotivo != ""){
-						$statiemotivitipi = DB::table('statiemotivitipi')->where('name',$ente->statoemotivo)->orderBy('id', 'asc')->first();
+						$statiemotivitipi = DB::table('statiemotivitipi')->where('id',$ente->statoemotivo)->orderBy('id', 'asc')->first();
+						if(isset($statiemotivitipi->language_key)){
+							$ente->statoemotivo = (!empty($statiemotivitipi->language_key)) ? trans('messages.'.$statiemotivitipi->language_key) : $statiemotivitipi->name;							
+						}
 						if(isset($statiemotivitipi->color)){
-							$ente->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.$ente->statoemotivo.'</span>';
+							$ente->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.ucwords(strtolower($ente->statoemotivo)).'</span>';
 						}
 					}
+
+					$ente->nomeazienda = ucwords(strtolower($ente->nomeazienda));
+					$ente->nomereferente = ucwords(strtolower($ente->nomereferente));
+					$ente->settore = ucwords(strtolower($ente->settore));
+					$ente->responsabilelanga = ucwords(strtolower($ente->responsabilelanga));
+
 					$ente_return[] = $ente;
 				}
 			}			
+			
 			return $ente_return;
 		}
     }
@@ -64,18 +81,21 @@ class CorporationRepository
 	// Tutti gli enti
     public function forUser2(User $user)
     {      
-		if($user->id == 0){
+		if($user->id == 0 || $user->dipartimento == 0){
            $data = DB::table('corporations')
 			   	->join('users', 'corporations.user_id', '=', 'users.id')
 				->select('corporations.*')
 				->where('is_deleted','0')
 				->where('users.is_delete', '=', 0)
 				->where('corporations.is_approvato', 1)
-				->orderBy('corporations.id', 'asc')
+				->orderBy('corporations.id', 'desc')
 				->get();
 			foreach($data as $data) {				
 				if($data->statoemotivo != ""){
-					$statiemotivitipi = DB::table('statiemotivitipi')->where('name',$data->statoemotivo)->orderBy('id', 'asc')->first();
+					$statiemotivitipi = DB::table('statiemotivitipi')->where('id',$data->statoemotivo)->orderBy('id', 'asc')->first();
+					if(isset($statiemotivitipi->language_key)){
+						$data->statoemotivo = (!empty($statiemotivitipi->language_key)) ? trans('messages.'.$statiemotivitipi->language_key) : $statiemotivitipi->name;
+					}
 					if(isset($statiemotivitipi->color)){
 						$data->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.$data->statoemotivo.'</span>';
 					}
@@ -97,7 +117,10 @@ class CorporationRepository
 			foreach($enti as $ente) {
 				if($ente->is_deleted == 0){
 					if($ente->statoemotivo != ""){
-						$statiemotivitipi = DB::table('statiemotivitipi')->where('name',$ente->statoemotivo)->orderBy('id', 'asc')->get();
+						$statiemotivitipi = DB::table('statiemotivitipi')->where('id',$ente->statoemotivo)->orderBy('id', 'asc')->get();
+						if(isset($statiemotivitipi->language_key)){
+							$ente->statoemotivo = (!empty($statiemotivitipi->language_key)) ? trans('messages.'.$statiemotivitipi->language_key) : $statiemotivitipi->name;
+						}
 						if(isset($statiemotivitipi->color)){
 							$ente->statoemotivo = '<span style="color:'.$statiemotivitipi->color.'">'.$ente->statoemotivo.'</span>';
 						}

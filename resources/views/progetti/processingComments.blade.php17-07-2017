@@ -1,0 +1,57 @@
+<div class="">
+	<div class="">
+        <div class="fixed-table-container" style="padding-bottom: 0px;">
+            <div class="fixed-table-body">
+        <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-classes="table table-bordered" id="table" class="table table-bordered">
+            <thead>
+                <tr>
+                <th style="" data-field="id" tabindex="0"><div class="th-inner sortable both">Id</div><div class="fht-cell"></div></th>
+                <th style="" data-field="nomeazienda" tabindex="0"><div class="th-inner sortable both">Comments</div><div class="fht-cell"></div></th>
+                <th style="" data-field="nomereferente" tabindex="0"><div class="th-inner sortable both">Date</div><div class="fht-cell"></div></th>
+                </tr>
+        </thead>
+        <tbody>
+            @foreach($comments as $key => $val)
+            <tr>            
+                <td>{{$val->id}}</td>            
+                <td>{{$val->comments}}</td>            
+                <td>{{dateFormate($val->date)}}</td>            
+            </tr>
+            @endforeach                
+        </tbody>
+        </table>
+        </div>
+    </div>
+    </div>
+</div>    
+<script>
+var selezione = [];
+var indici = [];
+var n = 0;
+$('#table').on('click-row.bs.table', function (row, tr, el) {
+	var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
+	if (!selezione[cod]) {
+         $('#table tr.selected').removeClass("selected");       
+		$(el[0]).addClass("selected");
+		selezione[cod] = cod;
+		indici[n] = cod;
+		n++;
+	} else {
+		$(el[0]).removeClass("selected");
+		selezione[cod] = undefined;
+		for(var i = 0; i < n; i++) {
+			if(indici[i] == cod) {
+				for(var x = i; x < indici.length - 1; x++)
+					indici[x] = indici[x + 1];
+				break;	
+			}
+		}
+		n--;
+        $('#table tr.selected').removeClass("selected");       
+        $(el[0]).addClass("selected");
+        selezione[cod] = cod;
+        indici[n] = cod;
+        n++;
+	}
+});
+</script>

@@ -27,22 +27,30 @@ th {
 <div class="canvas-holder" id="stat">
     <canvas id="myChart" width="1080" height="540" style="display: block; width: 1080px; height: 540px;"></canvas>
 </div>
-<div class="col-md-12">                            
-    <div class="col-md-4">
+<div class="row">
+<div class="col-md-12 col-sm-12 col-xs-12 statistics-week">                            
+    <div class="col-md-4 col-sm-4 col-xs-4">
+    	<div class="info-1">
         <h5 style="color: red">{{trans('messages.keyword_cost')}} </h5> 
         <h1 style="color: red"><?php  echo array_sum($statistics['expense']); ?><b> € </b></h1> 
-        <span style="color: red">+3% </span>  From last week 
+        <span style="color: red"><?php echo getLastCostPercentage($year,'1');?> % </span> From last month 
+        </div>
     </div>                                                         
-    <div class="col-md-4">
+    <div class="col-md-4 col-sm-4 col-xs-4">
+    <div class="info-2">
         <h5 style="color: DARKGREEN">{{trans('messages.keyword_proceeds')}}</h5> 
         <h1 style="color: DARKGREEN"><?php echo array_sum($statistics['revenue']); ?> <b> € </b> </h1>
-        <span style="color: DARKGREEN"> +3% </span>  From last week 
+        <span style="color: DARKGREEN"><?php echo getLastRevenuePercentage($year,'1');?>% </span> From last month 
+        </div>
     </div>
-    <div class="col-md-4">                                                        
+    <div class="col-md-4 col-sm-4 col-xs-4">   
+    <div class="info-3">                                                     
         <h5 style="color: DARKORANGE">{{trans('messages.keyword_profit')}}</h5>
         <h1 style="color: DARKORANGE"><?php echo array_sum($statistics['earn']); ?> <b> € </b> </h1>
-        <span style="color: DARKORANGE"> +3% </span>  From last week 
+        <span style="color: DARKORANGE"> <?php echo getLastProfitPercentage($year,'1');?>% </span> From last month
+        </div>
     </div> 
+</div>
 </div>
 <script>
 var ctx = $("#myChart");

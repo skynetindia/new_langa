@@ -40,7 +40,20 @@
 	</div>
 </form>
 <h4>{{trans('messages.keyword_edit_frequency')}}</h4>
+<div class="row alltaxationeditparts">
+  <div class="col-md-6">
+  <div class="form-group m_select lblshow">
+    <input id="chktasentitypeall" name="chktasentitypeall" value="1" type="checkbox">
+     <label for="chktasentitypeall"> Select All </label>
+  </div>
+  </div>
+  <div class="col-md-6 text-right">
+    <input type="button" onclick="AllTaxonomiesAction('update')" class="btn btn-warning" value="{{trans('messages.keyword_save_selected')}}">
+    <input type="button" onclick="AllTaxonomiesAction('delete')" class="btn btn-danger" value="{{trans('messages.keyword_delete_selected')}}">
+  </div>
+</div>
 <form action="{{url('/admin/frequency/update')}}" method="post" id="frmemotionalestEdit">
+<input type="hidden" id="actiontype" name="action" value="update">
 <div class="table-responsive">
 		<table class="table table-striped table-bordered text-right">
 	@foreach($frequency as $frequencies)
@@ -50,11 +63,15 @@
             <input type="hidden" name="id[]" value="{{$frequencies->id}}">
             <table class="table sub-table">
               <tr>
-                <td><input type="text" class="form-control" name="name[]" id="name" value="{{$frequencies->nome}}"></td>
-                <td><input type="text" class="form-control" name="description[]" value="{{$frequencies->descrizione}}"></td>
-                <td><input type="text" class="form-control" name="rinnovo[]" maxlength="7" value="{{$frequencies->rinnovo}}"></td>                
-                <td><input type="submit" class="btn btn-primary" value="{{trans('messages.keyword_save')}}">
-                  <a  onclick="conferma(event);" type="submit" href="{{url('/admin/frequency/delete/id' . '/' . $frequencies->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a></td>
+                <td><input type="checkbox" class="form-control chktasentitype" name="chktasentitype[{{$frequencies->id}}]" id="chktasentitype_{{$frequencies->id}}" value="{{$frequencies->id}}"><label for="chktasentitype_{{$frequencies->id}}"></label></td>
+                <td><input type="text" class="form-control" name="name[{{$frequencies->id}}]" id="name" value="<?php echo ($frequencies->language_key != "") ? trans('messages.'.$frequencies->language_key) : $frequencies->nome; ?>">
+                <input type="hidden" name="langkey[{{$frequencies->id}}]" value="{{$frequencies->language_key}}"></td>
+                <td><input type="text" class="form-control" name="description[{{$frequencies->id}}]" value="{{$frequencies->descrizione}}"></td>
+                <td><input type="text" class="form-control" name="rinnovo[{{$frequencies->id}}]" maxlength="7" value="{{$frequencies->rinnovo}}"></td><td><input type="button" onclick="SingleTaxonomiesAction('{{$frequencies->id}}','update')" class="btn btn-warning" value="{{trans('messages.keyword_save')}}">
+                  <a onclick="conferma(event);" type="button" href="javascript:SingleTaxonomiesAction('{{$frequencies->id}}','delete')" class="btn btn-danger"> {{trans('messages.keyword_delete_label')}}</a></td>
+
+                <?php /*<td><input type="submit" class="btn btn-warning" value="{{trans('messages.keyword_save')}}">
+                  <a  onclick="conferma(event);" type="submit" href="{{url('/admin/frequency/delete/id' . '/' . $frequencies->id)}}" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a></td>*/?>
               </tr>
             </table>
         </td>
@@ -90,7 +107,7 @@
 </fieldset>
 <script>
 function conferma(e) {
-	var confirmation = confirm("<?php echo trans('messages.keyword_are_you_sure?');?>") ;
+	var confirmation = confirm("<?php echo trans('messages.keyword_are_you_sure_affected__section');?>") ;
     if (!confirmation)
         e.preventDefault();
 	return confirmation ;
@@ -118,8 +135,44 @@ function conferma(e) {
                     digits:"{{trans('messages.keyword_only_digits_allowed')}}"
                   }
               }
-          });   
-   
+          });      
   });
+ $("#chktasentitypeall").click(function () {
+     $('.chktasentitype').not(this).prop('checked', this.checked);
+     addremoveclass();
+ });
+  $(".chktasentitype").click(function () {        
+    addremoveclass();
+ });
+function SingleTaxonomiesAction(id,action) {
+  $("#chktasentitype_"+id).prop('checked', true);
+  $("#actiontype").val(action);
+  $( "#frmemotionalestEdit" ).submit();
+}
+function AllTaxonomiesAction(action) {
+if ($("#frmemotionalestEdit input:checkbox:checked").length > 0) {    
+  if(action == 'delete'){
+    var confirmation = confirm("<?php echo trans('messages.keyword_are_you_sure_affected__section');?>") ;
+    if (!confirmation) {
+      return false;
+    }        
+  }
+  $("#actiontype").val(action);
+  $( "#frmemotionalestEdit").submit();  
+ }
+ else {
+    alert("{{trans('messages.keyword_select_at_least_one_record')}}");
+ }
+}
+function addremoveclass() {
+  $(".table input[type=checkbox]").each(function() {
+    if(false == $(this).prop("checked")) { 
+        $(this).closest("tr").removeClass("selected");
+     }
+     else {
+          $(this).closest("tr").addClass("selected");
+    } 
+  });
+}
 </script>
 @endsection

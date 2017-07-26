@@ -7,8 +7,6 @@
 
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
 
-
-
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -16,6 +14,9 @@
     </script>
 @endif
 
+<!-- <style type="text/css">
+.table.table-bordered tr td input[type="checkbox"] { display: block;}
+</style> -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -33,20 +34,16 @@
     
     <div class="header-lst-img">
         <div class="header-svg text-left float-left">
-            <img src="http://betaeasy.langa.tv/dev/images/HEADER1_LT_ACCOUNTING.svg" alt="header image">
+            <img src="{{url('images/HEADER1_LT_ACCOUNTING.svg')}}" alt="header image">
         </div>
         <div class="float-right text-right">
             <h1> {{ trans('messages.keyword_add_invoice') }} </h1><hr>
         </div>
 	</div>
-    
-    
     	<div class="clearfix"></div>
 		<div class="height20"></div>
-
-    
 <div class="row">
-	<div class="col-md-8">
+	<div class="col-md-8 col-sm-12 col-xs-12">
     	    <script>
 			"use strict";
 			$.datepicker.setDefaults(
@@ -68,97 +65,106 @@
 								link.dispatchEvent(clickEvent);
     	    				});
     	    			</script></label>
-    	
-	
 	<div class="row">
-	
-    
-    <div class="col-md-4">
-		 	<label for="id"> {{ trans('messages.keyword_invoicenumber') }} </label>
-	        <input value="{{old('idfattura')}}" type="text" id="idfattura" name="idfattura" placeholder=" {{ trans('messages.keyword_invoicenumber') }} " class="form-control">
-        </div>
-
-        <div class="col-md-8">
-			
-		    <label for="legameprogetto"> {{ trans('messages.keyword_linktoproject') }} </label>
-		    <select name="legameprogetto" id="legameprogetto" class="js-example-basic-single form-control">
+    <div class="col-md-4 col-sm-12 col-xs-12">
+		 	<div class="form-group"><label for="id"> {{ trans('messages.keyword_invoicenumber') }} </label>
+	        <input value="{{old('idfattura')}}" type="text" id="idfattura" name="idfattura" placeholder=" {{ trans('messages.keyword_invoicenumber') }} " class="form-control"></div>
+        </div>        
+        <div class="col-md-8 col-sm-12 col-xs-12">			
+		   <div class="form-group"> <label for="legameprogetto"> {{ trans('messages.keyword_linktoproject') }}</label>
+		    <select name="legameprogetto" id="legameprogetto" class="form-control <?php echo (!empty($selectProject) && isset($selectProject->id)) ? '' : 'required-input'; ?> error">
 		       <option></option>
             @foreach($progetti as $progetto)
-            	<option value="{{$progetto->id}}">::{{$progetto->id}}<?php echo '/' . substr($progetto->datainizio, -2);?> | {{$progetto->nomeprogetto}}</option>
+            	<option value="{{$progetto->id}}" <?php echo (isset($selectProject->id) && $selectProject->id == $progetto->id) ? 'selected' : '';?> >::{{$progetto->id}}<?php echo '/' . substr($progetto->datainizio, -2);?> | {{ ucwords(strtolower($progetto->nomeprogetto)) }}</option>
             @endforeach
 		        
 		    </select>
-<br><br>
+            <label for="legameprogetto" generated="true" class="error"></label></div>
 		</div>
     
     
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<h4> {{ trans('messages.keyword_invoice_header') }} </h4>
-	    <label for="sedelegaleente"> {{ trans('messages.keyword_registered_office_from') }} </label>
-	    <select name="DA" id="sedelegaleente" class="js-example-basic-single form-control">
+	    
+        <div class="form-group"><label for="sedelegaleente"> {{ trans('messages.keyword_registered_office_from') }}  </label>
+	    <select name="DA" id="sedelegaleente" class="js-example-basic-single form-control required-input error">
 	        <option></option>
 	        @foreach($enti as $ente)
-	        <option value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
+	        <option value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
 	        @endforeach
-	    </select><br>
-	    <br>
-	    <label for="note"> {{ trans('messages.keyword_note') }}  </label>
-		<input value="" type="text" class="form-control" id="note" name="note" placeholder="{{ trans('messages.keyword_note') }} ">
+	    </select><label for="sedelegaleente" generated="true" class="error"></label><br><br></div>
+	    
+        <div class="form-group"><label for="note"> {{ trans('messages.keyword_note') }}  </label>
+		<input value="" type="text" class="form-control" id="note" name="note" placeholder="{{ trans('messages.keyword_note') }} "></div>
 
-	    <br><label for="modalita"> {{ trans('messages.keyword_payment_methods') }} </label>
-		<input value="{{old('modalita')}}" type="text" class="form-control" id="modalita" name="modalita" placeholder=" {{ trans('messages.keyword_payment_methods') }} "><br>
+	   <div class="form-group"> <br><label for="modalita"> {{ trans('messages.keyword_payment_methods') }} </label>
+		<input value="{{old('modalita')}}" type="text" class="form-control" id="modalita" name="modalita" placeholder=" {{ trans('messages.keyword_payment_methods') }} "><br></div>
 	</div>
-	<div class="col-md-4">
-	<input type="hidden" name="id_disposizione" value="{{$idfattura}}"> 
+	<div class="col-md-4 col-sm-12 col-xs-12">
+        <!-- Project id-->
+	   <input type="hidden" name="id_disposizione" value="{{$idfattura}}"> 
 		<br><br>
-	   <label for="sedelegaleentea"> {{ trans('messages.keyword_registered_office_to') }}  </label>
-	    <select id="sedelegaleentea" name="A" class="js-example-basic-single form-control">
+	   <div class="form-group"><label for="sedelegaleentea"> {{ trans('messages.keyword_registered_office_to') }}  </label>
+	    <select id="sedelegaleentea" name="A" class="js-example-basic-single form-control required-input error">
 	        <option></option>
 	        @foreach($enti as $ente)
-	        <option value="{{$ente->id}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
+	        <option value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
 	        @endforeach
-	    </select><br><br>
+	    </select><label for="sedelegaleentea" generated="true" class="error"></label><br><br></div>
 
-	 	<label for="emissione"> {{ trans('messages.keyword_issue_of_the') }} </label>
-	    <input value="{{old('emissione')}}" type="text" name="emissione" id="emissione" class="form-control"><br>
+	 	<div class="form-group"><label for="emissione"> {{ trans('messages.keyword_issue_of_the') }} </label>
+	    <input value="{{old('emissione')}}" type="text" name="emissione" id="emissione" class="form-control required-input error"><br></div>
 
-		<label for="iban"> {{ trans('messages.keyword_company_iban') }} </label>
+		<div class="form-group"><label for="iban"> {{ trans('messages.keyword_company_iban') }} </label>
 	     <select name="iban" id="iban" class="js-example-basic-single form-control">
 	        <option></option>
 	        @foreach($enti as $ente)
-	        <option value="{{$ente->iban}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
+	        <option value="{{$ente->iban}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
 	        @endforeach
 	    </select><script type="text/javascript">
-
-    $(".js-example-basic-single").select2();
-
-</script><br>
+            $("#legameprogetto").select2({ containerCssClass : "<?php echo (!empty($selectProject) && isset($selectProject->id)) ? '' : 'required-input'; ?>" });    
+            //var $j = jQuery.noConflict();
+                var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+                });
+              $('#legameprogetto').on("change", function() {
+                var id = $("#legameprogetto").val();
+                if(id != ""){
+                    var link = document.createElement("a");
+                    link.href = "{{ url('/pagamenti/linktoproject') }}" + '/' + id;
+                    link.dispatchEvent(clickEvent);
+                }
+              });
+        $(".js-example-basic-single").select2({ containerCssClass : "required-input" });
+    </script><br>
 		
-	</div>
-	<div class="col-md-4">
+	</div></div>
+	<div class="col-md-4 col-sm-12 col-xs-12">
 	<br><br>
-	<label for="Tipo"> {{ trans('messages.keyword_type_of_invoice') }} </label>
+	<div class="form-group"><label for="Tipo"> {{ trans('messages.keyword_type_of_invoice') }} </label>
         <select id="Tipo" name="tipofattura" class="form-control">
         	<option value="0" selected> {{ trans('messages.keyword_sales_invoice') }} 
         	</option>
             <option value="1"> {{ trans('messages.keyword_credit_note') }} </option>
-        </select><br>
+        </select><br></div>
         
 	    
-	    <label for="base"> {{ trans('messages.keyword_on_the_base') }} </label>
-	    <input value="{{old('base')}}" class="form-control" type="text" name="base" id="base" placeholder="{{ trans('messages.keyword_on_the_base') }} ">
-	    <br>
+	    <div class="form-group"><label for="base"> {{ trans('messages.keyword_on_the_base') }} </label>
+	    <input value="{{old('base')}}" class="form-control required-input error" type="text" name="base" id="base" placeholder="{{ trans('messages.keyword_on_the_base') }} " >
+	    <br></div>
 
-        <label for="indirizzospedizione"> {{ trans('messages.keyword_shipping_address') }} </label>
+        <div class="form-group"><label for="indirizzospedizione"> {{ trans('messages.keyword_shipping_address') }} </label>
         <select name="indirizzospedizione" name="indirizzospedizione" id="indirizzospedizione" class="js-example-basic-single form-control">
 	        <option></option>
 	        @foreach($enti as $ente)
-	        <option value="{{$ente->indirizzospedizione}}">{{$ente->id}} | {{$ente->nomeazienda}}</option>
+	        <option value="{{$ente->indirizzospedizione}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
 	        @endforeach
 	    </select>
 
 	    <script>
-	    
+	    $(".js-example-basic-single").select2();
 	        var today = new Date();
 			var dd = today.getDate();
 			var mm = today.getMonth()+1; //January is 0!
@@ -176,13 +182,13 @@
     			this.blur();
     			this.value = dataInserimento;
 		    }
-	</script>
+	</script> </div>
 		
 	</div>
 	</div>
 			<h4> {{ trans('messages.keyword_invoice_body') }} </h4>
                <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-12 col-sm-12 col-xs-12">
                         <a class="btn btn-warning"  id="aggiungiCorpo"><span class="fa fa-plus"></span></a>
                         <a class="btn btn-danger"  id="eliminaCorpo"><span class="fa fa-trash"></span></a>
                 </div>
@@ -190,14 +196,13 @@
                
                <div class="height10"></div>
                
-	        <div class="set-height">
-	    	<table class="table table-bordered">
+	        <div class="set-height450">
+	    	<table class="table table-bordered modificatranshe-blade-pagamenti-tbl">
 	    		<thead>
 	    			<th>#</th>
 	    			<th> {{ trans('messages.keyword_references') }} </th>
 	    			<th> {{ trans('messages.keyword_description') }} </th>
-	    			<th> {{ trans('messages.keyword_qty') }} </th>
-	    			<th> {{ trans('messages.keyword_unitary') }} </th>
+	    			<th> {{ trans('messages.keyword_qty') }}, {{ trans('messages.keyword_unitary') }} </th>
 	    			<th> {{ trans('messages.keyword_subtotal') }} </th>
 
 	    		</thead>
@@ -233,120 +238,145 @@
                     @endforeach
                     @endif
 	    		</tbody>
-	    		 <script>
-	                    $j('#aggiungiCorpo').on("click", function() {
-	                        var tab = document.getElementById("corpofattura");
+			 <script>
+			 var count = 0;
+            $j('#aggiungiCorpo').on("click", function() {
 
-	                        var tr = document.createElement("tr");
-	                        var check = document.createElement("td");
-	                        var checkbox = document.createElement("input");
-	                        checkbox.type = "checkbox";
-	                        checkbox.className = "selezione";
-	                        check.appendChild(checkbox);
-	                        var ord = document.createElement("td");
+                var tab = document.getElementById("corpofattura");
 
-	                        var ordine = document.createElement("input");
-	                        ordine.type = "text";
-	                        ordine.placeholder = ":{{ trans('messages.keyword_quote') }}";
-	                        ordine.className = "form-control";
-	                        ordine.name = "ordine[]";
-							// ordine.value = ":";
-	                        ord.appendChild(ordine);
+                var tr = document.createElement("tr");
+                var check = document.createElement("td");
 
-	                        var progetto = document.createElement("input");
-	                        progetto.type = "text";
-	                        progetto.placeholder = ":{{ trans('messages.keyword_project') }}";
-	                        progetto.className = "form-control";
-	                        progetto.name = "ordine[]";
-							// progetto.value = ":";
-	                        ord.appendChild(progetto);
+                var checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.className = "selezione";
+                checkbox.id = "checkopt";
+                check.appendChild(checkbox);
 
-	                        var td = document.createElement("td");
-	                        var descrizione = document.createElement("textarea");
-	                        descrizione.className = "form-control";
-	                        descrizione.name = "desc[]";
-	                        descrizione.rows = "3";
-	                        descrizione.cols = "80";
-	                        td.appendChild(descrizione);
-
-	                        var qt = document.createElement("td");
-	                        var quantita = document.createElement("input");
-	                        quantita.type = "text";
-	                        quantita.className = "form-control";
-	                        quantita.name = "qt[]";
-	                        qt.appendChild(quantita);
-
-	                        var unitario = document.createElement("td");
-	                        var unitary = document.createElement("input");
-	                        unitary.type = "text";
-	                        unitary.className = "form-control";
-	                        unitary.name = "unitario";
-							unitario.appendChild(unitary);
+                var checkboxLabel = document.createElement("label");
+            	checkboxLabel.setAttribute('for', "checkopt"+count);
+	            var td = document.createElement("td");
+	            check.appendChild(checkboxLabel);
 
 
-	                        var pr = document.createElement("td");
-	                        var prezzo = document.createElement("input");
-	                        prezzo.type = "text";
-	                        prezzo.className = "form-control";
-	                        prezzo.name = "subtotale[]";
-	                        pr.appendChild(prezzo);
+                var ord = document.createElement("td");
+                var ordine = document.createElement("input");
+                ordine.type = "text";
+                ordine.placeholder = ":{{ trans('messages.keyword_quote') }}";
+                ordine.className = "form-control";
+                ordine.name = "ordine[]";
+                ord.appendChild(ordine);
 
-	                        var perc = document.createElement("td");
-	                        var percentualesconto = document.createElement("input");
-	                        percentualesconto.type = "text";
-	                        percentualesconto.className = "form-control";
-	                        percentualesconto.name = "scontoagente[]";
-							perc.appendChild(percentualesconto);
+                var progetto = document.createElement("input");
+                progetto.type = "text";
+                progetto.placeholder = ":{{ trans('messages.keyword_project') }}";
+                progetto.className = "form-control";
+                progetto.name = "ordine[]";
+                ord.appendChild(progetto);
 
-							var per = document.createElement("td");
-	                        var percentual = document.createElement("input");
-	                        percentual.type = "text";
-	                        percentual.className = "form-control";
-	                        percentual.name = "scontobonus[]";
-	                        per.appendChild(percentual);
+                var td = document.createElement("td");
+                var descrizione = document.createElement("textarea");
+                descrizione.className = "form-control";
+                descrizione.name = "desc[]";
+                descrizione.rows = "3";
+                descrizione.cols = "80";
+                td.appendChild(descrizione);
 
-	                        var netto = document.createElement("td");
-	                        var prezzonetto = document.createElement("input");
-	                        prezzonetto.type = "text";
-	                        prezzonetto.className = "form-control";
-	                        prezzonetto.name = "prezzonetto[]";
-	                        netto.appendChild(prezzonetto);
+                var qt = document.createElement("td");
+                var quantita = document.createElement("input");
+                quantita.type = "text";
+                quantita.className = "form-control";
+                quantita.placeholder = ":{{ trans('messages.keyword_qty') }}";
+                quantita.name = "qt[]";
+                qt.appendChild(quantita);
 
-	                        var perciva = document.createElement("td");
-	                        var iva = document.createElement("input");
-	                        iva.type = "text";
-	                        iva.className = "form-control";
-	                        iva.name = "iva[]";
+                var unitary = document.createElement("input");
+                unitary.type = "text";
+                unitary.className = "form-control";
+                unitary.placeholder = ":{{ trans('messages.keyword_unit_price') }}";
+                unitary.name = "unitario";
+				qt.appendChild(unitary);
 
-	                        perciva.appendChild(iva);
-	                        tr.appendChild(check);
-	                        tr.appendChild(ord);
-	                        tr.appendChild(td);
-	                        tr.appendChild(qt);
-	                        tr.appendChild(unitario);
-	                        tr.appendChild(pr);
-	      //                   tr.appendChild(perc);
-							// tr.appendChild(per);
-	      //                   tr.appendChild(netto);
-	      //                   tr.appendChild(perciva);
-	                        kCorpo++;
+                var pr = document.createElement("td");
+                var prezzo = document.createElement("input");
+                prezzo.type = "text";
+                prezzo.className = "form-control";
+                prezzo.placeholder = ":{{ trans('messages.keyword_subtotal') }}";
+                prezzo.name = "subtotale[]";
+                pr.appendChild(prezzo);
 
-	                        tab.appendChild(tr);
+                var idNotificheDiv = document.createElement("div");
+				idNotificheDiv.className='switch';
+				
+				var idNotificheLabel = document.createElement("label");
+				idNotificheLabel.for = "is_active_"+count;
+				idNotificheLabel.setAttribute('for', "is_active_"+count);
+				var idNotifiche = document.createElement("input");
+                idNotifiche.type = "checkbox";	                        
+                idNotifiche.value = '1';
+                idNotifiche.name = "is_active["+count+"]";
+				idNotifiche.id = "is_active_"+count;
+				idNotificheDiv.appendChild(idNotifiche);
+				idNotificheDiv.appendChild(idNotificheLabel);
+				pr.appendChild(idNotificheDiv);
 
-	                        $j('.selezione').on("click", function() {
-				                selezioneCorpo[nCorpo] = $j(this).parent().parent();
-				                nCorpo++;
-		                	});
-	                    });
 
-	                    $j('#eliminaCorpo').on("click", function() {
-	                       for(var i = 0; i < nCorpo; i++) {
-	                           selezioneCorpo[i].remove();
-	                       }
-	                       nCorpo = 0;
-	                    });
-	                </script>
-	    	</table>
+                var perc = document.createElement("td");
+                var percentualesconto = document.createElement("input");
+                percentualesconto.type = "text";
+                percentualesconto.className = "form-control";
+                percentualesconto.name = "scontoagente[]";
+				perc.appendChild(percentualesconto);
+
+				var per = document.createElement("td");
+                var percentual = document.createElement("input");
+                percentual.type = "text";
+                percentual.className = "form-control";
+                percentual.name = "scontobonus[]";
+                per.appendChild(percentual);
+
+                var netto = document.createElement("td");
+                var prezzonetto = document.createElement("input");
+                prezzonetto.type = "text";
+                prezzonetto.className = "form-control";
+                prezzonetto.name = "prezzonetto[]";
+                netto.appendChild(prezzonetto);
+
+                var perciva = document.createElement("td");
+                var iva = document.createElement("input");
+                iva.type = "text";
+                iva.className = "form-control";
+                iva.name = "iva[]";
+
+                perciva.appendChild(iva);
+                tr.appendChild(check);
+                tr.appendChild(ord);
+                tr.appendChild(td);
+                tr.appendChild(qt);
+                // tr.appendChild(unitario);
+                tr.appendChild(pr);
+
+
+                kCorpo++;
+                count++;
+
+                tab.appendChild(tr);
+
+                $j('.selezione').on("click", function() {
+	                selezioneCorpo[nCorpo] = $j(this).parent().parent();
+	                nCorpo++;
+            	});
+            });
+
+	        $j('#eliminaCorpo').on("click", function() {
+	           for(var i = 0; i < nCorpo; i++) {
+	               selezioneCorpo[i].remove();
+	           }
+	           nCorpo = 0;
+	        });
+	    </script>
+
+		</table>
 	    	</div>
 			<h4> {{ trans('messages.keyword_base_invoice') }} </h4><a onclick="calcola()" class="" title="{{ trans('messages.keyword_assembled_compilation') }}"> {{ trans('messages.keyword_click') }}  <span class="fa fa-info"></span> {{ trans('messages.keyword_for_compilation') }} </span></a>
 			<div class="table-responsive">
@@ -368,7 +398,7 @@
 	   			<td><input id="nettototale" class="form-control" type="text" name="nettototale" value="{{old('nettototale')}}"></td>
 	   			<td><input id="imponibile" class="form-control" type="text" name="imponibile" value="{{old('imponibile')}}"></td>
 	   			<td><input id="prezzoiva" class="form-control" type="text" name="prezzoiva" value="{{old('prezzoiva')}}"></td>
-	   			<td><input id="percentualeiva" class="form-control" type="text" name="percentualeiva" value="{{old('percentualeiva')}}"></td>
+	   			<td><input id="percentualeiva" class="form-control" type="text" name="percentualeiva" value="<?php echo (isset($taxation->tassazione_percentuale)) ? $taxation->tassazione_percentuale : old('percentualeiva'); ?>"></td>
 	   			<td><input id="dapagare" class="form-control" type="text" name="dapagare" value="{{old('dapagare')}}"></td>
                 <script>
 					function approssima(x) {
@@ -388,7 +418,7 @@
 						percentuale = eval(prompt("{{trans('messages.keyword_enter_the_percentage')}} (%)", percentuale));
 						netto = eval(prompt("{{trans('messages.keyword_enter_the_net_price')}} (€)", (importototale - sconto) * percentuale / 100));
 						imponibile = eval(prompt("{{trans('messages.keyword_enter_the_taxable_amount')}} (€)", netto));
-						percentualeiva = eval(prompt("{{trans('messages.keyword_enter_the_vat')}} (%)", 22));
+						percentualeiva = eval(prompt("{{trans('messages.keyword_enter_the_vat')}} (%)", percentualeiva));
 						prezzoiva = eval(prompt("{{trans('messages.keyword_enter_the_price_with_vat')}} (€)", imponibile * percentualeiva / 100));
 						dapagare = eval(prompt("{{trans('messages.keyword_enter_the_total_payable')}} (€)", imponibile + prezzoiva));
 						
@@ -412,20 +442,21 @@
 	   	</table>
 	   	</div>
 
-	<div class="row"><div class="col-md-2" >
+	<div class="row"><div class="col-md-2 col-sm-12 col-xs-12 mb16 show-desktop" >
 		<input onclick="mostra2()" type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_save') }}">
 	</div></div>
 
 	</div>
-	<div class="col-md-4">
-		<label for="statoemotivo"> {{ trans('messages.keyword_emotional_state') }} </label>
+	<div class="col-md-4 col-sm-12 col-xs-12">
+		<div class="form-group"><label for="statoemotivo"> {{ trans('messages.keyword_emotional_state') }} </label>
 		<!-- statiemotivi -->
 		<select name="statoemotivo" class="form-control" id="statoemotivo">
 			@for($i = 0; $i < count($statiemotivi); $i++)
+             <?php $label = (!empty($statiemotivi[$i]->language_key)) ?  ucwords(strtolower(trans('messages.'.$statiemotivi[$i]->language_key))) : (($statiemotivi[$i]->name)); ?>
             	@if($i == 0)
-					<option selected style="background-color:{{$statiemotivi[$i]->color}};color:#ffffff">{{$statiemotivi[$i]->name}}</option>
+					<option selected style="background-color:{{$statiemotivi[$i]->color}};color:#ffffff" value="{{$statiemotivi[$i]->id}}">{{ ucwords($label) }}</option>
                 @else
-                	<option style="background-color:{{$statiemotivi[$i]->color}};color:#ffffff">{{$statiemotivi[$i]->name}}</option>
+                	<option style="background-color:{{$statiemotivi[$i]->color}};color:#ffffff" value="{{$statiemotivi[$i]->id}}">{{ ucwords($label) }}</option>
                 @endif
 			@endfor
 		</select>
@@ -437,8 +468,8 @@
 			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
 		});
 		</script>
-		<br>
-		  <label for="privato"> {{ trans('messages.keyword_hide_stats') }} </label> 
+		<br></div>
+		 <div class="form-group"> <label for="privato"> {{ trans('messages.keyword_hide_stats') }} </label> 
 		  <span class="fa fa-eye-slash" title="{{ trans('messages.keyword_ifso') }} "></span>
             <select class="form-control" name="privato">
             	<option value="0" selected>{{ trans('messages.keyword_no') }} </option>
@@ -446,21 +477,23 @@
             </select>
 		
 			
-			<br><label for="tipo"> {{ trans('messages.keyword_type') }} </label>
+			<br></div>
+            
+          <div class="form-group">  <label for="tipo"> {{ trans('messages.keyword_type') }}  </label>
 		    <select name="tipo" id="tipo" class="form-control">
     		    <option value="0"> {{ trans('messages.keyword_payment') }} </option>
     		    <option value="1"> {{ trans('messages.keyword_renewal') }} </option>
-		    </select>
+		    </select></div>
 			<div id="frequenza">
-		    <br><label for="frequ"> {{ trans('messages.keyword_frequency_in_days') }} </label>
-		    <input id="frequ" name="frequenza" class="form-control" placeholder="{{ trans('messages.keyword_frequency_in_days') }}" value="{{old('frequenza')}}">
+		    <br><div class="form-group"><label for="frequ"> {{ trans('messages.keyword_frequency_in_days') }}<span class="required">(*)</span> </label>
+		    <input id="frequ" name="frequenza" class="form-control" placeholder="{{ trans('messages.keyword_frequency_in_days') }}" value="{{old('frequenza')}}"></div>
 		</div>
         
-			<br><label for="percentuale">% {{ trans('messages.keyword_total_amount') }}  <span class="required">(*)</span></label>
-			<input id="percentuale" name="percentuale" class="form-control" value="{{old('percentuale')}}" placeholder="% {{ trans('messages.keyword_description') }}">
-            <div id="percentualediv">
+			<div class="form-group"><br><label for="percentuale">% {{ trans('messages.keyword_total_amount') }} </label>
+			<input id="percentuale" name="percentuale" class="form-control required-input error" value="{{old('percentuale')}}" placeholder="% {{ trans('messages.keyword_description') }}"></div>
+            <div class="form-group"><div id="percentualediv">
 		    <br><label for="frequ"> {{ trans('messages.keyword_amount') }} </label>
-		    <input id="frequ" name="importo_nopercentuale" class="form-control" placeholder=" {{ trans('messages.keyword_amount') }} " value="{{old('importo_nopercentuale')}}">
+		    <input id="frequ" name="importo_nopercentuale " class="form-control" placeholder=" {{ trans('messages.keyword_amount') }} " value="{{old('importo_nopercentuale')}}"></div>
 		</div>
             <script>
 			$j('#percentuale').on("change", function() {
@@ -474,8 +507,8 @@
 				}
 			});
 			</script>
-			<br><label for="datascadenza"> {{ trans('messages.keyword_expiry_date_invoice') }} <span class="required">(*)</span></label><br>
-		    <input value="{{old('datascadenza')}}" class="form-control" name="datascadenza" id="datascadenza"></input><br>
+			<div class="form-group"><br><label for="datascadenza"> {{ trans('messages.keyword_expiry_date_invoice') }} </label><br>
+		    <input value="{{old('datascadenza')}}" class="form-control required-input error" name="datascadenza" id="datascadenza"></input><br></div>
 		    <script>
 		    $j('#frequenza').hide();
 			$j('#percentualediv').hide();
@@ -496,14 +529,14 @@
 </form>  
 
 		<div class="row">
-          	<div class="col-md-12">
+          	<div class="col-md-12 col-sm-12 col-xs-12">
             <div class="bg-white modifica-blade-estimate-upload">
             
 	        <label for="scansione"> 
 	        {{ trans('messages.keyword_attach_administrative_file') }} 
 	        </label><br>
 	        <div class="row">
-	        <div class="col-md-12">
+	        <div class="col-md-12 col-sm-12 col-xs-12">
             	<div class="image_upload_div">
                 <?php echo Form::open(array('url' => '/add/fatture/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>					
 					{{ csrf_field() }}					
@@ -627,6 +660,12 @@
             
             	
 	</div>
+    
+    <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-mobile" >
+		<input onclick="mostra2()" type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_save') }}">
+	</div>
+    
+    
 </div>
 
 
@@ -645,12 +684,12 @@
                     <div class="row">
                         <div class="col-md-12">                               
                             <div class="form-group">
-                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} <span class="required">(*)</span> </label>
-                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
+                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} </label>
+                                <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
                             </div>
                             <div class="form-group">
-                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} <span class="required">(*)</span></label>
-                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
+                                <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }}</label>
+                                <textarea rows="5" name="descriptions" id="descriptions" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_description')) }}">{{ old('descriptions') }}</textarea>
                             </div>
                         </div>
                      </div>
@@ -743,7 +782,7 @@ $(document).ready(function() {
         		digits:true
         	},
         	legameprogetto: {
-        		required: true
+        		required: <?php echo (!empty($selectProject) && isset($selectProject->id)) ? 'false' : 'true'; ?>
         	},        
             DA: {
                 required: true

@@ -94,6 +94,7 @@ li label {
 </div>
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="notifiche/json" data-classes="table table-bordered" id="table">
         <thead>
+            <!-- <th data-field="type" data-sortable="true"> -->
             <th data-field="id" data-sortable="true">  
             {{ trans('messages.keyword_no_notification') }} 
             <th data-field="id_ente" data-sortable="true">
@@ -115,6 +116,7 @@ var n = 0;
 
 $('#table').on('click-row.bs.table', function (row, tr, el) {
   var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
+  console.log(cod);
   if (!selezione[cod]) {
     $(el[0]).addClass("selected");
     selezione[cod] = cod;
@@ -132,6 +134,9 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
     }
     n--;
   }
+
+
+
 });
 
 function check() { return confirm("  {{ trans('messages.keyword_sure') }}: " + n + " {{ trans('messages.keyword_notifiche') }} ?"); }
@@ -146,21 +151,22 @@ function multipleAction(act) {
   switch(act) {
     case 'delete':
       link.href = "{{ url('/notifiche/delete') }}" + '/';
+
       if(check() && n!=0) {
-        for(var i = 0; i < n; i++) {
+        for(var i = 0; i < n; i++) {          
           $.ajax({
             type: "GET",
             url : link.href + indici[i],
             error: function(url) {
               if(url.status==403) {
-                link.href = "{{ url('/notifiche/delete') }}" + '/' + indici[n];
-                link.dispatchEvent(clickEvent);
+                // link.href = "{{ url('/notifiche/delete') }}" + '/' + indici[n];
+                // link.dispatchEvent(clickEvent);
                           } 
             }
                     });
         }
-                selezione = undefined;
-        setTimeout(function(){location.reload();},100*n);
+        selezione = undefined;
+        // setTimeout(function(){location.reload();},100*n);
         n = 0;
           }
       break;

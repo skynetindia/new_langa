@@ -1,0 +1,90 @@
+@extends('layouts.app')
+@section('content')
+
+<h1>{{ trans('messages.keyword_optional_budget_llist') }}: <strong>{{$preventivo->oggetto}}</strong></h1>
+
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
+
+<a class="btn btn-info" onclick="window.close();" title=" {{ trans('messages.keyword_back_to_project') }}"><span class="fa fa-arrow-left"></span></a>
+
+<br>
+<form action="{{url('/preventivo/optional/aggiorna') . '/' . $preventivo->id}}" method="post">
+    {{ csrf_field() }}
+
+<!-- hide Salva button  -->
+
+   <!--  <div class="row">
+        <div class="col-md-12">
+            <input type="submit" class="btn btn-warning btn-sm" value="Salva">
+        </div>
+    </div> -->
+    <div class="table-responsive">
+        <table class="table table-bordered">
+        <?php $i = 1; ?>
+            @foreach($optional as $opt)
+                <tr>
+                    <td>
+                       {{ trans('messages.keyword_object') }}: <input type="text" name="oggetti[]" value="{{$opt->oggetto}}" class="form-control">
+                    </td>
+                    <td>
+                       {{ trans('messages.keyword_description') }}:                                                                                  <input type="text" name="desc[]" value="{{$opt->descrizione}}" class="form-control">
+                    </td>
+                    <td>
+                       {{ trans('messages.keyword_qty') }}: <input type="number" name="qt[]" value="{{$opt->qta}}" class="form-control">
+                    </td>
+                    <td>
+                       {{ trans('messages.keyword_unit_price') }}: <input type="number" step=any name="pru[]" value="{{$opt->prezzounitario}}" class="form-control">
+                    </td>
+                    <td>
+                       {{ trans('messages.keyword_subtotal') }}: <input type="number" name="tot[]" step=any value="{{$opt->totale}}" class="form-control">
+                    </td>
+
+                    <td>
+                       {{ trans('messages.keyword_cyclicity') }}: 
+                       <?php foreach($frequency as $key => $frequencyval){ ?>
+                        <div class="cust-radio"><input type="radio" <?php if($key=='0'){echo 'checked';}?> name="cicli['<?php echo $i; ?>']" id="frequenza_<?php echo $i; ?>'<?php echo $frequencyval->rinnovo;?>" value="{{ $frequencyval->rinnovo }}" /><label for="frequenza_<?php echo $i; ?><?php echo $frequencyval->rinnovo;?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div><?php
+                            }
+                        ?>';
+                    </td>
+
+                    <td>
+                        {{ trans('messages.keyword_asterisca') }}:                        
+                        <div class="switch">
+                            <input type="checkbox" name="ast[]" id="ast">
+                            <label for="ast"></label>
+                        </div>
+                    </td>
+
+                    <!-- <td>
+                       {{ trans('messages.keyword_asterisca') }}:
+                        <select name="ast[]" class="form-control">
+                        @if($opt->asterisca == 1)
+                            <option selected value="1">{{ trans('messages.keyword_yes') }}</option>
+                            <option value="0">{{ trans('messages.keyword_no') }}</option>
+                        @else
+                            <option value="1">{{ trans('messages.keyword_yes') }}</option>
+                            <option selected value="0">{{ trans('messages.keyword_no') }}</option>
+                        @endif
+                        </select>
+                    </td> -->
+                    <td>
+                        <a onclick="return confirm('{{ trans('messages.keyword_sure') }}');" href="{{url('/preventivi/optional/elimina') . '/' . $opt->id}}" class="btn btn-danger">{{ trans('messages.keyword_delete_optional') }}</a>
+                    </td>
+                </tr>
+                <?php $i++; ?>
+            @endforeach
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <input type="submit" class="btn btn-warning btn-sm" value="{{ trans('messages.keyword_save') }}">
+        </div>
+    </div>
+</form>
+
+@endsection

@@ -13,38 +13,43 @@ document.write(msg);
 @endif
 </script>
 <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-<!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
+
 <?php /*<a onclick="multipleAction('add');" id="add" class="btn btn-warning" name="add" title="{{ trans('messages.keyword_adduser') }}"><i class="glyphicon glyphicon-plus"></i></a>
 <div class="space10"></div>
 <a class="btn btn-primary" onclick="multipleAction('modify');" id="modifica" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a>*/?>
 <div class="row">
   <div class="col-md-1">
+  	<div class="space24"></div>
     <a id="delete" class="btn btn-danger"  onclick="multipleAction('delete');" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="fa fa-trash"></i></a>
 </div>
 @if($mastertype != 'admin')
 
 <div class="col-md-3">
 <div class="form-group">
-    <label> Type </label>
+    <label> {{ trans('messages.keyword_type') }} </label>
 <select class="form-control" id="filterbytype">
-    <option value="0">-- Select --</option>
+    <option value="0">-- {{ trans('messages.keyword_select') }} --</option>
     @foreach($departments as $department)
-        <option value="{{$department->ruolo_id}}">{{$department->nome_ruolo}}</option>
+        <option value="{{$department->ruolo_id}}" {{(isset($usertype)&& $usertype== $department->ruolo_id)?"selected":''}}>{{ ucwords(strtolower($department->nome_ruolo)) }}</option>
     @endforeach
 </select>
   </div>
   </div>
 @endif
 </div>
+
+<div class="space10"></div>
+
+<div class="panel panel-default">
+<div class="panel-body">
 <div class="table-responsive table-custom-design">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="{{ url('loginactivity/json/').'/'.$mastertype.'/'.$usertype }}" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="id" data-sortable="true"> {{ trans('messages.keyword_id') }} </th>
-            <th data-field="user_id" data-sortable="true"> {{ trans('messages.keyword_user_id') }} </th>
+            <th data-field="username" data-sortable="true"> {{ trans('messages.keyword_user_name') }} </th>
             <th data-field="nome_ruolo" data-sortable="true"> {{ trans('messages.keyword_department') }} </th>
             <th data-field="log_date" data-sortable="true"> {{ trans('messages.keyword_date') }} </th>
             <th data-field="logs" data-sortable="true"> {{ trans('messages.keyword_activity') }}</th>
@@ -52,6 +57,9 @@ document.write(msg);
         </thead>
     </table>
 </div>
+</div>
+</div>
+
 <script>
     var selezione = [];
     var indici = [];

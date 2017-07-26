@@ -7,14 +7,10 @@
 @include('common.errors')
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
+<link rel="stylesheet" href="{{ asset('build/css/bootstrap-table.min.css') }}">
+<script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
+<script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 
-<!-- Latest compiled and minified JavaScript -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
-
-<!-- Latest compiled and minified Locales -->
-<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
 <script>
   $(function(){
         $("table").stupidtable();
@@ -33,7 +29,10 @@
     </div>
 @endif
 </div>
-<br><br>
+
+<div class="panel panel-default">
+<div class="panel-body">
+
 <div class="table-responsive table-custom-design">
 <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="newutente/json" data-classes="table table-bordered" id="table">
     <thead>
@@ -50,6 +49,9 @@
         <th data-field="azione" data-sortable="true"> {{trans('messages.keyword_action')}} </th>
     </thead>
 </table>
+</div>
+</div>
+
 </div>
 <script>
 var selezione = [];

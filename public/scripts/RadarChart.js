@@ -83,8 +83,8 @@ var RadarChart = {
 	   .style("font-family", "sans-serif")
 	   .style("font-size", "10px")
 	   .attr("transform", "translate(" + (cfg.w/2-levelFactor + cfg.ToRight) + ", " + (cfg.h/2-levelFactor) + ")")
-	   .attr("fill", "#737373")
-	   .text(Format((j+1)*cfg.maxValue/cfg.levels));
+	   .attr("fill", "#737373");
+	  /* .text(Format((j+1)*cfg.maxValue/cfg.levels));*/
 	}
 	
 	series = 0;

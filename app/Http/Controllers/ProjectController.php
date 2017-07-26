@@ -17,10 +17,22 @@ class ProjectController extends Controller
     protected $progetti;
 	protected $logmainsection;
 
+	protected $module;
+	protected $sub_id;
+
     public function __construct(ProjectRepository $projects) {
+
         $this->middleware('auth');
         $this->progetti = $projects;
         $this->logmainsection = 'Project';
+
+        $request = parse_url($_SERVER['REQUEST_URI']);
+		$path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylangaw/', '', $request["path"]), '/') : $request["path"];		
+		$result = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');
+		$current_module = DB::select('select * from modulo where TRIM(BOTH "/" FROM modulo_link) = :link', ['link' => $result]);  
+
+        $this->module = (isset($current_module[0]->modulo_sub)) ? $current_module[0]->modulo_sub : 4;
+        $this->sub_id = (isset($current_module[0]->id)) ? $current_module[0]->id : 18;
     }
 
 	//updatemediaComment
@@ -68,8 +80,20 @@ class ProjectController extends Controller
 						
 			foreach($updateData as $prev) {
 				$imagPath = url('/storage/app/images/projects/'.$prev->name);
+				$downloadlink = url('/storage/app/images/projects/'.$prev->name);
+				$filename = $prev->name;			
+				$arrcurrentextension = explode(".", $filename);
+				$extention = end($arrcurrentextension);
+							
+				$arrextension['docx'] = 'docx-file.jpg';
+				$arrextension['pdf'] = 'pdf-file.jpg';
+				$arrextension['xlsx'] = 'excel.jpg';
+				if(isset($arrextension[$extention])){
+					$imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);			
+				}
+
 				$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";			
-				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</p></td></tr>';
+				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</p></td></tr>';
 
 				$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 				$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
@@ -125,19 +149,26 @@ class ProjectController extends Controller
 
     public function index(Request $request)
     {
+    	if(!checkpermission($this->module, $this->sub_id, 'lettura')){
+    		return redirect('/unauthorized');
+    	}
+
         return $this->show($request);
     }
     
 	public function completaCodice(&$progetti)
 	{
-		foreach($progetti as $prog) {
-			$anno = substr($prog->datainizio, -2);
-			if($prog->id_ente != null)
-				$prog->ente = DB::table('corporations')
-					->where('id', $prog->id_ente)
-					->first()->nomeazienda;
-			$prog->codice = '::' . $prog->id . '/' . $anno;
+		if($progetti != ''){
+			foreach($progetti as $prog) {
+				$anno = substr($prog->datainizio, -2);
+				if($prog->id_ente != null)
+					$prog->ente = DB::table('corporations')
+						->where('id', $prog->id_ente)
+						->first()->nomeazienda;
+				$prog->codice = '::' . $prog->id . '/' . $anno;
+			}
 		}
+		
 	}
 	
 	public function getJsonMiei(Request $request)
@@ -220,6 +251,10 @@ class ProjectController extends Controller
 	
 	public function miei(Request $request)
     {
+    	if(!checkpermission($this->module, $this->sub_id, 'lettura')){
+    		return redirect('/unauthorized');
+    	}
+
 		$buffer = DB::table('buffer')
 					->where([
 						'id_user' => $request->user()->id,
@@ -245,12 +280,27 @@ class ProjectController extends Controller
     
     public function aggiungi(Request $request)
     {
+		
+    	if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+    	/*Get the Processing of web */
+    	$processing = DB::table('lavorazioni')->where('departments_id', '1')->get();
+
+		$arrwhere['quotes.is_deleted'] = 0;
+        $arrwhere['statiemotivipreventivi.id'] = '6';                        
+        $quotes = DB::table('quotes')
+        ->Join('statipreventivi', 'statipreventivi.id_preventivo', '=', 'quotes.id')
+        ->Join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')            
+        ->where($arrwhere)            
+        ->select('quotes.*')->get();                
+
+        /*DB::table('quotes')->where('legameprogetto', 1)->get() */
         return view('progetti.aggiungi', [
-            'utenti' => DB::table('users')
-                        ->get(),
-            'preventiviconfermati' => DB::table('quotes')->where('legameprogetto', 1)->get(),
+            'utenti' => DB::table('users')->get(),
+            'confirmQuote' => $quotes,
 			'statiemotivi' => DB::table('statiemotiviprogetti')->get(),
-			'oggettostato' => DB::table('oggettostato')->where('is_deleted', '0')->get(),
+			'oggettostato' => $processing,
         ]);
     }
     
@@ -268,7 +318,7 @@ class ProjectController extends Controller
                 ->with('error_code', 6)
                 ->withErrors($validator);
         }
-		
+
         $progetto = DB::table('projects')->insertGetId([
                         'user_id' => $request->user()->id,
                         'nomeprogetto' => $request->nomeprogetto,
@@ -333,25 +383,22 @@ class ProjectController extends Controller
 				]);
 			}
 		}
-        
+        	
         // Memorizzo le note private
         if(isset($request->nome)) {
-			$note = $request->nome;
+			$nome = $request->nome;
 			$password = $request->pass;
-			$dettagli = $request->dett;
-			//$scadenza = $request->scad;
-			for($i = 0; $i < count($note); $i++) {
+			$dettagli = $request->dett;			
+			for($i = 0; $i < count($nome); $i++) {
 				DB::table('progetti_noteprivate')->insert([
 					'id_progetto' => $progetto,
-					'nome' => $note[$i],
-					'password' => $password[$i],
-					'user' => $dettagli[$i]
-					//'scadenza' => $scadenza[$i]
+					'nome' => isset($nome[$i]) ? $nome[$i] : '',
+					'password' =>isset($password[$i])?$password[$i] : '',
+					'user' => isset($dettagli[$i]) ? $dettagli[$i] : ''
 				]);
 			}
 		}
-        
-        
+       
         // Memorizza i partecipanti al progetto
         if(isset($request->partecipanti)) {
 			$options = $request->partecipanti;
@@ -362,34 +409,38 @@ class ProjectController extends Controller
 				]);
 			}
 		}
-        
+       $progessPercentage = 0;
         // Memorizzo le lavorazioni del progetto
-        if(isset($request->ric)) {
+          if(isset($request->ric)) {
 			$appunti = $request->ric;
 			$ricontattare = $request->ricontattare;
 			$alle = $request->alle;
 			$datainserimento = $request->datainserimento;
 			$completato = $request->completato;
+			$descrizione = $request->descrizione;
 			$completamento = $request->percentvalue;
+			$proceesingcode = $request->processing_code;
 
 			for($i = 0; $i < count($appunti); $i++) {
-			    if($completato[$i] == null)
-			        $completato[$i] = 0;
-			    else
-			        $completato[$i] = 1;
-				DB::table('progetti_lavorazioni')->insert([
+			    // if($completato[$i] == null)
+			    //     $completato[$i] = 0;
+			    // else
+			    //     $completato[$i] = 1;
+				$procceingID = DB::table('progetti_lavorazioni')->insertGetId([
 					'user_id' => $request->user()->id,
 				    'id_progetto' => $progetto,
-					'nome' => $appunti[$i],
-					/*'scadenza' => $ricontattare[$i],
-					'alle' => $alle[$i],*/
+					'nome' => isset($appunti[$i]) ? $appunti[$i] : "",
 					'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : "",
-					/*'programmato' => $datainserimento[$i],*/
-					'completato' => $completato[$i],
-					'completamento' => $completamento[$i],
+					'completato' => isset($completato[$i]) ? $completato[$i] : 0,
+					'completamento' =>isset($completamento[$i]) ? $completamento[$i] : 0,
 				]);
+				DB::table('project_processing_comments')->where('code', $proceesingcode[$i])->update(array('processing_id' => $procceingID));
 			}
+			 $progessDetails = DB::select("select AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `progetti_lavorazioni`    WHERE `progetti_lavorazioni`.`id_progetto` = $progetto ");
+			 $progessPercentage = round($progessDetails[0]->completedPercentage,2);			 
 		}
+		DB::table('projects')->where('id', $progetto)->update(array('progresso' => $progessPercentage));
+
 
 		/* Update Project Id in Media files Paras */
 			DB::table('media_files')
@@ -404,7 +455,11 @@ class ProjectController extends Controller
     
     public function destroy(Request $request, Project $project)
     {
-        $this->authorize('destroy', $project);
+    	if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
+        // $this->authorize('destroy', $project);
 			
 		DB::table('projects')
 			->where('id', $project->id)
@@ -417,12 +472,16 @@ class ProjectController extends Controller
 
 		return Redirect::back()
             ->with('error_code', 5)
-            ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_project_deleted_correctly').'</div>');
+            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_project_deleted_correctly').'</div>');
     }
     
     public function duplicate(Request $request, Project $project)
     {
-        $this->authorize('duplicate', $project);
+    	if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
+        // $this->authorize('duplicate', $project);
         
         $pid = DB::table('projects')->insertGetId([
             'user_id' => $request->user()->id,
@@ -444,11 +503,20 @@ class ProjectController extends Controller
     
     public function modify(Request $request, Project $project)
     {
-    	$this->authorize('modify', $project);
+    	/*if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}*/
+
+		// $this->authorize('modify', $project);
+    	$project = DB::table('projects')->where('id', $project->id)->first();    	
+    	$quote = DB::table('quotes')->where('id', $project->id_preventivo)->first();
+    	$dipartimento= (isset($quote->dipartimento) && !empty($quote->dipartimento)) ? $quote->dipartimento : '1';
+    	$processing = DB::table('lavorazioni')->where('departments_id', $dipartimento)->get();
+    	$departments = DB::table('departments')->where('id', $dipartimento)->first();
+
+
         return view('progetti.modifica', [
-            'progetto' => DB::table('projects')
-                            ->where('id', $project->id)
-                            ->first(),
+            'progetto' => $project,
             'files' => DB::table('progetti_files')
                         ->where('id_progetto', $project->id)
                         ->get(),
@@ -470,11 +538,10 @@ class ProjectController extends Controller
             'noteprivate' => DB::table('progetti_noteprivate')
             					->where('id_progetto', $project->id)
             					->get(),
-			'oggettostato' => DB::table('oggettostato')
-			    ->where('is_deleted', '0')
-			    ->get(),
-			 'chartdetails'=> DB::select("select `oggettostato`.*, `progetti_lavorazioni`.`completamento` as `completedPercentage` from `oggettostato` left join `progetti_lavorazioni` on `oggettostato`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $project->id"),
-			'statiemotivi' => DB::table('statiemotiviprogetti')->get(),
+            'departments'=>$departments,
+			'oggettostato' => $processing,
+			 'chartdetails'=> DB::select("select `lavorazioni`.*, AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `lavorazioni` left join `progetti_lavorazioni` on `lavorazioni`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $project->id WHERE `lavorazioni`.`departments_id`=$dipartimento GROUP BY id ORDER BY completedPercentage DESC"),
+			'statiemotivi' => DB::table('statiemotiviprogetti')->get(),			
 			'statoemotivoselezionato' => DB::table('statiprogetti')
 				->where('id_progetto', $project->id)
 				->first(),
@@ -512,7 +579,12 @@ class ProjectController extends Controller
     
     public function update(Request $request, Project $project)
     {
-		$this->authorize('modify', $project);
+    	if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
+    		return redirect('/unauthorized');
+    	}
+
+		// $this->authorize('modify', $project);
+		
         $validator = Validator::make($request->all(), [
             'nomeprogetto' => 'required|max:50',
             'notetecniche' => 'max:1000',
@@ -583,7 +655,6 @@ class ProjectController extends Controller
 		
 		// Aggiorno i file
 		$options = $request->file;
-
 			for($i = 0; $i < count($options); $i++) {
     			if(file_exists($options[$i])) {
                     $nome = time() . uniqid() . '-' . '-progetto';
@@ -600,8 +671,9 @@ class ProjectController extends Controller
 			    }
 		}
 		
+
 		// Memorizza le note private
-		if(isset($request->nome)) {
+		if(isset($request->nome)) {				
 			$note = $request->nome;
 			$password = $request->pass;
 			$dettagli = $request->dett;
@@ -613,9 +685,9 @@ class ProjectController extends Controller
 			for($i = 0; $i < count($note); $i++) {
 				DB::table('progetti_noteprivate')->insert([
 					'id_progetto' => $project->id,
-					'nome' => $note[$i],
-					'password' => $password[$i],
-					'user' => $dettagli[$i]
+					'nome' => isset($note[$i]) ? $note[$i] : '',
+					'password' => isset($password[$i]) ? $password[$i] : '',
+					'user' => isset($dettagli[$i]) ? $dettagli[$i] : ''
 					/*'scadenza' => $scadenza[$i]*/
 				]);
 			}
@@ -663,7 +735,7 @@ class ProjectController extends Controller
 			    ->delete();
 		}
         
-        // Memorizzo le lavorazioni del progetto
+        // Memorizzo le lavorazioni del progetto (Processing Of Projects)
         if(isset($request->ric)) {
 			$appunti = $request->ric;
 			$ricontattare = $request->ricontattare;
@@ -672,28 +744,30 @@ class ProjectController extends Controller
 			$datainserimento = $request->datainserimento;
 			$completato = $request->completato;
 			$completamento = $request->percentvalue;
-			
-			DB::table('progetti_lavorazioni')
-			    ->where('id_progetto', $project->id)
-			    ->delete();
+			$proceesingcode = $request->processing_code;			
+
+			DB::table('progetti_lavorazioni')->where('id_progetto', $project->id)->delete();
 			for($i = 0; $i < count($appunti); $i++) {
-				DB::table('progetti_lavorazioni')->insert([
+			$procceingID = DB::table('progetti_lavorazioni')->insertGetId([
 					'user_id' => $request->user()->id,
 				    'id_progetto' => $project->id,
-					'nome' => $appunti[$i],
-					/*'scadenza' => $ricontattare[$i],
-					'alle' => $alle[$i],*/
+					'nome' => isset($appunti[$i]) ? $appunti[$i] : '',					
 					'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : "",
-					/*'programmato' => $datainserimento[$i],*/
-					'completato' => $completato[$i],
-					'completamento' => $completamento[$i],
+					'completato' => isset($completato[$i]) ? $completato[$i] : 0,
+					'completamento' =>isset($completamento[$i]) ? $completamento[$i] : 0,
 				]);
+				$arrwhereprocoment = array('code'=>$proceesingcode[$i]);
+				DB::table('project_processing_comments')->where($arrwhereprocoment)->update(array('processing_id' => $procceingID));
 			}
+			$progessDetails = DB::select("select AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `progetti_lavorazioni`    WHERE `progetti_lavorazioni`.`id_progetto` = $project->id ");
+			 $progessPercentage = round($progessDetails[0]->completedPercentage,2);			 
 		} else {
 		    DB::table('progetti_lavorazioni')
 			    ->where('id_progetto', $project->id)
 			    ->delete();
+			$progessPercentage = 0;
 		}
+		DB::table('projects')->where('id', $project->id)->update(array('progresso' => $progessPercentage));
 
 		/* Update Project Id in Media files Paras */
 			DB::table('media_files')
@@ -708,71 +782,127 @@ class ProjectController extends Controller
     
     public function creadapreventivo(Request $request)
     {
-    	$quote = DB::table('quotes')
-    		->where('id', $request->id)
-    		->first();
-		$nomecliente = DB::table('corporations')
-			->where('id', $quote->idente)
-			->first()->nomeazienda;
+    	//check project exit for this quote
+    	$project = DB::table('projects')->where('id_preventivo', $request->id)->first();    	
+    	$quote = DB::table('quotes')->where('id', $request->id)->first();
+    	$dipartimento= (isset($quote->dipartimento) && !empty($quote->dipartimento)) ? $quote->dipartimento : '1';
+		$processing = DB::table('lavorazioni')->where('departments_id', $dipartimento)->get();
+		$departments = DB::table('departments')->where('id', $dipartimento)->first();
+		
+		if(count($project) > 0){    				
+			$nuovoprogetto = $project->id;
+		}
+    	else {
+		$nomecliente = DB::table('corporations')->where('id', $quote->idente)->first()->nomeazienda;
         $nuovoprogetto = DB::table('projects')->insertGetId([
+			'user_id'=>$request->user()->id,
             'nomeprogetto' => $quote->oggetto . '_' . $nomecliente,
             'id_ente' => $quote->idente,
             'id_preventivo' => $quote->id,
             'notetecniche' => $quote->notetecniche,
             'noteprivate' => $quote->noteimportanti,
+            'datainizio'=>date('d/m/Y'),
             'datafine' => $quote->finelavori,
             'progresso' => 10
         ]);
+    	$project = DB::table('projects')->where('id', $nuovoprogetto)->first();    	    	
+    	
+    	/* Optional section from Quote to project processing */
+		$quoteOptional = DB::table('optional_preventivi')->where('id_preventivo', $quote->id)->get();
+		foreach($quoteOptional AS $keyqopt => $valqopt){
+				$procceingID = DB::table('progetti_lavorazioni')->insertGetId([
+					'user_id' => $request->user()->id,
+				    'id_progetto' => $project->id,
+					'nome' => isset($valqopt->oggetto) ? $valqopt->oggetto : '',					
+					'descrizione' => isset($valqopt->descrizione) ? $valqopt->descrizione : "",
+					'completato' => 0,
+					'completamento' =>0,
+				]);
+			}
 		
+		/* Medai files from project to qoute */
+		$medifilesQuote = DB::table('media_files')->where(['master_id'=>$quote->id,'master_type'=>'0'])->get();
+		foreach ($medifilesQuote as $keymq => $valuemq) {
+			$mediafileid = DB::table('media_files')->insertGetId([
+					'name' => 'pro'.$valuemq->name,
+				    'master_id' => $project->id,
+					'type' => $request->user()->dipartimento,					
+					'master_type' => 1,
+					'title' => $valuemq->title,
+					'description' =>$valuemq->description,
+					'created_at'=>time()
+				]);
+			if(file_exists('storage/app/images/quote/'.$valuemq->name)){			
+				copy('storage/app/images/quote/'.$valuemq->name, 'storage/app/images/projects/pro'.$valuemq->name);
+			}
+		}
+		/* User added as participant */	
 		DB::table('progetti_partecipanti')
 			->insert([
 				'id_progetto' => $nuovoprogetto,
 				'id_user' => $request->user()->id
 			]);
-			
+
 		// Buffer per tenere il progetto in memoria (DB) fino a quando non l'ho salvato,
 		// Se uno non salva ed esce esso verrà eliminato al prossimo login
-		DB::table('buffer')
-			->insert([
-				'id_user' => $request->user()->id,
-				'id_progetto' => $nuovoprogetto
-			]);
+		DB::table('buffer')->insert(['id_user' => $request->user()->id,'id_progetto' => $nuovoprogetto]);
+
+		}		
         
         return view('progetti.modifica', [
-        	'progetto' => DB::table('projects')
-                            ->where('id', $nuovoprogetto)
-                            ->first(),
-            'utenti' => DB::table('users')
-                            ->get(),
-            'files' => DB::table('progetti_files')
-                ->where('id_preventivo', $quote->id)
-                ->get(),
-            'projectmediafiles' => DB::table('media_files')
-								->select('*')
-								->where('master_id', $nuovoprogetto)->where('master_type','1')
-								->get(),								
-            'datisensibili' => DB::table('progetti_datisensibili')
-                        ->where('id_progetto', $nuovoprogetto)
-                        ->get(),
-            'lavorazioni' => DB::table('progetti_lavorazioni')
-                        ->where('id_progetto', $nuovoprogetto)
-                        ->get(),
-            'partecipanti' => DB::table('progetti_partecipanti')
-                                ->where('id_progetto', $nuovoprogetto)
-                                ->get(),
-            'noteprivate' => DB::table('progetti_noteprivate')
-            					->where('id_progetto', $nuovoprogetto)
-            					->get(),
+        	'progetto' => DB::table('projects')->where('id', $nuovoprogetto)->first(),
+            'utenti' => DB::table('users')->get(),
+            'files' => DB::table('progetti_files')->where('id_preventivo', $quote->id)->get(),
+            'projectmediafiles' => DB::table('media_files')->select('*')->where('master_id', $nuovoprogetto)->where('master_type','1')->get(),		
+            'datisensibili' => DB::table('progetti_datisensibili')->where('id_progetto', $nuovoprogetto)->get(),
+            'lavorazioni' => DB::table('progetti_lavorazioni')->where('id_progetto', $nuovoprogetto)->get(),
+            'partecipanti' => DB::table('progetti_partecipanti')->where('id_progetto', $nuovoprogetto)->get(),
+            'noteprivate' => DB::table('progetti_noteprivate')->where('id_progetto', $nuovoprogetto)->get(),
 			'dapreventivo' => 1,
 			'idpreventivo' => $request->id,
-			'oggettostato' => DB::table('oggettostato')
-			    ->where('is_deleted', '0')
-			    ->get(),			   
-			'chartdetails'=> DB::select("select `oggettostato`.*, `progetti_lavorazioni`.`completamento` as `completedPercentage` from `oggettostato` left join `progetti_lavorazioni` on `oggettostato`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $nuovoprogetto"),
-			'statiemotivi' => DB::table('statiemotiviprogetti')->get(),
+			'departments'=>$departments,
+			'oggettostato' => $processing,
+			'chartdetails'=> DB::select("select `lavorazioni`.*, AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `lavorazioni` left join `progetti_lavorazioni` on `lavorazioni`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $project->id WHERE `lavorazioni`.`departments_id`=$dipartimento GROUP BY id"),
+			'statiemotivi' => DB::table('statiemotiviprogetti')->get(),			
 			'statoemotivoselezionato' => DB::table('statiprogetti')
-				->where('id_progetto', $nuovoprogetto)
+				->where('id_progetto', $project->id)
 				->first(),
         ]);         
+    }
+
+    public function getprocessingcomment(Request $request) {
+    	/*$where = (isset($request->id) && $request->id != '0') ? array('processing_id'=> $request->id) : array('code'=> $request->code); */
+    	$where = array('code'=> $request->code); 
+    	$orwhere = (isset($request->id) && $request->id != '0') ? array('processing_id'=> $request->id) : array();
+
+    	return view('progetti.processingComments', [
+        	'comments' => DB::table('project_processing_comments')->where($where)->orWhere($orwhere)->get()])->render();         
+    }
+    public function addprocessingcomment(Request $request){
+    	if ($request->user()->id  != 0 && $request->user()->dipartimento != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {                	
+			$validator = Validator::make($request->all(), ['frontlogo'=>'max:1000']);
+			if ($validator->fails()) {
+            	 echo 'fail'; 
+            	 exit;
+        	}        	        	
+        	DB::table('project_processing_comments')->insert([
+				'processing_id' => $request->processingid,
+				'comments' => $request->comments,
+				'code'=>$request->hdCode,				
+				'date'=> date('Y-m-d')]);
+			echo 'success';
+			exit;
+        }
+    }
+
+     public function deleteprocessingcomment(Request $request) {
+     	if(isset($request->commentid)){
+    		$response = DB::table('project_processing_comments')->where('id', $request->commentid)->delete();
+    	}
+    	echo (isset($response)) ? 'true' : 'false';
+    	exit;
     }
 }
