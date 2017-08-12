@@ -26,6 +26,15 @@
     <div class="row" id="resize-width">
 		<div class="col-md-6 col-sm-12 col-xs-12" id="left-resize">
         	<div class="set-height-lft-bacheca-user">
+              <!-- ================================ Hey Section start ========================== -->
+                <div class="bg-white">                  
+                    <h4><strong>Hey</strong></h4><hr>                    
+                    <div class="widget-quotes hey_media_list" id="media_list">
+                      @include('dashboard.media_list')
+                    </div>
+                </div>
+              <!-- ================================ Hey section start ========================== -->
+
             	<!-- ================================ Wearther Section ========================== -->
                 <?php /*<div class="bg-white">
                     <h4><strong>Weather</strong></h4><hr>

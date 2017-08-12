@@ -160,6 +160,21 @@ span.round-tab:hover {
 }
 </style>
   <!-- HTML Structure -->
+  <div class="responsive-icon-wrapper">
+                	<ul>
+                    	<li><a href="Javascript:void(0);" onclick="fun_width(1366,this.id);" id="desktop"><img src="{{ url('/images').'/desktop-view.svg' }}" alt="Desktop view" class="desktop-view"> </a></li>
+                        <li><a href="Javascript:void(0);" onclick="fun_width(768,this.id);" id="tablet"><img src="{{ url('/images').'/tablet-view.svg' }}" alt="Tablet View" class="tablet-view"> </a></li>
+                        <li><a href="Javascript:void(0);" onclick="fun_width(375,this.id);" id="mobile"><img src="{{ url('/images').'/mobile-view.svg' }}" alt="Mobile View" class="mobile-view"> </a></li>
+                    </ul>
+                </div>
+                <script>
+				function fun_width(width1,$this)
+				{
+					$('.right-side').find('iframe').width(width1);
+					$('.selected').removeClass('selected');
+					$('#'+$this).addClass('selected');
+				}
+				</script>
 <div class="right-side">
 
       <?php /*<div class="right-header">
@@ -173,7 +188,7 @@ span.round-tab:hover {
           <div class="row">
           <?php $averageScore = 3; ?>
           @foreach($ratType as $ratType)
-            <div class="col-md-4">
+            <div class="col-md-3 col-sm-12 col-xs-12">
               <div class="rating" id="ratingdetail_{{$ratType->rating_id}}"></div>
 
             <?php  $score = DB::table('quiztype_user_rat')
@@ -240,21 +255,24 @@ span.round-tab:hover {
                 $score = number_format($score->average, 2, '.', '');
                 echo round($score); 
             }?>/5</span> </div>
-          <div class="starline"> {{ $ratType->titolo }} </div>
+          <div class="starline"> {{ ucwords($ratType->titolo) }} </div>
         </div>
 
         @endforeach
 
-        <div class="col-md-4">
+        <div class="col-md-3 col-sm-12 col-xs-12">
 
           <div class="rating rate_update" id="overall_rating_<?php echo $demodettagli->id;?>"> </div>  
 
-          <div class="rating">                                          
+          <div class="stars">                                          
             <div class="star-count" id="star-count_{{$demodettagli->id}}"><?php 
             $tassomedio = number_format($demodettagli->tassomedio, 2, '.', '');  
             ?>  
             <span class="average"><?php echo $tassomedio; ?></span><?php echo '/'.$demodettagli->tassototale;?></div>
-            </div>
+             </div>
+            <div class="starline overall"> 
+          {{ trans('messages.keyword_total_score') }}  </div>
+           
         </div>
 
         <script>     
@@ -270,8 +288,7 @@ span.round-tab:hover {
 
         </script>
 
-          <div class="starline overall"> 
-          {{ trans('messages.keyword_total_score') }}  </div>
+          
         </div>
       </div>                  
     </div>

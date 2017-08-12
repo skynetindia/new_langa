@@ -30,17 +30,17 @@ th {
 </div>
 <div class="row">
 <div class="col-md-12 col-sm-12 col-xs-12">                            
-    <div class="col-md-4 col-sm-12 col-xs-12">
+    <div class="col-md-4 col-sm-4 col-xs-4">
         <h5 style="color: #0002fb">{{trans('messages.keyword_confirmed')}} </h5> 
         <h1 style="color: #0002fb"><?php  echo array_sum($statistics['confirm']); ?><b> € </b></h1> 
         <span style="color: #0002fb">+3% </span>  From last week 
     </div>                                                         
-    <div class="col-md-4 col-sm-12 col-xs-12">
+    <div class="col-md-4 col-sm-4 col-xs-4">
         <h5 style="color: #fafe02">{{trans('messages.keyword_pending_confirmation')}}</h5> 
         <h1 style="color: #fafe02"><?php echo array_sum($statistics['pendingconfirm']); ?> <b> € </b> </h1>
         <span style="color: #fafe02"> +3% </span>  From last week 
     </div>
-    <div class="col-md-4 col-sm-12 col-xs-12">                                                        
+    <div class="col-md-4 col-sm-4 col-xs-4">                                                        
         <h5 style="color: #000000">{{trans('messages.keyword_non_confirmed')}}</h5>
         <h1 style="color: #000000"><?php echo array_sum($statistics['notconfirm']); ?> <b> € </b> </h1>
         <span style="color: #000000"> +3% </span>  From last week 

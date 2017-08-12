@@ -54,15 +54,15 @@
   <?php /*<div class="col-md-12">
       <h1>{{trans('messages.keyword_addproject')}}</h1><hr>
   </div>*/?>
-  <div class="col-md-8">
+  <div class="col-md-8 col-sm-12 col-xs-12">
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-md-4 col-sm-12 col-xs-12">
         <div class="form-group">
               <label for="preventivo">{{trans('messages.keyword_n_project')}}</label>
         <input type="text" disabled value=":{{trans('messages.keyword_cod_/_year')}}" class="form-control">
                 </div>
     </div>
-    <div class="col-md-8">
+    <div class="col-md-8 col-sm-12 col-xs-12">
           <div class="form-group project-name">
       <label for="prev">{{trans('messages.keyword_linktoquote')}}</label>
         <select class="js-example-basic-multiple form-control" id="prev">
@@ -90,7 +90,7 @@
     </div>
   </div>
       <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-8 col-sm-12 col-xs-12">
           <div class="form-group">
       <label for="nomeprogetto">{{trans('messages.keyword_projectname')}}</label>
       <input value="{{ old('nomeprogetto') }}" class="form-control required-input" type="text" name="nomeprogetto" id="nomeprogetto" placeholder="{{trans('messages.keyword_projectname')}}">
@@ -447,7 +447,7 @@
           </table>
       </div></div>
           <div class="row">
-      <div class="col-md-2"><br>
+      <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-desktop"><br>
         <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
       </div>
           </div>
@@ -484,7 +484,7 @@
                 </div>
             </div>
         </div>
-  <div class="col-md-4">
+  <div class="col-md-4 col-sm-12 col-xs-12">
   <div class="form-group">
     <label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
     <select name="statoemotivo" class="form-control" id="statoemotivo">
@@ -505,13 +505,13 @@
    
     
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 col-sm-12 col-xs-12">
           <div class="form-group">
               <label for="tempo">{{trans('messages.keyword_starttime')}}</label>   
                 <input value="" class="form-control" type="text" name="datainizio" id="datainizio" placeholder="{{trans('messages.keyword_starttime')}}">
              </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 col-sm-12 col-xs-12">
           <div class="form-group">
               <label for="preventivo">{{trans('messages.keyword_endtime')}}</label>
                 <input value="" class="form-control" type="text" name="datafine" id="datafine" placeholder="{{trans('messages.keyword_endtime')}}">
@@ -545,7 +545,7 @@
     </script>        
       <!-- Stato emotivo -->
           <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-12 col-sm-12 col-xs-12">
         <label for="preventivo">{{trans('messages.keyword_sensitivedata')}}:</label><br>
           <a class="btn btn-warning" id="aggiungiNote"><i class="fa fa-plus"></i></a>
           <a class="btn btn-danger"  id="eliminaNote"><i class="fa fa-trash"></i></a>
@@ -812,6 +812,8 @@
       </script>
 
   </div> 
+  
+  
 
   <br>
         <!-- <label for="datisensibili">Dati sensibili</label><br>
@@ -1125,9 +1127,9 @@
         <?php echo Form::close(); ?>        
     
       
-        <div class="pull-right col-md-4">
+        <div class="pull-right col-md-4 col-sm-12 col-xs-12">
            <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-12 col-sm-12 col-xs-12">
       <div class="bg-white image-upload-box">
            
            <div class="form-group">
@@ -1227,7 +1229,13 @@
           </div>
           </div>
         </div>
-        </div>        
+        </div>   
+        
+        <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-mobile">
+        <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+      </div>
+        
+             
 <!--    </div>
   </div> -->
 </div></div><!-- /row -->

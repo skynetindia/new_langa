@@ -39,7 +39,7 @@ th {
         @if($key > 5)
             <?php break;?>
         @endif
-    <div class="col-md-2 col-xs-12">    
+    <div class="col-md-2 col-sm-2 col-xs-2">    
         <h5>{{$forecastdayVal['date']['weekday_short']}}</h5>
         <h5>{{$forecastdayVal['high']['celsius'].'°'}}</h5>
         <img src="{{$forecastdayVal['icon_url']}}">

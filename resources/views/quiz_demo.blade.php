@@ -18,38 +18,39 @@
 </script>
 <?php //$lavorazioni = DB::table('lavorazioni')->where('departments_id', $departments->id)->get(); ?>
 <fieldset>
-  <div class="row">
+<div class="quiz-demo">
+  <div class="row quiz-top-section">
     <form action="{{url('/admin/quizdemonew')}}" method="post" name="quizdemoadd" id="quizdemoadd" enctype="multipart/form-data">
-      <div class="col-md-12">
+      <div class="col-md-12 col-sm-12 col-xs-12">
         <legend>{{trans("messages.keyword_quiz")}}</legend>
       </div>
       <div class="space20"></div>
       {{ csrf_field() }}
-      <div class="col-sm-4">
+      <div class="col-md-4 col-sm-12 col-xs-12">
         <div class="form-group">
           <label>&nbsp; </label>
           <input type="text" class="form-control" name="name" id="name" value="{{old('name')}}" placeholder="{{trans("messages.keyword_name")}}">
         </div>
       </div>
-      <div class="col-sm-4">
+      <div class="col-md-4 col-sm-12 col-xs-12">
         <div class="form-group">
           <label>&nbsp;</label>
           <input type="url" class="form-control" name="url" value="{{old('url')}}" placeholder="{{trans("messages.keyword_url")}}">
         </div>
       </div>
-      <div class="col-sm-4">
+      <div class="col-md-4 col-sm-12 col-xs-12">
       <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-10 col-sm-10 col-xs-10">
           <div class="form-group">
             <label>{{trans("messages.keyword_highlighted_image")}}</label>
             <input type="file" class="form-control" id="immagine" name="immagine">
             <label for="immagine" generated="true" class="error none" id="immagine_validatio_msg"></label>          
           </div>
           </div>
-        <div class="col-md-2 immaginepreview" id="immaginepreview"></div>
+        <div class="col-md-2 col-sm-2 col-xs-2 immaginepreview" id="immaginepreview"></div>
       </div>
       </div>
-      <div class="col-md-12 text-right">
+      <div class="col-md-12 col-sm-12 col-xs-12 text-right text-left-767">
         <div class="form-group">
           <input type="submit" class="btn btn-primary" value="{{trans("messages.keyword_add")}}">
         </div>
@@ -58,9 +59,9 @@
   </div>
   @if(count($quizdemodettagli) > 0)
   <h4>{{trans("messages.keyword_edit_types")}}</h4>
-  <div class="row alltaxationeditparts">
+  <div class="row alltaxationeditparts quiz-edit-type">
   <div class="col-md-6">
-  <div class="form-group m_select">
+  <div class="form-group m_select lblshow">
     <input id="chktasentitypeall" name="chktasentitypeall" value="1" type="checkbox">
      <label for="chktasentitypeall"> Select All </label>
   </div>
@@ -70,10 +71,10 @@
     <input type="button" onclick="AllTaxonomiesAction('delete')" class="btn btn-danger" value="{{trans('messages.keyword_delete_selected')}}">
   </div>
   </div>
-  <form action="{{url('/admin/quizdemoupdate')}}" name="quizdemoedit" id="quizdemoedit" method="post" enctype="multipart/form-data">
+  <form action="{{url('/admin/quizdemoupdate')}}" name="quizdemoedit" id="quizdemoedit" method="post" enctype="multipart/form-data" class="quiz-form">
   <input type="hidden" id="actiontype" name="action" value="update">
   <div class="table-responsive">
-    <table class="table table-striped text-right">
+    <table class="table table-striped text-right checkbox-tbl">
     	<tr>
       @foreach($quizdemodettagli as $quizdemodettagli)
       <tr>
@@ -85,14 +86,14 @@
                 <input type="checkbox" class="form-control chktasentitype" name="chktasentitype[{{$quizdemodettagli->id}}]" id="chktasentitype_{{$quizdemodettagli->id}}" value="{{$quizdemodettagli->id}}">
                 <label for="chktasentitype_{{$quizdemodettagli->id}}"></label></td>
 
-                <td width="20%"><label>&nbsp; </label>
+                <td width="20%"> <!--<label>&nbsp; </label>-->
                   <input type="text" class="form-control" name="name[{{$quizdemodettagli->id}}]" id="name" value="{{$quizdemodettagli->nome}}"></td>
-                <td width="20%"><label> &nbsp; </label>
+                <td width="20%"> <!-- <label> &nbsp; </label>-->
                   <input type="url" class="form-control" name="url[{{$quizdemodettagli->id}}]" value="{{$quizdemodettagli->url}}"></td>
                 <td width="20%">
-                  <div class="row">
+                  <div class="row im-previews-quiz">
                     <div class="col-md-10">
-                      <label class="pull-left">{{trans("messages.keyword_highlighted_image")}}</label>
+                    <!--  <label class="pull-left">{{trans("messages.keyword_highlighted_image")}}</label>-->
                       <input type="file" class="form-control editimage" val="{{$quizdemodettagli->id}}" id="immagine_{{$quizdemodettagli->id}}" name="immagine[{{$quizdemodettagli->id}}]">
                        <label for="immagine_{{$quizdemodettagli->id}}" generated="true" class="error none" id="immagine_validatio_msg_{{$quizdemodettagli->id}}"></label>          
                     </div>
@@ -100,7 +101,7 @@
                       <div class="img-border-preview"><?php if(isset($quizdemodettagli->immagine) && !empty($quizdemodettagli->immagine)) { ?> <img src="{{url('/storage/app/images/quizdemo/').'/'.$quizdemodettagli->immagine}}" height="100" width="100" class="img-responsive"><?php } ?> </div></div>
                   </div>
                   </td>
-                  <td width="10%"><label class="pull-left">{{trans('messages.keyword_average_rating')}}</label>
+                  <td width="10%"> <!--<label class="pull-left">{{trans('messages.keyword_average_rating')}}</label>-->
                   <input type="text" class="form-control" id="rate" readonly value="{{$quizdemodettagli->tassomedio.'/'.$quizdemodettagli->tassototale }}"></td><?php
                     // ON ACTIVE THIS REMOVE HIDDEN COLOR INPUT TYPE
                     /* <div class="col-xs-6 col-sm-3">
@@ -124,6 +125,7 @@
   </div>
   </form>
   @endif
+  </div>
 </fieldset>
 <div class="footer-svg">
     <img src="{{url('/images/ADMIN_QUIZ-footer.svg')}}" alt="quiz">

@@ -58,7 +58,8 @@ class QuoteController extends Controller
 		
 		foreach($preventivi as $prev) {
 			$id = $prev->id;
-			$prev->id = ':' . $prev->id . '/' . $prev->anno;
+			$yearid=(isset($prev->anno) && $prev->anno!=0)?$prev->anno:date('y');
+			$prev->id = ':' . $prev->id . '/' .$yearid ;
 		
 			$prev->data = str_replace('/', '-', $prev->data);
 			$prev->valenza = str_replace('/', '-', $prev->valenza);
@@ -183,6 +184,7 @@ class QuoteController extends Controller
 	
 	public function getJsonMyestimates(Request $request)
 	{
+		$particpantid=check_participant();
 		if($request->user()->id == 0) {
 			$preventivi = DB::table('quotes')
 			->where('is_deleted', 0)
@@ -196,11 +198,10 @@ class QuoteController extends Controller
 				->get();
 			$id = $request->user()->id;
 			foreach($preventivi as $prev) {
-				if($prev->user_id == $id ||
-				   $prev->idutente == $id)
+				if($prev->user_id == $id || $prev->idutente == $id ||in_array($prev->idente,$particpantid))
 				   $to_return[] = $prev;
+				   
 			}
-				
 			$this->completeListCode($to_return);
 			return json_encode($to_return);
 		}
@@ -227,6 +228,7 @@ class QuoteController extends Controller
 	
 	public function myestimates(Request $request)
 	{
+		//is_array(check_participant());
 		if(!checkpermission($this->module, $this->sub_id, 'lettura')){
     		return redirect('/unauthorized');
     	}

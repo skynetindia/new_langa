@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use DB;
+use Storage;
 use Validator;
 use Redirect;
 use Session;
@@ -13,7 +14,9 @@ class CommonController extends Controller
 {   
 
 	public function __construct(Request $request){ 
+	if (!Session::has('reg_user_id')) {
         $this->middleware('auth');
+	}
     }
 
     public function downloadcsv(Request $request)
@@ -190,15 +193,47 @@ class CommonController extends Controller
     }
 
     public function storesteptwo(Request $request)
-    {        
-        $user = DB::table('users')
-            ->where('id', $request->user_id)
-            ->update( array( 'dipartimento' => $request->role ));
-        $user_id = $request->user_id;
+    {   
+		$user_id = $request->user_id;
+		$user = DB::table('users')->where('id', $user_id)->first();
+		$enti=DB::table('corporations')->where('user_id',$request->user_id)->first();
+		if(isset($enti->id))
+		{
+			$entid =$enti->id;
+			 DB::table('corporations')->where('id',$entid)
+           			 ->update(['nomeazienda'=> $request->company,
+							'indirizzo'=>$request->address,
+							'settore'=>$request->sector,
+							'telefonoazienda'=>$request->phone,
+							'user_id'=>$user_id,
+							'user_id'=>$user_id,
+							'nomereferente'=>$user->name,
+							'email'=>$user->email,
+							'updated_at'=>date("Y-m-d H:i:s")
+						]);
+		}
+		else
+		{
+        	$entid = DB::table('corporations')
+           			 ->insertGetId(['nomeazienda'=> $request->company,
+							'indirizzo'=>$request->address,
+							'settore'=>$request->sector,
+							'telefonoazienda'=>$request->phone,
+							'user_id'=>$user_id,
+							'created_at'=>date("Y-m-d H:i:s"),
+							'updated_at'=>date("Y-m-d H:i:s")
+						]);
+		}
+      
 
-        if($user) { 
-            $user = DB::table('users')->where('id', $user_id)->first();
-            return json_encode($user); 
+        if($entid) { 
+            $user = DB::table('users')->where('id', $user_id)
+			->update(['cellulare'=>$request->phone,
+					  'id_ente'=>$entid,
+					  'updated_at'=>date("Y-m-d H:i:s")
+					])
+			;
+           
         }
         return 'true';
     }
@@ -209,22 +244,36 @@ class CommonController extends Controller
 		if (Session::has('reg_user_id')) {
 			$reg_user_id = Session::get('reg_user_id');
 			$reg_user =  DB::table('users')->where('id', $reg_user_id)->first();
+			 $role = DB::table('ruolo_utente')
+            ->where('is_delete', '=', 0)
+			 ->where('ruolo_id', '!=', 13)
+			 ->where('ruolo_id','!=', '0')
+            ->get();
+			 $departments = DB::table('departments')->get();
 		}
-		return  view("auth.register-second",["reg_user"=>$reg_user]);
+		
+		return  view("auth.register-second",["reg_user"=>$reg_user,'role'=>$role,'departments'=>$departments]);
 
 	}
 
     public function storestepthree(Request $request)
     {
+		$user_id = $request->user_id;
+		$user = DB::table('users')->where('id', $user_id)->first();
+		$enti=DB::table('corporations')->where('user_id',$request->user_id)->first();
         $user = DB::table('users')
-            ->where('id', $request->user_id_three)
+            ->where('id', $request->user_id)
             ->update( array( 
-                'id_citta' => $request->city, 
-                'id_stato' => $request->state,
+                'dipartimento' => $request->profile, 
+                 'updated_at'=>date("Y-m-d H:i:s")
             ));
-
-       $user_id = $request->user_id_three;
-
+		if($request->profile==13)	
+		 $user = DB::table('corporations')
+            ->where('id', $enti->id)
+            ->update( array( 
+                'id_cliente' => $request->user_id, 
+                 'updated_at'=>date("Y-m-d H:i:s")
+            ));
         if($user) { 
             $user = DB::table('users')->where('id', $user_id)->first();
             return json_encode($user); 
@@ -250,9 +299,164 @@ class CommonController extends Controller
         }
         return 'true';
     }
+	
+	public function stepclient(Request $request)
+	{
+		$user_id = $request->user_id;
+		 $user = DB::table('users')
+            ->where('id', $request->user_id)
+            ->update( array( 
+                'department' => $request->depart, 
+                'package' => $request->package,
+              	'description'=>$request->description
+            ));
+
+
+        if($user) { 
+            $user = DB::table('users')->where('id', $user_id)->first();
+            return json_encode($user); 
+        }
+        return 'true';
+	}
+	public function stepother(Request $request)
+	{
+		$user_id = $request->user_id;
+		 $user = DB::table('users')
+            ->where('id', $request->user_id)
+            ->update( array( 
+                'location' => $request->location, 
+               
+              	'description'=>$request->description
+            ));
+
+
+        if($user) { 
+            $user = DB::table('users')->where('id', $user_id)->first();
+            return json_encode($user); 
+        }
+        return 'true';
+	}
+
+    /*Media File upload on registration steps */
+    public function fileupload(Request $request){       
+        Storage::put(
+                'images/user/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
+        );
+
+        $filename = $request->file('file')->getClientOriginalName();    
+        $user_id = $request->user_id;
+        $userDetails = DB::table('users')->where('id', $user_id)->first();
+        $user = DB::table('users')->where('id', $request->user_id)->update( array('media' => $filename));
+        if($user) { 
+            $user = DB::table('users')->where('id', $user_id)->first();
+            DB::table('media_files')->insert([
+            'name' => $filename,
+            'code' => isset($request->code) ? $request->code : "",
+            'master_type' => 5,
+            'type'=>$userDetails->dipartimento,
+            'master_id' => $user_id,
+            'date_time'=>time()
+            ]);                 
+            //$user = DB::table('users')->where('id', $user_id)->first();
+            //return json_encode($user); 
+        }
+    }
+        
+    public function fileget(Request $request){  
+        DB::enableQueryLog();
+        /*if(isset($request->quote_id)){
+            //$updateData = DB::table('media_files')->where('quote_id',$request->quote_id)->get();                                  
+            $query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0'";
+        
+            $userprofileid = $request->user()->dipartimento;
+            $Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
+            $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+                
+            if(isset($request->term) && $request->term != ""){
+                $where = ($request->user()->id === 0 || $type === 'SupperAdmin') ? "" : " AND find_in_set('$userprofileid',type) <> 0";
+                $query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0' $where  AND (title LIKE '%$request->term%' OR  description LIKE '%$request->term%')";
+            }           
+            $updateData = DB::select($query);
+        }
+        else {
+            $query = "SELECT * FROM media_files WHERE code=$request->code";     
+            $updateData = DB::select($query);          
+        }*/
+        $updateData = DB::table('media_files')->where(['master_id'=>$request->user_id,'master_type'=>5])->get();          
+         $userDetails = DB::table('users')->where('id', $request->user_id)->first();                                       
+        foreach($updateData as $prev) {
+            $imagPath = url('/storage/app/images/user/'.$prev->name);
+            $downloadlink = url('/storage/app/images/user/'.$prev->name);
+            $filename = $prev->name;            
+            $arrcurrentextension = explode(".", $filename);
+            $extention = end($arrcurrentextension);                            
+            $arrextension['docx'] = 'docx-file.jpg';
+            $arrextension['pdf'] = 'pdf-file.jpg';
+            $arrextension['xlsx'] = 'excel.jpg';
+            if(isset($arrextension[$extention])){
+                $imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);          
+            }
+            $titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";            
+            $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+
+            $html .='<tr class="quoteFile_'.$prev->id.'"><td>';
+            $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->where('nome_ruolo','!=','SupperAdmin')->get();                            
+            foreach($utente_file as $key => $val){
+                if($userDetails->dipartimento == $val->ruolo_id){
+                    $response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));      
+                    $specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
+                }
+                else {
+                    $check = '';
+                    $array = explode(',', $prev->type);
+                    if(in_array($val->ruolo_id,$array)){                    
+                        $check = 'checked';
+                    }
+                    $specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" '.$check.' id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
+                }
+            }
+            echo $html .='</td></tr>';
+        }
+        exit;           
+    }
+
+    public function filedelete(Request $request) {       
+        $response = DB::table('media_files')->where('id', $request->id)->delete();
+        echo ($response) ? 'success' :'fail';                   
+        exit;
+    }
+
+    public function filetypeupdate(Request $request){        
+        $request->ids = isset($request->ids) ? implode(",",$request->ids) : "";
+        $response = DB::table('media_files')->where('id', $request->fileid)->update(array('type' => $request->ids));        
+        echo ($response) ? 'success' :'fail';                   
+        exit;
+    }
+
 
     // show add alert form
-    public function addalert(Request $request)
+   /* public function addadminalert(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {            
+            return view('s.alertmail', [
+                'enti' => DB::table('corporations')
+					->where('is_deleted', '=', 0)
+                    ->get(),
+                'role_type' => DB::table('ruolo_utente')
+                    ->where('is_delete', '=', 0)
+                    ->get(),
+                'alert_type' => DB::table('alert_tipo')
+                    ->get(),
+            ]);
+        }
+    }*/
+	 public function addalert(Request $request)
     {
         /*if($request->user()->id != 0) {
             return redirect('/unauthorized');
@@ -305,7 +509,7 @@ class CommonController extends Controller
             ]);
         /*}*/
     }
-
+	
     // get alert entity in json format
     public function getalertjson(Request $request)
     {
@@ -318,14 +522,11 @@ class CommonController extends Controller
         }
         return json_encode($allaray);
     }
-	
-	//store alert details
-    public function storeadminalert(Request $request) {
+	 public function storeadminalert(Request $request) {
             $validator = Validator::make($request->all(), [
                 'nome_alert' => 'required',
                 'tipo_alert' => 'required',
-                'ente' => 'required',
-                'ruolo' => 'required',
+                'ente' => 'required',                
                 'messaggio' => ''
             ]);
             if ($validator->fails()) {
@@ -333,8 +534,9 @@ class CommonController extends Controller
                     ->withInput()
                     ->withErrors($validator);
             }            
+            
             $entity = implode(",", $request->input('ente'));
-            $role = implode(",", $request->input('ruolo')); 
+            $role = ($request->input('ruolo') && !empty($request->input('ruolo'))) ? implode(",", $request->input('ruolo')) : 'All'; 
             $today = date("Y-m-d");
             $message = strip_tags($request->messaggio);
             DB::table('alert')->insert([
@@ -373,7 +575,6 @@ class CommonController extends Controller
             }
            	
             foreach ($alert as $value) {
-
             	$user_entity = $request->user()->id_ente;
             	$corporations = DB::table('corporations')
                     ->where('id', $user_entity)->first();
@@ -399,30 +600,13 @@ class CommonController extends Controller
                 $ruolo = explode(",", $value->ruolo);
 
                 foreach ($ente as $ente) {
-
-                    $getente = DB::table('enti_partecipanti')
-                        ->select('id_ente', 'id_user')
-                        ->where('id_ente', $ente)
-                        ->get();
-
-                    foreach ($getente as $getente) {
- 
-                        $getrole = DB::table('users')
-                            ->select('dipartimento')
-                            ->where('id', $getente->id_user)
-                            ->where('is_delete', 0)
-                            ->first();                       	
-
+                    $getente = DB::table('enti_partecipanti')->select('id_ente', 'id_user')->where('id_ente', $ente)->get();
+                    foreach ($getente as $getente) { 
+                        $getrole = DB::table('users')->select('dipartimento')->where('id', $getente->id_user)->where('is_delete', 0)->first(); 
                         if(isset($getrole)) {  
-   
                         	$check = in_array($getrole->dipartimento, $ruolo); 
-
-                        	if($check){
-
-                        	$corporations = DB::table('corporations')
-                                ->where('id', $getente->id_ente)
-                                ->first();  
-
+                        	if($check || $value->ruolo == 'All'){
+                        	$corporations = DB::table('corporations')->where('id', $getente->id_ente)->first();  
                             $store = DB::table('inviare_avviso')->insert([
                                 'id_ente' => $corporations->id,
                                 'user_id' => $getente->id_user,
@@ -435,8 +619,7 @@ class CommonController extends Controller
                                 'responsible_langa' => $corporations->responsabilelanga,
                                 'comment' => '',
                                 'conferma' => 'NON LETTO'
-                                ]);                            
-
+                                ]);
 	                            if($store) {
 	                            	$true = true;     
 	                            }
@@ -462,4 +645,24 @@ class CommonController extends Controller
 	    else
 	    	return "Somthing Went Wrong";
     } 
-	}
+	 
+
+    public function getdepartmentpackage(Request $request){
+        $packagedetails = DB::table('pack')->where('departments_id',$request->departmentid)->get();
+        $html = "";
+        foreach ($packagedetails as $key => $value) {
+            $imageurl = url('storage/app/images/'.$value->icon);
+            $html.='<div class="wrap-shot" onclick="fun_package('.$value->id.')">
+                            <div class="icon-shot"><img src="'.$imageurl.'" alt="Video Shooting" class="img-responsive"></div>
+                            <div class="video-shot-content">
+                                <h3>'.$value->code.'</h3>
+                                <p>'.$value->label.'</p>
+                                <p>'.nl2br($value->description).'</p>
+								<input type="hidden" class="hidden-package" value="'.$value->id.'">
+                            </div>
+                        </div>';
+        }
+        return $html;        
+    }
+
+}

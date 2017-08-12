@@ -13,6 +13,7 @@
 <script src="{{ asset('build/js/bootstrap-table.min.js') }}"></script>
 <script src="{{ asset('build/js/bootstrap-table-it-IT.min.js') }}"></script>
 
+<div class="my-ticket-tbl">
 <div class="main-blade">
     <div class="header-right">
         <div class="float-left">      
@@ -33,7 +34,7 @@
 </div>
 </div>
 
-<div class="clearfix"></div>
+<div class="clearfix"></div> <div class="space30"></div>
 <div class="panel panel-default">
 	<div class="panel-body">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/tickets/json');?>" data-classes="table table-bordered" id="table">
@@ -48,7 +49,7 @@
     </table>
     </div>
 </div>
-    
+ </div>   
 
 <script>
 

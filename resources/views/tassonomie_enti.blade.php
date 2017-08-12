@@ -171,7 +171,7 @@ function addremoveclass(){
 <h4>{{trans('messages.keyword_edit_emotional_state')}}</h4>
 <div class="row alltaxationeditparts">
   <div class="col-md-6">
-  <div class="form-group m_select">
+  <div class="form-group m_select lblshow">
     <input id="chktasentiemotionall" name="chktasentiemotionall" value="1" type="checkbox">
     <label for="chktasentiemotionall"> Select All </label>
   </div>
@@ -184,7 +184,7 @@ function addremoveclass(){
 <form action="{{url('/admin/tassonomie/aggiornastatiemotivi')}}" method="post" id="frmentiemotionedit">
 <input type="hidden" id="actionEmotional" name="action" value="update">
  <div class="table-responsive">
-    <table class="table table-striped table-bordered text-right">
+    <table class="table table-striped table-bordered text-right checkbox-tbl">
       @foreach($emotional_states_types as $emostatetye)
       <tr>
         <td>

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
+use App\Traits\CaptchaTrait;
 use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -23,7 +23,7 @@ class RegisterController extends Controller
     |
     */
 
-    use RegistersUsers;
+    use RegistersUsers,CaptchaTrait;
 
     /**
      * Where to redirect users after registration.
@@ -51,16 +51,22 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {   
         $reg_user_id = Session::get('reg_user_id');
-
+		 $data['captcha'] = $this->captchaCheck();
         if(isset($reg_user_id)){
             return Validator::make($data, [
                 'email' => 'required|string|email|max:255|unique:users,email,'.$reg_user_id,
-                'password' => 'required|string|min:6'
+				'username' => 'required|string|max:255|unique:users,username,'.$reg_user_id,
+                'password' => 'required|string|min:6',
+				'g-recaptcha-response'  => 'required',
+                'captcha'               => 'required|min:1'
             ]);
         } else {
             return Validator::make($data, [
                 'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:6'
+				'username' => 'required|string|max:255|unique:users',
+                'password' => 'required|string|min:6',
+				 'g-recaptcha-response' => 'required',
+                'captcha'              => 'required|min:1'
             ]);
         }
     }
@@ -72,24 +78,27 @@ class RegisterController extends Controller
      * @return User
      */
     protected function create(array $data)
-    {   
-        $name = $data['firstname'] . $data['lastname'];
-
+    { 
+        $name = $data['firstname'] .' ' .$data['lastname'];
+		
         $reg_user_id = Session::get('reg_user_id');
 
         if(isset($reg_user_id)){
-            $user = DB::table('users')->where('id', $reg_user_id)->update(array(
+            $user = DB::table('users')->where('id', $reg_user_id)->update([
                 'name' => isset($name) ? $name : '',
                 'email' => isset($data['email']) ? $data['email'] : '',
+				 'username' => (isset($data['username'])) ? $data['username'] : '',
                 'password' => bcrypt($data['password'])
-            ));
-
-            return $user;
+            ]);
+			$user=DB::table('users')->where('id', $reg_user_id)->first();
+			
+           return json_encode($user);
             
         } else {
             $user =  User::create([
-            'name' => isset($name) ? $name : '',
-            'email' => isset($data['email']) ? $data['email'] : '',
+            'name' => (isset($name)) ? $name : '',
+            'email' => (isset($data['email']))? $data['email'] : '',
+			 'username' => (isset($data['username'])) ? $data['username'] : '',
             'password' => bcrypt($data['password'])
             ]);
 
@@ -101,7 +110,8 @@ class RegisterController extends Controller
             //     $m->to($email)->subject('RICHIESTA CONFERMA REGISTRAZIONE UTENTE_Easy LANGA');
             // });
 
-            Session::put('reg_user_id', $user->id);    
+            Session::put('reg_user_id', $user->id);  
+			  
             return json_encode($user);
         }
     }

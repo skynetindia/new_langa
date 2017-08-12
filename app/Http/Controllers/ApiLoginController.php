@@ -13,6 +13,7 @@ use DB;
 use Storage;
 use Auth;
 use App\Event;
+use App;
 
 /*class Cestino {
 
@@ -74,9 +75,12 @@ class ApiLoginController extends Controller {
     	$this->request_param = json_encode($request->all());
 		if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'is_delete' => 0, 'is_active'=>0])) {
 			$api_token = str_random(60);
-			$update = DB::table('users')->where('email', $request->email)->update(array('api_token' => $api_token));
+			$update = DB::table('users')->where('email', $request->email)->update(array('api_token' => $api_token,'language_id'=>$request->language_id));
 			$userDetails = DB::table('users')->where('email', $request->email)->first();
 			$respo = array('result' => $userDetails,'status'=>'success');
+            $logs = $userDetails->name.' login successfully from App (UserID: '.$userDetails->id.' )';
+            storelogs($userDetails->id, $logs);     
+
 			$this->responde_param = json_encode($respo);
 			$this->storerequestresponse();
 			return response()->json($respo);
@@ -85,10 +89,58 @@ class ApiLoginController extends Controller {
 			$respo = array('result' => 'These credentials do not match our records.','status'=>'fail');
 			$this->responde_param = json_encode($respo);
 			$this->storerequestresponse();
-		   return response()->json(['result' => 'These credentials do not match our records.','status'=>'fail']);
+		    return response()->json(['result' => 'These credentials do not match our records.','status'=>'fail']);
 		}    	
     }
-	
+
+    public function sociallogin(Request $request) {
+        $input = $request->all();       
+        $this->request_param = json_encode($request->all());
+        $userDetails = DB::table('users')->where(['email'=>$request->email,'social_id'=>$request->social_id])->first();
+        if(count($userDetails) > 0) {
+            $respo = array('result' => $userDetails,'status'=>'success','isnew'=>'0');
+            $logs = $userDetails->name.' login successfully from App Social (UserID: '.$userDetails->id.' )';
+            storelogs($userDetails->id, $logs);     
+        }
+        else {
+            $userDetails =  User::create([
+            'name' => isset($request->name) ? $request->name : '',
+            'email' => isset($request->email) ? $request->email : '',
+            'social_id' => $request->social_id,
+            'social_type'=> $request->social_type            
+            ]);           
+            $userDetails = DB::table('users')->where(['email'=>$userDetails->email,'social_id'=>$userDetails->social_id])->first();
+            $respo = array('result' => $userDetails,'status'=>'success','isnew'=>'1');
+            $logs = $userDetails->name.' Register successfully from App Social (UserID: '.$userDetails->id.')';
+            storelogs($userDetails->id, $logs);     
+
+        }
+
+        if (Auth::loginUsingId($userDetails->id)) {
+            $api_token = str_random(60);
+            $update = DB::table('users')->where('email', $request->email)->update(array('api_token' => $api_token,'language_id'=>$request->language_id));            
+            $this->responde_param = json_encode($respo);
+            $this->storerequestresponse();
+            return response()->json($respo);
+        }
+        else {
+            $respo = array('result' => 'These credentials do not match our records.','status'=>'fail');
+            $this->responde_param = json_encode($respo);
+            $this->storerequestresponse();
+            return response()->json(['result' => 'These credentials do not match our records.','status'=>'fail']);
+        }       
+    }
+        
+    /* After Login must call web this for create as session in webview  */
+    public function makesessionwebview(Request $request){
+        $user = DB::table('users')->where('id', $request->userid)->first();
+        $request->session()->put('isAdmin', 1);
+        //$request->session()->put('adminID', Auth::id());
+                
+        if (Auth::loginUsingId($user->id)) {
+            return redirect('api/dashboard/entity/'.$user->id);
+        }
+	}
 	
     public function registerstepone(Request $request){
     	/*if(isset($reg_user_id)){
@@ -126,7 +178,6 @@ class ApiLoginController extends Controller {
 			$this->responde_param = json_encode($respo);
 			$this->storerequestresponse();
          	return response()->json($respo);
-
 		
     	/*if(isset($reg_user_id)) {
             $user = DB::table('users')->where('id', $reg_user_id)->update(array(
@@ -154,7 +205,7 @@ class ApiLoginController extends Controller {
         }*/
     }
 
-    /*This is for the entity create of user */
+    /*This is for the entity create of user that store the user type(ie. in next step) like Clients, Resellers.... */
     public function registersteptwo(Request $request){
  		$validator = Validator::make($request->all(), [
                     'phone' => 'required|max:25',                                        
@@ -169,15 +220,16 @@ class ApiLoginController extends Controller {
 			$this->responde_param = json_encode($respo);
 			$this->storerequestresponse();
             return response()->json($respo);
-        }		
-		$userdetails = DB::table('users')->where('id', $request->userid)->first();		
+        }				
 
-		if(isset($request->usertype)){
+		if(isset($request->usertype)) {
 			$res = DB::table('users')->where('id', $request->userid)->update(array('dipartimento' => $request->usertype));
         }
+        $userdetails = DB::table('users')->where('id', $request->userid)->first();      
+
         $arrCorpwhere = array('email'=>$userdetails->email,'user_id'=>$userdetails->id);
 		$entity = DB::table('corporations')->where($arrCorpwhere)->first();		        
-		if(count($entity) > 0){
+		if(count($entity) > 0) {
 			DB::table('corporations')->where('id', $entity->id)->update(
 				array('nomeazienda' => isset($request->companyname) ? $request->companyname : $userdetails->name,            
 	            'settore' => isset($request->sector) ? $request->sector : '',            
@@ -192,8 +244,8 @@ class ApiLoginController extends Controller {
 	            'telefonoazienda' => isset($request->phone) ? $request->phone : '',            
 				'indirizzo' => $request->location,
 				'email' => $userdetails->email,
-				'user_id'=>$userdetails->id,			
-				/*
+				'user_id'=>$userdetails->id,							
+                /*
 				'cellulareazienda' => isset($request->cellulareazienda) ? $request->cellulareazienda : '',
 				'emailsecondaria' => $request->emailsecondaria,
 				'sedelegale' => $request->sedelegale,
@@ -247,10 +299,68 @@ class ApiLoginController extends Controller {
     public function getdepartmentspackage(Request $request) {
     	$this->request_param = json_encode($request->all());            
     	$departmentspack = DB::table('pack')->where(['departments_id'=>$request->department_id])->get()->toArray();
-		$respo = (count($departmentspack) > 0) ? array('result' => $departmentspack,'status'=>'success') : array('result' => array(),'status'=>'fail');
+        $arrPackages = array();
+        foreach ($departmentspack as $module) {            
+            $module->icon = url('storage/app/images/'.$module->icon);
+            $arrPackages[] = $module;
+        }
+		$respo = (count($arrPackages) > 0) ? array('result' => $arrPackages,'status'=>'success') : array('result' => array(),'status'=>'fail');
         $this->responde_param = json_encode($respo);
 		$this->storerequestresponse();
  		return response()->json($respo);
+    }
+
+
+    public function updateclientpackage(Request $request){
+        $validator = Validator::make($request->all(), [
+                    'package_department' => 'required',                                        
+                    'package_id' => 'required',
+                    'userid'=>'required'                    
+                ]);   
+        $this->request_param = json_encode($request->all());            
+        if ($validator->fails()) {
+            //print_r($validator->getMessageBag());                        
+            $respo = array('message'=>json_encode($validator->errors()),'status'=>'fail');
+            $this->responde_param = json_encode($respo);
+            $this->storerequestresponse();
+            return response()->json($respo);
+        }               
+        $arrupdate = array('department' => $request->package_department,'package'=>$request->package_id);
+        $res = DB::table('users')->where('id', $request->userid)->update($arrupdate);
+        $userdetails = DB::table('users')->where('id', $request->userid)->first(); 
+        
+        $respo = array('result' => $userdetails,'status'=>'success');
+        $this->responde_param = json_encode($respo);
+        $this->storerequestresponse();
+        return response()->json($respo);
+    }
+
+     public function registermediaupdate(Request $request){
+        $validator = Validator::make($request->all(), [
+                    'area_interest' => 'required',                                        
+                    'description' => 'required',
+                    'file' => 'required',
+                    'userid'=>'required'                    
+                ]);   
+        $this->request_param = json_encode($request->all());            
+        if ($validator->fails()) {
+            //print_r($validator->getMessageBag());                        
+            $respo = array('message'=>json_encode($validator->errors()),'status'=>'fail');
+            $this->responde_param = json_encode($respo);
+            $this->storerequestresponse();
+            return response()->json($respo);
+        }
+        $nome = time().uniqid().'-usermedia_'.$request->file('file')->getClientOriginalName(); 
+        Storage::put('images/usermedia/' . $nome, file_get_contents($request->file('file')->getRealPath()));               
+        
+        $arrupdate = array('description' => $request->description,'media'=>$nome,'location'=>$request->area_interest);
+        $res = DB::table('users')->where('id', $request->userid)->update($arrupdate);
+        $userdetails = DB::table('users')->where('id', $request->userid)->first(); 
+        
+        $respo = array('result' => $userdetails,'status'=>'success');
+        $this->responde_param = json_encode($respo);
+        $this->storerequestresponse();
+        return response()->json($respo);
     }
 
     /*public function register(Request $request) {        
@@ -267,4 +377,45 @@ class ApiLoginController extends Controller {
 	}
 	
 	
+	 /* This used to get all the languages with icon and details : 25-Jul-2017 */
+	public function getlanguagelist(Request $request) {
+		/*$langcode = isset($request->langcode) ? $request->langcode : 'en';
+		App::setLocale($langcode);*/		
+		$languages = DB::table('languages')->where('is_deleted', 0)->orderBy('id')->get();		
+		$arrResponse = array('result'=>array(),'status'=>'fail');
+		$arrlanguages = array();		
+        foreach ($languages as $languageskey => $languagesval) {
+			$languagesval->icon = url('storage/app/images/languageicon/'.$languagesval->icon);
+			$arrlanguages[] = $languagesval;
+		}		
+		$arrResponse = array('result'=>$arrlanguages,'status'=>'success');
+
+		$this->request_param = json_encode($request->all());
+      	$this->responde_param = json_encode($arrResponse);
+      	$this->storerequestresponse();
+	 	 return response()->json($arrResponse);
+    }
+
+    /* This used to get languages keyword base on the language code : 08-Aug-2017 */
+    public function getlanguagekeywords(Request $request) {
+        /*$langcode = isset($request->langcode) ? $request->langcode : 'en';
+        App::setLocale($langcode);*/ 
+        /*$arrlanguages = array();        
+        foreach ($languages as $languageskey => $languagesval) {
+            $languagesval->icon = url('storage/app/images/languageicon/'.$languagesval->icon);
+            $arrlanguages[] = $languagesval;
+        }*/        
+        $languages = DB::table('language_transalation')->where(['code'=>$request->code,'is_cmspage'=>'0'])->orderBy('id')->get()->toArray();                    
+        $arrResponse = array('result'=>array(),'status'=>'fail');
+        if((count($languages) > 0)){
+           App::setLocale($request->code);
+           $arrResponse = array('result'=>$languages,'status'=>'success');
+        }
+        
+
+        $this->request_param = json_encode($request->all());
+        $this->responde_param = json_encode($arrResponse);
+        $this->storerequestresponse();
+        return response()->json($arrResponse);
+    }		
 }

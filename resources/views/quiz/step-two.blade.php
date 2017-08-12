@@ -18,12 +18,13 @@ document.write(msg);
 <script src="{{ asset('public/scripts/jquery.raty.js') }}"></script>
 <script src="{{ asset('public/scripts/labs.js') }}"></script>
 <link rel="stylesheet" href="{{ asset('public/scripts/jquery.raty.css') }}">
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/base/jquery-ui.css" type="text/css" rel="stylesheet">
  <!-- CSS required for STEP Wizard  -->
 
 
   <!-- HTML Structure -->
 <div class="row quiz-wizard">
-  <div class="col-md-12">
+  <div class="col-md-12 col-sm-12 col-xs-12">
     
     <h1> {{ trans('messages.keyword_quiz') }} </h1>
     <div class="wizard wizard-step-line">
@@ -47,12 +48,14 @@ document.write(msg);
         <div class="step-pane">
           <form role="form" class="text-center">
           <input type="hidden" name="quizid" id="quizid" value="{{ $quizid}}"/>
-            <div class="left-side">            
-				      <div class="height550">
+          <div id="quiz-resize">
+            <div class="left-side" id="left-quiz"> 
+            <div class="selected-demo"><span id="demo-count"><?php if($quizdetail->rate_counter<3)echo 'Minimum 3 Required';?></span></div>           
+				      <div class="height1000">
               <?php $i = 1; ?>
               <div class="row">
                @foreach($quizdemodettagli as $quizdemodettagli)	              
-                <div class="col-md-6">
+                <div class="col-md-6 col-sm-12 col-xs-12">
                   <div class="item-wrapper" onclick="getQuizDetails('<?php echo $quizdemodettagli->id;?>','<?php echo $quizid;?>', this);"> <img  src="{{ URL::to('/storage/app/images/quizdemo/'.$quizdemodettagli->immagine) }}" class="img-responsive getselect" id="select<?php echo $i; ?>" alt="{{ $quizdemodettagli->nome }}">
 
                   <div class="bg-white">
@@ -67,6 +70,10 @@ document.write(msg);
                     </div>
                     <?php $i++; ?>
 				        </div>
+                        <div class="item-name">
+                       {{ $quizdemodettagli->nome }}
+                        </div>
+
 
                   </div>
 
@@ -86,14 +93,15 @@ document.write(msg);
 	             @endforeach                
               </div>
             </div></div>
-            <div class="height550">
+            <div class="height1000" id="right-quiz">
             <div class="right-side" id="right_side">				    
               <?php 
-                if(isset($last_show)){ ?>
+                if(isset($last_show)){  ?>
                   @include('quiz.step-two-details')
                <?php }
               ?>
-          	</div> </div>  
+          	</div> </div> 
+            </div> 
 
 			<div class="clearfix"></div>
           
@@ -108,7 +116,7 @@ document.write(msg);
                 <li><a class="prev-step" id="prev_steptwo"> 
                 {{ trans('messages.keyword_back') }} </a></li>
                 <li id="next-step" class="">
-                <a class="<?php if(!isset($last_show->view_count) || isset($last_show->view_count) && $last_show->view_count < 3) echo 'none';?> next-step" id="step_twonext"> {{ trans('messages.keyword_next') }} </a></li> 
+                <a class="<?php if(!isset($quizdetail->rate_id) || isset($quizdetail->rate_counter) && $quizdetail->rate_counter < 3) echo 'none';?> next-step" id="step_twonext"> {{ trans('messages.keyword_next') }} </a></li> 
               </ul>
               
               <div class="quiz-btn-save">
@@ -205,13 +213,13 @@ document.write(msg);
       currenrUrl = document.location = url+"/stepthree/"+quizid;
   });   
 
-  var total_view = 0;
+  var total_view = {{$quizdetail->rate_counter}};
   var viewedArr = [];
 
   function getQuizDetails( id, quizid, classId ){
-
-    $(".img-responsive").removeClass('getselect');  
-    $(classId).addClass( "getselect" );
+	 $("#right_side").addClass('loading');
+    $(".item-wrapper").removeClass('current');  
+    $(classId).addClass( "getselect current" );
 
 	  var path = '/quiz/getDetails/';
 
@@ -219,15 +227,20 @@ document.write(msg);
         viewedArr.push(id);
         total_view++;
     }
-
+	
 	  $.ajax({
         type:'GET',
         data:{ 'id': id, 'view_count': total_view, 'quizid': quizid },
         url:'{{ url("/quiz/getDetails/") }}',
         success:function( data ){
-
-            $("#right_side").html(data);				            
-
+			
+            $("#right_side").html(data);
+			
+			$('iframe').load(function(){
+				  $("#right_side").removeClass('loading');
+				//alert("iframe is done loading")
+			}).show();				            
+			
     				// if( $.inArray(id, viewedArr) == -1 ){
       		// 			viewedArr.push(id);
       		// 			total_view++;
@@ -235,8 +248,10 @@ document.write(msg);
             // var detail_id = $("#detail_id").val();
 				    // alert(detail_id);
     				if(total_view >= 3){
+						$('#demo-count').text('');
     					// $("#next-step").show();
               $("#step_twonext").css("display", "inline");
+			  
     				}     
         }
     });
@@ -279,7 +294,44 @@ document.write(msg);
   }
   
   </script>
+  
+     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+var $jp = jQuery.noConflict();
+$jp(document).ready(function() {
 
+// init
+
+
+var containerWidth = $jp("#quiz-resize").width();
+if($jp(window).width()>991){
+    $jp("#left-quiz").resizable({
+      handles: 'e',
+      maxWidth: containerWidth-320,
+      minWidth: 320,
+      resize: function(event, ui){
+          var currentWidth = ui.size.width;
+         // alert(currentWidth);
+          // this accounts for padding in the panels + 
+          // borders, you could calculate this using jQuery
+          var padding = 40; 
+          
+          // this accounts for some lag in the ui.size value, if you take this away 
+          // you'll get some instable behaviour
+          $jp(this).width(currentWidth-padding);
+          console.log(currentWidth,'width');
+		  console.log(containerWidth - (currentWidth + padding),'left');
+          // set the content panel width
+          $jp("#right-quiz").width(containerWidth - (currentWidth + padding));
+		   //alert($jp("#right-resize").width(containerWidth - currentWidth - padding));            
+      }
+	});
+}
+
+
+});
+</script>
 
 
 

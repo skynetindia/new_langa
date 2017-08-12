@@ -96,12 +96,13 @@ else {
 <script type="text/javascript">var $j = jQuery.noConflict();</script>
 @if($action == 'edit')
   <div class="row">
-	<div class="col-md-12 tpbtm10">
+	<div class="col-md-12 col-sm-12 col-xs-12 tpbtm10">
 		<h4>{{trans('messages.keyword_note')}} ({{trans('messages.keyword_conversations')}}, {{trans('messages.keyword_costs')}}, {{trans('messages.keyword_notes')}},..)</h4>
 		@if(checkpermission('1', '12', 'scrittura','true'))
 		<a id="creaNuovaChiamata" class="btn btn-warning" name="create" title="{{trans('messages.keyword_create_new')}}"><i class="fa fa-plus"></i></a>
 		<a class="btn btn-danger" id="removeNote"  name="remove" title="{{trans('messages.keyword_delete_label')}}"><i class="fa fa-trash"></i></a>
 		@endif
+        <div class="table-responsive">
 		<div class="table-editable tpbtm10 set-height350">
 			<table class="table table-striped table-bordered note_conversations">
 			<thead>
@@ -211,6 +212,7 @@ else {
 				</tbody>
 			</table>
 		</div>
+        </div>
 		<script>		
 		$j('#removeNote').on("click", function() {
 			$j('.selezione_note:checked').parents("tr").remove();
@@ -332,7 +334,7 @@ else {
 	<!-- fine chiamata -->
 	<!-- colonna a sinistra -->
   <div class="row">
-	<div class="col-md-6">
+	<div class="col-md-6 col-sm-12 col-xs-12">
     	<div class="form-group">
 		<label for="nomeazienda">{{trans('messages.keyword_company_name')}}</label>
 		<input value="{{ isset($corp->nomeazienda) ? $corp->nomeazienda : old('nomeazienda')}}" maxlength="35" class="form-control required-input" type="text" name="nomeazienda" id="nomeazienda" placeholder="{{trans('messages.keyword_company_name')}}">
@@ -367,7 +369,7 @@ else {
 		</script>
         </div>
 	</div>
-     <div class="col-md-6">
+     <div class="col-md-6 col-sm-12 col-xs-12">
 	<div class=""><div class=""><label>{{trans('messages.keyword_address')}} </label></div>
 	 <input value="{{ isset($corp->indirizzo) ? $corp->indirizzo : old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls required-input" type="text"
         placeholder="{{trans('messages.keyword_enter_an_address')}} (*)">
@@ -390,7 +392,7 @@ else {
 	<!-- colonna centrale -->
 	@if($action=='edit')
     <div class="row">
-	<div class="col-md-6">
+	<div class="col-md-6 col-sm-12 col-xs-12">
 		<div class="form-group">
 		<label for="cellulareazienda">{{trans('messages.keyword_secondary_telephone')}} </label>
 		<input value="{{isset($corp->cellulareazienda) ? $corp->cellulareazienda : ""}}" class="form-control" maxlength="15" type="text" name="cellulareazienda" id="cellulareazienda" placeholder="{{trans('messages.keyword_secondary_telephone')}}">
@@ -431,7 +433,7 @@ else {
 		</script>		
 	</div>
 	<!-- colonna a destra -->
-	<div class="col-md-6">
+	<div class="col-md-6 col-sm-12 col-xs-12">
 		<div class="form-group">
 		<label for="piva">{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}</label>
 		<input value="{{isset($corp->piva) ? $corp->piva : ""}}" class="form-control" type="text" name="piva" id="piva" placeholder="{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}">
@@ -477,14 +479,14 @@ else {
 	}
 	</script>
     
-    <div class="col-md-6">
+    <div class="col-md-6 col-sm-12 col-xs-12">
       <div class="row modifica-set-textarea">
-      	<div class="col-md-6">
+      	<div class="col-md-6 col-sm-12 col-xs-12">
     		<!-- sede legale -->
         	<div class="form-group"><label for="sedelegale">{{trans('messages.keyword_registered_office')}}</label>
         		<textarea rows="9" title="{{trans('messages.keyword_headquarters_estimate')}}" class="form-control" name="sedelegale" id="sedelegale" placeholder="{{trans('messages.keyword_registered_office')}}">{{ isset($corp->sedelegale) ? $corp->sedelegale : old('sedelegale')  }}</textarea></div>
         </div>
-          <div class="col-md-6">
+          <div class="col-md-6 col-sm-12 col-xs-12">
         	<div class="form-group"><label for="indirizzospedizione">{{trans('messages.keyword_shipping_address')}}</label>
         	<textarea rows="9" title="Sede dell'ente che verrà riporata nel preventivo" class="form-control" name="indirizzospedizione" id="indirizzospedizione" placeholder="{{trans('messages.keyword_shipping_address')}}">{{ isset($corp->indirizzospedizione) ? $corp->indirizzospedizione :  old('sedelegale') }}</textarea>
             </div>
@@ -492,8 +494,8 @@ else {
         
         
         
-          <div class="col-md-12"> <label for="partecipanti">{{trans('messages.keyword_participants')}}</label></div>
-	            <div class="col-md-10">
+          <div class="col-md-12 col-sm-12 col-xs-12"> <label for="partecipanti">{{trans('messages.keyword_participants')}}</label></div>
+	            <div class="col-md-10 col-sm-12 col-xs-12">
                 	<div class="form-group">
                    
 	                <select class="form-control" id="utenti">
@@ -504,7 +506,7 @@ else {
                     </div>
 	            </div>
 	            @if(checkpermission('1', '12', 'scrittura','true'))
-	            <div class="col-md-2 text-right button-marg0">
+	            <div class="col-md-2 col-sm-12 col-xs-12 text-right button-marg0 text-left-mobile">
 	                <a class="btn btn-warning" id="aggiungiPartecipante"><i class="fa fa-plus"></i></a>
 	                <a class="btn btn-danger"  id="elimina"><i class="fa fa-trash"></i></a>
 	            </div>
@@ -518,7 +520,7 @@ else {
     </div>
     
     
-    <div class="col-md-6">
+    <div class="col-md-6 col-sm-12 col-xs-12">
     	<!-- logo resp tel participant -->
 		<div class="form-group">
         	<label for="skype_id">Skype Id</label>
@@ -526,12 +528,12 @@ else {
         </div>
 		<div class="form-group">
         	<div class="row">
-            	<div class="col-md-10">
+            	<div class="col-md-10 col-sm-12 col-xs-12">
                     <label for="{{trans('messages.keyword_logo')}}">{{trans('messages.keyword_logo')}}</label>
                     <?php echo Form::file('logo', ['class' => 'form-control','id'=>'logo']); ?>
                     <label for="logo" generated="true" class="error none" id="logo_validatio_msg"></label>
                 </div>
-                <div class="col-md-2 logopreview" id="logopreview"> <div class="img-border-preview" style="<?php echo (isset($corp->logo)) ? 'display:block' :'display:none';?>"> <?php if(isset($corp->logo)) { ?> <img src="{{url('/storage/app/images/').'/'.$corp->logo}}" height="100" width="100" class="img-responsive" ><?php } ?>
+                <div class="col-md-2 col-sm-12 col-xs-12 logopreview" id="logopreview"> <div class="img-border-preview" style="<?php echo (isset($corp->logo)) ? 'display:block' :'display:none';?>"> <?php if(isset($corp->logo)) { ?> <img src="{{url('/storage/app/images/').'/'.$corp->logo}}" height="100" width="100" class="img-responsive" ><?php } ?>
                 </div></div>
                 
             </div>    
@@ -539,7 +541,7 @@ else {
     
     
     <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-6 col-sm-12 col-xs-12">
     	<div class="form-group">
     <label for="responsabilelanga">{{trans('messages.keyword_responsible')}} LANGA</label>
 		<select title="{{trans('messages.keyword_responsible_associated_body')}}" name="responsabilelanga" id="responsabilelanga" class="form-control required-input" 
@@ -552,7 +554,7 @@ else {
         	</div>
         	<input type="hidden" name="responsabilelangaid" id="responsabilelangaid" value="<?php echo isset($corp->responsiblelang_id) ? $corp->responsiblelang_id : '0';?>">
     </div>    
-     <div class="col-md-6">
+     <div class="col-md-6 col-sm-12 col-xs-12">
      	<div class="form-group">
      	 
      <label for="telefonoresponsabile">{{trans('messages.keyword_responsible_phone_langa')}}</label>
@@ -601,7 +603,7 @@ else {
 		</tr>
 		</table>
 	</div></div><?php */?>
-	<div class="col-md-12">
+	<div class="col-md-12 col-sm-12 col-xs-12">
      		
 	      
          
@@ -932,9 +934,9 @@ else {
  </div><?php */?>
 
 <div class="row"> 
-<div class="col-md-6 tpbtm10">
-</div>
-<div class="col-md-6 tpbtm10 text-right">
+<!--<div class="col-md-6 col-sm-12 col-xs-12 tpbtm10">
+</div>-->
+<div class="col-md-12 col-sm-12 col-xs-12 tpbtm10">
 		@if(checkpermission('1', '12', 'scrittura','true'))
 		<button onclick="mostra2()" id="btnSubmitEnti" type="submit" class="btn btn-warning marg0">{{trans('messages.keyword_save')}}</button>
 		@endif

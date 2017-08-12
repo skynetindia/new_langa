@@ -1202,7 +1202,6 @@
 					if(isset($preventivo->id) && isset($quotefiles)){
 					foreach($quotefiles as $prev) {
         				$imagPath = url('/storage/app/images/quote/'.$prev->name);
-                        $downloadlink = url('/storage/app/images/quote/'.$prev->name);
                         $filename = $prev->name;            
                         $arrcurrentextension = explode(".", $filename);
                         $extention = end($arrcurrentextension);
@@ -1214,7 +1213,7 @@
                             $imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);          
                         }
                         $titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";
-        				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+        				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
         				$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
         				$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();							
         				foreach($utente_file as $key => $val){

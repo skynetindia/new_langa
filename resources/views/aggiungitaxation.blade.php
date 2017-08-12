@@ -13,38 +13,38 @@
       {{ csrf_field() }}
 
       @if(isset($taxation))
-          <div class="col-md-12"><h1>{{trans('messages.keyword_update_template_for_taxation')}}</h1></div>
-          <div class="col-md-6">
+          <div class="col-md-12 col-sm-12 col-xs-12"><h1>{{trans('messages.keyword_update_template_for_taxation')}}</h1></div>
+          <div class="col-md-6 col-sm-12 col-xs-12">
             <div class="form-group">
               <label>{{trans("messages.keyword_taxation_name")}}</label>
               <input class="form-control" name="tassazione_nome" value="{{ $taxation->tassazione_nome }}">
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6 col-sm-12 col-xs-12">
             <div class="form-group">
               <label>{{trans("messages.keyword_percentage_taxation")}}</label>
               <input class="form-control" maxlength="4" name="tassazione_percentuale" value="{{ $taxation->tassazione_percentuale }}">
              </div>
           </div>
-          <div class="col-md-12">          
+          <div class="col-md-12 col-sm-12 col-xs-12">          
             <input type="hidden" name="tassazione_id" value="{{ $taxation->tassazione_id }}">
             <input class="btn btn-warning" type="submit" value="{{trans('messages.keyword_modify')}}">
             </div>
       @else
-          <div class="col-md-12"><h1>{{trans("messages.keyword_add_template_for_taxation")}}</h1></div>
-          <div class="col-md-6">
+          <div class="col-md-12 col-sm-12 col-xs-12"><h1>{{trans("messages.keyword_add_template_for_taxation")}}</h1></div>
+          <div class="col-md-6 col-sm-12 col-xs-12">
             <div class="form-group">
               <label>{{trans("messages.keyword_taxation_name")}}</label>
               <input class="form-control" name="tassazione_nome" value="">
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6 col-sm-12 col-xs-12">
             <div class="form-group">
               <label>{{trans("messages.keyword_percentage_taxation")}}</label>
               <input class="form-control" maxlength="4"  name="tassazione_percentuale" value="">
             </div>
           </div>
-           <div class="col-md-12">
+           <div class="col-md-12 col-sm-12 col-xs-12">
           <input class="btn btn-warning" type="submit" value="{{trans('messages.keyword_add')}}">
           </div>
       @endif

@@ -275,16 +275,17 @@
 	
 	function check_media($id)
 	{
-		$imageurl=[1=>"projects", 3 =>"invoice", 0=>"quote", 4=>"quiz"];
+		$imageurl=[1=>"projects", 3 =>"invoice", 0=>"quote", 4=>"quiz","5"=>"user","6"=>"dashboard"];
 		$filedetail=DB::table('media_files')->where('id',$id)->first();
 		$social=DB::table('social')->get();
-		$url=url('social/share/'.$id);
+		$url=($filedetail->url!='')?$filedetail->url:url('social/share/'.$id);
 		$title=$filedetail->title;
 		$description=$filedetail->description;
 		$image_url=url('storage/app/images/'.$imageurl[$filedetail->master_type]."/".$filedetail->name);
 		$newval=[];
 		foreach($social as $soc)
 		{
+			
 			$soc->url=str_replace('$url',"$url",$soc->url);
 			$soc->url=str_replace('$title',"$title",$soc->url);
 			$soc->url=str_replace('$description',"$description",$soc->url);
@@ -604,6 +605,7 @@
           }
           }
         } 
+
        	 $total = array_sum($notconfirm);        
 	     $lastrequired = array_reverse($notconfirm);
 	     $lastExpens = array_slice($lastrequired,$lastmonth);
@@ -611,4 +613,101 @@
 	     $total = ($total == 0) ? 1 : $total;
 	     $percentChange = ($total == 0) ? 0 : ((1 - $lastExpens / $total) * 100);		 
 		 return number_format($percentChange);            
+    }
+
+    function getprocessing($option) {
+    	$optionalDetails = DB::table('optional')->where('code',$option)->orWhere('label',$option)->first(); 
+    	$arr['processing'] = isset($optionalDetails->dipartimento) ? DB::table('lavorazioni')->where('departments_id', $optionalDetails->dipartimento)->get() : array();
+    	$arr['currentprocessing'] = isset($optionalDetails->lavorazione) ? $optionalDetails->lavorazione : "";
+    	return $arr;
+    }
+	
+	function getentity($id)
+	{
+		if(is_numeric($id))
+		{
+			$entity=DB::table('corporations')->select('id','nomeazienda')->where('id',$id)->first(); 
+			return $entity->id.'|'.$entity->nomeazienda;
+		}
+		else
+		{
+			return '-';
+		}
+	}
+
+    /* Get all the media files : Quotes, Project,Invoices */
+   function getallmedias() {    	
+    	$userid = Auth::user()->id;
+    	$userprofileid = Auth::user()->dipartimento;
+ 		$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
+        $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";        
+        
+        if ($userid === 0 || $userprofileid === '0') {			
+			DB::enableQueryLog();			
+			/*$arrwhere['projects.is_deleted'] = 0;           
+			$arrwhere['media_files.master_type'] = 1;           
+            $quotefiles = DB::table('media_files')
+            ->Join('projects', 'media_files.master_id', '=', 'projects.id')                      
+            ->where($arrwhere)
+            ->orWhere('media_files.master_type','=','6')            
+            ->select('media_files.*')
+            ->orderBy('media_files.id', 'desc')
+            ->get();*/            	        
+	        $query = "select `media_files`.* from `media_files` where (`media_files`.`master_id` IN(select id from projects where is_deleted = 0) and `media_files`.`master_type`='1') or (`media_files`.`master_type` = '6') order by id desc";			
+	    	$quotefiles = DB::select($query);
+	    	               
+           /*$queries = DB::getQueryLog();
+	        $last_query = end($queries);
+	        print_r($last_query);
+	        exit;*/	 
+		}
+		else {	
+			 $query = "select `media_files`.* from `media_files` where (`media_files`.`master_id` IN(select id from projects where is_deleted = 0 and `projects`.`user_id` = $userid) and `media_files`.`master_type`='1') or (`media_files`.`master_id` = $userid and `media_files`.`master_type` = '6') order by id desc";
+			
+			 $quotefiles = DB::select($query);                           
+			DB::enableQueryLog();						
+
+    		/* ====== Quote ======== */
+    		/*DB::enableQueryLog();			
+			$arrwhere['quotes.is_deleted'] = 0;           
+			$arrwhere['media_files.master_type'] = 0;           
+            $quotefiles = DB::table('media_files')
+            ->Join('quotes', 'media_files.master_id', '=', 'quotes.id')                      
+            ->where($arrwhere)
+            ->where(function ($query) use ($userid) {                
+                $query->where('quotes.user_id', $userid)
+                      ->orWhere('quotes.idutente', $userid);
+            })->select('media_files.*')->orderBy('media_files.id', 'desc')->get();  			 
+            
+            /* ======= Invoice ======== */
+			/*$invoicewhere['tranche.is_deleted'] = 0;
+			$invoicewhere['media_files.master_type'] = 3; 
+            if($type === 'Client' || $type === 'Customer') {
+				$invoicewhere['tranche.is_published'] = 1; 
+            }                       			
+            $invoicequery = DB::table('media_files')
+            ->Join('tranche', 'media_files.master_id', '=', 'tranche.id')                      
+            ->where($invoicewhere)
+            ->where(function ($query) use ($userid)  {                
+                $query->where('tranche.user_id', $userid);                    
+            })->select('media_files.*');  			 
+            
+			$prowhere['projects.is_deleted'] = 0;  
+			$prowhere['media_files.master_type'] = 1;           
+            $proquery = DB::table('media_files')
+            ->Join('projects', 'media_files.master_id', '=', 'projects.id')                      
+            ->where($prowhere)
+            ->where(function ($query) use ($userid) {                
+                $query->where('projects.user_id', $userid);
+            })->select('media_files.*');  			             
+            $quotefiles = $proquery->unionAll($quotesquery)->unionAll($invoicequery)->orderBy('media_files.id', 'desc')->get();*/
+
+
+            /*$queries = DB::getQueryLog();
+            $last_query = end($queries);
+            print_r($last_query);
+            exit;*/
+    	}
+
+    	return $quotefiles;
     }

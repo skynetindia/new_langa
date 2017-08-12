@@ -2615,6 +2615,7 @@ class AdminController extends Controller
             
             return view('addalertform', [
                 'enti' => DB::table('corporations')
+						 ->where('is_deleted', '=', 0)
                     ->get(),
                 'ruolo_utente' => DB::table('ruolo_utente')
                     ->where('is_delete', '=', 0)
@@ -2768,8 +2769,9 @@ class AdminController extends Controller
     }
 
     // send alert notification to users
-    public function sendalert(Request $request)
+    /*public function sendalert(Request $request)
     {
+		$true='';
         if($request->user()->id != 0) {            
             return redirect('/unauthorized');
         } 
@@ -2783,7 +2785,7 @@ class AdminController extends Controller
                 return "NO Alert Remaining ..!!";
             }
            	
-           	
+           
             foreach ($alert as $value) {
 
                 $ente = explode(",", $value->ente);
@@ -2830,33 +2832,148 @@ class AdminController extends Controller
 	                            if($store) {
 	                            	$true = true;     
 	                            }
+								if($value->is_email == '1') {      	
+									$emailSubject = "Alert :".$value->nome_alert;
+									$toEmail = $corporations->email;
+									/*Mail::send('layouts.alertemail', ['content' => $value->messaggio], function ($m) use ($corporations,$emailSubject,$toEmail) {
+										$m->from('easy@langa.tv', 'Alert LANGA');
+										/*$corporations->email = "developer5@mailinator.com";
+										$m->to($corporations->email)->subject($emailSubject);
+									});
+	                    		}
                          	}
 
-	                 		DB::table('alert')      
+	                 		/*DB::table('alert')      
 	                            ->where('alert_id', $value->alert_id)       
 	                            ->update(array(     
 	                            'is_sent' => 1      
 	                    	));
-	                     	if($value->is_email == '1') {      	
-	                     		$emailSubject = "Alert :".$value->nome_alert;
-	                     		$toEmail = $corporations->email;
-	                    		Mail::send('layouts.alertemail', ['content' => $value->messaggio], function ($m) use ($corporations,$emailSubject,$toEmail) {
-									$m->from('easy@langa.tv', 'Alert LANGA');
-									/*$corporations->email = "developer5@mailinator.com";*/
-									$m->to($corporations->email)->subject($emailSubject);
-        						});
-	                    	}
+	                     	
                         } 
                     }
                 }
             }
+		}
 
             if($true)
             	return "Send All Alert Successfully";
             else
             	return "Somthing Went Wrong";
+       
+    }*/
+	
+	// send alert notification to users
+    public function sendalert(Request $request)
+    {
+    	$true = '';
+        if($request->user()->id != 0) {            
+            return redirect('/unauthorized');
+
+        } else {
+
+            $today = date("Y-m-d");
+            $alert = DB::table('alert')
+                ->where('created_at', $today)
+                ->where('is_sent', '=', 0)
+                ->get();
+
+            if($alert->isEmpty()) {
+                return "No Alert Remaining...!!";
+            }
+           	
+            foreach ($alert as $value) {
+
+            	$user_entity = $request->user()->id_ente;
+            	$corporations = DB::table('corporations')
+                    ->where('id', $user_entity)->first();
+                   
+            	DB::table('inviare_avviso')->insert([
+                    'id_ente' => $corporations->id,
+                    'user_id' => $request->user()->id,
+                    'alert_id' => $value->alert_id,
+                    'nome_azienda' => $corporations->nomeazienda,
+                    'nome_referente' => $corporations->nomereferente,
+                    'settore' => $corporations->settore,
+                    'telefono_azienda' => $corporations->telefonoazienda,
+                    'email' => $corporations->email,                    
+                    'responsible_langa' => $corporations->responsabilelanga,
+                    'comment' => '',
+                    'conferma' => 'NON LETTO'
+                    ]);
+            	 
+            	DB::table('alert')->where('alert_id', $value->alert_id)
+            		->update(array('is_sent' => 1 ));
+
+                $ente = explode(",", $value->ente);
+                $ruolo = explode(",", $value->ruolo);
+
+                foreach ($ente as $ente) {
+
+                    $getente = DB::table('enti_partecipanti')
+                        ->select('id_ente', 'id_user')
+                        ->where('id_ente', $ente)
+                        ->get();
+
+                    foreach ($getente as $getente) {
+ 
+                        $getrole = DB::table('users')
+                            ->select('dipartimento')
+                            ->where('id', $getente->id_user)
+                            ->where('is_delete', 0)
+                            ->first();                       	
+
+                        if(isset($getrole)) {  
+   
+                        	$check = in_array($getrole->dipartimento, $ruolo); 
+
+                        	if($check){
+
+                        	$corporations = DB::table('corporations')
+                                ->where('id', $getente->id_ente)
+                                ->first();  
+
+                            $store = DB::table('inviare_avviso')->insert([
+                                'id_ente' => $corporations->id,
+                                'user_id' => $getente->id_user,
+                                'alert_id' => $value->alert_id,
+                                'nome_azienda' => $corporations->nomeazienda,
+                                'nome_referente' => $corporations->nomereferente,
+                                'settore' => $corporations->settore,
+                                'telefono_azienda' => $corporations->telefonoazienda,
+                                'email' => $corporations->email,                    
+                                'responsible_langa' => $corporations->responsabilelanga,
+                                'comment' => '',
+                                'conferma' => 'NON LETTO'
+                                ]);                            
+
+	                            if($store) {
+	                            	$true = true;     
+	                            }
+                         	}
+
+	                     	if($value->is_email == '1') {      	
+	                     		$emailSubject = "Alert :".$value->nome_alert;
+	                     		$toEmail = $corporations->email;
+	                    		/*Mail::send('layouts.alertemail', ['content' => $value->messaggio], function ($m) use ($corporations,$emailSubject,$toEmail) {
+									$m->from('easy@langa.tv', 'Alert LANGA');
+									/*$corporations->email = "developer5@mailinator.com";
+									$m->to($corporations->email)->subject($emailSubject);
+        						});*/
+
+                    		}
+                    	}
+                    } 
+                }
+            }
         }
+
+	    if($true)
+	    	return "Send All Alert Successfully";
+	    else
+	    	return "Somthing Went Wrong";
     }
+	
+	
  /* ==================================== Taxation section START ======================================== */
 
     public function deletetaxation(Request $request) {

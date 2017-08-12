@@ -17,7 +17,7 @@
 <?php $activewidgets = getWidgets();?>
 <div class="main-dashbord-bacheca-user">	
     <div class="row">
-		<div class="col-sm-6">
+		<div class="col-md-6 col-sm-12 col-xs-12">
         	<div class="set-height-lft-bacheca-user">
             	<!-- ================================ Wearther Section ========================== -->
                 <div class="bg-white">
@@ -43,12 +43,12 @@
                 <!-- ================================ Statisctic section end =========================== -->                
             </div>
         </div>        
-        <div class="col-sm-6">
+        <div class="col-md-6 col-sm-12 col-xs-12">
         	<div class="set-height-right-bacheca-user">            
             	<!-- ================================ Calendar section  ========================== -->
                 <div class="bg-white" style="<?php echo (in_array('2',$activewidgets)) ? 'display:block' : 'display:none'; ?>">
                     <h4><strong> {{ trans('messages.keyword_calendar') }}</strong><a onclick="return widgetupdate('delete','2')" class="pull-right"><i class="fa fa-times" aria-hidden="true"></i></a></h4><hr>
-                    <div class="widget-quotes"><!-- widget -->
+                    <div class="widget-quotes widget-quotes-without-scroll"><!-- widget -->
                         @include('dashboard.calendar')
                     </div>
                 </div>

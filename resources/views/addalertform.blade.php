@@ -15,8 +15,8 @@
 <!-- ckeditor -->
 <script src="//cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
 <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<?php /*@if(checkpermission('2', '14', 'scrittura','true'))*/?>
-    	<h1> {{ trans('messages.keyword_addalert') }}  </h1><hr>
+    @if(checkpermission('2', '14', 'scrittura','true'))
+    <div class="add-alert-frm">	<h1> {{ trans('messages.keyword_addalert') }}  </h1><hr></div>
 @if(!empty(Session::get('msg')))
     <script>
     var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
@@ -110,25 +110,24 @@
     <label> {{ trans('messages.keyword_message') }} </label>
     <textarea name="messaggio" id="messaggio" rows="10" cols="50" class="form-control"></textarea>
 </div>
-    <script type="text/javascript" >
-      CKEDITOR.replace( 'messaggio' );
+    <script type="text/javascript">
+      CKEDITOR.replace('messaggio');
     </script>
 <div class="chkselect">
   <div class="form-group">
-    <input type="checkbox" id="is_email" name="is_email" value="1">
-    <label for="is_email"> {{ trans('messages.keyword_is_email_info') }}? </label>
-    <input type="checkbox" id="is_system_info" checked="checked" name="is_system_info" value="1">
-    <label for="is_system_info"> {{ trans('messages.keyword_is_system_info') }}? </label>
+        <label for="is_email"> {{ trans('messages.keyword_is_email_info') }}? </label>
+        <div class="switch"><input type="checkbox" id="is_email" name="is_email" value="1"> <label for="is_email"></label></div>
+        &nbsp;&nbsp;    
+        <label for="is_system_info"> {{ trans('messages.keyword_is_system_info') }}? </label>
+        <div class="switch"><input type="checkbox" checked="checked" id="is_system_info" name="is_system_info" value="1"> <label for="is_system_info"></label></div>
    </div>
 </div>
 <input class="btn btn-warning" type="submit" value="{{ trans('messages.keyword_send') }}">
-</div>
-  
+</div>  
     </form>
   </div>
-  <?php /* @endif */ ?>
+  @endif 
 <div class="space10"></div>
-
 <div class="panel panel-default">
 <div class="panel-body">
 <h1 class="cst-datatable-heading"> {{ trans('messages.keyword_activitylist') }} </h1>

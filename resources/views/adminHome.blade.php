@@ -20,81 +20,7 @@ $arrSettings = adminSettings();
 
 <!-- Font -->
 <link rel="stylesheet" href="{{asset('public/css/stylesheet.css')}}">
-<style type='text/css'>
-      div.selectBox
-      {
-        position:relative;
-        display:inline-block;
-        cursor:default;
-        text-align:left;
-        line-height:30px;
-        clear:both;
-        color:#888;
-      }
-      span.selected
-      {
-        width:167px;
-        text-indent:20px;
-        border:1px solid #ccc;
-        border-right:none;
-        border-top-left-radius:5px;
-        border-bottom-left-radius:5px;
-        background:#f6f6f6;
-        overflow:hidden;
-      }
-      span.selectArrow
-      {
-        width:30px;
-        border:1px solid #60abf8;
-        border-top-right-radius:5px;
-        border-bottom-right-radius:5px;
-        text-align:center;
-        font-size:20px;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -o-user-select: none;
-        user-select: none;
-        background:#4096ee;
-      }
-      
-      span.selectArrow,span.selected
-      {
-        position:relative;
-        float:left;
-        height:30px;
-        z-index:1;
-      }
-      
-      div.selectOptions
-      {
-        position:absolute;
-        top:28px;
-        left:0;
-        width:198px;
-        border:1px solid #ccc;
-        border-bottom-right-radius:5px;
-        border-bottom-left-radius:5px;
-        overflow:hidden;
-        background:#f6f6f6;
-        padding-top:2px;
-        display:none;
-      }
-        
-      span.selectOption
-      {
-        display:block;
-        width:80%;
-        line-height:20px;
-        padding:5px 10%;
-      }
-      
-      span.selectOption:hover
-      {
-        color:#f6f6f6;
-        background:#4096ee; 
-      }     
-    </style>
+
 </head>
 <?php $logged = false; ?>
 @if (!Auth::guest())
@@ -375,7 +301,7 @@ $arrSettings = adminSettings();
   <!-- /content --> 
   <!-- footer content -->
   <footer>
-    <div class="pull-right"> 2016 © Easy <strong>LANGA</strong> created by <a href="http://langa.tv" target="_blank"><strong>LANGA</strong></a> </div>
+    <p align="right"><small><a href="http://www.langa.tv/" target="_blank"><strong>Marketing with Method</strong> by LANGA Group</a><br>2017 © Easy <strong>LANGA 2.01</strong><br></small></p>
     <div class="clearfix"></div>
     </div>
   </footer>

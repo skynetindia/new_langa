@@ -1480,11 +1480,12 @@ class HomeController extends Controller {
         return json_encode($tickets);
     }
 
-    public function problemstore(Request $request) {
+   public function problemstore(Request $request) {
 
         $random_number = mt_rand(100000, 999999);
         $rand_ticket = '#tic'.$random_number;
         $user_id = $request->user()->id;
+        $users[] = '';
 
         if($request->module_id == 1){
 
@@ -1492,11 +1493,13 @@ class HomeController extends Controller {
                 ->where('user_id', $user_id)
                 ->first();
 
-            $users = DB::table('enti_partecipanti')
+            if(isset($entity)){
+                $users = DB::table('enti_partecipanti')
                 ->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
                 ->where('enti_partecipanti.id_ente', $entity->id)
                 ->where('users.dipartimento', 2)
                 ->groupBy('id_user')->get()->toArray();
+            }
         } 
 
         if($request->module_id == 3){
@@ -1505,11 +1508,13 @@ class HomeController extends Controller {
                 ->where('idente', '!=', null)
                 ->where('user_id', $user_id)->first();
 
-            $users = DB::table('enti_partecipanti')
+            if(isset($quote)){
+                $users = DB::table('enti_partecipanti')
                 ->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
                 ->where('enti_partecipanti.id_ente', $quote->idente)
                 ->where('users.dipartimento', 2)
                 ->groupBy('id_user')->get()->toArray();
+            }
         } 
 
         if($request->module_id == 4){
@@ -1518,12 +1523,13 @@ class HomeController extends Controller {
                 ->where('user_id', $user_id)
                 ->where('id_ente', '!=', null)
                 ->first();
-            
-            $users = DB::table('enti_partecipanti')
+            if(isset($project)){
+                $users = DB::table('enti_partecipanti')
                 ->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
                 ->where('enti_partecipanti.id_ente', $project->id_ente)
                 ->where('users.dipartimento', 3)
                 ->groupBy('id_user')->get()->toArray();
+            }
         } 
 
         if($request->module_id == 5){
@@ -1532,18 +1538,25 @@ class HomeController extends Controller {
                 ->where('user_id', $user_id)
                 ->where('A', '!=', null)
                 ->first();
-            
-            $users = DB::table('enti_partecipanti')
+            if(isset($invoice)){
+                $users = DB::table('enti_partecipanti')
                 ->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
                 ->where('enti_partecipanti.id_ente', $invoice->A)
                 ->where('users.dipartimento', 1)
                 ->groupBy('id_user')->get()->toArray();
+            }
         }
-
+        
         $user_ids = [];
-        foreach ($users as $value) {
-            $user_ids[] = $value->id;
+        
+        if($users[0] != ''){
+            foreach ($users as $value) {
+                $user_ids[] = $value->id;
+            }
+        } else {
+            $user_ids[] = 0;
         }
+        
         $user_ids = implode(',', $user_ids);
 
         DB::table('ticket_problem')->insert([

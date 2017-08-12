@@ -80,6 +80,7 @@
     document.write(msg);
 @endif
 </script>
+<div class="table-responsive">
 <table data-toggle="table" data-search="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-id-field="id" data-show-refresh="true"  data-show-columns="true" data-url="<?php if(isset($miei)) echo url('enti/myenti/json'); else echo url('/enti/json');?>" data-classes="table table-bordered" id="table">
   <thead>
   <th data-field="id" data-sortable="true">{{trans('messages.keyword_id')}}</th>
@@ -94,6 +95,7 @@
     <th data-field="tipo" data-sortable="true">{{trans('messages.keyword_guy')}}</th>
       </thead>
 </table>
+</div>
 </div>
 </div>
 </div>

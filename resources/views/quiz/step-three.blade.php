@@ -29,7 +29,7 @@
   <!-- HTML Structure -->
 
 <div class="row quiz-wizard">
-  <div class="col-md-12">
+  <div class="col-md-12 col-sm-12 col-xs-12">
     <h1> {{ trans('messages.keyword_quiz') }} </h1>
     <div class="wizard wizard-step-line">
       <div class="wizard-inner">
@@ -90,7 +90,7 @@
                   
                  <li><label> {{ trans('messages.keyword_which_characters_would_like_use') }} ?</label>
                   <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-6 col-sm-12 col-xs-12">
                        <div class="form-group">
                        <select class="form-control" id="fontsize" name="fontsize">
 
@@ -121,11 +121,10 @@
                   
                       </div>                        
                         
-                      <div class="col-md-6">
+                      <div class="col-md-6 col-sm-12 col-xs-12">
                                 
                       <div class="form-group">
-                        <textarea class="form-control" rows="15" id="font_preview" name="font_preview">
-                          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia dictum varius. Aenean fermentum est a nisl luctus, eu consequat dolor auctor. Aliquam dignissim sed felis a cursus. Aliquam ac vulputate metus. Proin sit amet felis auctor, elementum orci nec, hendrerit massa.
+                        <textarea class="form-control" rows="15" id="font_preview" name="font_preview">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia dictum varius. Aenean fermentum est a nisl luctus, eu consequat dolor auctor. Aliquam dignissim sed felis a cursus. Aliquam ac vulputate metus. Proin sit amet felis auctor, elementum orci nec, hendrerit massa.
                         </textarea>
                         </div>
                     
@@ -284,7 +283,7 @@ $("#colore_secondario_span").click(function(){
                     'quiz_id':quizid,
                     '_token' : _token
                   },
-            url: '{{ url('storeStepthree') }}',
+            url: "{{ url('storeStepthree') }}",
             success:function(data) {
               // console.log(data);
               var seekString = "/quiz";

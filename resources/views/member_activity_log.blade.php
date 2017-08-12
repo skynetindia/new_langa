@@ -21,13 +21,13 @@ document.write(msg);
 <div class="space10"></div>
 <a class="btn btn-primary" onclick="multipleAction('modify');" id="modifica" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a>*/?>
 <div class="row">
-  <div class="col-md-1">
+  <div class="col-md-1 col-sm-12 col-xs-12">
   	<div class="space24"></div>
     <a id="delete" class="btn btn-danger"  onclick="multipleAction('delete');" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="fa fa-trash"></i></a>
 </div>
 @if($mastertype != 'admin')
 
-<div class="col-md-3">
+<div class="col-md-3 col-sm-12 col-xs-12">
 <div class="form-group">
     <label> {{ trans('messages.keyword_type') }} </label>
 <select class="form-control" id="filterbytype">

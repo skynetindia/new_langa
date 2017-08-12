@@ -19,15 +19,7 @@
 <!-- Font -->
 <link rel="stylesheet" href="{{asset('public/css/stylesheet.css')}}">
 </head>
-<?php 
-echo "dd";
-exit;
-$arrSettings = adminSettings();
-print_r($arrSettings);
-exit;
-$logged = false; 
-
-?>
+<?php $logged = false; ?>
 @if (!Auth::guest())
 <?php $logged = true; ?>
  <script type="text/javascript">
@@ -38,7 +30,7 @@ $logged = false;
   <div class="main_container">
   <div class="col-md-3 left_col">
     <div class="left_col scroll-view">
-      <div class="navbar nav_title"> <a href="{{url('/admin/')}}" class="site_title md"><img src="<?php echo (isset($arrSettings->adminlogo) && !empty($arrSettings->adminlogo)) ? asset('storage/app/images/logo/'.$arrSettings->adminlogo) :  asset('images/LOGO-Admin-LANGA.svg');?>" alt="admin Langa" class="img" > </a> <a href="{{url('/admin/')}}" class="site_title sm"><img src="{{asset('images/admin-logo.svg')}}" alt="admin Langa" class="img" > </a> </div>
+      <div class="navbar nav_title"> <a href="{{url('/admin/')}}" class="site_title md"><img src="{{asset('images/LOGO-Admin-LANGA.svg')}}" alt="admin Langa" class="img" > </a> <a href="{{url('/admin/')}}" class="site_title sm"><img src="{{asset('images/admin-logo.svg')}}" alt="admin Langa" class="img" > </a> </div>
       
       <!-- sidebar menu -->
       <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">

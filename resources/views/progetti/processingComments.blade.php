@@ -12,21 +12,27 @@
                 <th style="" data-field="nomereferente" tabindex="0"><div class="th-inner sortable both">{{trans('messages.keyword_action')}}</div><div class="fht-cell"></div></th>
                 @endif
                 </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             @foreach($comments as $key => $val)
-            <tr id="commentList_{{$val->id}}">            
-                <td>{{$val->id}}</td>            
-                <td>{{$val->comments}}</td>            
+            <?php 
+            if(($val->user_id == Auth::user()->id && $val->is_private == '1') || ($val->is_private == '0')) {
+            ?><tr id="commentList_{{$val->id}}">            
+                <td>{{$val->id}}
+                <input type="hidden" id="hdisprivate_{{$val->id}}" value="{{$val->is_private}}"></td>            
+                <td id="listcomment_{{$val->id}}">{{$val->comments}}</td>            
                 <td>{{dateFormate($val->date)}}</td>            
                 @if(checkpermission('3', '18', 'scrittura','true'))
                  <td>               
-                    <a class="btn btn-danger" id="btnDelete" onclick="deleteComment('{{$val->id}}')" ><i class="fa fa-trash"></i></a>                
+                    <a class="btn btn-danger" id="btnDelete" onclick="deleteComment('{{$val->id}}')" ><i class="fa fa-trash"></i></a>
+                    <a class="btn btn-warning" id="btnEdit" onclick="editComment('{{$val->id}}')" ><i class="fa fa-pencil"></i></a>                                
                 </td>            
                 @endif
-            </tr>
+            </tr><?php 
+            }
+            ?>
             @endforeach                
-        </tbody>
+            </tbody>
         </table>
         </div>
     </div>

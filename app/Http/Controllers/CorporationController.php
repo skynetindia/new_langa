@@ -516,7 +516,7 @@ class CorporationController extends Controller
 			for($i = 0; $i < count($options); $i++) {
 				$notifiche = isset($partecipantiNotifiche[$options[$i]]) ? $partecipantiNotifiche[$options[$i]] : '0';
 				DB::table('enti_partecipanti')->insert([
-					'id_ente' => $corp->id,
+					'id_ente' => $corp,
 					'id_user' => $options[$i],
 					'notifiche'=> $notifiche, 					
 				]);

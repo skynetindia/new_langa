@@ -1,0 +1,128 @@
+@extends('layouts.app')
+@section('content')
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
+
+@include('common.errors')
+
+<style type="text/css">
+   
+#msg {
+    border-radius: 25px;
+    background-color: #73AD21;
+    padding: 10px;  
+    color: black;  
+    font-size: 14;
+}
+
+#msg1 {
+    border-radius: 25px;
+    background-color: #717D7E;
+    padding: 10px;  
+    color: black; 
+    text-align: right; 
+    font-size: 14;
+}
+
+</style>
+
+<div class="header-right">
+  <div class="float-left">
+      <h1>{{trans('messages.keyword_problem')}}</h1><hr>
+    </div>
+</div>
+
+<?php echo Form::open(array('url' => '', 'files' => true)) ?>
+
+{{ csrf_field() }}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="form-group">
+            <label> {{ trans('messages.keyword_message') }} </label>
+            <textarea name="message" id="message" rows="10" cols="40" class="form-control"></textarea>
+            <input type="hidden" id="ticketid" name="ticketid" value="{{ $ticket_problem->random_tid }}">
+
+            <br>
+            <div class="form-group"> 
+              <select class="form-control" id="status"> 
+                <option>--Status--</option>
+
+                <option value="1" selected="<?php if($ticket_problem->ticket_status == 1) echo "selected"; ?>"> {{ trans('messages.keyword_open') }}</option>
+                <option value="0" selected="<?php if($ticket_problem->ticket_status == 0) echo "selected"; ?>"> {{ trans('messages.keyword_close') }}</option>
+
+              </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button id="reply" type="button" class="btn btn-warning" >{{trans('messages.keyword_send')}}</button>
+
+<a href="{{ url('tickets')}}" id="cancel" name="cancel" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a>
+
+<br>
+<div class="row">
+    <div class="col-md-8">
+        <div class="myproblem">
+            <p id="msg"> {{ $ticket_problem->problem }} </p>
+            <?php if(isset($ticket_problems)){ 
+                foreach ($ticket_problems as $value) { ?>
+                <p id="<?php if($value->user_id == Auth::user()->id) echo 'msg1'; else echo 'msg';?>">
+                {{ $value->reply }} </p>
+
+            <?php } } ?>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    
+$(document).ready(function () { 
+
+    $('#status').on("change", function() {
+        var ticketid = $('#ticketid').val();
+        var _token = $('input[name="_token"]').val();
+        var status = $('#status option:selected').val();
+        
+        $.ajax({
+            type:'POST',
+            data:{ 'ticketid':ticketid, 'status':status, '_token':_token },
+            url:'{{ url("ticket/status/update") }}',
+            success:function( data ){
+                console.log(data);
+            }
+        });
+    });
+
+    $("#reply").on("click", function() {
+       
+        var message = $('#message').val();
+        var ticketid = $('#ticketid').val();
+        var _token = $('input[name="_token"]').val();
+        $.ajax({
+            type:'POST',
+            data:{ 'ticketid': ticketid, 'message': message, '_token' : _token },
+            url:'{{ url("/store/reply") }}',
+            success:function( data ){
+                var reply = JSON.parse(data);
+                $( ".myproblem" ).append( $( "<p id='msg1'>"+ reply.reply +"</p>" ) );
+                $('#message').val('');
+                console.log(reply.reply);
+            }
+        });
+    });
+});
+
+
+</script>
+
+@endsection

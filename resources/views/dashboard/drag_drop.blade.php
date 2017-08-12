@@ -5,7 +5,7 @@
 </div>
 <div class="dropdown-screen">
     <div class="row">
-    	<div class="col-sm-12"><?php $arrmodules = getModules(); ?>
+    	<div class="col-md-12 col-sm-12 col-xs-12"><?php $arrmodules = getModules(); ?>
         @foreach($arrmodules as $key => $val)
             <div class="ui-widget-content" valid="{{$val->id}}" ondragstart="dragStart(event)" draggable="true" id="dragtarget_{{$val->id}}">
                 {{trans('messages.'.$val->phase_key)}}

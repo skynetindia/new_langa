@@ -1,0 +1,334 @@
+@extends('layouts.app')
+@section('content')
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
+<!-- <style type="text/css">
+.table.table-bordered tr td input[type="checkbox"] { display: block;}
+</style> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
+<script type="text/javascript" src="{{asset('public/scripts/dropzone.js')}}"></script>
+<div class="header-lst-img">
+	<div class="header-svg text-left float-left">
+        <img src="{{url('images/HEADER1_LT_ACCOUNTING.svg')}}" alt="header image">
+    </div>
+    <div class="float-right text-right">
+    	<h1> {{ trans('messages.keyword_editinvoice') }} <?php if(!$tranche->idfattura) echo "#0000/" . date('y'); else echo $tranche->idfattura; ?></h1><hr>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+<div class="height20"></div>
+@include('common.errors')
+<form action="{{url('/pagamenti/tranche/update') . '/' . $tranche->id}}" method="post" name="edit_fattura" id="edit_fattura">
+	{{ csrf_field() }}
+	<?php $mediaCode = date('dmyhis');?>
+    <input type="hidden" name="mediaCode" id="mediaCode" value="{{$mediaCode}}" />
+	@if(isset($tranche->idfattura))
+    	<input name="idfattura" value="{{ $tranche->idfattura }}" type="hidden">   
+    @endif
+<div class="row">
+	<div class="col-md-8">
+    	    <script>
+			"use strict";
+			$.datepicker.setDefaults(
+                                        $.extend(
+                                          {'dateFormat':'dd/mm/yy'},
+                                          $.datepicker.regional['nl']
+                                        )
+                                      );
+			var $j = jQuery.noConflict();
+    	    	var clickEvent = new MouseEvent("click", {
+					"view": window,
+					"bubbles": true,
+					"cancelable": false
+				});
+    	    				$j('#prev').on("change", function() {
+    	    					var id = $j("#prev").val();
+    	    					var link = document.createElement("a");
+    	    					link.href = "{{ url('/progetti/add') }}" + '/' + id;
+								link.dispatchEvent(clickEvent);
+    	    				});
+    	    			</script></label>
+						
+                        <div class="modificatranshe-blade-pagamenti-head">
+                        <label for="preventivo"> {{ trans('messages.keyword_project') }}  <input type="text" disabled value=":cod/anno" class="form-control"></label>
+                        <a href="{{ url('/pagamenti/tranche/pdf') . '/' . $tranche->id }}"  target="new" class="btn" type="button"><i class="fa fa-file-pdf-o"></i></a>
+                        </div>
+                        
+			<h4> {{ trans('messages.keyword_invoice_header') }} </h4>
+			
+            
+            <div class="row">
+			<div class="col-md-3">
+            <div class="form-group">
+	<!-- colonna a sinistra -->
+	    <label for="sedelegaleente"> {{ trans('messages.keyword_registered_office_from') }} <span class="required">(*)</span> </label>
+	    <select name="DA" id="sedelegaleente" class="js-example-basic-single form-control">
+	        <option></option>
+	        @foreach($enti as $ente)
+	        	@if($ente->id == $tranche->DA)
+	        		<option selected value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                @else
+                	<option value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                @endif
+	        @endforeach
+	    </select>
+        	</div>
+            
+            <div class="form-group">
+	    <label for="id"> {{ trans('messages.keyword_note') }}  </label>
+        <input value="{{$tranche->idfattura}}" type="text" id="id" name="idfattura" placeholder="{{ trans('messages.keyword_paymentcode') }} " class="form-control">
+        	</div>
+	   
+	    <div class="form-group">
+        <label for="modalita"> {{ trans('messages.keyword_payment_methods') }} </label>
+		<input value="{{$tranche->modalita}}" type="text" class="form-control" id="modalita" name="modalita" placeholder=" {{ trans('messages.keyword_payment_methods') }} ">
+        </div>
+        
+        
+	</div>
+	<div class="col-md-3">
+    	<div class="form-group">
+		<label for="sedelegaleentea"> {{ trans('messages.keyword_registered_office_to') }} <span class="required">(*)</span> </label>
+	    <select id="sedelegaleentea" name="A" class="js-example-basic-single form-control">
+	        <option></option>
+	        @foreach($enti as $ente)
+            	@if($ente->id == $tranche->A)
+	        		<option selected value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                @else
+                	<option value="{{$ente->id}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                @endif
+	        @endforeach
+	    </select>
+        </div>
+	   
+          <div class="form-group">
+	    <label for="emissione"> {{ trans('messages.keyword_issue_of_the') }}<span class="required">(*)</span> </label>
+	    <input type="text" name="emissione" id="emissione" class="form-control" value="{{$tranche->emissione}}">
+			</div>
+
+		<div class="form-group">
+	    <label for="iban"> {{ trans('messages.keyword_company_iban') }} </label>
+	     <select name="iban" id="iban" class="js-example-basic-single form-control">
+	        <option></option>
+	        @foreach($enti as $ente)
+            	@if($ente->iban == $tranche->iban)
+	       			<option selected value="{{$ente->iban}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                @else
+                	<option value="{{$ente->iban}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                @endif
+	        @endforeach
+	    </select><script type="text/javascript">
+
+    $(".js-example-basic-single").select2();
+
+</script>
+		</div>
+		
+	</div>
+	<div class="col-md-3">
+    	<div class="form-group">
+		 <label for="id"> {{ trans('messages.keyword_invoicenumber') }} </label>
+        <input value="{{$tranche->idfattura}}" type="text" id="idfattura" name="idfattura" placeholder=" {{ trans('messages.keyword_paymentcode') }} " class="form-control">
+        	</div>
+    </div>
+	<div class="col-md-3">
+    	<div class="form-group">
+	<label for="Tipo"> {{ trans('messages.keyword_type_of_invoice') }} </label>
+        <select id="Tipo" name="tipofattura" class="form-control">
+        	@if($tranche->tipofattura == "NOTA DI CREDITO")
+                <option value="0"> {{ trans('messages.keyword_sales_invoice') }} </option>
+                <option value="1" selected> {{ trans('messages.keyword_credit_note') }} </option>
+            @else
+            	<option value="0" selected> {{ trans('keyword_sales_invoice.keyword') }} </option>
+                <option value="1"> {{ trans('messages.keyword_credit_note') }} </option>
+            @endif
+        </select>
+        </div>
+        
+        <div class="form-group">
+	    <label for="base"> {{ trans('messages.keyword_on_the_base') }}<span class="required">(*)</span> </label>
+	    <input class="form-control" type="text" name="base" id="base" placeholder="{{ trans('messages.keyword_on_the_base') }}" value="{{$tranche->base}}">
+	    </div>
+        
+        <div class="form-group">
+	     <label for="indirizzospedizione"> {{ trans('messages.	keyword_shipping_address') }} </label>
+        <select name="indirizzospedizione" id="indirizzospedizione" class="js-example-basic-single form-control">
+	        <option></option>
+	        @foreach($enti as $ente)
+            	@if($ente->id == $tranche->indirizzospedizione)
+	        		<option selected value="{{$ente->indirizzospedizione}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                @else
+                	<option value="{{$ente->indirizzospedizione}}">{{$ente->id}} | {{ ucwords(strtolower($ente->nomeazienda)) }}</option>
+                @endif
+	        @endforeach
+	    </select>
+        </div>
+	    <script>	    
+	        var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth()+1; //January is 0!
+			var yyyy = today.getFullYear();
+			var tbody = document.createElement("tbody");
+			if(dd<10) {
+				dd='0'+dd;
+			} 
+			if(mm<10) {
+				mm='0'+mm;
+			}
+    		var vecchiaData = "<?php echo $tranche->datainserimento; ?>";
+    		var dataInserimento = vecchiaData.toString();
+    		var impedisciModifica = function(e) {
+    			this.blur();
+    			this.value = dataInserimento;
+		    }
+	</script>		
+	</div>
+	</div>
+		<h4> {{ trans('messages.keyword_invoice_body') }} </h4>			
+            <div class="row">
+	        <div class="col-md-12">
+            		<!-- <a target="new" href="{{url('/pagamenti/tranche/corpofattura') . '/' . $tranche->id}}" class="btn btn-info" style="color:#ffffff;text-decoration: none" title="Vedi Corpo fattura esistenti"><i class="fa fa-info"></i></a> -->
+	                <a class="btn btn-warning" id="aggiungiCorpo"><i class="fa fa-plus"></i></a>
+	                <a class="btn btn-danger" id="eliminaCorpo"><i class="fa fa-trash"></i></a>
+	        </div>
+            </div>
+            <div class="height10"></div>
+	    	<table class="table table-bordered">
+	    		<thead>
+	    			<th> #</th>
+	    			<th> {{ trans('messages.keyword_references') }} </th>
+	    			<th> {{ trans('messages.keyword_description') }}</th>
+	    			<th> {{ trans('messages.keyword_qty') }} </th>
+	    			<th> {{ trans('messages.keyword_subtotal') }} </th>
+	    			<th> {{ trans('messages.keyword_total') }} </th>
+	    		</thead>
+
+	    		<tbody id="corpofattura">
+	    		</tbody>
+	    		 <script>
+			 		var kCorpo = 0;
+				 	var selezioneCorpo = [];
+	                    var nCorpo = 0;
+	                    var count = 0;
+	                    $j('#aggiungiCorpo').on("click", function() {
+	                        var tab = document.getElementById("corpofattura");
+	                        var tr = document.createElement("tr");
+	                        var check = document.createElement("td");
+	                        var checkbox = document.createElement("input");
+	                        checkbox.type = "checkbox";
+	                        checkbox.className = "selezione";
+	                        checkbox.id = "checkinv"+count;
+	                        check.appendChild(checkbox);
+
+	                        var checkboxLabel = document.createElement("label");                               
+                            checkboxLabel.setAttribute('for', "checkinv"+count);
+                            var td = document.createElement("td");
+                            check.appendChild(checkboxLabel);
+
+	                        var ord = document.createElement("td");
+	                        var ordine = document.createElement("input");
+	                        ordine.type = "text";
+	                        ordine.className = "form-control";
+	                        ordine.placeholder = ":{{ trans('messages.keyword_quote') }}";
+	                        ordine.name = "ordine[]";
+							// ordine.value = ":";
+	                        ord.appendChild(ordine);
+
+	                        var progetto = document.createElement("input");
+	                        progetto.type = "text";
+	                        progetto.placeholder = ":{{ trans('messages.keyword_project') }}";
+	                        progetto.className = "form-control";
+	                        progetto.name = "ordine[]";
+							// progetto.value = ":";
+	                        ord.appendChild(progetto);
+
+	                        var td = document.createElement("td");
+	                        var descrizione = document.createElement("textarea");
+	                        descrizione.className = "form-control";
+	                        descrizione.name = "desc[]";
+	                        descrizione.rows = "3";
+	                        descrizione.cols = "80";
+	                        td.appendChild(descrizione);
+
+	                        var qt = document.createElement("td");
+	                        var quantita = document.createElement("input");
+	                        quantita.type = "text";
+	                        quantita.className = "form-control";
+	                        quantita.name = "qt[]";
+	                        qt.appendChild(quantita);
+
+	                        var unitario = document.createElement("td");
+	                        var unitary = document.createElement("input");
+	                        unitary.type = "text";
+	                        unitary.className = "form-control";
+	                        unitary.name = "unitario";
+							unitario.appendChild(unitary);
+
+
+	                        var pr = document.createElement("td");
+	                        var prezzo = document.createElement("input");
+	                        prezzo.type = "text";
+	                        prezzo.className = "form-control";
+	                        prezzo.name = "subtotale[]";
+	                        pr.appendChild(prezzo);
+	                        var perc = document.createElement("td");
+	                        var percentualesconto = document.createElement("input");
+	                        percentualesconto.type = "text";
+	                        percentualesconto.className = "form-control";
+	                        percentualesconto.name = "scontoagente[]";
+							perc.appendChild(percentualesconto);
+							var per = document.createElement("td");
+	                        var percentual = document.createElement("input");
+	                        percentual.type = "text";
+	                        percentual.className = "form-control";
+	                        percentual.name = "scontobonus[]";
+	                        per.appendChild(percentual);
+	                        var netto = document.createElement("td");
+	                        var prezzonetto = document.createElement("input");
+	                        prezzonetto.type = "text";
+	                        prezzonetto.className = "form-control";
+	                        prezzonetto.name = "prezzonetto[]";
+	                        netto.appendChild(prezzonetto);
+	                        var perciva = document.createElement("td");
+	                        var iva = document.createElement("input");
+	                        iva.type = "text";
+	                        iva.className = "form-control";
+	                        iva.name = "iva[]";
+	                        perciva.appendChild(iva);
+	                        tr.appendChild(check);
+	                        tr.appendChild(ord);
+	                        tr.appendChild(td);
+	                        tr.appendChild(qt);
+	                        tr.appendChild(unitario);
+	                        tr.appendChild(pr);
+	      	//              tr.appendChild(perc);
+			// 				tr.appendChild(per);
+	      	//              tr.appendChild(netto);
+	      	//              tr.appendChild(perciva);
+
+	                        kCorpo++;
+	                        count++;
+	                        tab.appendChild(tr);
+
+	                        $j('.selezione').on("click", function() {
+				                selezioneCorpo[nCorpo] = $j(this).parent().parent();
+				                nCorpo++;
+		                	});
+	                    });
+
+	                    $j('#eliminaCorpo').on("click", function() {
+	                       for(var i = 0; i < nCorpo; i++) {
+	                           selezioneCorpo[i].remove();
+	              

@@ -18,7 +18,6 @@ Route::post('dashboard/statistics/date', 'HomeController@statistic_date');
 Route::post('dashboard/weatherautocomplete', 'HomeController@weatherautocomplete');
 Route::post('dashboard/getweatherdetails', 'HomeController@getweatherdetails');
 
-
 /*Route::get('/', function () {
     return view('welcome');
 });*/
@@ -38,8 +37,6 @@ Route::get('/logout', 'Auth\LoginController@logout');
 Route::get('/admin', 'AdminController@index');
 Route::post('/admin/globalsetting/store', 'AdminController@storelogotemp');
 Route::post('/admin/globalsetting/save', 'AdminController@savelogos');
-Route::post('/admin/globalsetting/previewlogo', 'AdminController@previewlogo');
-
 
 
 /*===================================== Language section routes =============================== */
@@ -396,7 +393,6 @@ Route::get('/notification-disabled', 'AdminController@notificationdisabled');
 
 // delete notification
 Route::get('/alert/delete/{id}', 'HomeController@deletealert');
-
 
 
 /* ================================ Login Activity Admin ============================= */

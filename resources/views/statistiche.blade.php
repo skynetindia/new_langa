@@ -19,18 +19,29 @@
 
 <!-- Include Date Range Picker -->
 
+<div class="header-right statistiche-blade-head">
+	<div class="float-left">
+    	<h1>{{trans('messages.keyword_messages.keyword_view_stats')}}</h1><hr>
+    </div>
+    <div class="header-svg">
+         <img src="{{url('images/HEADER2  RT_STATS.svg')}}" alt="header image">
+    </div>
+</div>
+
 <link rel="stylesheet" type="text/css" href="{{ asset('public/js/daterangepicker/daterangepicker.css') }}" />
 
 <div class="height20"></div>
+<div class="clearfix"></div>
+
 <div class="row">
-	<div class="col-md-8 col-sm-12 col-xs-12">
+	<div class="col-md-8 col-sm-12 col-xs-12 text-center-480">
         <div class="btn-group">
             <h3 class="inline"><a href='{{url("/statistiche/economiche") . '/' . ($year - 1)}}'><i class="fa fa-arrow-left"></i>{{$year - 1}}</a></h3>
             <h3 class="inline orange"> {{$year}} </h3><h3 class="inline"><a href='{{url("/statistiche/economiche") . '/' . ($year + 1)}}'>{{$year + 1}}<i class="fa fa-arrow-right"></i></a></h3>
         </div>
     </div>
 
-    <div class="col-md-4 col-sm-12 col-xs-12">
+    <div class="col-md-4 col-sm-12 col-xs-12 text-center-480">
 
      <!--    <span class="datapicker-icon">
             <i class="fa fa-calendar" aria-hidden="true"></i>
@@ -50,7 +61,7 @@
 </div>
 
 
-<div class="stat-graph row">
+<div class="stat-graph row economic-stati-set-width">
 <div class="canvas-holder stat" id="stat">
 	<div class="col-md-10 col-sm-12 col-xs-12">
 	<canvas id="myChart" width="1080" height="540" style="display: block; width: 1080px; height: 540px;"></canvas>
@@ -453,6 +464,9 @@ function mAction(act) {
     </div></div>
 
 
+</div>
+<div class="footer-svg">
+  <img src="{{url('images/FOOTER3 ORIZZONTAL_STATS.svg')}}" alt="avvisi">
 </div>
 
 

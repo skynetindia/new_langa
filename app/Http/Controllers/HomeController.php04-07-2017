@@ -424,21 +424,20 @@ class HomeController extends Controller {
      */
     public function index(Request $request) {         
         
-        return view('onworking'); 
-        $type = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
-        if (Auth::user()->id === 0 || $type === 'Administration') {
+         return view('onworking'); 
+        if (Auth::user()->id === 0 || Auth::user()->dipartimento === 1) {
             return $this->adminstrator();        
         }
-        elseif(Auth::user()->dipartimento === 'Commerical') { /* Commercial */
+        elseif(Auth::user()->dipartimento === 2) { /* Commercial */
             return $this->commercial(); 
         }
-        elseif(Auth::user()->dipartimento === 'Technician') { /* Technician */
+        elseif(Auth::user()->dipartimento === 3) { /* Technician */
             return $this->technician();
         }
-        elseif(Auth::user()->dipartimento === 'Reseller') { /* Reseller */        
+        elseif(Auth::user()->dipartimento === 4) { /* Reseller */        
             return $this->reseller($request); 
         }
-        elseif(Auth::user()->dipartimento === 'Client') { /* Client */                    
+        elseif(Auth::user()->dipartimento === 5) { /* Client */                    
             return $this->clients($request); 
         }
     }
@@ -446,11 +445,9 @@ class HomeController extends Controller {
     /* this is used for temparary in dashboard */
     public function temp(Request $request) {         
         
-        /* return view('onworking'); */
-        $Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
-        $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
-        //print_r($type);
-        //exit;
+       $Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
+       $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+       
         if (Auth::user()->id === 0 || $type === 'Administration') {
             return $this->adminstrator();        
         }
@@ -1445,177 +1442,4 @@ class HomeController extends Controller {
         return Redirect::back();
     }
     /* ==================================== Profile section END ======================================== */
-
-    /* ======================= Ticket Functions ============================= */
-
-    public function tickets(Request $request) {
-        return view('myticket');
-    }
-
-    public function getticketsjson(Request $request) {
-
-        $ticket_problem = DB::table('ticket_problem')->where('user_id', $request->user()->id)->orWhere('participants_id', 'like', '%'. $request->user()->id. '%')->where('is_deleted', 0)->get();
-        
-        $tickets = [];
-
-        foreach ($ticket_problem as $value) {  
-
-            if($value->ticket_status == 1){
-                $value->ticket_status = trans('messages.keyword_open');
-            } else if($value->ticket_status == 0){
-                $value->ticket_status = trans('messages.keyword_close');
-            }
-
-            $value->created_at = date('d-m-Y H:i:s', strtotime($value->created_at));
-            if($value->updated_at == '0000-00-00 00:00:00') {
-                $value->updated_at = '-';
-            } else{
-                $value->updated_at = date('d-m-Y H:i:s', strtotime($value->updated_at));
-            }
-
-            $tickets[] = $value;
-
-        }
-    
-        return json_encode($tickets);
-    }
-
-    public function problemstore(Request $request) {
-
-        $random_number = mt_rand(100000, 999999);
-        $rand_ticket = '#tic'.$random_number;
-        $user_id = $request->user()->id;
-
-        if($request->module_id == 1){
-
-            $entity = DB::table('corporations')
-                ->where('user_id', $user_id)
-                ->first();
-
-            $users = DB::table('enti_partecipanti')
-                ->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
-                ->where('enti_partecipanti.id_ente', $entity->id)
-                ->where('users.dipartimento', 2)
-                ->groupBy('id_user')->get()->toArray();
-        } 
-
-        if($request->module_id == 3){
-
-            $quote = DB::table('quotes')
-                ->where('idente', '!=', null)
-                ->where('user_id', $user_id)->first();
-
-            $users = DB::table('enti_partecipanti')
-                ->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
-                ->where('enti_partecipanti.id_ente', $quote->idente)
-                ->where('users.dipartimento', 2)
-                ->groupBy('id_user')->get()->toArray();
-        } 
-
-        if($request->module_id == 4){
-
-            $project = DB::table('projects')
-                ->where('user_id', $user_id)
-                ->where('id_ente', '!=', null)
-                ->first();
-            
-            $users = DB::table('enti_partecipanti')
-                ->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
-                ->where('enti_partecipanti.id_ente', $project->id_ente)
-                ->where('users.dipartimento', 3)
-                ->groupBy('id_user')->get()->toArray();
-        } 
-
-        if($request->module_id == 5){
-
-            $invoice = DB::table('tranche')
-                ->where('user_id', $user_id)
-                ->where('A', '!=', null)
-                ->first();
-            
-            $users = DB::table('enti_partecipanti')
-                ->leftJoin('users', 'enti_partecipanti.id_user', '=', 'users.id')
-                ->where('enti_partecipanti.id_ente', $invoice->A)
-                ->where('users.dipartimento', 1)
-                ->groupBy('id_user')->get()->toArray();
-        }
-
-        $user_ids = [];
-        foreach ($users as $value) {
-            $user_ids[] = $value->id;
-        }
-        $user_ids = implode(',', $user_ids);
-
-        DB::table('ticket_problem')->insert([
-            'problem' => $request->problem,
-            'random_tid' => $rand_ticket,
-            'user_id' => $user_id,
-            'module_id' => $request->module_id,
-            'participants_id'=> $user_ids,
-            'ticket_status' => 1,
-            'is_deleted' => 0
-        ]);
-
-        // foreach ($users as $value) {
-        //     $email = $value->email;
-        //     Mail::send('layouts.ticket_mail', ['user' => $users, 'email' => $email], function ($m) use ($users, $email) {
-        //         $m->from('easy@langa.tv', 'Easy LANGA');            
-        //         $m->to($email)->subject('Test Report Ticket');
-        //     });
-        // }
-
-        // $user_email = $request->user()->email;
-        // Mail::send('layouts.ticket_mail', ['user' => $users, 'email' => $user_email], function ($m) use ($users, $user_email) {
-        //     $m->from('easy@langa.tv', 'Easy LANGA');            
-        //     $m->to($user_email)->subject('Test Report Ticket');
-        // });
-
-        // $admin = DB::table('users')->where('id', 0)->first();
-        // $admin_email = $admin->email;
-        // Mail::send('layouts.ticket_mail', ['user' => $users, 'email' => $admin_email], function ($m) use ($users, $admin_email) {
-        //     $m->from('easy@langa.tv', 'Easy LANGA');            
-        //     $m->to($admin_email)->subject('Test Report Ticket');
-        // });
-        
-        return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_problem_send_successfully').'</div>');
-    }
-
-    public function ticketmodify(Request $request) {
-      
-        $id = '#tic'.$request->id;
-        return view('modifyticket',[
-            'ticket_problem' => DB::table('ticket_problem')->where('random_tid', $id)->first(),
-            'ticket_problems' => DB::table('ticket_problems')->where('problem_id', $id)->get(),
-            ]);
-    }   
-
-    public function ticketdelete(Request $request) {
-                
-        DB::table('ticket_problem')
-            ->where('ticket_id', $request->id)
-            ->update([ 'is_deleted' => 1]);
-
-        return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>');
-    }   
-
-    public function storereply(Request $request) {
-        
-        $id = DB::table('ticket_problems')->insertGetId([
-            'problem_id' => $request->ticketid,
-            'reply' => $request->message,
-            'user_id' => $request->user()->id,
-        ]);
-
-        if($id){
-
-            $time = time();
-            $date = date("Y-m-d H:i:s", $time);
-
-            DB::table('ticket_problem')->where('random_tid', $request->ticketid)->update([
-                'updated_at' => $date]);
-        }
-
-        $last_reply = DB::table('ticket_problems')->where('id',$id)->first();
-        return json_encode($last_reply);
-    }   
 }

@@ -34,7 +34,7 @@
 @endif
 
 @include('common.errors')
-
+<div class="modifica-blade-estimate">
 <div class="header-right">
   <div class="float-left">
       <h1>{{trans('messages.keyword_editproject')}} <?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?></h1><hr>
@@ -42,6 +42,7 @@
     <div class="header-svg">
          <img src="{{url('images/HEADER1_RT_PROJECT.svg')}}" alt="header image">
     </div>
+</div>
 </div>
 <?php /*
 <div class="progetti-header">
@@ -53,10 +54,8 @@
         <img src="{{url('images/HEADER1_RT_PROJECT.svg')}}" alt="header image">
     </div>
 </div>*/?>
-
 <div class="clearfix"></div>
 <div class="height20"></div>
-
 <?php echo Form::open(array('url' => '/progetti/modify/project/' . $progetto->id, 'files' => true, 'id'=>'project_edit')) ?>
     <?php $mediaCode = date('dmyhis');?>
     <input type="hidden" name="mediaCode" id="mediaCode" value="{{$mediaCode}}" />
@@ -94,8 +93,7 @@
 				$link_prev = url('/estimates/pdf/quote/') . '/'.  $progetto->id_preventivo;
 				$link_prev_noprezzi = url('/estimates/noprezzi/pdf/quote/') . '/'.  $progetto->id_preventivo;
 				?>        		    
-    		</div>
-            
+    		</div>            
             	<div class="modifica-blade-progetto">
                     @if(isset($progetto->id_preventivo) && $progetto->id_preventivo != "")
                     <a id="pdf" target="_blank" href="{{$link_prev}}" class="btn">
@@ -105,8 +103,7 @@
                     @if(isset($progetto->id_ente) && $progetto->id_ente != "")                    
     			    <a href="{{url('enti/modify/corporation').'/'.$progetto->id_ente}}" target="_blank" class="btn btn-warning">{{trans('messages.keyword_this_entity')}}</a>				                    
     				<a onclick="skypecall('{{$progetto->id_ente}}');" class="btn btn-warning">{{trans('messages.keyword_onlinereview')}}</a>
-                    @endif
-                	
+                    @endif                	
                 </div>
     	</div>
         	
@@ -127,12 +124,13 @@
 	            <table class="table table-bordered">
 	                <thead>
 	                   <th>#</th>
+                        <?php /*<th> {{ trans('messages.keyword_order') }} </th> */?>
 	                    <th>{{trans('messages.keyword_subject_state')}}</th>
 	                    <th>{{trans('messages.keyword_description')}}</th>	          
                         <th>{{trans('messages.keyword_processing_comments')}}</th>
 	                    <th>% {{trans('messages.keyword_of_completion')}}</th>
 	                </thead>
-	                <tbody id="lavorazioni">
+	                <tbody id="lavorazioni" class="lavorazioni">
 	                	<?php $p = 0; 
                         $processingCode = date('dmyhis');?>
 	                    @foreach($lavorazioni as $partecipante)
@@ -144,18 +142,30 @@
 	                            <td>
 	                                <input type="checkbox" id="checkNuL{{$p}}" class="selezione"><label for="checkNuL{{$p}}"></label>
 	                            </td>
+                                <?php /*<td><input name="ordine[]" type="number" class="form-control priority" value="{{isset($partecipante->ordine) ? $partecipante->ordine : $p }}" placeholder="{{ trans('messages.keyword_order') }}"></td>*/?>
                             <td>
-                                <input type="text" name="ric[]" value="<?php echo $partecipante->nome; ?>" class="form-control">
-                                <hr>
-                                <select class="form-control" name="completato[]">
-								@foreach($oggettostato as $key => $oggettostatoval)
-                                  <?php $label = (!empty($oggettostatoval->language_key)) ?  ucwords(strtolower(trans('messages.'.$oggettostatoval->language_key))) : (($oggettostatoval->nome)); ?>
-                               	<option value="{{$oggettostatoval->id}}" <?php if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato ) { echo 'selected';}?>>{{$label}}</option>
+                                <input type="text" name="ric[]" value="<?php echo $partecipante->nome; ?>" placeholder="{{trans('messages.keyword_subject_state')}}"  class="form-control">
+                                <hr>                                
+                                <select class="form-control" name="completato[]"><?php
+                                $proecessingd = $oggettostato;
+                                if(isset($partecipante->nome) && !empty($partecipante->nome)){
+                                    $arrprocessing = getprocessing($partecipante->nome);    
+                                    if(isset($arrprocessing['processing']) && !empty($arrprocessing['processing'])){
+                                       //$proecessingd = $arrprocessing['processing'];
+                                        $currentprocessing = $arrprocessing['currentprocessing'];
+                                    }
+                                }                                
+                                ?>
+								@foreach($proecessingd as $key => $oggettostatoval)
+                                  <?php $label = (!empty($oggettostatoval->language_key)) ?  ucwords(strtolower(trans('messages.'.$oggettostatoval->language_key))) : (($oggettostatoval->nome));
+                                  $selected = 0;
+                                   ?>
+                               	<option value="{{$oggettostatoval->id}}" <?php if(isset($partecipante->completato) && $oggettostatoval->id == $partecipante->completato ) { echo 'selected';$selected=1;}elseif(isset($currentprocessing) && $currentprocessing == $oggettostatoval->id && $selected == 0){ echo 'selected'; }?>>{{$label}}</option>
                                  @endforeach
                                 </select>
                             </td>
                             <td>
-                                <textarea class="form-control" name="descrizione[]">{{$partecipante->descrizione}}</textarea>
+                                <textarea class="form-control" placeholder="{{trans('messages.keyword_description')}}" name="descrizione[]">{{$partecipante->descrizione}}</textarea>
                             </td>
                             <td><a id="comment_processing{{$p}}" onclick="commentProcessing(this)" val="{{$partecipante->id}}" proc="{{$p}}" class="btn btn-warning btnprocesscomment">{{trans('messages.keyword_review')}}</a>
                             <input type="hidden" name="processing_code[]" id="processingcode_{{$p}}" value="{{$defaultcode}}"></td>
@@ -249,18 +259,28 @@
                        }
                         $(document).ready(function (e) {            
                             $("#btnsubmitcomments").on('click', (function (e) { 
+                                var comments = $("#comments").val();
+                                var is_private = 0;
+                                if($("#is_private").is(":checked")){
+                                    is_private = 1;
+                                }
+                                
+                                
+                                if(comments != ""){
                                 var urlfile = '<?php echo url('/projectprocessing/addcomment'); ?>';    
                                 //e.preventDefault();
                                 var formData = new FormData($('#frmComments')[0]);                                 
                                 /*formData.append('_token', '{{ csrf_token() }}');*/
-                                var comments = $("#comments").val();
+                                
                                 var processingid = $("#hdprocessingid").val();
                                 var hdCode = $("#hdCode").val();
+                                var hdcommentid = $("#hdcommentid").val();
+                                var hdaction = $("#hdaction").val();
                                 $('#show_alert_msg').html("");
                                 $.ajax({
                                     url: urlfile,
                                     type: "POST",
-                                    data: { "_token": "{{ csrf_token() }}",comments: comments,processingid:processingid,hdCode:hdCode },
+                                    data: { "_token": "{{ csrf_token() }}",comments: comments,is_private:is_private,processingid:processingid,hdCode:hdCode,commentid:hdcommentid,action:hdaction },
                                     success: function (data) {                        
                                       if(data =='fail'){
                                          $('#show_alert_msg').html('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>'+jslang_keyword_the_file_must_be_a_type_of_image+'! </div>');
@@ -268,8 +288,21 @@
                                       }
                                       else {
                                         //$('#frmComments')[0].reset();
+                                        $("#is_private").prop('checked',false);
                                         $("#comments").val("");
-                                        $("#newComment").modal('hide');
+                                        $("#hdcommentid").val('0');
+                                        $("#hdaction").val('add');
+                                        //$("#newComment").modal('hide');
+
+                                        var urlD = '<?php echo url('/project/getprocessingcomment'); ?>';
+                                        $.ajax({
+                                            url: urlD,
+                                            type: 'post',
+                                            data: { "_token": "{{ csrf_token() }}",id: processingid,code:hdCode },
+                                            success:function(data) {                                        
+                                                $("#commentlist").html(data);
+                                            }
+                                        });
                                         //$('#show_alert_msg').html("");
                                         //$("#frontlogopreview").html(data);
                                       }
@@ -277,8 +310,30 @@
                                     error: function () {
                                     }
                                 });
+                            }
                             }));
-                        });
+
+                            $('#newComment').on('shown.bs.modal', function(){                              
+                                $("#comments").val("");
+                                $("#hdcommentid").val('0');
+                                $("#hdaction").val('add');
+                            });
+                        });                    
+
+                        function editComment(commentid) {                            
+                            var comment = $("#listcomment_"+commentid).text();
+                            var isprivate = $("#hdisprivate_"+commentid).val();                            
+                            if(isprivate == 1) {                                                               
+                               $("#is_private").prop('checked',true);
+                            }
+                            else {                               
+                               $("#is_private").prop('checked',false);
+                            }                            
+                            $("#comments").val(comment);
+                            $("#hdcommentid").val(commentid);
+                            $("#hdaction").val('edit');                          
+                        }
+
                         /*$('.btnprocesscomment').on("click", function() {
                             alert($(this).attr('val'));
                         });*/                        
@@ -382,6 +437,7 @@
                         // descrizione.type = "textarea";
                         descrizione.className = "form-control";
                         descrizione.name = "descrizione[]";
+                        descrizione.placeholder="{{trans('messages.keyword_description')}}";
                         desc.appendChild(descrizione);
 						
                     var progress = document.createElement("td");
@@ -409,6 +465,7 @@
                 			input.placeholder = "{{trans('messages.keyword_writehere')}}";
                 			input.name = "ric[]";
                 			input.className = "form-control";
+                            input.placeholder="{{trans('messages.keyword_subject_state')}}" ;
                 			input.id = "editable" + kLav;
                 			appunti.appendChild(input);
 
@@ -416,7 +473,17 @@
                 			checkbox.appendChild(check);
                             checkbox.appendChild(checkboxLabel);
                 			tr.appendChild(checkbox);
-                			
+
+                            var ordine = document.createElement("input");
+                            ordine.type = "number";
+                            var qt1 = document.createElement("td");
+                            ordine.value = countlavorazioni;
+                            ordine.name = "ordine[]";
+                            ordine.className = "form-control priority";
+                            ordine.placeholder="{{ trans('messages.keyword_order') }}";
+                            qt1.appendChild(ordine);
+                			//tr.appendChild(qt1);
+
                             ora.appendChild(input);
                             ora.appendChild(hr);                  
                             ora.appendChild(select1);                			
@@ -500,10 +567,18 @@
                             <div class="" id="commentlist"></div>
                             <input type="hidden" name="hdprocessingid" id="hdprocessingid" value="0">
                             <input type="hidden" name="hdCode" id="hdCode" value="0">
+                            <input type="hidden" name="hdcommentid" id="hdcommentid" value="0">
+                            <input type="hidden" name="hdaction" id="hdaction" value="add">                            
                             <div class="">
-                             <div class="form-group">
-                                <label for="ente" class="control-label">{{ trans('messages.keyword_comment') }}</label>
-                                <textarea class="form-control required-input" name="comments" id="comments" rows="5" cols="10"></textarea>
+                                <div class="form-group">
+                                <div class="switch">
+                                    {{ trans('messages.keyword_private') }} <input id="is_private" name="is_private" value="1" type="checkbox"> 
+                                    <label for="is_private"></label>
+                                </div>                  
+                                </div>              
+                                <div class="form-group">
+                                    <label for="ente" class="control-label">{{ trans('messages.keyword_comment') }}</label>
+                                    <textarea class="form-control required-input" name="comments" placeholder="{{trans('messages.keyword_comment')}}" id="comments" rows="5" cols="10"></textarea>
                                 </div>                    
                             </div>                    
                             <br />
@@ -590,13 +665,13 @@
                 <div class="col-md-6 col-sm-12 col-xs-12">
                 	<div class="form-group">
                		 	<label for="preventivo">{{trans('messages.keyword_starttime')}}</label>
-                        <input value="{{ $progetto->datainizio }}" class="form-control" type="text" name="datainizio" id="datainizio" placeholder="{{trans('messages.keyword_starttime')}}">
+                        <input value="{{ $progetto->datainizio }}" class="form-control required-input   " type="text" name="datainizio" id="datainizio" placeholder="{{trans('messages.keyword_starttime')}}">
                     </div>    
                 </div>
                 <div class="col-md-6 col-sm-12 col-xs-12">
                 	<div class="form-group">
 		                <label for="preventivo">{{trans('messages.keyword_endtime')}}</label>
-                        <input value="{{ $progetto->datafine }}" class="form-control" type="text" name="datafine" id="datafine" placeholder="{{trans('messages.keyword_endtime')}}">
+                        <input value="{{ $progetto->datafine }}" class="form-control required-input" type="text" name="datafine" id="datafine" placeholder="{{trans('messages.keyword_endtime')}}">
                     </div>    
                 </div>
             </div>
@@ -652,13 +727,13 @@
 		                                <input type="checkbox" id="Sensitiv{{$k}}" val="{{$k}}" class="selezione"><label for="Sensitiv{{$k}}"></label>
 		                            </td>
 		                            <td>
-		                                <input name="nome[]" id="url_{{$k}}" class="form-control" value="{{$nota->nome}}">
+		                                <input name="nome[]" placeholder="{{trans('messages.keyword_url')}}" id="url_{{$k}}" class="form-control" value="{{$nota->nome}}">
 		                            </td>
 		                            <td>
-		                            	<input name="dett[]" class="form-control" value="{{$nota->user}}">
+		                            	<input name="dett[]" placeholder="{{trans('messages.keyword_user')}}" class="form-control" value="{{$nota->user}}">
 		                            </td>
                                     <td>
-		                            	<input name="pass[]" class="form-control" value="{{$nota->password}}">
+		                            	<input name="pass[]" placeholder="{{trans('messages.keyword_password')}}" class="form-control" value="{{$nota->password}}">
 		                            </td>
                                     <!-- <td>
 		                            	<input id="datepicker<?php echo $k;?>" type="text" name="scad[]" class="form-control" value="{{$nota->scadenza}}">
@@ -676,9 +751,9 @@
                          @for($i=0;$i< 3;$i++)
                           <tr>
                             <td><input class="selezione" id="Sensitiv{{$i}}" val="{{$i}}" type="checkbox"><label for="Sensitiv{{$i}}"></label></td>
-                            <td><input class="form-control" id="url_{{$i}}" name="nome[]" type="text"></td>
-                            <td><input class="form-control" name="dett[]" type="text"></td>
-                            <td><input class="form-control" name="pass[]" type="text"></td>
+                            <td><input class="form-control" id="url_{{$i}}" name="nome[]" placeholder="{{trans('messages.keyword_url')}}" type="text"></td>
+                            <td><input class="form-control" name="dett[]" placeholder="{{trans('messages.keyword_user')}}" type="text"></td>
+                            <td><input class="form-control" name="pass[]" placeholder="{{trans('messages.keyword_password')}}" type="text"></td>
                           </tr>
                         @endfor
                         @endif
@@ -741,6 +816,8 @@
 
 		                        fileInput.name = "nome[]";
                                 fileInput.id = "url_"+countnoteprivate;
+                                fileInput.placeholder="{{trans('messages.keyword_url')}}";
+
 
 		                        var dettagli = document.createElement("input");
 
@@ -749,11 +826,13 @@
 		                        dettagli.className = "form-control";
 
 		                        dettagli.name = "dett[]";
+                                dettagli.placeholder="{{trans('messages.keyword_user')}}";
 								
 								var password = document.createElement("input");
 		                        password.type = "text";
 		                        password.className = "form-control";
 		                        password.name = "pass[]";
+                                password.placeholder="{{trans('messages.keyword_password')}}";
 								
 								var scadenza = document.createElement("input");
 		                        scadenza.type = "text";
@@ -1067,7 +1146,7 @@
   <?php echo Form::close(); ?> 
          <div class="pull-right col-md-4 col-sm-12 col-xs-12">
          <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-12 col-sm-12 col-xs-12">
           	<div class="bg-white image-upload-box">
                 <label for="scansione">{{trans('messages.keyword_dropzone_for_multiple_file_upload')}}</label><br/>
                 @if(checkpermission('4', '18', 'scrittura','true'))
@@ -1139,9 +1218,17 @@
             //$.ajax({url: urlD, success: function(result){ }});
         }
         </script>
+        <div class="space30"></div>
+            <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="">
+                    <input type="text" class="form-control" name="searchmediabox" id="searchmediabox" placeholder="{{trans('messages.keyword_search_media')}}">
+                </div>
+            </div>
+            </div>
         <div class="set-height">
         <table class="table table-striped table-bordered">
-            <tbody><?php
+            <tbody id="mainmedialist"><?php
                     if(isset($progetto->id) && isset($projectmediafiles)){
                     foreach($projectmediafiles as $prev) {
                 $imagPath = url('/storage/app/images/projects/'.$prev->name);
@@ -1165,7 +1252,7 @@
                     $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a>'.$titleDescriptions.'</td></tr>'; 
                 }
                 $html .='<tr class="quoteFile_'.$prev->id.'"><td>';
-                $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();                           
+                $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->where('nome_ruolo','!=','SupperAdmin')->get();                           
                 foreach($utente_file as $key => $val){
                     $check = '';
                     $array = explode(',', $prev->type);
@@ -1175,10 +1262,10 @@
                     $specailcharcters = array("'", "`");
                     $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
                     if(checkpermission('4', '18', 'scrittura','true')){
-                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
                     }
                     else {
-                        $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" disabled readonly  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                        $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.trim($rolname).'_'.$prev->id.'" disabled readonly  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
                     }
                 }
                 echo $html .='</td></tr>';
@@ -1188,6 +1275,21 @@
                     <tbody id="files">
                     </tbody>
                     <script>
+                     $('#searchmediabox').keyup(function(e) {
+                    var keyvalue = $(this).val();
+                     var urlgetfile = '<?php echo url('/project/searchmedia/'.$progetto->id); ?>';   
+                     if(keyvalue !=""){
+                         var urlgetfile = '<?php echo url('/project/searchmedia/'.$progetto->id); ?>/'+keyvalue;   
+                     }   
+                    // if(e.keyCode == 13) {
+                     
+                     $.ajax({url: urlgetfile, success: function(result){
+                        $("#mainmedialist").html(result);
+                       // $(".dz-preview").remove();
+                        //$(".dz-message").show();
+                    }});
+                      //}
+                  });
                     
                         var selezione = [];
                         var nFile = 0;
@@ -1255,10 +1357,14 @@
                     {{ csrf_field() }}
                     @include('common.errors')                       
                     <div class="row">
-                        <div class="col-md-12">                               
+                        <div class="col-md-12">                                                           
                             <div class="form-group">
-                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }}  </label>
+                                <label for="title" class="control-label"> {{ ucfirst(trans('messages.keyword_title')) }} </label>
                                 <input value="{{ old('title') }}" type="text" name="title" id="title" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_title')) }} ">
+                            </div>
+                            <div class="form-group">
+                                <label for="url" class="control-label"> {{ ucfirst(trans('messages.keyword_url')) }}  </label>
+                                <input value="{{ old('url') }}" type="text" name="url" id="url" class="form-control required-input" placeholder="{{ ucfirst(trans('messages.keyword_url')) }} ">
                             </div>
                             <div class="form-group">
                                 <label for="descriptions" class="control-label"> {{ ucfirst(trans('messages.keyword_description')) }} </label>
@@ -1307,11 +1413,24 @@ $(document).ready(function() {
             rules: {
                 nomeprogetto: {
                     required: true
+                },
+                datainizio: {
+                    required: true
+                },
+                datafine: {
+                    required: true
                 }
             },
             messages: {
                 nomeprogetto: {
                     required: "{{trans('messages.keyword_please_enter_projectname')}}"
+                },
+                datainizio: {
+                    required: "{{trans('messages.keyword_please_enter_a_start_time')}}"
+                },
+                datafine: {
+                    required: "{{trans('messages.keyword_please_enter_a_end_time')}}"
+                    
                 }
             }
         });
@@ -1323,6 +1442,10 @@ $(document).ready(function() {
                 },
                 descriptions: {
                     required: true                    
+                },
+                url: {
+                  required: true,
+                  url:true  
                 }
             },
             messages: {
@@ -1331,9 +1454,28 @@ $(document).ready(function() {
                 },
                 descriptions: {
                     required: "{{trans('messages.keyword_please_enter_a_description')}}"
+                },
+                url: {
+                  required: "Please enter url",                    
+                  url:"Please enter valid url" 
                 }
             }
         });
+
+      $("#frmComments").validate({            
+            rules: {
+                comments: {
+                    required: true
+                }
+            },
+            messages: {                
+                comments: {
+                    required: "{{trans('messages.keyword_please_enter_a_description')}}"
+                }
+            }
+        });
+
+      
 
       $(function(){
         $('#commnetform').on('submit',function(e){

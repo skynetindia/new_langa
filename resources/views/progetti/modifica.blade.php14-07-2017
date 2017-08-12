@@ -1112,8 +1112,8 @@
         <div class="set-height">
         <table class="table table-striped table-bordered">
             <tbody><?php
-                if(isset($progetto->id) && isset($projectmediafiles)){
-                foreach($projectmediafiles as $prev) {
+                    if(isset($progetto->id) && isset($projectmediafiles)){
+                    foreach($projectmediafiles as $prev) {
                 $imagPath = url('/storage/app/images/projects/'.$prev->name);
                 $filename = $prev->name;            
                 $arrcurrentextension = explode(".", $filename);
@@ -1125,7 +1125,7 @@
                 if(isset($arrextension[$extention])){
                     $imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);          
                 }
-
+                
                 $titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";
                 $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
                 $html .='<tr class="quoteFile_'.$prev->id.'"><td>';

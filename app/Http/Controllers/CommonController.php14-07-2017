@@ -12,6 +12,10 @@ use Session;
 class CommonController extends Controller
 {   
 
+	public function __construct(Request $request){ 
+        $this->middleware('auth');
+    }
+
     public function downloadcsv(Request $request)
     {
               
@@ -255,6 +259,7 @@ class CommonController extends Controller
         } else {            
             return view('s.alertmail', [
                 'enti' => DB::table('corporations')
+					->where('is_deleted', '=', 0)
                     ->get(),
                 'role_type' => DB::table('ruolo_utente')
                     ->where('is_delete', '=', 0)

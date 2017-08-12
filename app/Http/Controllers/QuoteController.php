@@ -127,16 +127,29 @@ class QuoteController extends Controller
 				'date_time'=>time()
 			]);					
 	}
-	
+		
 	public function fileget(Request $request){	
 		DB::enableQueryLog();
 		if(isset($request->quote_id)){
-			$updateData = DB::table('media_files')->where('quote_id',$request->quote_id)->get();										
+			//$updateData = DB::table('media_files')->where('quote_id',$request->quote_id)->get();									
+			$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0'";
+		
+			$userprofileid = $request->user()->dipartimento;
+	 		$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
+	        $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+                
+			if(isset($request->term) && $request->term != ""){
+				$where = ($request->user()->id === 0 || $type === 'SupperAdmin') ? "" : " AND find_in_set('$userprofileid',type) <> 0";
+				$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0' $where  AND (title LIKE '%$request->term%' OR  description LIKE '%$request->term%')";
+			}			
+			$updateData = DB::select($query);
 		}
 		else {
-			$updateData = DB::select("SELECT * FROM media_files WHERE code=$request->code");
+			$query = "SELECT * FROM media_files WHERE code=$request->code";		
+			$updateData = DB::select($query);
 			/*DB::table('media_files')->where('code',$request->code)->get();*/				
 		}		
+		
 		foreach($updateData as $prev) {
 			$imagPath = url('/storage/app/images/quote/'.$prev->name);
 			$downloadlink = url('/storage/app/images/quote/'.$prev->name);
@@ -151,21 +164,26 @@ class QuoteController extends Controller
 					$imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);			
 				}
 			$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";			
-			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
 
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
-			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
+			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->where('nome_ruolo','!=','SupperAdmin')->get();							
 			foreach($utente_file as $key => $val){
 				if($request->user()->dipartimento == $val->ruolo_id){
 					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
 					$specailcharcters = array("'", "`");
                     $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 				else {
+					$check = '';
+					$array = explode(',', $prev->type);
+                    if(in_array($val->ruolo_id,$array)){                    
+                        $check = 'checked';
+                    }
 					$specailcharcters = array("'", "`");
                     $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" '.$check.' id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 			}
 			echo $html .='</td></tr>';
@@ -205,17 +223,21 @@ class QuoteController extends Controller
 				'created_at'=>date('Y-m-d H:i:s')
 			]);
 	
+		if($response) {
+			$this->createquoteinvoice($request->id);
+		}
 		echo ($response) ? 'success' :'fail';   				
 		exit;
 	}
 	
 	
 	public function getJsonMyestimates(Request $request)
-	{
+	{DB::enableQueryLog();
 		$particpantid=check_participant();
 		if(($request->user()->id == 0) || ($request->user()->dipartimento == 0)) {
 			$preventivi = DB::table('quotes')
-			->where('is_deleted', 0)			
+			->where('is_deleted', 0)
+			->orderBy('id', 'desc')			
 			->get();
 			$this->completeListCode($preventivi);
 			return json_encode($preventivi);
@@ -223,11 +245,108 @@ class QuoteController extends Controller
 		else {
 			$Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
         	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
-        	$arrwhere = ($type === 'Client') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0); 
+        	$arrwhere = ($type === 'Client' || Auth::user()->dipartimento == '16' || Auth::user()->dipartimento == '13') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0); 
 
-			$preventivi = DB::table('quotes')
-				->where($arrwhere)
-				->get();
+			$preventivi = DB::table('quotes')->where($arrwhere)->orderBy('id', 'desc')->get();
+			
+			$id = $request->user()->id;
+			foreach($preventivi as $prev) {
+				if($prev->user_id == $id || $prev->idutente == $id ||in_array($prev->idente,$particpantid))
+				   $to_return[] = $prev;				   
+			}
+			$this->completeListCode($to_return);
+			return json_encode($to_return);
+		}
+	}
+
+	public function getpendingquote(Request $request)
+	{
+
+		$particpantid=check_participant();
+		$userid = $request->user()->id;
+		if(($request->user()->id == 0) || ($request->user()->dipartimento == 0) || $request->type == 'all') {
+			$arrwhere['quotes.is_deleted'] = 0;
+            $arrwhere['statiemotivipreventivi.id'] = '9'; /* Pending Quotes */                        
+            $preventivi = DB::table('quotes')
+            ->Join('statipreventivi', 'statipreventivi.id_preventivo', '=', 'quotes.id')
+            ->Join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+            ->leftJoin('users', 'users.id', '=', 'quotes.user_id')
+            ->where($arrwhere)
+            ->where(function ($query) use ($userid)  {                
+                $query->where('quotes.user_id', $userid)
+                      ->orWhere('quotes.idutente', $userid);
+            })
+            ->select('users.color as color','users.name','quotes.*')->orderBy('quotes.id', 'desc')->get();                
+			$this->completeListCode($preventivi);
+			return json_encode($preventivi);
+		}
+		else {
+			$Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
+        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+        	$arrwhere = ($type === 'Client' || Auth::user()->dipartimento == '13' || Auth::user()->dipartimento == '16') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0); 
+
+			$arrwhere['quotes.is_deleted'] = 0;
+            $arrwhere['statiemotivipreventivi.id'] = '9'; /* Pending Quotes */                      
+            $preventivi = DB::table('quotes')
+            ->Join('statipreventivi', 'statipreventivi.id_preventivo', '=', 'quotes.id')
+            ->Join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+            ->leftJoin('users', 'users.id', '=', 'quotes.user_id')
+            ->where($arrwhere)
+            ->where(function ($query) use ($userid)  {                
+                $query->where('quotes.user_id', $userid)
+                      ->orWhere('quotes.idutente', $userid);
+            })
+            ->select('users.color as color','users.name','quotes.*')->orderBy('quotes.id', 'desc')->get();                
+
+			$id = $request->user()->id;
+			foreach($preventivi as $prev) {
+				if($prev->user_id == $id || $prev->idutente == $id ||in_array($prev->idente,$particpantid))
+				   $to_return[] = $prev;				   
+			}
+			$this->completeListCode($to_return);
+			return json_encode($to_return);
+		}
+	}
+
+	
+	public function getconfirmedquote(Request $request) {
+		$particpantid=check_participant();
+		$userid = $request->user()->id;
+		if(($request->user()->id == 0) || ($request->user()->dipartimento == 0) || $request->type == 'all') {
+			$arrwhere['quotes.is_deleted'] = 0;
+            $arrwhere['statiemotivipreventivi.id'] = '6'; /* Pending Quotes */                        
+            $preventivi = DB::table('quotes')
+            ->Join('statipreventivi', 'statipreventivi.id_preventivo', '=', 'quotes.id')
+            ->Join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+            ->leftJoin('users', 'users.id', '=', 'quotes.user_id')
+            ->where($arrwhere)
+            ->where(function ($query) use ($userid)  {                
+                $query->where('quotes.user_id', $userid)
+                      ->orWhere('quotes.idutente', $userid);
+            })
+            ->select('users.color as color','users.name','quotes.*')->orderBy('quotes.id', 'desc')->get();                
+
+			$this->completeListCode($preventivi);
+			return json_encode($preventivi);
+		}
+		else {
+			$Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
+        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+        	$arrwhere = ($type === 'Client' || Auth::user()->dipartimento == '16' || Auth::user()->dipartimento == '13') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0); 
+
+			$arrwhere['quotes.is_deleted'] = 0;
+            $arrwhere['statiemotivipreventivi.id'] = '6'; /* Pending Quotes */                      
+            $preventivi = DB::table('quotes')
+            ->Join('statipreventivi', 'statipreventivi.id_preventivo', '=', 'quotes.id')
+            ->Join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+            ->leftJoin('users', 'users.id', '=', 'quotes.user_id')
+            ->where($arrwhere)
+            ->where(function ($query) use ($userid)  {                
+                $query->where('quotes.user_id', $userid)
+                      ->orWhere('quotes.idutente', $userid);
+            })
+            ->select('users.color as color','users.name','quotes.*')->orderBy('quotes.id', 'desc')->get();                
+
 			$id = $request->user()->id;
 			foreach($preventivi as $prev) {
 				if($prev->user_id == $id || $prev->idutente == $id ||in_array($prev->idente,$particpantid))
@@ -238,10 +357,11 @@ class QuoteController extends Controller
 		}
 	}
 	
+	
 	public function getjson(Request $request)
 	{
 		$preventivi = DB::table('quotes')
-			->where('is_deleted', 0)
+			->where('is_deleted', 0)->orderBy('id', 'desc')
 			->get();
 		$this->completeListCode($preventivi);
 		return json_encode($preventivi);
@@ -477,6 +597,7 @@ class QuoteController extends Controller
 			if(isset($request->codici)) {
 				
 				$codice = $request->codici;
+				$ordine = $request->ordine;
 				$oggetto = $request->oggetti;
 				$descrizione = $request->desc;
 				$qta = $request->qt;
@@ -495,6 +616,7 @@ class QuoteController extends Controller
 					// Salvo l'optional
 					DB::table('optional_preventivi')->insert([
 						'id_preventivo' => $nuovopreventivo,
+						'ordine' => isset($ordine[$i]) ? $ordine[$i] : "",
 						'codice' => isset($codice[$i]) ? $codice[$i] : "",
 						'oggetto' => isset($oggetto[$i]) ? $oggetto[$i] : "",
 						'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : "",
@@ -536,13 +658,24 @@ class QuoteController extends Controller
     	}*/
 
 		// $this->authorize('modify', $quote);
+		$userprofileid = $request->user()->dipartimento;
+ 		$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
+        $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+        // print_r($type);
+        // exit;
+        if ($request->user()->id === 0 || $type === 'SupperAdmin') {
+			$quotefiles = DB::table('media_files')->select('*')->where('master_id', $quote->id)->where('master_type', '0')->get();
+		}
+		else {
+    		$quotefiles = DB::select("select * from media_files where master_id = ".$quote->id." AND master_type = '0' AND find_in_set('$userprofileid',type) <> 0");
+    	}
 
 		return view('estimates.modifica', [
 			'preventivo' => DB::table('quotes')
 								->select('*')
 								->where('id', $quote->id)
 								->first(),
-			'quotefiles' => DB::table('media_files')->select('*')->where('master_id', $quote->id)->where('master_type', '0')->get(),								
+			'quotefiles' => $quotefiles,								
 			'utenti' => DB::table('users')
 							->select('*')
 							->get(),
@@ -560,7 +693,7 @@ class QuoteController extends Controller
 								->select('*')
 								->get(),
 			'optional_preventivi' => DB::table('optional_preventivi')
-					->where('id_preventivo', $quote->id)
+					->where('id_preventivo', $quote->id)->orderBy('ordine', 'asc')
 					->get(),					
 			'quote_paymento' => DB::table('quote_paymento')
 					->where('qp_quote_id', $quote->id)
@@ -696,7 +829,7 @@ class QuoteController extends Controller
 
 		$logs = $this->logmainsection.' -> Update Quote (ID: '. $quote->id . ')';
 		storelogs($request->user()->id, $logs);
-
+		$emotionalstatusold = DB::table('statipreventivi')->where('id_preventivo', $quote->id)->first();		
 		if($request->statoemotivo!=null) {
 			// Aggiorno lo stato emotivo
 			/*$tipo = DB::table('statiemotivipreventivi')
@@ -753,9 +886,16 @@ class QuoteController extends Controller
 			$datapay = $request->datapay;
 			$amountper = $request->amountper;
 			$importo = $request->importo;
-			var_dump($datapay);
+			/*print_r($datapay);
+			echo ' >>> ';
+			print_r($amountper);
+			echo ' >>> ';
+			print_r($importo);
+			exit;*/
+
+			//var_dump($datapay);
 			for($i = 0; $i < count($datapay); $i++) {				
-				if(isset($amountper[$i]) && $amountper[$i] != "" && isset($datapay[$i]) && $datapay[$i] != ""){
+				if((isset($amountper[$i]) && $amountper[$i] != "") || (isset($datapay[$i]) && $datapay[$i] != "")){
 					$datapay[$i] = str_replace('/', '-', $datapay[$i]);				
 					DB::table('quote_paymento')->insert([
 						'qp_quote_id' => $quote->id,
@@ -793,6 +933,7 @@ class QuoteController extends Controller
 				// Salvo l'optional
 				DB::table('optional_preventivi')->insert([
 					'id_preventivo' => $quote->id,
+					'ordine' => isset($ordine[$i]) ? $ordine[$i] : "",
 					'codice' => isset($codice[$i]) ? $codice[$i] : "",
 					'oggetto' => isset($oggetto[$i]) ? $oggetto[$i] : "",
 					'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : "",
@@ -820,8 +961,130 @@ class QuoteController extends Controller
 			->where('code', $request->mediaCode)
 			->update(array('master_id' => $quote->id));
 
+		/*If new status confirmed AND Old status is not already confirmed then create invoice */
+		if($request->statoemotivo!=null && $request->statoemotivo == '6' && $emotionalstatusold->id_tipo != '6') {
+			$this->createquoteinvoice($quote->id);
+		}
+		
 		return Redirect::back()
 				->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_estimated_edited_correctly').'</div>');
+	}
+
+	public function createquoteinvoice($quoteId = "") {		
+    	
+    	if($quoteId=="") {
+    		return false;
+    	}
+		$quote = DB::table('quotes')->where('id', $quoteId)->first();
+		$dipartimento= (isset($quote->dipartimento) && !empty($quote->dipartimento)) ? $quote->dipartimento : '1';
+		$ente = DB::table('corporations')->where('id', $quote->idente)->first();
+
+    	$project = DB::table('projects')->where('id_preventivo', $quoteId)->first();  	  
+		$tipofattura = "FATTURA DI VENDITA"; /* Sales note */	
+		
+		$date = isset($quote->data) ? str_replace('/', '-', $quote->data) :  date('Y-m-d');
+		$datainserimento = date('Y-m-d', strtotime($date));		
+
+		/*$date = str_replace('/', '-', $request->datascadenza);
+		$datascadenza = date('Y-m-d', strtotime($date));*/
+
+		//$date = str_replace('/', '-', $request->data);
+		$emissione = date('Y-m-d', strtotime($date));
+
+		$tranche = DB::table('tranche')->insertGetId([
+                        'user_id' => Auth::user()->id,
+                        'id_disposizione' => isset($project->id) ? $project->id : '0',/* Project id */
+						'tipo' => 0,
+						//'datainserimento' => isset($request->datainserimento) ? $request->datainserimento : '',
+						'datainserimento' => $datainserimento,
+						'datascadenza' => isset($quote->finelavori) ? $quote->finelavori : '',
+						'percentuale' => 0,
+						'dettagli' => isset($quote->considerazioni) ? $quote->considerazioni : '',
+						/*'frequenza' => $request->frequenza,*/
+						'DA' => isset($quote->dipartimento) ? $quote->dipartimento : Auth::user()->dipartimento,
+						'A' => isset($quote->idente) ? $quote->idente : '',
+						'idfattura' => isset($request->idfattura) ? $request->idfattura : '',
+						'emissione' => $emissione,
+						'indirizzospedizione' => isset($ente->indirizzospedizione) ? $ente->indirizzospedizione : '',
+						'privato' => 0,
+						/*'testoimporto' => $request->importo_nopercentuale,*/
+						/*'base' => $request->base,*/
+						/*'modalita' => isset($request->modalita) ? $request->modalita : '',*/
+						'tipofattura' => $tipofattura,
+						'iban' => isset($ente->iban) ? $ente->iban : '',
+						/*'peso' => isset($request->peso) ? $request->peso : '',*/
+						/*'netto' => isset($request->netto) ? $request->netto : '',*/
+						/*'scontoaggiuntivo' => isset($request->scontoaggiuntivo) ? $request->scontoaggiuntivo : '',*/
+						/*'imponibile' => isset($request->imponibile) ? $request->imponibile : '',*/
+						/*'prezzoiva' => isset($request->prezzoiva) ? $request->prezzoiva : '',*/
+						/*'percentualeiva' => isset($request->percentualeiva) ? $request->percentualeiva : '',*/
+						/*'dapagare' => isset($request->dapagare) ? $request->dapagare : '',*/
+                      ]);
+
+		/* Medai files from project to qoute */
+		$arrwhere = (isset($project->id)) ? array('master_id'=>$project->id,'master_type'=>'1') : array('master_id'=>$quoteId,'master_type'=>'0');
+		$medifilesQuote = DB::table('media_files')->where($arrwhere)->get();
+		foreach ($medifilesQuote as $keymq => $valuemq) {
+			$mediafileid = DB::table('media_files')->insertGetId([
+					'name' => 'inv'.$valuemq->name,
+				    'master_id' => $tranche,
+					'type' => Auth::user()->dipartimento,					
+					'master_type' => 3,
+					'title' => $valuemq->title,
+					'description' =>$valuemq->description,
+					'created_at'=>time()
+				]);
+			if(isset($project->id)){
+				if(file_exists('storage/app/images/projects/'.$valuemq->name)){			
+					copy('storage/app/images/projects/'.$valuemq->name, 'storage/app/images/invoice/inv'.$valuemq->name);
+				}
+			}
+			else {
+				if(file_exists('storage/app/images/quote/'.$valuemq->name)){			
+					copy('storage/app/images/quote/'.$valuemq->name, 'storage/app/images/invoice/inv'.$valuemq->name);
+				}	
+			}
+		}
+
+		$logs = $this->logmainsection.' -> Add New Invoice (ID: '. $tranche . ')';
+		storelogs(Auth::user()->id, $logs);
+
+		//if($request->statoemotivo!=null) {
+			// Memorizzo lo stato emotivo
+			$tipo = DB::table('statiemotivipagamenti')->where('id', '12')->first();
+			if(isset($tipo->id)){
+				DB::table('statipagamenti')->insert([
+					'id_pagamento' => $tranche,
+					'id_tipo' => $tipo->id,
+				]);
+			}
+		//}
+		
+		/* ================= Invoice Body Sections ==================== */
+		$ordine = isset($quote->id) ? ':'.$quote->id.'/'.$quote->anno : '';
+		$project_refer_no = isset($project->id) ? ':'.$project->id.'/'.substr($project->datainizio, -2) : '';		
+		if(isset($quote->id)) {
+			$quote_optional = DB::table('optional_preventivi')->where('id_preventivo', $quote->id)->get();		
+			foreach ($quote_optional as $quoteopkey => $quoteopvalue) {
+				DB::table('corpofattura')->insert([
+						'id_tranche' => $tranche,
+						'ordine' => $ordine,
+						'project_refer_no'=>$project_refer_no,
+						'descrizione' => $quoteopvalue->descrizione,
+						'qta' => $quoteopvalue->qta,
+						'subtotale' =>$quoteopvalue->totale,
+						/*'scontoagente' => isset($scontoagente[$i]) ? $scontoagente[$i] : 0 ,
+						'scontobonus' => $scontobonus[$i],*/
+						'netto' => $quoteopvalue->prezzounitario,						
+						'percentualeiva' => 0,
+						'is_active' => 0,
+					]);
+			}
+		}
+		return true;
+		/*return redirect('/pagamenti/tranche/modifica/' . $tranche)
+                        ->with('error_code', 5)
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').'!</div>');*/
 	}
 	// Elimina un preventivo
 	public function deleteEstimates(Request $request, Quote $quote)
@@ -1015,7 +1278,9 @@ public function eliminaoptional(Request $request, Quote $quote)
 
 			
 		$pdf = new PDF('utf-8');
-		$pdf->mirrorMargins(1);
+		$pdf->shrink_tables_to_fit = 1;
+		//$pdf->tableMinSizePriority = false;
+		//$pdf->mirrorMargins(1);
 						
 		$header = \View::make('pdf.quotation_header')->render();				
 		$footer = \View::make('pdf.quotation_footer')->render();
@@ -1026,7 +1291,7 @@ public function eliminaoptional(Request $request, Quote $quote)
 		$pdf->SetHTMLFooter($footer, 'E');
 		
 		/*$pdf->AddPage('Portrait', margin-left, margin-right, margin-top, margin-bottom, margin-header, margin-footer, 'A4');*/
-		$pdf->AddPage('P', 0, 0, 40, 20, 0, 0, 'Letter');
+		$pdf->AddPage('P', 0, 0, 40, 15, 0, 0, 'Letter');
 		/*echo $header;
 		echo view('pdf.quotation', [
 			'preventivo' =>$preventivo,										
@@ -1038,7 +1303,8 @@ public function eliminaoptional(Request $request, Quote $quote)
 			'optional_preventivi'=>$optional_preventivi]);
 		echo $footer;
 		exit;*/
-
+		
+		
 		$pdf->loadView('pdf.quotation', [
 			'preventivo' =>$preventivo,										
 			'ente' => $ente,
@@ -1061,10 +1327,10 @@ public function eliminaoptional(Request $request, Quote $quote)
 	{
 		if(($request->user()->id == 0) || ($request->user()->dipartimento == 0)){
 			$quotes = DB::table('quotes')->where('is_deleted', 0)
-            ->where('user_id', $request->user()->id)->get();
+            ->where('user_id', $request->user()->id)->orderBy('id', 'desc')->get();
 		} else {
 			$quotes = DB::table('quotes')->where('is_deleted', 0)
-            ->where('user_id', $request->user()->id)->get();
+            ->where('user_id', $request->user()->id)->orderBy('id', 'desc')->get();
 		}
 
 		$jsonQuotes[] = '';

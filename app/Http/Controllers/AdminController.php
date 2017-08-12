@@ -521,14 +521,16 @@ class AdminController extends Controller
 				$numItems = count($phases);
 				$i = 0;
 				foreach($phases as $phase){
-					if(++$i === $numItems) {
-						$content .= '
-						"'.$phase->language_key.'" => "'.htmlspecialchars($phase->language_value).'"';
+					if($phase->language_value != "" && !empty($phase->language_value)) {
+						if(++$i === $numItems) {
+							$content .= '
+							"'.$phase->language_key.'" => "'.htmlspecialchars($phase->language_value).'"';
+						}
+						else {
+							$content .= '
+							"'.$phase->language_key.'" => "'.htmlspecialchars($phase->language_value).'",';
+						}					
 					}
-					else {
-						$content .= '
-						"'.$phase->language_key.'" => "'.htmlspecialchars($phase->language_value).'",';
-					}					
 				}
 				$content .= "]; ?>";
 				$fp = fopen($file,"wb");
@@ -664,8 +666,7 @@ class AdminController extends Controller
     {
         if($request->user()->id != 0) {
             return redirect('/unauthorized');
-        } else {
-            
+        } else {            
             DB::table('corporations')
                 ->where('id', $request->id)
                 ->update(array(
@@ -677,6 +678,159 @@ class AdminController extends Controller
             return Redirect::back()->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_rejected_successfully').' </div>');              
         }
     }
+
+    /*public function writesectordb(Request $request){
+    	$arrSector = json_decode(file_get_contents(asset('public/json/settori.json')));		
+    	foreach($arrSector as $keysector => $valsector){
+    	DB::table('sector')->insert([
+                'name' => $valsector,                
+                'date'=>date('Y-m-d')
+            ]);
+    	}
+    }*/  
+
+
+    /* ============================ Quiz Package section Start ========================  */
+    /* Package sesction listing : Paras */
+     public function sectors(Request $request) {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            return view('settings_sectors', [
+                'pacchetto' => DB::table('sector')
+                                ->select('*')
+                                ->where('id', '!=', 0)
+                                ->orderBy('id', 'desc')                                
+                                ->paginate(10),
+            ]);
+        }
+    }
+    // Language details
+    public function getjsonsector(Request $request) {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+		else { 
+			$data = DB::table('sector')
+                        ->select('*')
+                        ->where('id', '!=', 0)
+                         ->orderBy('id', 'desc')                                
+                        ->get();            
+			foreach($data as $data) {				
+				//$data->date = date_format($data->date,'Y-m-d');
+				$ente_return[] = $data;	
+			}
+			return json_encode($ente_return);
+        }
+    }
+   
+    public function modifysector(Request $request)
+    {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {
+            if($request->id){
+                return view('modifysector', [                   
+                    		'action'=>'edit',
+                    		'pacchetto_data' => DB::table('sector')
+                                ->select('*')
+                                ->where('id', $request->id)
+                                ->get()               
+                ]);
+            } 
+            else {
+                return view('modifysector', ['action'=>'add']);
+            }
+        }
+    }
+     
+    public function savesector(Request $request) {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|max:150'
+            ]);
+	        if ($validator->fails()) {
+	            return Redirect::back()->withInput()->withErrors($validator);
+	        }
+            
+	        if($request->id) {
+	            DB::table('sector')
+	                ->where('id', $request->id)
+	                ->update(array('name' => $request->name));     
+	                $this->writesectorjsonfile();       
+	            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_sector_updated_successfully').'</div>');
+	        } 
+	        else {
+	            DB::table('sector')->insert(array('name' => $request->name,'date' => date('Y-m-d H:i:s')));
+	            $this->writesectorjsonfile();
+	            return Redirect::back()
+	           ->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'.trans('messages.keyword_sector_added_successfully').'</div>');
+	        }        
+        }            
+    }
+    
+     public function destroysector(Request $request) {
+        if($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+             DB::table('sector')->where('id', $request->id)->delete();   
+            return Redirect::back()
+                            ->with('msg', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Sector Deleted Successfully!</div>');
+        }
+    }
+
+    /* this function is used to write the sector json file */
+	public function writesectorjsonfile($type=''){
+		$arrLanguages =  DB::table('sector')->select('*')->where('id', '!=', 0)->orderBy('name', 'asc')->get();		
+		$collection = collect($arrLanguages);		
+		$arrLanguages = $collection->toArray();			
+		$arrcontent= array();
+		foreach($arrLanguages as $key => $val){
+			$arrcontent[] = $val->name;						
+		}
+		$jsonconent = json_encode($arrcontent);
+		$path = './public/json';
+		if(!is_dir($path)) {
+			mkdir($path, 0775, true);				
+		}
+		$file = $path.'/settori.json';
+		if(is_file($file)){
+			unlink($file);				
+		}
+		if(!is_file($file)){				
+			$fp = fopen($file,"wb");
+			fwrite($fp,$jsonconent);
+			fclose($fp);		
+		}
+	}
+    /* ============================ Sector section ========================  */
+    
+    /* This function is used to update/delete *
+	public function sectorsupdatedelete(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {      
+        	foreach($request->chktasentitype as $key => $val) {        		
+        		$name = isset($request->name[$key]) ? $request->name[$key] : '';
+        		$languageKey = 'keyword_'.str_replace(" ","_",strtolower($request->name));							
+				$this->emotionlanguagetranslation($request->name,'add',$languageKey);
+	            if($request->action == 'delete') {
+					DB::table('sector')->where('id', $key)->delete();							
+	            }
+	            else {
+		           DB::table('sector')->where('id',$key)->update(array('name' => $name,'language_key'=>$languageKey));
+	            }          
+            }
+            $msg = ($request->action == 'delete') ? '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>' : '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' </div>';
+            return Redirect::back()->with('msg', $msg);
+        }
+    }   */
+	
 
     
 	
@@ -1557,27 +1711,31 @@ class AdminController extends Controller
     // getting list of users
     public function newregistratoutente(Request $request)
     {
-        if($request->user()->id != 0) {
-            return redirect('/unauthorized');
-        } else {
+        
             return view('newregistratoutente', [
                 'utenti' => DB::table('users')
                                 ->select('*')
                                 ->where('is_approvato', '=', 0)
                                 ->paginate(10),
             ]);
-        }
+       
     }
 
     public function newutentejson(Request $request)
     {   
-        $users = DB::table('users')
-                    ->select('*')
-                    ->where('is_approvato', '=', 0)
-                    ->get();
+        $query = DB::table('users as u')
+                    ->select('u.id','id_ente','name','email','cellulare','nome_ruolo')
+					 ->join('ruolo_utente as r','u.dipartimento','=','r.ruolo_id')
+                    ->where('is_approvato', '=', 0)->orderby('id','desc');
+					if(Auth::user()->dipartimento!=0)
+					{
+						 $query= $query ->where('dipartimento', '=', Auth::user()->dipartimento);
+					}
+                   $users=  $query->get();
         // dd($users);
 		$utenti = array();                   
         foreach ($users as $user) {
+			$user->id_ente=getentity($user->id_ente);
          $user->azione="<a class='btn btn-warning' id='approvare' href='".url('/approvare/'.$user->id)."' onclick=\"return confirm('".trans('messages.keyword_are_you_sure_you_want_to_approve_this_item?')."');\">".trans('messages.keyword_approve')." </a> 
              <a class='btn btn-danger' id='rifiutare' href='".url('/rifiutare/'.$user->id)."' onclick=\"return confirm('".trans('messages.keyword_are_you_sure_you_want_to_reject_this_item?')."');\">".trans('messages.keyword_reject')."  </a>";
           $utenti[] = $user;
@@ -1590,9 +1748,7 @@ class AdminController extends Controller
     // approve user
     public function approvareutente(Request $request)
     {
-        if($request->user()->id != 0) {
-            return redirect('/unauthorized');
-        } else {            
+                 
             DB::table('users')
                 ->where('id', $request->id)
                 ->update(array(
@@ -1601,15 +1757,13 @@ class AdminController extends Controller
             return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_approved_successfully').' </div>');
 
 
-        }
+        
     }
 
     // rejct user
     public function rifiutareutente(Request $request)
     {
-        if($request->user()->id != 0) {
-            return redirect('/unauthorized');
-        } else {
+       
             
             DB::table('users')
                 ->where('id', $request->id)
@@ -1617,7 +1771,7 @@ class AdminController extends Controller
                     'is_approvato' => 2));
 
 			return Redirect::back()->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '. trans('messages.keyword_rejected_successfully').' </div>');
-        }
+       
     }
 
     // Pacchetti list
@@ -2380,7 +2534,8 @@ class AdminController extends Controller
 
     public function menuadd() {
         $parent = DB::table("modulo")->select('*')->where('modulo_sub', null)->get();
-        $departments = DB::table("departments")->select('*')->get();
+        /*$departments = DB::table("departments")->select('*')->get();*/
+        $departments = DB::table("ruolo_utente")->select('*')->where('ruolo_id', '!=','0')->get();        		
         return view('menuaddmodify', 
 		['parent' => $parent,
 		'departments'=>$departments,
@@ -2390,8 +2545,8 @@ class AdminController extends Controller
     public function menumodify(Request $request) {
         $parent = DB::table("modulo")->select('*')->where('modulo_sub', null)->get();
         $menu = DB::table("modulo")->select('*')->where('id', $request->id)->first();
-        $departments = DB::table("departments")->select('*')->get();
-		
+        //$departments = DB::table("departments")->select('*')->get();
+        $departments = DB::table("ruolo_utente")->select('*')->where('ruolo_id', '!=','0')->get();        		
 		$language_transalation = DB::table('language_transalation')->where('language_key',$menu->tutorial_lang_key)->get();
 		//$language_transalation = DB::table('language_transalation')->where('id',$request->id)->first();
         //echo "<pre>"; print_r($menu);die;
@@ -2439,7 +2594,7 @@ class AdminController extends Controller
         }
 		
 		$avatar_image = "";
-		if ($request->avatar_image != null) {
+		if (isset($request->avatar_imag) && $request->avatar_image != null) {
             Storage::put('images/modulavtar/' . $request->file('avatar_image')->getClientOriginalName(), file_get_contents($request->file('avatar_image')->getRealPath()));
             $avatar_image = $request->file('avatar_image')->getClientOriginalName();
         } 
@@ -2447,7 +2602,7 @@ class AdminController extends Controller
         $status = $this->checkurl($request->menulink);
         $phase_key = 'keyword_'.str_replace(" ","_",strtolower($request->manuname));		
 		$keyword_tour_key = 'keyword_menutext_'.str_replace(" ","_",strtolower($request->manuname));
-
+		$deparments = isset($request->deparments) ? implode(",",$request->deparments) : '0'; 		
             DB::table('modulo')->insert([	
             	'modulo' => $request->manuname,
                 'phase_key' => $phase_key,
@@ -2455,7 +2610,7 @@ class AdminController extends Controller
                 'modulo_link' => isset($request->menulink) ? $request->menulink : '',
                 'modulo_class' => $request->menuclass,
                 'menu_active' => $status,
-                'dipartimento' => $request->deparments,
+                'dipartimento'=>$deparments,
                 'image' => $nome,
             	'type' => $request->menutype,
             	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
@@ -2632,6 +2787,7 @@ class AdminController extends Controller
                             ->withInput()
                             ->withErrors($validator);
         }
+        $deparments = isset($request->deparments) ? implode(",",$request->deparments) : '0';
 
     	$nome = "";
     	$oldMenuDetails = DB::table('modulo')->where('id', $request->id)->first();
@@ -2653,7 +2809,7 @@ class AdminController extends Controller
         }*/
 		
 		$avatar_image = $oldMenuDetails->avatar_image;
-		if ($request->avatar_image != null) {
+		if (isset($request->avatar_imag) && $request->avatar_image != null) {
             Storage::put('images/modulavtar/' . $request->file('avatar_image')->getClientOriginalName(), file_get_contents($request->file('avatar_image')->getRealPath()));
             $avatar_image = $request->file('avatar_image')->getClientOriginalName();
         } 
@@ -2703,6 +2859,7 @@ class AdminController extends Controller
                         'modulo_link' => isset($request->menulink) ? $request->menulink : '',
                         'modulo_class' => "",
                         'menu_active' => $status,
+                        'dipartimento'=>$deparments,
                         'image' => $nome,
 	                	'type' => $request->menutype,
 	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
@@ -2722,6 +2879,7 @@ class AdminController extends Controller
                         'modulo_link' => isset($request->menulink) ? $request->menulink : '',
                         'modulo_class' => "",
                         'menu_active' => $status,
+                        'dipartimento'=>$deparments,
                         'image' => $nome,
 	                	'type' => $request->menutype,
 	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
@@ -2741,6 +2899,7 @@ class AdminController extends Controller
                         'modulo_link' => isset($request->menulink) ? $request->menulink : '',
                         'modulo_class' => $request->menuclass,
                         'menu_active' => $status,
+                        'dipartimento'=>$deparments,
                         'image' => $nome,
 	                	'type' => $request->menutype,
 	                	'frontpriority' => isset($request->frontpriority) ? $request->frontpriority : '',
@@ -3541,6 +3700,139 @@ class AdminController extends Controller
         }
     }
 
+    public function quizextra(Request $request)
+	{
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+		else {
+			return view('quiz_extra', [
+				'type' => DB::table('quiz_rating_type')->orderBy('rating_id', 'desc')->get(),
+				'font_family' => DB::table('quiz_fontfamily')->orderBy('id', 'desc')->get(),
+				'font_size' => DB::table('quiz_fontsize')->orderBy('id', 'desc')->get()
+			]);
+        }
+    }
+	public function addratetype(Request $request)
+	{
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            // Creo il nuovo tipo e lo memorizzo nel DB masterdatatypes            
+            $languageKey = 'keyword_'.str_replace(" ","_",strtolower($request->name));							
+			$this->emotionlanguagetranslation($request->name,'add',$languageKey);
+
+            DB::table('quiz_rating_type')->insert([
+                'titolo' => $request->name,
+                'descrizione' => isset($request->description) ? $request->description : "",                
+                'language_key'=>$languageKey
+            ]);
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
+        }
+    }
+	
+	/* This function is used to update/delete */
+	public function updatedeleteratetype(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {      
+        	foreach($request->chktasentitype as $key => $val) {        		
+        		$name = isset($request->name[$key]) ? $request->name[$key] : '';
+        		$languageKey = isset($request->langkey[$key]) ? $request->langkey[$key] : '';
+        		$description = isset($request->description[$key]) ? $request->description[$key] : '';        		
+
+        		/*$languageKey = $this->emotionlanguagetranslation($name);*/
+        		$this->emotionlanguagetranslation($name,'update',$languageKey);
+	            if($request->action == 'delete') {
+					DB::table('quiz_rating_type')->where('rating_id', $key)->delete();							
+	            }
+	            else {
+		          DB::table('quiz_rating_type')->where('rating_id', $key)->update(array('titolo' => $name,'descrizione' => $description,'language_key'=>$languageKey));
+	            }          
+            }
+            $msg = ($request->action == 'delete') ? '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>' : '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' </div>';
+            return Redirect::back()->with('msg', $msg);
+        }
+    }
+
+    public function addfontfamily(Request $request)
+	{
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            // Creo il nuovo tipo e lo memorizzo nel DB masterdatatypes            
+            //$languageKey = 'keyword_'.str_replace(" ","_",strtolower($request->name));							
+			//$this->emotionlanguagetranslation($request->name,'add',$languageKey);
+
+            DB::table('quiz_fontfamily')->insert(['family' => $request->name]);
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
+        }
+    }
+	
+	/* This function is used to update/delete */
+	public function updatedeletefontfamily(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {      
+        	foreach($request->chktasentitype as $key => $val) {        		
+        		$name = isset($request->name[$key]) ? $request->name[$key] : '';
+        		/*$languageKey = isset($request->langkey[$key]) ? $request->langkey[$key] : '';
+        		  $description = isset($request->description[$key]) ? $request->description[$key] : '';        		
+        		*/        		
+        		//$this->emotionlanguagetranslation($name,'update',$languageKey);
+	            if($request->action == 'delete') {
+					DB::table('quiz_fontfamily')->where('id', $key)->delete();							
+	            }
+	            else {
+		          DB::table('quiz_fontfamily')->where('id', $key)->update(array('family' => $name));
+	            }          
+            }
+            $msg = ($request->action == 'delete') ? '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>' : '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' </div>';
+            return Redirect::back()->with('msg', $msg);
+        }
+    }
+	public function addfontsize(Request $request)
+	{
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } else {
+            // Creo il nuovo tipo e lo memorizzo nel DB masterdatatypes            
+            //$languageKey = 'keyword_'.str_replace(" ","_",strtolower($request->name));							
+			//$this->emotionlanguagetranslation($request->name,'add',$languageKey);
+
+            DB::table('quiz_fontsize')->insert(['size' => $request->name]);
+            return Redirect::back()->with('msg', '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').' </div>');
+        }
+    }
+	
+	/* This function is used to update/delete */
+	public function updatedeletefontsize(Request $request) {
+        if ($request->user()->id != 0) {
+            return redirect('/unauthorized');
+        } 
+        else {      
+        	foreach($request->chktasentitype as $key => $val) {        		
+        		$name = isset($request->name[$key]) ? $request->name[$key] : '';
+        		/*$languageKey = isset($request->langkey[$key]) ? $request->langkey[$key] : '';
+        		  $description = isset($request->description[$key]) ? $request->description[$key] : '';        		
+        		*/        		
+        		//$this->emotionlanguagetranslation($name,'update',$languageKey);
+	            if($request->action == 'delete') {
+					DB::table('quiz_fontsize')->where('id', $key)->delete();							
+	            }
+	            else {
+		          DB::table('quiz_fontsize')->where('id', $key)->update(array('size' => $name));
+	            }          
+            }
+            $msg = ($request->action == 'delete') ? '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_deletesuccessmsg').' </div>' : '<div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_editsuccessmsg').' </div>';
+            return Redirect::back()->with('msg', $msg);
+        }
+    }
+
+
+
     /* ==================================== Quiz Demo section END ======================================== */
 	
 	/* ==================================== Life Cost Indices section START======================================== */
@@ -3716,13 +4008,10 @@ class AdminController extends Controller
 
     protected function access(Request $request) {
         
-        $user = DB::table('users')
-                ->where('id', $request->userid)
-                ->first();
-
+        $user = DB::table('users')->where('id', $request->userid)->first();
         $request->session()->put('isAdmin', 1);
         $request->session()->put('adminID', Auth::id());
-        
+                
         if (Auth::loginUsingId($user->id)) {
             return redirect('/');
         }
@@ -3756,12 +4045,30 @@ class AdminController extends Controller
                         ->where('id', '!=', 0)
                         ->where('is_deleted', '=', 0)
                         ->get();            
-			foreach($data as $data) {								
+			foreach($data as $data) {
+				$checked = ($data->is_active==1) ? 'checked' : '';
+				if($data->is_active == 0){
+        		$data->status = '<div class="switch"><input class="quizpackagetogal" name="status" onchange="updateQuizStatus('.$data->id.')" id="activestatus_'.$data->id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$data->id.'"></label></div>';            	
+        		}
+        		else {
+        			$data->status = '<div class="switch"><input class="quizpackagetogal"  onchange="updateQuizStatus('.$data->id.')"  name="status" disabled id="activestatus_'.$data->id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$data->id.'"></label></div>';            	
+        		}
+
 				$ente_return[] = $data;	
 			}
 			return json_encode($ente_return);
         }
     }
+
+    public function updatequizpackstatus(Request $request) {						
+		$getActivecount = DB::table('pacchetto')->where(['id'=>$request->userid,'is_active' => 1])->count();
+		/*if($request->status == 0 && $getActivecount <= 1) {
+			return "2";		
+		}*/
+		$updateAll = DB::table('pacchetto')->update(array('is_active' => 0));
+		$update = DB::table('pacchetto')->where('id', $request->userid)->update(array('is_active' => $request->status));		
+		return ($update) ? 'true' : 'false';		
+	}
 	
     public function modifyquizpackage(Request $request)
     {
@@ -4089,8 +4396,7 @@ class AdminController extends Controller
       // send notification to users
     public function sendnotification(Request $request)
     {
-        if($request->user()->id != 0) {
-            
+        if($request->user()->id != 0) {            
             return redirect('/unauthorized');
 
         } else {
@@ -4134,9 +4440,7 @@ class AdminController extends Controller
 	                        if(isset($getrole)) {  
 
                         	$check = in_array($getrole->dipartimento, $ruolo);  
-
                         	if($check){
-
 	                        	$corporations = DB::table('corporations')
 	                                ->where('id', $getente->id_ente)
 	                                ->first();
@@ -4159,7 +4463,6 @@ class AdminController extends Controller
                                 ->update(array( 'is_sent' => 1 ));   
 
                                 $true = true;                  
-
                     			}
                         	} 
                         } 
@@ -4168,7 +4471,6 @@ class AdminController extends Controller
                 } else {
                 	
                 	foreach ($ruolo as $role) {
-
                         $getdept = DB::table('users')
                         	->select('id', 'dipartimento')
                             ->where('dipartimento', $role)
@@ -4176,7 +4478,6 @@ class AdminController extends Controller
                             ->get();                       	
 
                         foreach ($getdept as $getdept) {
-
 	                        $store = DB::table('invia_notifica')->insert([
 	                            'ruolo' => $role,
 	                            'user_id' => $getdept->id,
@@ -4189,7 +4490,6 @@ class AdminController extends Controller
 	                            'data_lettura' => '',
 	                            'conferma' => 'NON LETTO'
 	                        ]);
-
                             if($store) {
                             	$true = true;     
                             }	
@@ -4459,40 +4759,44 @@ class AdminController extends Controller
 
 	/*================================= Notification sections ============================================= */
 	/* get filter notification in json format  */
-	 public function notificationjson(Request $request) {
-       
+	public function notificationjson(Request $request) {       
       $userId = Auth::id();
-
-		$notifications = DB::table('invia_notifica')
-       ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
-       ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
-       ->where('user_id', $userId)
-       ->where('is_enabled', 0)
-       ->Where('notification_type', 'like', '%' .$request->find. '%')
-       ->orderBy('data_lettura', 'asc')	         
-       ->get()->toArray();
+      $today = date("Y-m-d");
+	
+      if($request->find != "") {
+      	$find = $request->find;
+			$notifications = DB::table('invia_notifica')
+	       ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
+	       ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
+	       ->where('user_id', $userId)->where('is_deleted', 0)
+	       ->where('is_enabled', 0)
+	       ->where('notifica.created_at', '=', $today)
+	       ->where(function ($query) use($find) {
+                $query->orWhere('notification_type', 'like', '%' .$find. '%')
+                      ->orwhere('notification_desc', 'like', '%' .$find. '%');
+            })	       
+	       ->orderBy('data_lettura', 'asc')	         
+	       ->get()->toArray();
+   		}
 
       // $html = '';
       $noti = [];
-
       if($notifications){
-
-      	foreach($notifications as $notification){
-				$date = $notification->created_at; $date = date_format(new DateTime($date), 'D-m-Y H:i:s'); 
-
-		  		$html = "<div id='replace-noti'><div class='chkbox-blk'> <div class='chkbox'> <input type='checkbox' id='notifi2'> <label for='notifi2'> notifi2 </label> </div> <div class='info'> <a href='" .url('/notifiche/delete') .'/' .$notification->id. "' onclick='return confirm('".trans('messages.keyword_sure_to_disable_notification')."?')'> <span>" .$notification->notification_type;
-				$html .="</span> <span class='time'>" .$date;
+      	foreach($notifications as $notification) {
+				$date = $notification->created_at; 
+				$date = date_format(new DateTime($date), 'd-m-Y H:i:s');
+		  		$html = "<div id='replace-noti'><div class='chkbox-blk'> <div class='chkbox'> <input type='checkbox' id='notifi2'> <label for='notifi2'> notifi2 </label> </div> <div class='info'><a href='".url('/notifiche/delete') .'/' .$notification->id."' onclick='return confirm('".trans('messages.keyword_sure_to_disable_notification')."?')'> <span>" .$notification->notification_type;
+				$html .= "</span> <span class='time'>" .$date;
 				$html .= "</span> <div class='message'>" .$notification->notification_desc;
-				$html .= "</div> </a> </div> </div> </div> ";
+				$html .= "</div></a></div></div></div>";
 		      $noti = $html;
-   		}	
-
-      } else {
+   		}
+      } 
+      else {
       	$html = "<div class='chkbox-blk'> <div class='chkbox'> </div> <div class='info'> <a href=''> <span> No matches Found";				
 			$html .= "</span> </div> </a> </div> </div> ";
 			$noti = $html;
-      }
-   	
+      }   	
       return $noti;
     }
 

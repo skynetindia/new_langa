@@ -1,9 +1,7 @@
 @extends('layouts.app')
 @section('content')
 @if(!empty(Session::get('msg')))
-
 <script>
-
 var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
 
 document.write(msg);
@@ -22,7 +20,7 @@ document.write(msg);
 
   <!-- HTML Structure -->
 <div class="row quiz-wizard">
-  <div class="col-md-12">
+  <div class="col-md-12 col-sm-12 col-xs-12">
     <h1> {{ trans('messages.keyword_quiz') }} </h1>
     <div class="wizard wizard-step-line">
       <div class="wizard-inner">
@@ -44,16 +42,16 @@ document.write(msg);
           
             <input type="hidden" name="quizid" id="quizid" value="{{ $quizid}}"/>
 
-            <div class="left-side col-md-6">
+            <div class="left-side col-md-6 col-sm-12 col-xs-12">
 
               <div class="row">        
               	<div class="col-md-12"><h5> <b> {{ trans('messages.keyword_legal_office_billing') }} </b> </h5> </div>                   
                 
-                    <div class="col-md-6"> 
+                    <div class="col-md-6 col-sm-12 col-xs-12"> 
 	                    @isset($order->indirizzo) {{ $order->indirizzo }} @endisset 
     	              </div>
 
-                  <div class="col-md-6">
+                  <div class="col-md-6 col-sm-12 col-xs-12">
 	                  <p> <b> {{ trans('messages.keyword_vat_identification_number') }}: </b> </p>
     	                @isset($order->vat_number) {{ $order->vat_number }} @endisset                                             
                   </div>
@@ -64,7 +62,7 @@ document.write(msg);
 
               <div class="row"> 
 
-                <div class="col-md-12"> 
+                <div class="col-md-12 col-sm-12 col-xs-12"> 
                   <h4> <b> {{ trans('messages.keyword_item_of_order') }} </b> </h4> 
                   <span> SITO WEB LANGA WEB- {{ trans('messages.keyword_package') }}</span>
                   <br>
@@ -79,7 +77,7 @@ document.write(msg);
 
               <div class="row"> 
 
-                <div class="col-md-8">         
+                <div class="col-md-8 col-sm-12 col-xs-12">         
                 
                 	<h4> <b> {{ trans('messages.keyword_accounting_plan') }} </b> </h4>
                          
@@ -124,12 +122,12 @@ document.write(msg);
                                    
                 </div> 
 
-                <div class="col-md-4 text-right">      
+                <div class="col-md-4 col-sm-12 col-xs-12 text-right">      
                 	 <h4> <b> {{ trans('messages.keyword_deposit') }} 20% </b> </h4>
                 </div> 
               <input type="hidden" id="tax" name="tax" value="<?php echo (isset($vat->tassazione_percentuale) ? $vat->tassazione_percentuale : 0); ?>">
 
-            	<div class="col-md-8"> <hr>
+            	<div class="col-md-8 col-sm-12 col-xs-12"> <hr>
                   <?php if(isset($order->totale_prezzo)) {
                     $tdiscount = $total*20 / 100;
                     $tassazione_percentuale = isset($vat->tassazione_percentuale) ? $vat->tassazione_percentuale : 0;
@@ -146,7 +144,7 @@ document.write(msg);
                   </span>
                 </div>
                 
-                <div class="col-md-4 text-right">     <div class="height30"></div> 
+                <div class="col-md-4 col-sm-12 col-xs-12 text-right">     <div class="height30"></div> 
                   <button id="confirm" class="btn btn-warning confirm" disabled="disabled"> {{ trans('messages.keyword_confirm') }} </button>
                 </div> 
          
@@ -161,15 +159,15 @@ document.write(msg);
 
             <input type="hidden" id="quoteid" name="quoteid" value="">
 
-            <div class="right-side col-md-6" id="right_side">
+            <div class="right-side col-md-6 col-sm-12 col-xs-12" id="right_side">
 
 			<div class="height550">
             <div class="row">
-              		<div class="header-top col-md-12"><b> {{ trans('messages.keyword_stamp_signature_for_acceptance') }} :</b>_______________________</div>
+              		<div class="header-top col-md-12 col-sm-12 col-xs-12"><b> {{ trans('messages.keyword_stamp_signature_for_acceptance') }} :</b>_______________________</div>
               <br><br>
-             		<div class="col-md-12 middle-top"> <b>{{ trans('messages.keyword_cap_object') }}:</b> SITO WEB LANGA WEB - {{ trans('messages.keyword_package') }} % WEB </div>
+             		<div class="col-md-12 col-sm-12 col-xs-12 middle-top"> <b>{{ trans('messages.keyword_cap_object') }}:</b> SITO WEB LANGA WEB - {{ trans('messages.keyword_package') }} % WEB </div>
               <br><br>
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
               <p>
                 <b> {{ $reference->nomereferente }} </b> {{ trans('messages.keyword_of') }} {{ $reference->nomeazienda }}<br>
                 
@@ -178,7 +176,7 @@ document.write(msg);
               </p>
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
               <p>
                 <b>  {{ trans('messages.keyword_date') }}: @isset($quote->created_at) </b>
                 {{  Carbon\Carbon::parse($quote->created_at)->format('d/m/Y') }} @endisset  <br>
@@ -193,14 +191,14 @@ document.write(msg);
 
             <div class="row">
               
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
                 <div class="innr-head"><h3> <b> {{ trans('messages.keyword_from') }}  </b> </h3></div>
 
-                <div class="col-md-3">
+                <div class="col-md-3 col-sm-12 col-xs-12">
                    <img src="{{ asset('storage/app/images/'.$departments->logo) }}" height="50" width="50">
                 </div>
 
-                <div class="col-md-9">
+                <div class="col-md-9 col-sm-12 col-xs-12">
                 	<ul class="list-unstyled">
 		                <li>{{ trans('messages.keyword_responsible') }} Easy Langa: {{ $departments->nomereferente }}</li>
                 		<li>{{ $departments->nomedipartimento }}</li>
@@ -212,17 +210,17 @@ document.write(msg);
                 
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
 
                 <div class="innr-head"><h3> <b> {{ trans('messages.keyword_to') }}  </b> </h3></div>
 
-                <div class="col-md-3">
+                <div class="col-md-3 col-sm-12 col-xs-12">
                 @if(isset($quiz_detail->logo) && $quiz_detail->logo != "")
                   <img src="{{ asset('storage/app/images/quiz/'.$quiz_detail->logo) }}" height="50" width="50">
                 @endif
                 </div>
 
-                <div class="col-md-9">
+                <div class="col-md-9 col-sm-12 col-xs-12">
                 	<ul class="list-unstyled">
 		                 <li>{{ trans('messages.keyword_contact') }}:</li>
 		                 <li>@isset($order->nome_azienda) {{ $order->nome_azienda }} @endisset</li>
@@ -238,7 +236,7 @@ document.write(msg);
             
             <div class="row">
               
-              <div class="col-md-12">
+              <div class="col-md-12 col-sm-12 col-xs-12">
 
               <?php if(isset($order_record)) { ?>
               
@@ -273,14 +271,76 @@ document.write(msg);
               <?php } ?>
           
               </div>
+              
+              
 
             </div>
+            <div class="missing-pdf-step-six">
+			<div class="row">
+            	<div class="col-md-8 col-sm-12 col-xs-12">
+                	<b>{{strtoupper(trans('messages.keyword_considerations'))}} : {{ $quiz_detail->id.'/'.date('y',strtotime($quiz_detail->created_at)).' | '.$reference->nomeazienda }}</b>
+                    <p></p>
+                    
+                    	<div class="text-center">
+                        	<div class="orange">MODALITA'DI PAGAMENTO: A CONSEGNA MATERIALE</div>
+                            <span>Per maggiori informazioni tecniche o di dettaglio fiscale: RESPONSABILE LANGA: <b>prata1201 | +39 320 4486586</b></span>
+                            <p>VALENZA PREVENTIVO > 08/09/2016</p>
+                        </div>
+                </div>
+                
+                <div class="col-md-4 col-sm-12 col-xs-12">
+                	<div class="border">{{strtoupper(trans('messages.keyword_work_presence_of_terms'))}}</div>
+                    <div class="middle"><img src="{{asset('images/pdfimages/delivery-bg.jpg')}}"/></div>
+                    <div class="date-box"><b></b> <img src="{{asset('images/pdfimages/box.png')}}" style=""></div>
+                    
+                    
+                    <div class="total row">
+                    	<h3>TOTALE DOVUTO</h3>
+                        <div class="col-md-4 col-sm-12 col-xs-12">TOTALE</div>
+                        <div class="col-md-8 col-sm-12 col-xs-12">€ 330.00</div>
+                         <div class="col-md-4 col-sm-12 col-xs-12">SCONTO</div>
+                        <div class="col-md-8 col-sm-12 col-xs-12">6% + 8% (€ 19.80 + € 24.82)</div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-4 col-sm-12 col-xs-12">TOTALE SCONTATO</div>
+                        <div class="col-md-8 col-sm-12 col-xs-12">€ 285.38</div>
+                        <div class="col-md-4 col-sm-12 col-xs-12">TOTALE DA PAGARE</div>
+                        <div class="col-md-8 col-sm-12 col-xs-12">€ 280.00 + IVA</div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+            
+            
+            <div class="description-line">
+            	<div class="row">
+                	<div class="col-md-12 col-sm-12 col-xs-12"></div>
+                    <div class="col-md-12 col-sm-12 col-xs-12"></div>
+                    <div class="col-md-12 col-sm-12 col-xs-12"></div>
+                    <div class="col-md-12 col-sm-12 col-xs-12"></div>
+                    <div class="col-md-12 col-sm-12 col-xs-12"></div>
+                </div>
+            </div>
+            
+            <div class="footer-pdf">
+	            <div class="row">
+                	<div class="col-md-3 col-sm-12 col-xs-12">
+                    	<img src="images/footer-logo.png"/>
+                    </div>
+                    <div class="bg-black-pdf col-md-9 col-sm-12 col-xs-12">
+                    	<div class="inline-block-img"><img src="{{url('images/footer-icon.png')}}"></div>
+                        <div class="inline-block-txt">MATERIALE PROTETTO DA COPYRIGHT LANGA WEB INFORMATICA FIRMATICA FIRMANDO QUESTO DOCUMENTO SI ACCETTA/AUTHORIZZA WEB INFORMATICA AD INIZIARE | PROCESS | TECNICI/AMMINISTRATIVI/COMMERCIALI APPLICANDO | METODI DI LAVORO LANGA. INFO SU</div>
+                    </div>
+    	        </div>
+            </div>
+		</div>
 
 			<div class="step-six-fixed">
 				<div class="row">
-                	<div class="col-md-10"><div class="auto-wrapper"> <textarea name="emailid" id="emailid" cols="100"></textarea><div id="auto-target"></div> </div></div>
+                	<div class="col-md-10 col-sm-12 col-xs-12"><div class="auto-wrapper"> <textarea name="emailid" id="emailid" cols="100"></textarea><div id="auto-target"></div> </div></div>
                   <input type="hidden" name="entityid" id="entityid" value="">
-                    <div class="col-md-2 text-right">  <button class="btn btn-warning" id="sendEmail"> {{ trans('messages.keyword_send') }} </button></div>
+                    <div class="col-md-2 text-right col-sm-12 col-xs-12">  <button class="btn btn-warning" id="sendEmail"> {{ trans('messages.keyword_send') }} </button></div>
                 </div>
             </div>
               
@@ -447,8 +507,8 @@ $("#down_payment").click(function(e){
     var discount_tax = 0;
       $('#ediscount').on('click', function(){      
       $('#confirm').attr("disabled", false);      
-      $('#ediscount').css("background-color", "green");
-      $('#tdiscount').css("background-color", "white");
+      $('#ediscount').addClass('amount-paid');
+      $('#tdiscount').removeClass('amount-paid');
       payment_status = 3;
       discount = $('#discounte').text();
       discount_tax = $('#etax').text();  
@@ -456,8 +516,9 @@ $("#down_payment").click(function(e){
 
     $('#tdiscount').on('click', function(){      
       $('#confirm').attr("disabled", false);
-      $('#tdiscount').css("background-color", "green");
-      $('#ediscount').css("background-color", "white");
+	   $('#ediscount').removeClass('amount-paid');
+      $('#tdiscount').addClass('amount-paid');
+     
       payment_status = 1;
       discount = $('#discountt').text();
       discount_tax = $('#ttax').text();
@@ -465,8 +526,6 @@ $("#down_payment").click(function(e){
 
     $('#confirm').on('click', function(){  
 
-      var ecolor = $('#ediscount').css( "background-color" );
-      var tcolor = $('#tdiscount').css( "background-color" );
       if(payment_status == 3){
        var discount = $('#discounte').text();
         var discount_tax = $('#etax').text();   
@@ -475,17 +534,7 @@ $("#down_payment").click(function(e){
         var discount = $('#discountt').text();
         var discount_tax = $('#ttax').text();
       }
-      /*if ($("#ediscount").css('background-color') =="rgb(0, 128, 0)") {
-        var payment_status = 3;
-        var discount = $('#discounte').text();
-        var discount_tax = $('#etax').text();       
-      } 
-
-      if ($("#tdiscount").css('background-color')=="rgb(0, 128, 0)") {
-        var payment_status = 1;
-        var discount = $('#discountt').text();
-        var discount_tax = $('#ttax').text();
-      }*/ 
+     
 
       if($("#stepsix").prop("checked") == true){
         var agent_discount = 10;
@@ -504,10 +553,10 @@ $("#down_payment").click(function(e){
             'discount':discount, 'discount_tax':discount_tax,
             'agent_discount':agent_discount
           },
-        url: '{{ url('stepsix/confirm') }}',
+        url: '{{ url("stepsix/confirm") }}',
         success:function(data) {
           console.log(data);
-          // location.reload();
+          //window.location=data;
         }
       });
 

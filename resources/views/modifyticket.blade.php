@@ -15,31 +15,9 @@
 
 @include('common.errors')
 
-<style type="text/css">
-   
-#msg {
-    border-radius: 25px;
-    background-color: #73AD21;
-    padding: 10px;  
-    color: black;  
-    font-size: 14;
-}
 
-#msg1 {
-    border-radius: 25px;
-    background-color: #717D7E;
-    padding: 10px;  
-    color: black; 
-    text-align: right; 
-    font-size: 14;
-}
 
-#time {
-    font-size: 8;   
-    text-align: right; 
-}
-
-</style>
+<div class="ticket-modify">
 
 <div class="header-right">
   <div class="float-left">
@@ -47,24 +25,27 @@
     </div>
 </div>
 
+<div class="clearfix"></div>
+
 <?php echo Form::open(array('url' => '', 'files' => true)) ?>
 
 {{ csrf_field() }}
 
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="form-group">
             <label> {{ trans('messages.keyword_message') }} </label>
             <textarea name="message" id="message" rows="10" cols="40" class="form-control"></textarea>
             <input type="hidden" id="ticketid" name="ticketid" value="{{ $ticket_problem->random_tid }}">
-            <br>
-            <input type="file" id="image" name="image" class="form-control">
+      
+           
         </div>
     </div>
 
     
 
-    <div class="col-md-4">
+    <div class="col-md-4 col-sm-12 col-xs-12">
+    	<div class="form-group"> <input type="file" id="image" name="image" class="form-control"></div>
         <div class="form-group"> 
         <label> {{ trans('messages.keyword_ticket_status') }}: </label>
         <div class="switch">
@@ -75,17 +56,19 @@
     </div>
     <br>
 </div>
-
+<div class="row">
+<div class="col-md-12 col-sm-12 col-xs-12">
 <button id="reply" type="button" class="btn btn-warning" <?php if($ticket_problem->ticket_status == 0) echo "disabled"; ?> >{{trans('messages.keyword_send')}}</button>
-
 <a href="{{ url('tickets')}}" id="cancel" name="cancel" class="btn btn-danger">{{trans('messages.keyword_clear')}}</a>
+</div>
+</div>
 
 <br><br>
 <div class="row">
-    <div class="col-md-8">
-
+    <div class="col-md-6">
+		<div class="chat-box">
         <div class="myproblem">
-            <div id="msg"> 
+            <div id="msg" class="heading"> 
                 <p style="font-size: 18px;">{{ $ticket_problem->path }}</p>
                 <p style="text-align: right;font-size: 10px;">
             <?php            
@@ -97,7 +80,7 @@
             <div class="col-md-8" >
                 <p> {{ $ticket_problem->problem }} </p>    
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 text-right">
                 <img src="{{ asset('storage/app/images/problems/'.$ticket_problem->image)}}" height="150" width="150">
             </div>
         </div>
@@ -105,9 +88,9 @@
         <div class="reply">
         <?php   if(isset($ticket_reply)){ 
                 foreach ($ticket_reply as $value) { ?>
-                <div id="<?php if($value->user_id == Auth::user()->id) echo 'msg1'; else echo 'msg';?>"> <?php echo $value->reply;
+                <div id="<?php if($value->user_id == Auth::user()->id) echo 'msg1'; else echo 'msg';?>" class="<?php if($value->user_id == Auth::user()->id) echo 'msg1'; else echo 'msg';?>"> <?php echo $value->reply;
 
-                $date = date('d-m-Y H:i:s', strtotime($value->created_at));
+   $date = date('d-m-Y H:i:s A', strtotime($value->created_at));
                 echo $date; ?> </div>
 
         <?php } } ?>
@@ -115,6 +98,8 @@
         </div>
         <div class="append"></div>
     </div>
+    </div>
+</div>
 </div>
 
 <script type="text/javascript">
@@ -172,7 +157,7 @@ $(document).ready(function () {
             success:function( data ){
                 console.log(data);
                 var reply = JSON.parse(data);
-                $(".append").attr('id', 'msg1');
+                $(".append").attr('class', 'msg1');
                 $( ".append" ).append(reply.reply +" "+ reply.created_at);
                 $('#message').val('');
                 CKEDITOR.instances['message'].setData('');

@@ -24,14 +24,14 @@ else {
 }
 ?>
     {{ csrf_field() }}
-    <div class="col-md-12">
-        <div class="col-md-3">
+    <div class="row">
+        <div class="col-md-3 col-sm-12 col-xs-12">
         	<div class="form-group">
         	<label for="manuname">{{trans('messages.keyword_menu_name')}}</label>
             <input name="manuname" id="manuname" placeholder="{{trans('messages.keyword_menu_name')}}" class="form-control hasDatepicker" value="{{isset($menu->modulo) ? $menu->modulo : old('manuname')}}" type="text"></div>
 			</div>
             
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-12 col-xs-12">
         	<div class="form-group">
             <label for="menutype"> {{trans('messages.keyword_type')}}: </label>
             <select name="menutype" id="menutype" class="js-example-basic-single form-control">
@@ -117,7 +117,7 @@ else {
 
         </script>
 
-        <div class="col-md-3 none" id="parent" >
+        <div class="col-md-3 none col-sm-12 col-xs-12" id="parent" >
         	<div class="form-group">
             <label for="parentmenu">{{trans('messages.keyword_parent')}}</label>
             <select name="parentmenu" id="parentmenu" class="js-example-basic-single form-control">
@@ -135,7 +135,7 @@ else {
             </select>      
             </div>  
         </div>
-        <div class="col-md-3 none" id="optionsub">
+        <div class="col-md-3 none col-sm-12 col-xs-12" id="optionsub">
         	<div class="form-group">
             <label for="submenu"> {{trans('messages.keyword_sub_menu')}} </label>
             <select name="submenu" id="submenu" class="js-example-basic-single form-control"></select>
@@ -146,13 +146,13 @@ else {
         </script>
     </div>
 
-    <div class="col-md-12">
-        <div class="col-md-3">
+    <div class="row">
+        <div class="col-md-3 col-sm-12 col-xs-12">
         	<div class="form-group"><label for="menulink">{{trans('messages.keyword_menu_link')}}</label>
             <input name="menulink" id="menulink" placeholder="{{trans('messages.keyword_menu_link')}}" class="form-control hasDatepicker" value="{{isset($menu->modulo_link) ? $menu->modulo_link : old('menulink')}}" type="text"></div></div>
-        <div class="col-md-3"><div class="form-group"><label for="menuclass">{{trans('messages.keyword_menu_class')}}</label>
+        <div class="col-md-3 col-sm-12 col-xs-12"><div class="form-group"><label for="menuclass">{{trans('messages.keyword_menu_class')}}</label>
             <input name="menuclass" id="menuclass" placeholder="{{trans('messages.keyword_menu_class')}}" class="form-control hasDatepicker" value="{{isset($menu->modulo_class) ? $menu->modulo_class : old('menuclass')}}" type="text"></div></div>
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-12 col-xs-12">
         	<div class="form-group">
             <label for="deparments">{{trans('messages.keyword_departments')}}</label>
             <select name="deparments" id="deparments" class="js-example-basic-single form-control">
@@ -164,15 +164,15 @@ else {
             </div>
         </div>
 
-        <div class="col-md-3"><div class="form-group"><label for="manuname"> Menu {{trans('messages.keyword_image')}} </label>
+        <div class="col-md-3 col-sm-12 col-xs-12"><div class="form-group"><label for="manuname"> Menu {{trans('messages.keyword_image')}} </label>
             <input name="image" id="image" class="form-control hasDatepicker" value="" type="file"></div>
         </div>
 
     </div>
 
-    <div class="col-md-12">
+    <div class="row">
         
-        <div class="col-md-3 none" id="frontorder">
+        <div class="col-md-3 none col-sm-12 col-xs-12 " id="frontorder">
         	<div class="form-group">
         <label for="order" > {{trans('messages.keyword_front_menu_priority')}}   </label>
             <input name="frontpriority" id="frontpriority" class="form-control hasDatepicker" 
@@ -180,34 +180,34 @@ else {
         </div>
         	</div>
 
-        <div class="col-md-3 none" id="backorder">
+        <div class="col-md-3 none col-sm-12 col-xs-12" id="backorder">
         	<div class="form-group">
         <label for="order" > {{trans('messages.keyword_back_menu_priority')}}   </label>
             <input name="backpriority" id="backpriority"  class="form-control hasDatepicker" 
             value="{{isset($menu->backpriority) ? $menu->backpriority : old('priority')}}" type="text">
             </div>
         </div>
-
-        <div class="col-md-3">
+<?php /* 
+        <div class="col-md-3 col-sm-12 col-xs-12">
             <div class="form-group">
                 <label for="manuname"> Avtar {{trans('messages.keyword_image')}} </label>
                 <input name="avatar_image" id="avatar_image" class="form-control" value="" type="file">
                 <label for="avatar_image" generated="true" class="error none" id="logo_validatio_msg"></label>
             </div>
         </div>
-        <div class="col-md-2 logopreview" id="logopreview"> 
+        <div class="col-md-2 logopreview col-sm-12 col-xs-12" id="logopreview"> 
             <div class="img-border-preview" style="<?php echo (isset($menu->avatar_image) && $menu->avatar_image != "") ? 'display:block' :'display:none';?>"> <?php if(isset($menu->avatar_image)) { ?> <img src="{{url('/storage/app/images/modulavtar').'/'.$menu->avatar_image}}" height="100" width="100" class="img-responsive" ><?php } ?>
             </div>
-        </div>
+        </div>*/?>
     </div>
-      <div class="col-sm-12">
-        <div class="form-group">
+  <?php /* <div class="row">   <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="form-group admin-lang-tab">
           <ul class="nav nav-tabs">
             @foreach ($language as $key => $val)
             <li class="<?php echo ($val->code=='en')?'active':'';?>"><a data-toggle="tab" href="<?php echo '#'.$val->code;?>"><?php echo $val->name;?></a></li>
             @endforeach
           </ul>
-          <br>
+        
           <div class="tab-content"> 
           @foreach ($language as $key => $val)
             <?php 
@@ -217,7 +217,7 @@ else {
               }
             ?><div id="<?php echo $val->code;?>" class="tab-pane fade <?php echo ($val->code=='en')?'in active':'';?>">
             <div class="row">
-              <div class="col-sm-12">
+              <div class="col-md-12 col-sm-12 col-xs-12">
                 <label> {{trans('messages.keyword_avatar_comic')}} </label>
                 <textarea class="form-control" rows="10"  name="<?php echo $val->code.'_keyword_desc';?>" id="<?php echo $val->code.'_keyword_desc';?>"><?php if(isset($phase_data->language_value) && $phase_data->language_value != ""){ echo $phase_data->language_value;}?>
 </textarea>
@@ -227,10 +227,10 @@ else {
             @endforeach </div>
         </div>
       </div>
-
-    <div class="col-md-12">
-        <div class="col-md-3"><button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button></div>
-    </div>
+	</div>*/?>
+    
+   <div class="row">     <div class="col-md-3 col-sm-12 col-xs-12"><button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button></div></div>
+    
 
 </form>
 

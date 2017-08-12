@@ -10,6 +10,7 @@ use Storage;
 use Mail;
 
 use App\Http\Requests;
+use App\Http\Controllers\PaypalController;
 
 class QuizController extends Controller
 {
@@ -33,7 +34,8 @@ class QuizController extends Controller
 	public function checkentity(Request $request){	  	
 
 		$step = DB::table('corporations')
-			->where('nomeazienda', $request->company_name)
+		->select("nomeazienda","nomereferente","settore","piva","indirizzo","telefonoazienda","email","user_id","id")
+			->where("nomeazienda", $request->company_name)
 			->first();
  		
 		if(!empty($step->nomeazienda)) {			
@@ -97,8 +99,8 @@ class QuizController extends Controller
 		} 
 		$logoquiz="";
 		// Memorizzo l'immagine nella cartella public/imagesavealpha
-		Storage::put('images/quiz/' . $request->file('logo')->getClientOriginalName(), file_get_contents($request->file('logo')->getRealPath()));
-		$logoquiz = $request->file('logo')->getClientOriginalName();
+		//Storage::put('images/quiz/' . $request->file('logo')->getClientOriginalName(), file_get_contents($request->file('logo')->getRealPath()));
+		//$logoquiz = $request->file('logo')->getClientOriginalName();
 
 		/*Storage::put('images/quiz/'. $request->file('logo')->getClientOriginalName(), file_get_contents($request->file('logo')->getRealPath()));*/
 
@@ -234,6 +236,9 @@ class QuizController extends Controller
 			->where('user_id', $request->user()->id)
 			->where('quiz_id', $request->id)
 			->first();	
+			$quizdetail=DB::table('quiz_dati')
+		 			->where('id', $request->id)
+		 			->first();
 
 		if($last_show) {
 	 		
@@ -252,13 +257,15 @@ class QuizController extends Controller
 				'quizid'=>$request->id,                 
 				'detail_id'=>$request->id,
 				'last_show' => $last_show,
-			]);
+				'quizdetail'=>$quizdetail,
+				]);
 
 		} else {
 
 			return view('quiz.step-two', [          
 			'quizdemodettagli' => DB::table('quizdemodettagli')->get(),
-			'quizid' =>$request->id,            
+			'quizid' =>$request->id, 
+			'quizdetail'=>$quizdetail ,	          
 			]);
 
 		}
@@ -266,13 +273,18 @@ class QuizController extends Controller
 	}
 
 	public function getQuizDetails(Request $request){
-
+		$curr_timestamp = date('Y-m-d H:i:s');
+		DB::table('quiz_dati')
+			->where('id', $request->quizid)
+			
+			->increment('rate_counter',1,['rate_id'=>$request->id,'updated_at'=>$curr_timestamp]);
+		
 		$demodettagli = DB::table('demo_detail_show')
 			->where('quiz_id', $request->quizid)
 			->first();
-
+		
 		if(isset($demodettagli)){
-			$curr_timestamp = date('Y-m-d H:i:s');
+			
 			DB::table('demo_detail_show')
 			    ->where('quiz_id', $demodettagli->quiz_id)
 				->update(array('view_count' => $request->view_count, 'quizdemodettagli_id' => $request->id, 'show_date' => $curr_timestamp));
@@ -281,7 +293,8 @@ class QuizController extends Controller
 				'quizdemodettagli_id' => $request->id,
 				'user_id' => $request->user()->id,
 				'quiz_id' => $request->quizid,
-				'view_count' => $request->view_count
+				'view_count' => $request->view_count,
+				'show_date' => $curr_timestamp
 			]);
 		}
 
@@ -330,12 +343,24 @@ class QuizController extends Controller
 			->select(DB::raw('AVG(rating) as average'))
 			->where('quiz_rating_type_id', $request->quiz_rating_type_id)
 			->where('demo_detail_id', $request->demo_detail_id)->get();
-
+		
+		$avg_rate = DB::table('quiztype_user_rat')
+			->select(DB::raw('AVG(rating) as average'))
+			->where('quiz_rating_type_id', $request->quiz_rating_type_id)
+			->get();
+			
+			DB::table('quiz_rating_type')
+			->where('rating_id', $request->quiz_rating_type_id)
+			->increment('tot_counter',1,['avg_rate'=>$avg_rate[0]->average]);
+			
+			
 		// check already rated or not
 		$already = DB::table('quiz_avg_rate')			
 			->where('demo_detail_id', $request->demo_detail_id)
 			->where('rating_type_id', $request->quiz_rating_type_id)->count();  
-
+			
+		
+			
 		if($already > 0){			
 		   	$true = DB::table('quiz_avg_rate')
 		   		->where('demo_detail_id', $request->demo_detail_id)
@@ -438,7 +463,7 @@ class QuizController extends Controller
 		}   
 
 		$pacchetto = DB::table('pacchetto')
-				->where('id', 1)
+				->where('is_active', 1)
 				->first();
 
 		$quiz = DB::table('quiz_user')
@@ -452,9 +477,9 @@ class QuizController extends Controller
 		$pacchetto_price = $pacchetto->prezzo_pacchetto;
 		$price_perpage = $pacchetto->per_pagina_prezzo;
 
-		$pages = $request->input('pages');
-		$total_pages = substr_count($pages, ',') + 1;
-
+		 $pages = $request->input('pages');
+		 $total_pages = substr_count($pages, ',') + 1;
+		
 		if( $total_pages > $pacchetto_pages ) {
 			$extra_pages = $total_pages - $pacchetto_pages;
 			$additional_price = $price_perpage * $extra_pages;
@@ -473,7 +498,7 @@ class QuizController extends Controller
 					'pagine' => $pages,
 					'totale_pagine' => $total_pages,                
 					'colore_primario' => $request->colore_primario,
-					'colore_secondario' => isset($request->colore_secondario) ? 					$request->colore_secondario : '',
+					'colore_secondario' => isset($request->colore_secondario) ?$request->colore_secondario : '',
 					'colore_alternativo' => isset($request->colore_alternativo) ? $request->colore_alternativo : '',
 					'font_dimensione' => isset($request->fontsize) ? $request->fontsize : '',
 					'font_famiglia' => isset($request->fontfamily) ? $request->fontfamily : '',
@@ -485,6 +510,8 @@ class QuizController extends Controller
 				->where('pacchetto_id', '!=', 0)
 				->update(array(             
 					'qty' => $total_pages,
+					'label' => isset($pacchetto->nome_pacchetto) ?$pacchetto->nome_pacchetto : '-',
+					'description' => isset($pacchetto->description) ? $pacchetto->description: '-',
 					'prezzo_base' => $pacchetto->prezzo_pacchetto,
 					'prezzo_totale' => $pacchetto_price
 				));  
@@ -540,8 +567,8 @@ class QuizController extends Controller
 					'quiz_id' => $quiz->quiz_id,
 					'nome_azienda' => $quiz->nome_azienda,  
 					'pacchetto_id' => $pacchetto->id,
-					'label' => isset($pacchetto->label) ? : '-',
-					'description' => isset($pacchetto->description) ? : '-',
+					'label' => isset($pacchetto->nome_pacchetto) ?$pacchetto->nome_pacchetto : '-',
+					'description' => isset($pacchetto->description) ? $pacchetto->description: '-',
 					'optional_id' => '',
 					'tipo' => 'pacchetto',
 					'qty' => $total_pages,
@@ -611,7 +638,7 @@ class QuizController extends Controller
 		
 		$totale_elementi = $order->totale_elementi + 1;
 		$totale_prezzo = $order->totale_prezzo + $request->price;
-
+		$optional=DB::table('optional')->where('id', $request->optioan_id)->first();
 		$true = DB::table('store_optioanl')
 			->insertGetId([
 				'user_id' => $request->user()->id,
@@ -634,6 +661,7 @@ class QuizController extends Controller
 				'description' => isset($request->icon_description) ? $request->icon_description : '-',
 				'tipo' => 'optional',
 				'qty' => 1,
+				'frequency'=>$optional->frequenza,
 				'prezzo_base' => $request->price,
 				'prezzo_totale' => $request->price
 			]);
@@ -745,7 +773,7 @@ class QuizController extends Controller
 			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100" onclick="displayFile(this, '.$prev->id.' )"><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 
-			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
+			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->where('ruolo_id','!=','0')->get();							
 			foreach($utente_file as $key => $val){
 				if($request->user()->dipartimento == $val->ruolo_id){
 					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
@@ -802,7 +830,7 @@ class QuizController extends Controller
 	}
 
 	public function stepsix(Request $request){
- 		
+ 		$this->stepsixsetup($request);exit();
  		$departments = DB::table('departments')
 			->where('nomedipartimento', 'LANGA WEB')->first();
 
@@ -829,9 +857,80 @@ class QuizController extends Controller
 					->where('quiz_id', $request->id)->first(),			
 	    ])->with('departments', $departments)->with('reference', $reference)->with('quiz_detail', $quiz_detail);
 	}
+	
+	public function stepsixsetup($request){
+		$quizid = $request->id;
+		$order = DB::table('quiz_order')
+			->where('quiz_id', $quizid)->first();
+		$entity = DB::table('corporations')
+			->where('nomeazienda', $order->nome_azienda)->first();
+		$date = date("d/m/Y"); $time = date("his");
+
+		$departments = DB::table('departments')
+			->where('nomedipartimento', 'LANGA WEB')->first();
+
+		$total_project = DB::table('projects')->where('is_deleted', 0)->where('statoemotivo', '!=', 11)->count();
+
+		$avg_project = DB::table('projects')->where('is_deleted', 0)->where('statoemotivo', '!=', 11)->avg('progresso');
+
+		$projects = DB::table('projects')
+			->select(DB::raw('AVG(progresso) as average'))
+			->where('is_deleted', 0)->where('statoemotivo', '!=', 11)
+			->get();
+
+		$days = isset($total_project) ? $total_project*5 : 5;
+		$remaining_avg = isset($avg_project) ? 100 - $avg_project : 0;
+		
+		$days = ceil($days*$remaining_avg/100);
+		$year = date("Y");
+		$valence = date('d/m/Y', strtotime("+ $days days"));
+		$show_date = date('Y-m-d', strtotime("+ $days days"));
+		$enddate = date("d/m/Y",strtotime($show_date."+7 day"));
+		echo $quoteid = DB::table('quotes')->updateOrCreate([	
+			'quiz_id' =>$quizid ,
+			'user_id' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
+			'idutente' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
+			'idente' => $entity->id,
+			'data' => isset($date) ? $date : '',
+			'oggetto' => isset($order->nome_azienda) ? trans('keyword_quiz_pacchetto').' '.$order->nome_azienda : '',
+			'dipartimento' => isset($departments->id) ? $departments->id : 0,
+			//'scontoagente' => isset($request->agent_discount) ? $request->agent_discount : 0,
+			'valenza' => isset($valence) ? $valence : '',
+			'finelavori' => isset($enddate) ? $enddate : '',
+			'progress' => isset($remaining_avg) ? $remaining_avg : 0,
+			'subtotale'=> isset($order->totale_prezzo) ? $request->totale_prezzo : 0,
+			'totale' => isset($order->totale_prezzo) ? $request->totale_prezzo : 0,
+			//'totaledapagare' => isset($request->discount_tax) ? $request->discount_tax : 0,
+			
+			//'nome_azienda' => isset($order->nome_azienda) ? $order->nome_azienda : '',
+			//'email' => isset($order->email) ? $order->email : '',
+			//'settore_merceologico' => isset($order->settore_merceologico) ? $order->settore_merceologico : '',	
+			//'vat_number' => isset($order->vat_number) ? $order->vat_number : '',
+			//'indirizzo' => isset($order->indirizzo) ? $order->indirizzo : '',
+			//'telefono' => isset($order->telefono) ? $order->telefono : '',	
+			'totale_elementi' => isset($order->totale_elementi) ? $order->totale_elementi : 0,
+			'anno' => date('y'),
+			//'prezzo_confermato' => isset($request->total) ? $request->total : 0
+		]);	
+		$optional = DB::table('order_record')
+			->where('quiz_id', $quizid)->get();
+		foreach($optional as $optional)
+		{
+			DB::table('quotes')->updateOrCreate([
+			'oggetto' =>  $optional->label,
+			'descrizione' =>  $optional->description,
+			'qta'=>$optional->qty,
+			'prezzounitario'=>$optional->prezzo_base,
+			'totale'=>$optional->prezzo_totale,
+			'Ciclicita'=>$optional->frequency,
+			]);
+		}
+			
+	}
+	
 
 	public function stepsixSendEmail(Request $request){
-
+		
 		$emails = explode(",", $request->input('email'));
 		$entityids = explode(",", $request->input('entityids'));
 		$quizid = $request->input('quizid');
@@ -860,6 +959,9 @@ class QuizController extends Controller
 		}
 		return 'true';
 	}
+	
+	
+	
 	public function getentity(Request $request){
 		 $label = $request->term;
 		 $entity = DB::table('corporations')->where('is_deleted', '=', 0)->limit('10')->get(); 
@@ -914,13 +1016,13 @@ public function stepsixconfirm(Request $request){
 
 		$days = isset($total_project) ? $total_project*5 : 5;
 		$remaining_avg = isset($avg_project) ? 100 - $avg_project : 0;
-
-		$days = $days*$remaining_avg/100;
+		
+		$days = ceil($days*$remaining_avg/100);
 		$year = date("Y");
-		$valence = date('d/m/Y', mktime( 0, 0, 0, 0, $days, $year));
-		$show_date = date('Y-m-d', mktime( 0, 0, 0, 0, $days, $year));
-		$enddate = date("d/m/Y",strtotime($show_date."+7 day"));
-
+		echo $valence = date('d/m/Y', strtotime("+ $days days"));
+		echo $show_date = date('Y-m-d', strtotime("+ $days days"));
+		echo $enddate = date("d/m/Y",strtotime($show_date."+7 day"));
+		exit(); 
 		$quoteid = DB::table('quotes')->insertGetId([			
 			'user_id' => isset($order->user_id) ? $order->user_id : 0,
 			'idutente' => isset($order->user_id) ? $order->user_id : 0,
@@ -957,8 +1059,10 @@ public function stepsixconfirm(Request $request){
 			'totale' => isset($request->total) ? $request->total : 0,
 			'payment_status' => $payment_status
 		]);	
-
-		return $quoteid;	
+		$paypal=new PaypalController();
+		return $redirect=$paypal->getCheckout(['amount'=>$request->total,'description'=>'Payment for quiz section purchase under'.$order->nome_azienda.'for quiz id '.$quoteid]);
+		 
+		//return $quoteid;	
 	}
 
 	public function stepseven(Request $request){

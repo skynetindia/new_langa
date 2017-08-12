@@ -96,7 +96,7 @@ function multipleAction(act) {
   });
   switch(act) {
     case 'delete':
-      link.href = "{{ url('/taxation/delete/') }}" + '/';
+      link.href = "{{ url('/admin/tassonomie/dipartimenti/delete/department/') }}" + '/';
       if(check() && n!=0) {
         for(var i = 0; i < n; i++) {
           $.ajax({
@@ -106,7 +106,7 @@ function multipleAction(act) {
               if(url.status==403) {
                 link.href = "{{ url('/admin/tassonomie/dipartimenti/delete/department') }}" + '/' + indici[n];
                 link.dispatchEvent(clickEvent);
-                          } 
+              } 
             }
                     });
         }

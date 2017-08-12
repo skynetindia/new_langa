@@ -38,7 +38,7 @@
     	<input name="idfattura" value="{{ $tranche->idfattura }}" type="hidden">   
     @endif
 <div class="row">
-	<div class="col-md-8">
+	<div class="col-md-8 col-sm-12 col-xs-12">
     	    <script>
 			"use strict";
 			$.datepicker.setDefaults(
@@ -395,6 +395,7 @@
 	    	</table>
 	    	</div>
 			<h4> {{ trans('messages.keyword_base_invoice') }} </h4><a onclick="calcola()"  class="" title=" {{ trans('messages.keyword_assembled_compilation') }} "><br>{{ trans('messages.keyword_click') }}  <i class="fa fa-info"></i> {{ trans('messages.keyword_for_compilation') }} </i></a>
+            <div class="table-responsive">
 	   	<table class="table table-bordered">
 	   		<thead>
 	   			
@@ -460,13 +461,14 @@
 				</script>
 	   		</tbody>
 	   	</table>
+        </div>
 	<div class="row">
-    <div class="col-md-2">
+    <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-desktop">
 		<input onclick="mostra2()" type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_save') }}">
 	</div>
     </div>
 	</div>
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
     	<div class="clearfix"></div>
         <div class="height10"></div>
         
@@ -587,11 +589,11 @@
 		</script>
 		</form>          	
 			<div class="row">
-          	<div class="col-md-12">
+          	<div class="col-md-12 col-sm-12 col-xs-12">
             <div class="bg-white image-upload-box">
 	        <label for="scansione"> {{ trans('messages.keyword_attach_administrative_file') }} </label>            
             <div class="row">
-	        <div class="col-md-12">
+	        <div class="col-md-12 col-sm-12 col-xs-12">
             	<div class="image_upload_div">
                 <?php echo Form::open(array('url' => '/add/fatture/uploadfiles/'. $mediaCode, 'files' => true,'class'=>'dropzone')) ?>
 						{{ csrf_field() }}
@@ -730,6 +732,13 @@
             </div>
 		
 	</div>
+    
+   
+    <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-mobile">
+		<input onclick="mostra2()" type="submit" class="btn btn-warning" value="{{ trans('messages.keyword_save') }}">
+	</div>
+  
+    
 </div>
 <div class="footer-svg">
   <img src="{{url('images/FOOTER2_RB_ACCOUNTING.svg')}}" alt="footer enti image">

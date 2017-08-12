@@ -39,11 +39,11 @@
         </ul>
       </div>      
 
-      <div class="step-content step-two step-six">
+      <div class="step-content step-six">
           
             <input type="hidden" name="quizid" id="quizid" value="{{ $quizid}}"/>
 
-            <div class="left-side col-md-6">
+            <div class="left-side col-md-6 col-sm-12 col-xs-12">
 
               <div class="row">        
               	<div class="col-md-12"><h5> <b> {{ trans('messages.keyword_legal_office_billing') }} </b> </h5> </div>                   
@@ -163,7 +163,7 @@
 
             <input type="hidden" id="quoteid" name="quoteid" value="">
 
-            <div class="right-side col-md-6" id="right_side">
+            <div class="right-side col-md-6 col-sm-12 col-xs-12" id="right_side">
 
 			<div class="height550">
             <div class="row">
@@ -241,6 +241,7 @@
               <div class="col-md-12">
 
               <?php if(isset($order_record)) { ?>
+              <div class="step-six-table">
               
               <table class="selectable table table-hover table-bordered" id="table" cellspacing="0" cellpadding="0">
 
@@ -269,6 +270,7 @@
                 </tbody>
 
               </table>
+              </div>
               
               <?php } ?>
           

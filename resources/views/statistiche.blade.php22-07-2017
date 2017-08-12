@@ -23,14 +23,14 @@
 
 <div class="height20"></div>
 <div class="row">
-	<div class="col-md-8">
+	<div class="col-md-8 col-sm-12 col-xs-12">
         <div class="btn-group">
             <h3 class="inline"><a href='{{url("/statistiche/economiche") . '/' . ($year - 1)}}'><i class="fa fa-arrow-left"></i>{{$year - 1}}</a></h3>
             <h3 class="inline orange"> {{$year}} </h3><h3 class="inline"><a href='{{url("/statistiche/economiche") . '/' . ($year + 1)}}'>{{$year + 1}}<i class="fa fa-arrow-right"></i></a></h3>
         </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-4 col-sm-12 col-xs-12">
 
      <!--    <span class="datapicker-icon">
             <i class="fa fa-calendar" aria-hidden="true"></i>
@@ -39,7 +39,7 @@
             <input type="text" id="datepicker_to" name="datepicker_to[]" class="form-control" value="">
         </span> -->
 
-        <div id="reportrange" class="pull-right reportrange" >
+        <div id="reportrange" class="pull-right reportrange pull-left-mobile" >
             <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
             <span id="daterange"></span> <b class="caret"></b>
         </div>
@@ -52,12 +52,12 @@
 
 <div class="stat-graph row">
 <div class="canvas-holder stat" id="stat">
-	<div class="col-md-10">
+	<div class="col-md-10 col-sm-12 col-xs-12">
 	<canvas id="myChart" width="1080" height="540" style="display: block; width: 1080px; height: 540px;"></canvas>
     </div>
 </div>
 <div class="right-side-info">
-        <div class="col-md-2">
+        <div class="col-md-2 col-sm-12 col-xs-12">
         <hr>
 
         <div class="info-1">
@@ -177,7 +177,7 @@ var myLineChart = new Chart(ctx, {
 
 <div class="statis-economic row">
 
-	<div class="col-md-6">
+	<div class="col-md-6 col-sm-12 col-xs-12">
     	<h4> {{ ucwords(trans('messages.keyword_costs')) }} </h4><hr>
         @if(checkpermission('5', '20', 'scrittura','true'))
         <div class="btn-group">
@@ -193,7 +193,7 @@ var myLineChart = new Chart(ctx, {
       <div class="space30"></div>
         
         <div class="panel panel-default">
-        <div class="panel-body">
+        <div class="panel-body mb16">
     	<table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('costi/json');?>" data-classes="table table-bordered" id="table">
             <thead>
                 <th data-field="id" data-sortable="true">
@@ -286,7 +286,7 @@ var myLineChart = new Chart(ctx, {
            </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 col-sm-12 col-xs-12">
     	<h4> {{ ucwords(trans('messages.keyword_revenues')) }} </h4><hr>
         @if(checkpermission('5', '20', 'scrittura','true'))
         <div class="btn-group">
@@ -309,7 +309,7 @@ var myLineChart = new Chart(ctx, {
   <div class="space30"></div>
         
         <div class="panel panel-default">
-        <div class="panel-body one-line-table">
+        <div class="panel-body one-line-table mb16">
 
         <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/tranche/json');?>" data-classes="table table-bordered" id="tabella">
         <thead>

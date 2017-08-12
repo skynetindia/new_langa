@@ -15,6 +15,7 @@
         <li class="navigation-item" id="thirdst"></li>
         <li class="navigation-item" id="fourthst"></li>
         <li class="navigation-item" id="fifthst"></li>
+        <li class="navigation-item" id="sixthst"></li>
        
     </ul>
 </div>
@@ -26,7 +27,7 @@
         <div class="row">
         	<div class="col-md-6 col-sm-12 col-xs-12">
             	<div class="registrtion-left-side firstpart" id="firstpart">
-                    <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                    <div class="heading"><img src="{{ url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}" height="150" width="150"/> </div>
                     <div class="registration-content heading"><h3>Let's get started!</h3><p>Three things you need to know about being an envato author.</p></div>
                     <div class="registration-content">
                     	<h3>We live for quality and originality</h3>
@@ -44,7 +45,7 @@
                     
                 </div>
                 <div class="registrtion-left-side reg-step-3 none secondpart" id="secondpart">
-                    <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                    <div class="heading"><img src="{{ url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}" height="150" width="150"/> </div>
                         <div class="registration-content heading"><h3>Create your Easy User</h3></div>
                        	
                        <form name="signupForm" id="signupForm" role="form" method="POST" action="{{ url('/register') }}">
@@ -92,7 +93,7 @@
                             </span>
                                 </div> 
                                 
-                                <div class="col-md-12 col-sm-12 col-xs-12"><div class="form-group"><div class="capcha-block"></div></div></div>
+                                <div class="col-md-12 col-sm-12 col-xs-12"><div class="form-group"><div class="capcha-block"><div class="g-recaptcha" data-sitekey="6LeJ1SoUAAAAAKaLCR28WjxMG4ZLvcBplM5wRpoI"></div></div></div></div>
                                  
                                  <div class="col-md-12 col-sm-12 col-xs-12">
                                  	<div class="privacy-blk">
@@ -287,7 +288,7 @@
 				</div>
                 </div>
                 <div class="registrtion-right-side reg-step-3 none secondpart" id="rightsecond">
-                	<img src="images/easy-logo.svg" width="150" height="150"/>
+                	<img src="images/easy_logo_tracciato.svg" width="150" height="150"/>
                 </div>
             </div>
         </div>
@@ -310,8 +311,8 @@
 <script type="text/javascript">
 	function fun_next()
 	{
-		$('.firstpart').hide(400);
-		$('.secondpart').show(400);
+		$('.firstpart').hide();
+		$('.secondpart').show();
 		$('#firstst').removeClass('navigation-active-item');
 		$('#secondst').addClass('navigation-previous-item');
 		$('#secondst').addClass('navigation-active-item');
@@ -348,6 +349,7 @@
             var email = $('#email').val();   
 			 var username = $('#username').val();           
             var password = $('#password').val();
+			  var grecaptcharesponse = $('#g-recaptcha-response').val();
 
             if (firstname == '') {
                 document.getElementById("span_firstname").style.display="block";
@@ -402,15 +404,17 @@
                 url: '{{ url('register') }}',
                 type:'POST',
                 data: { 'firstname': firstname, 'lastname': lastname, 
-                        'email': email,'username':username, 'password': password, '_token': '{{ csrf_token() }}' 
+                        'email': email,'username':username, 'password': password, '_token': '{{ csrf_token() }}' ,'g-recaptcha-response':grecaptcharesponse
                     },              
                 success:function(data) { 
+				//alert(data);
                     if(data == 1){                        
                         $('#second-step').css('display', 'block');
                         $('#first-step').css('display', 'none');
 						$('#firstst').removeClass('navigation-active-item');
 						$('#secondst').addClass('navigation-previous-item');
 						$('#secondst').addClass('navigation-active-item');
+						window.location="{{url('/register/step-two')}}";
                     } else {
                         var data = $.parseJSON(data); 
                         var user_id = data.id;           
@@ -723,4 +727,6 @@ createJets();
 //TweenMax.globalTimeScale(0.50)
 
 </script>
+
+<script src='https://www.google.com/recaptcha/api.js'></script>
 @endsection

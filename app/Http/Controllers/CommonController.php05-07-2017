@@ -111,7 +111,6 @@ class CommonController extends Controller
             }
         }
         
-        
         return redirect()->back();
     
     }
@@ -199,6 +198,17 @@ class CommonController extends Controller
         }
         return 'true';
     }
+	
+	public function nextstep()
+	{
+		
+		if (Session::has('reg_user_id')) {
+			$reg_user_id = Session::get('reg_user_id');
+			$reg_user =  DB::table('users')->where('id', $reg_user_id)->first();
+		}
+		return  view("auth.register-second",["reg_user"=>$reg_user]);
+
+	}
 
     public function storestepthree(Request $request)
     {

@@ -23,33 +23,35 @@
 <form action="{{url('/alert/add/tipo')}}" method="post" name="alerttipo" id="alerttipo">
     {{ csrf_field() }}
     <div class="row">
-    	<div class="col-md-12">
+    	<div class="col-md-12 col-sm-12 col-xs-12">
     		<h4>{{ trans('messages.keyword_addtype') }}<label> <span class="required">(*)</span></label></h4>
     	</div>    
-	<div class="col-md-4"> 		
+	<div class="col-md-4 col-sm-12 col-xs-12"> 		
 		<div class="form-group">
 		<input type="text" class="form-control" id="nome_tipo" name="nome_tipo" placeholder="{{ trans('messages.keyword_name') }} ">
 		</div>
 	</div>
-	<div class="col-md-4">	
+	<div class="col-md-4 col-sm-12 col-xs-12">	
 		<div class="form-group">		
 		<input type="text" class="form-control" id="desc_tipo" name="desc_tipo" placeholder="{{ trans('messages.keyword_description') }} ">
 		</div>
 	</div>
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<div class="form-group">	
 		<input class="form-control color no-alpha" value="#f37f0d" name="color" placeholder="{{ trans('messages.keyword_color') }}" id="color" />
 		</div>
 	</div>
-	<div class="text-right">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+	<div class="text-right text-left-767">
 		<input type="submit" class="btn btn-primary" value="{{ trans('messages.keyword_add') }}">
 	</div>
+    </div>
 	</div>
 </form>
 <h4>{{ trans('messages.keyword_modifytype') }} </h4>
 <div class="row alltaxationeditparts">
   <div class="col-md-6">
-  <div class="form-group m_select">
+  <div class="form-group m_select lblshow">
     <input id="chktasentitypeall" name="chktasentitypeall" value="1" type="checkbox">
      <label for="chktasentitypeall"> Select All </label>
   </div>
@@ -59,7 +61,7 @@
     <input type="button" onclick="AllTaxonomiesAction('delete')" class="btn btn-danger" value="{{trans('messages.keyword_delete_selected')}}">
   </div>
 </div>
-<div class="table-responsive alerttipo-blade-table">
+<div class="table-responsive alerttipo-blade-table text-right checkbox-tbl">
 	<form action="{{url('/admin/update/tipo')}}" method="post" id="modifyalerttipo" name="modifyalerttipo">
 	<input type="hidden" id="actiontype" name="action" value="update">
 	<table class="table table-striped table-bordered">		

@@ -61,8 +61,10 @@
     	    				});
     	    			</script></label>
 						
-                        <div class="modificatranshe-blade-pagamenti-head">
-                        <label for="preventivo"> {{ trans('messages.keyword_project') }}  <input type="text" disabled value=":cod/anno" class="form-control"></label>
+                        <div class="modificatranshe-blade-pagamenti-head"><?php 
+                            $quotereference = isset($tranche->quoteId) ? ':' . $tranche->quoteId . '/' . $tranche->quoteyear : ''; 
+                        ?><label for="preventivo"> {{ trans('messages.keyword_project') }}  <input type="text" disabled value="<?php echo $projecreference = isset($tranche->datainizio) ? ':' . $tranche->id_disposizione . '/' . substr($tranche->datainizio, -2) : ':cod/anno' ?>" placeholder=":cod/anno" class="form-control"></label>
+                        <label for="preventivo"> {{ trans('messages.keyword_entity') }}  <input type="text" disabled value="<?php echo isset($tranche->nomeazienda) ? ':' . $tranche->DA . '/' . $tranche->nomeazienda : ':cod/entity' ?>" placeholder=":cod/anno" class="form-control"></label>
                         <a href="{{ url('/pagamenti/tranche/pdf') . '/' . $tranche->id }}"  target="new" class="btn" type="button"><i class="fa fa-file-pdf-o"></i></a>
                         </div>
                         
@@ -107,7 +109,7 @@
                    <div class="col-md-3 col-sm-12 col-xs-12">     
                         <div class="form-group">
                      <label for="id"> {{ trans('messages.keyword_invoicenumber') }} </label>
-                    <input value="{{$tranche->idfattura}}" type="text" id="idfattura" name="idfattura" placeholder=" {{ trans('messages.keyword_paymentcode') }} " class="form-control">
+                    <input value="{{$tranche->idfattura}}" type="text" id="idfattura" name="idfattura" placeholder=" {{ trans('messages.keyword_invoicenumber') }} " class="form-control">
                         </div>
                    </div>     
                    <div class="col-md-3 col-sm-12 col-xs-12">     
@@ -133,13 +135,13 @@
             	 <div class="col-md-4 col-sm-12 col-xs-12">
                    		<div class="form-group">
                             <label for="id"> {{ trans('messages.keyword_note') }}  </label>
-                            <input value="{{$tranche->idfattura}}" type="text" id="id" name="idfattura" placeholder="{{ trans('messages.keyword_paymentcode') }} " class="form-control">
+                            <input value="{{$tranche->idfattura}}" type="text" id="id" name="idfattura" placeholder="{{ trans('messages.keyword_note') }} " class="form-control">
                          </div>
                    </div>
                    <div class="col-md-4 col-sm-12 col-xs-12">
                    		<div class="form-group">
                             <label for="emissione"> {{ trans('messages.keyword_issue_of_the') }} </label>
-                            <input type="text" name="emissione" id="emissione" class="form-control required-input error" value="<?php 
+                            <input type="text" name="emissione" id="emissione" class="form-control required-input error" placeholder="{{ trans('messages.keyword_issue_of_the') }}" value="<?php 
                             if($tranche->emissione != '0000-00-00'){
                                 $dateemi = str_replace('/', '-', $tranche->emissione);
                                 echo date('d/m/Y', strtotime($dateemi));
@@ -235,6 +237,7 @@
 	    	<table class="table table-bordered modificatranshe-blade-pagamenti-tbl">
 	    		<thead>
 	    			<th> #</th>
+                    <th> {{ trans('messages.keyword_order') }} </th>
 	    			<th> {{ trans('messages.keyword_references') }} </th>
 	    			<th> {{ trans('messages.keyword_description') }}</th>
 	    			<th> {{ trans('messages.keyword_qty') }}, {{ trans('messages.keyword_unitary') }} </th>
@@ -246,14 +249,15 @@
 	    		@foreach($invoicebody as $keybody => $keyval)
 	    			<tr>
 	    				<td><input class="selezione" id="checkinv{{$keybody}}" type="checkbox"><label for="checkinv{{$keybody}}"></label></td>
-	    				<td><input class="form-control" placeholder=":Quote" name="ordine[]" type="text" value="{{$keyval->ordine}}">
-	    				<input placeholder=":Project" class="form-control" name="project_refer_no[]" type="text" value="{{$keyval->project_refer_no}}"></td>
-	    				<td><textarea class="form-control" name="desc[]" rows="3" cols="80">{{$keyval->descrizione}}</textarea></td>
-	    				<td><input class="form-control" placeholder=":Qty" name="qt[]" type="text" value="{{$keyval->qta}}">
-	    				<input class="form-control" placeholder=":Unit Price" name="unitario" type="text" value="{{$keyval->netto}}"></td>
-	    				<td><input class="form-control" name="subtotale[]" type="text" value="{{$keyval->subtotale}}">
+                        <td><input name="ordine_numerico[]" type="number" class="form-control priority" value="{{$keyval->ordine_numerico}}" placeholder="{{ trans('messages.keyword_order') }}"></td>                
+	    				<td><input class="form-control" placeholder=":{{ trans('messages.keyword_quote') }}" name="ordine[]" type="text" value="{{$keyval->ordine}}">
+	    				<input placeholder=":{{trans('messages.keyword_project')}}" class="form-control" name="project_refer_no[]" type="text" value="{{$keyval->project_refer_no}}"></td>
+	    				<td><textarea class="form-control" name="desc[]" placeholder="{{ trans('messages.keyword_description') }}" rows="3" cols="80">{{$keyval->descrizione}}</textarea></td>
+	    				<td><input class="form-control qt" placeholder=":Qty" name="qt[]" type="text" value="{{$keyval->qta}}">
+	    				<input class="form-control pr" placeholder=":Unit Price" name="unitario[]" type="text" value="{{$keyval->netto}}"></td>
+	    				<td><input class="form-control tot" name="subtotale[]" placeholder="{{ trans('messages.keyword_subtotal') }}" type="text" value="{{$keyval->subtotale}}">
 	    				<div class="switch">
-	    					<input value="1" name="is_active[{{$keybody}}]" id="is_active_{{$keybody}}" <?php echo ($keyval->is_active == '1') ? 'checked' : ''?> type="checkbox">
+	    					<input value="1" class="astircflag" name="is_active[{{$keybody}}]" id="is_active_{{$keybody}}" <?php echo ($keyval->is_active == '1') ? 'checked' : ''?> type="checkbox">
 	    					<label for="is_active_{{$keybody}}"></label>
 	    				</div>
 	    				</td></tr>
@@ -280,13 +284,22 @@
                             var td = document.createElement("td");
                             check.appendChild(checkboxLabel);
 
+                            
+                            var ordine_numericotd = document.createElement("td");
+                            var ordine_numerico = document.createElement("input");
+                            ordine_numerico.className = "form-control";
+                            ordine_numerico.name = "ordine_numerico[]";   
+                            ordine_numerico.value = count;                        
+                            ordine_numerico.placeholder = "{{ trans('messages.keyword_order') }}";
+                            ordine_numericotd.appendChild(ordine_numerico);
+
 	                        var ord = document.createElement("td");
 	                        var ordine = document.createElement("input");
 	                        ordine.type = "text";
 	                        ordine.className = "form-control";
 	                        ordine.placeholder = ":{{ trans('messages.keyword_quote') }}";
 	                        ordine.name = "ordine[]";
-							// ordine.value = ":";
+                            ordine.value="{{$quotereference}}";							
 	                        ord.appendChild(ordine);
 
 	                        var progetto = document.createElement("input");
@@ -294,6 +307,7 @@
 	                        progetto.placeholder = ":{{ trans('messages.keyword_project') }}";
 	                        progetto.className = "form-control";
 	                        progetto.name = "project_refer_no[]";
+                            progetto.value="{{$projecreference}}";
 							// progetto.value = ":";
 	                        ord.appendChild(progetto);
 
@@ -303,12 +317,13 @@
 	                        descrizione.name = "desc[]";
 	                        descrizione.rows = "3";
 	                        descrizione.cols = "80";
+                            descrizione.placeholder = "{{ trans('messages.keyword_description') }}";
 	                        td.appendChild(descrizione);
 
 	                        var qt = document.createElement("td");
 	                        var quantita = document.createElement("input");
 	                        quantita.type = "text";
-	                        quantita.className = "form-control";
+	                        quantita.className = "form-control qt";
 	                        quantita.placeholder = ":{{ trans('messages.keyword_qty') }}";
 	                        quantita.name = "qt[]";
 	                        qt.appendChild(quantita);
@@ -316,17 +331,18 @@
 	                        var unitario = document.createElement("td");
 	                        var unitary = document.createElement("input");
 	                        unitary.type = "text";
-	                        unitary.className = "form-control";
+	                        unitary.className = "form-control pr";
 	                        unitary.placeholder = ":{{ trans('messages.keyword_unit_price') }}";
-	                        unitary.name = "unitario";
+	                        unitary.name = "unitario[]";
 							qt.appendChild(unitary);
 
 
 	                        var pr = document.createElement("td");
 	                        var prezzo = document.createElement("input");
 	                        prezzo.type = "text";
-	                        prezzo.className = "form-control";
+	                        prezzo.className = "form-control tot";
 	                        prezzo.name = "subtotale[]";
+                            prezzo.placeholder ="{{ trans('messages.keyword_subtotal') }}";
 	                        pr.appendChild(prezzo);
 
 	                        var idNotificheDiv = document.createElement("div");
@@ -340,6 +356,7 @@
 				                idNotifiche.value = '1';
 				                idNotifiche.name = "is_active["+count+"]";
 								idNotifiche.id = "is_active_"+count;
+                                idNotifiche.className = "astircflag";
 								idNotificheDiv.appendChild(idNotifiche);
 								idNotificheDiv.appendChild(idNotificheLabel);
 								pr.appendChild(idNotificheDiv);
@@ -372,6 +389,7 @@
 
 	                        
 	                        tr.appendChild(check);
+                            tr.appendChild(ordine_numericotd);                            
 	                        tr.appendChild(ord);
 	                        tr.appendChild(td);
 	                        tr.appendChild(qt);
@@ -399,8 +417,8 @@
 			<h4> {{ trans('messages.keyword_base_invoice') }} </h4><a onclick="calcola()"  class="" title=" {{ trans('messages.keyword_assembled_compilation') }} "><br>{{ trans('messages.keyword_click') }}  <i class="fa fa-info"></i> {{ trans('messages.keyword_for_compilation') }} </i></a>
             <div class="table-responsive">
 	   	<table class="table table-bordered">
-	   		<thead>
-	   			
+	   		<thead>	   			 
+                <th> {{ ucfirst(strtolower(trans('messages.keyword_weight'))) }} (kg) </th>
 	   			<th> {{ trans('messages.keyword_network') }} </th>
 	   			<th> {{ trans('messages.keyword_additional_discount') }} </th>
 	   			<th> {{ trans('messages.keyword_total_net') }} </th>
@@ -410,17 +428,18 @@
 	   			<th> {{ trans('messages.keyword_amount_due') }} </th>
 	   		</thead>
 	   		<tbody>
-	   			<td><input id="netto" class="form-control" type="text" name="netto" value="{{$tranche->netto}}"></td>
+                <td><input id="peso" class="form-control" type="text" name="peso" placeholder="{{ucfirst(strtolower(trans('messages.keyword_weight')))}}" value="{{$tranche->peso}}"></td>
+	   			<td><input id="netto" class="form-control" type="text" name="netto" placeholder="{{trans('messages.keyword_network')}}" value="{{$tranche->netto}}"></td>
 
-	   			<td><input id="scontoaggiuntivo" class="form-control" type="text" name="scontoaggiuntivo" value="{{$tranche->scontoaggiuntivo}}"></td>
+	   			<td><input id="scontoaggiuntivo" class="form-control" type="text" placeholder="{{trans('messages.keyword_additional_discount')}}"  name="scontoaggiuntivo" value="{{$tranche->scontoaggiuntivo}}"></td>
 
-	   			<td><input id="sconto" class="form-control" type="text" name="scontoaggiuntivo" value="{{$tranche->scontoaggiuntivo}}"></td>
+	   			<td><input id="sconto" class="form-control" type="text" placeholder="{{trans('messages.keyword_total_net')}}"  name="scontoaggiuntivo" value="{{$tranche->scontoaggiuntivo}}"></td>
 
-	   			<td><input id="imponibile" class="form-control" type="text" name="imponibile" value="{{$tranche->imponibile}}"></td>
+	   			<td><input id="imponibile" class="form-control" type="text" placeholder="{{trans('messages.keyword_taxable_invoice')}}"  name="imponibile" value="{{$tranche->imponibile}}"></td>
 
-	   			<td><input id="prezzoiva" class="form-control" type="text" name="prezzoiva" value="{{$tranche->prezzoiva}}"></td>
+	   			<td><input id="prezzoiva" class="form-control" type="text" placeholder="{{trans('messages.keyword_vat_price')}}"  name="prezzoiva" value="{{$tranche->prezzoiva}}"></td>
 
-	   			<td><input id="percentualeiva" class="form-control" type="text" name="percentualeiva" value="<?php 
+	   			<td><input id="percentualeiva" class="form-control" type="text" placeholder="% {{ trans('messages.keyword_vat') }}"  name="percentualeiva" value="<?php 
                 if(isset($tranche->percentualeiva) && $tranche->percentualeiva != null){
                     echo $tranche->percentualeiva;
                 }
@@ -429,9 +448,43 @@
                 }
                 ?>"></td>
 
-	   			<td><input id="dapagare" class="form-control" type="text" name="dapagare" value="{{$tranche->dapagare}}"></td>
+	   			<td><input id="dapagare" class="form-control" placeholder="{{trans('messages.keyword_amount_due')}}"  type="text" name="dapagare" value="{{$tranche->dapagare}}"></td>
 
                 <script>
+                    $('table').on('change','tr input.qt', function() {
+                         var prezzo = $(this).parent().closest('tr').find("input.pr").val();
+                         var qta = $(this).val();
+                         $(this).parent().closest('tr').find("input.tot").val(prezzo * qta);
+                         calculateTotal();
+                    });
+                    
+                    $('table').on('change','tr input.pr', function() {
+                         var prezzo = $(this).val();
+                         var qta = $(this).parent().closest('tr').find("input.qt").val();
+                         $(this).parent().closest('tr').find("input.tot").val(prezzo * qta);
+                         calculateTotal();
+                    });
+                    $('table').on('change','tr input.tot', function() {             
+                         calculateTotal();
+                    });
+                    $('table').on('change','tr input.astircflag', function() {             
+                         calculateTotal();
+                    });
+                    $('form').on('change','div input#percentuale', function() {                                     
+                         calculateTotal();
+                    });                   
+                    $('form').on('change','div input#importo_nopercentuale', function() {                                     
+                         calculateTotal();
+                    });                   
+                     $('table').on('change','tr input#scontoaggiuntivo', function() {                                     
+                         finalamount();
+                    });
+                     $('table').on('change','tr input#percentualeiva', function() {                                     
+                         finalamount();
+                    });
+
+                     
+                     
 					function approssima(x) {
 						
 					}
@@ -443,11 +496,15 @@
 						var prezzoiva = $j('#prezzoiva').val() || 0;
 						var percentualeiva = $j('#percentualeiva').val() || 0;
 						var dapagare = $j('#dapagare').val() || 0;
+                        var additionaldiscount =  $("scontoaggiuntivo").val() || 0;
 
 						var importototale = eval(prompt("{{trans('messages.keyword_enter_the_amount_equivalent_to')}} 100%", netto));
-						sconto = eval(prompt("{{trans('messages.keyword_enter_the_additional_discount')}} (€)", sconto));
-						percentuale = eval(prompt("{{trans('messages.keyword_enter_the_percentage_of_total_amount')}} (%)", percentuale));
-						netto = eval(prompt("{{trans('messages.keyword_enter_the_net_price')}} (€)", (importototale - sconto) * percentuale / 100));
+						sconto = eval(prompt("{{trans('messages.keyword_enter_the_additional_discount')}} (€)", additionaldiscount));
+						//percentuale = eval(prompt("{{trans('messages.keyword_enter_the_percentage_of_total_amount')}} (%)", percentuale));
+                        
+                        netto = netto - additionaldiscount
+                        //var netprice = (netto - ((importototale - sconto) * percentuale / 100));
+						netto = eval(prompt("{{trans('messages.keyword_enter_the_net_price')}} (€)", netto));
 						imponibile = eval(prompt("{{trans('messages.keyword_enter_the_taxable_amount')}} (€)", netto));
 						percentualeiva = eval(prompt("{{trans('messages.keyword_enter_the_vat')}} (%)", percentualeiva));
 						prezzoiva = eval(prompt("{{trans('messages.keyword_enter_the_price_with_vat')}} (€)", imponibile * percentualeiva / 100));
@@ -461,12 +518,63 @@
 						$j('#percentuale').val(percentuale);
 						$j('#netto').val(importototale);
 						$j('#sconto').val(sconto);
+                        $j('#scontoaggiuntivo').val(sconto);
+                        
 						$j('#imponibile').val(imponibile);
 						$j('#prezzoiva').val(prezzoiva);
 						$j('#percentualeiva').val(percentualeiva);
 						$j('#dapagare').val(dapagare);
 					}
-					
+                    function calculateTotal(){
+                        var totalval = 0;   
+                        var arrchekedp=[];
+                        $(".astircflag").each(function(index) {
+                            arrchekedp[index] = false;
+                            if ($(this).is(':checked')) {
+                                arrchekedp[index] = true;    
+                            }
+                        });
+                        $(".tot").each(function(index) {
+                             if(arrchekedp[index]==false && $(this).val() != "" && $(this).val() != 0) {
+                                totalval = (parseFloat(totalval) + parseFloat($(this).val()));        
+                            }
+                        });                        
+                        var percentuale = $("#percentuale").val();
+                        var percentageAmount = $("#importo_nopercentuale").val();                        
+                        if(parseInt(percentuale) > 0 ) {
+                            var discountamount = ((totalval * percentuale) / 100);
+                            totalval = (totalval - discountamount);
+                        }
+                        else if(parseInt(percentageAmount) > 0) {
+                            totalval = (totalval - percentageAmount);                               
+                        }
+                        $("#netto").val(totalval);
+                        finalamount();
+                        /*var scontoagente = $("#scontoagente").val();
+                        var scontobonus = $("#scontobonus").val();
+                        var agentdiscount = ((totalval * scontoagente) / 100);
+                        var topay = (totalval - agentdiscount);
+
+                        var agentbonus = ((topay * scontobonus) / 100);
+                        var TotalDiscount = (agentdiscount + agentbonus);    
+                        topay = (topay - agentbonus);
+                        $("#totale").val(TotalDiscount);
+                        $("#totaledapagare").val(topay);*/
+                        /*$("#agentdiscount").val(agentdiscount);
+                        $("#agentbonus").val(agentbonus);*/
+                    }
+                    function finalamount() {
+                        var NetWork = $("#netto").val();
+                        var additionaldiscount =  $("#scontoaggiuntivo").val() || 0;
+                        var vatpercentage = $j('#percentualeiva').val() || 0;
+                        var totalNet = (NetWork - additionaldiscount);
+                        $("#sconto").val(totalNet);
+                        $("#imponibile").val(totalNet);
+                        var getpercentageval = (totalNet * vatpercentage / 100);
+                        vat = $("#prezzoiva").val(getpercentageval);
+                        var amountdue = (totalNet + getpercentageval);                        
+                        $("#dapagare").val(amountdue);                        
+                    }					
 				</script>
 	   		</tbody>
 	   	</table>
@@ -540,12 +648,12 @@
 		</div> -->
         <div class="form-group">
 			<label for="percentuale">% {{ trans('messages.keyword_total_amount') }} </label>
-			<input id="percentuale" name="percentuale" class="form-control required-input error" value="{{$tranche->percentuale}}" placeholder="{{ trans('messages.keyword_description') }} % ">
+			<input id="percentuale" name="percentuale" class="form-control required-input error" value="{{$tranche->percentuale}}" placeholder="{{ trans('messages.keyword_total_amount') }} ">
         </div>   
         <div class="form-group"> 
             <div id="percentualediv">
 		    <label for="frequ"> {{ trans('messages.keyword_amount') }} </label>
-		    <input name="importo_nopercentuale" class="form-control" placeholder="{{ trans('messages.keyword_amount') }} " value="<?php echo $tranche->testoimporto; ?>">
+		    <input name="importo_nopercentuale" id="importo_nopercentuale" class="form-control" placeholder="{{ trans('messages.keyword_amount') }} " value="<?php echo $tranche->testoimporto; ?>">
 		</div>
         </div>
             <script>
@@ -559,7 +667,7 @@
 				}
 				
 			function test() {
-			if($j('#percentuale').val() == 0) {
+			     if($j('#percentuale').val() == 0) {
 					// Mostro l'importo
 					$j('#percentualediv').show();
 					
@@ -571,6 +679,10 @@
 			test();
 			
 			$j('#percentuale').on("change", function() {
+                var value = $j(this).val();
+                if(value >= 100 ){
+                    $j(this).val(99);
+                }
 				test();
 			});
 			</script>
@@ -579,7 +691,7 @@
 		    <input value="<?php 
 		    $datedatascadenza = str_replace('/', '-', $tranche->datascadenza);
 			echo ($tranche->datascadenza != '0000-00-00') ? date('d/m/Y', strtotime($datedatascadenza)) : '';
-		    ?>" class="form-control required-input error" name="datascadenza" id="datascadenza"></input>
+		    ?>" class="form-control required-input error" name="datascadenza" placeholder="{{trans('messages.keyword_expiry_date_invoice')}}" id="datascadenza"></input>
             </div>
            
 			  <script>
@@ -657,13 +769,21 @@
                     //$.ajax({url: urlD, success: function(result){ }});
                 }
                 </script>
+                <div class="space30"></div>
+            <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="">
+                    <input type="text" class="form-control" name="searchmediabox" id="searchmediabox" placeholder="{{trans('messages.keyword_search_media')}}">
+                </div>
+            </div>
+            </div>
 			<div class="set-height">
 	            <table class="table table-striped table-bordered">	                
-	                <tbody><?php
+	                <tbody id="mainmedialist"><?php
 					if(isset($tranche->id) && isset($quotefiles)){
 						foreach($quotefiles as $prev) {
-							$imagPath = url('/storage/app/images/invoice/'.$prev->name);
-							$downloadlink = url('/storage/app/images/invoice/'.$prev->name);
+							$imagPath = url('/storage/app/images/quote/'.$prev->name);
+							$downloadlink = url('/storage/app/images/quote/'.$prev->name);
 							$filename = $prev->name;			
 							$arrcurrentextension = explode(".", $filename);
 							$extention = end($arrcurrentextension);
@@ -680,7 +800,7 @@
 	        				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-danger pull-right"  onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';							
 
 							$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
-							$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->get();							
+							$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', '=', 0)->where('nome_ruolo','!=','SupperAdmin')->get();							
 							foreach($utente_file as $key => $val){
 								$check = '';
 								$array = explode(',', $prev->type);
@@ -689,7 +809,7 @@
 	                            }
 	                            $specailcharcters = array("'", "`");
 	                            $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-	                            $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+	                            $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'"  '.$check.' id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.trim($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
 							}
 							echo $html .='</td></tr>';
 						}
@@ -698,6 +818,19 @@
                     <tbody id="files"></tbody>
                     
 	                <script>
+                    $('#searchmediabox').keyup(function(e) {
+                        var keyvalue = $(this).val();
+                         var urlgetfile = '<?php echo url('/invoice/searchmedia/'.$tranche->id); ?>';   
+                         if(keyvalue !=""){
+                             var urlgetfile = '<?php echo url('/invoice/searchmedia/'.$tranche->id); ?>/'+keyvalue;   
+                         }  
+                         $.ajax({url: urlgetfile, success: function(result){
+                            $("#mainmedialist").html(result);
+                           // $(".dz-preview").remove();
+                            //$(".dz-message").show();
+                        }
+                        });                   
+                    });
 	                var $j = jQuery.noConflict();
 	                    var selezione = [];
 	                    var nFile = 0;

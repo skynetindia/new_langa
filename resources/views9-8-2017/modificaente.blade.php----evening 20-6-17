@@ -1,0 +1,1269 @@
+@extends('layouts.app')
+
+@section('content')
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.1.62/jquery.inputmask.bundle.js"></script>
+
+<!--<link href="{{asset('build/js/jquery.datetimepicker.min.css')}}" rel="stylesheet">
+<script src="{{asset('build/js/jquery.datetimepicker.full.js')}}"></script>-->
+
+<div class="header-left-same">
+<div class="header-svg text-left">
+	<img src="{{url('images/HEADER1-LT_ENTITY.svg')}}" alt="header image">
+</div>
+<div class="float-right text-right">
+<h1><?php echo (isset($action) && $action=='add') ? trans('messages.keyword_add_entity') : trans('messages.keyword_edit_entity'); ?></h1>
+<hr>
+@if(isset($corp->logo))
+<div class="profile-block-top">
+        <div class="inline profile-user">
+        <img src="{{url('/storage/app/images/').'/'.$corp->logo}}" class="img-responsive" ></img><h4 class="inline">  {{trans('messages.keyword_code')}}: {{$corp->id}}</h4>
+    
+        </div>
+		<div class="btn-blk">
+		@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '2')
+		<button onclick="mostra2()" id="btnSubmiTop" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+		@endif
+        </div>
+	</div>
+@endif
+
+</div>
+
+
+
+
+
+</div>
+<div class="clearfix"></div>
+<?php $loginuser = collect($loginuser)->toArray();?>
+
+@if(!empty(Session::get('msg')))
+    <script>
+    var msg = '<?php echo html_entity_decode(htmlentities(Session::get('msg'))); ?>';
+    document.write(msg);
+    </script>
+@endif
+@include('common.errors')
+@if(isset($corp->logo))
+<!--<div class="row">
+<div class="container-fluid col-md-10">
+	<div class="inline profile-user">
+ 	<img src="{{url('/storage/app/images/').'/'.$corp->logo}}" class="img-responsive" ></img><h4 class="inline">  {{trans('messages.keyword_code')}}: {{$corp->id}}</h4>
+
+	</div>
+</div>
+<div class="col-md-2 top-right-btn"  >
+		@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '2')
+		<button onclick="mostra2()" id="btnSubmiTop" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+		@endif
+	</div>
+</div>   --->
+
+
+
+    
+@endif
+<?php /*<div class="container-fluid col-md-12" style="background:#2a3f54;color:#ffffff"><br>
+	<form action="http://maps.google.com/maps" onsubmit="punto()" method="get" target="new">
+		<div>
+			<div class="col-md-12">
+				<h4 style="display:inline;color:#ffffff">Vuoi raggiungere l'ente?</h4>
+	   			<br><br><input style="display:inline" class="form-control" style="color:#000000;max-width:250px;" type="text" name="saddr" placeholder="Inserisci la tua posizione">
+	   			
+<br>
+	   			<input style="display:inline" type="hidden" id="prova" name="daddr">
+	   			<br><input style="display:inline;background:#f37f0d; color:#ffffff;" class="form-control" type="submit" value="Vai dall'ente"><br><br><br>
+	   		</div>
+	   	    </div>
+		</div>
+	</form>
+</div>*/?>
+<?php
+
+	
+if(isset($corp->id)){
+	echo Form::open(array('url' => '/enti/update/corporation/' . $corp->id, 'files' => true,'id'=>'frmModificaente')); 
+}
+else {
+	echo Form::open(array('url' => '/enti/store/', 'files' => true,'id'=>'frmModificaente'));
+}
+
+?>
+	{{ csrf_field() }}
+   
+<!-- inizio chiamata -->
+<script type="text/javascript">var $j = jQuery.noConflict();</script>
+@if($action == 'edit')
+  <div class="row">
+	<div class="col-md-12 tpbtm10">
+		<h4>{{trans('messages.keyword_note')}} ({{trans('messages.keyword_conversations')}}, {{trans('messages.keyword_costs')}}, {{trans('messages.keyword_notes')}},..)</h4>
+		<a id="creaNuovaChiamata" class="btn btn-warning" name="create" title="{{trans('messages.keyword_create_new')}}"><i class="fa fa-plus"></i></a>
+		<a class="btn btn-danger" id="removeNote"  name="remove" title="{{trans('messages.keyword_delete_label')}}"><i class="fa fa-trash"></i></a>
+		<div class="table-editable tpbtm10 set-height350">
+			<table class="table table-striped table-bordered">
+			<thead>
+				<th width="2%">#</th>
+				<th width="13%">{{trans('messages.keyword_user')}}</th>
+                <th width="20%">{{trans('messages.keyword_notes')}}</th>
+                <th width="20%">{{trans('messages.keyword_date')}}</th>
+                <th width="10%">{{trans('messages.keyword_bank')}}</th>
+                <th width="10%">{{trans('messages.keyword_case')}}</th>
+                <th width="20%">{{trans('messages.keyword_frequency')}}</th>
+                <th width="5%">{{trans('messages.keyword_notifications')}}</th>               
+				<?php /*<th>Ricontattare il giorno
+				<th>Alle
+				<th>Data inserimento*/?>
+			</thead>
+				<script>
+				
+				var ele;
+				var k = 0;
+				</script>
+				<tbody id="tb"><script>
+				$j.datepicker.setDefaults(
+                                        $j.extend(
+                                          {'dateFormat':'dd/mm/yy'},
+                                          $j.datepicker.regional['nl']
+                                        )
+                                      ); 
+                    //var $j = jQuery.noConflict();
+                    </script>					
+					@foreach($actionmessages as $i => $actionmessages)
+						<tr>
+						<td>
+							<input type="checkbox" onchange="checkboxevent(this.id)" id="<?php echo 'checkNo'.$i;?>" class="selezione_note">
+							<label for="<?php echo 'checkNo'.$i;?>"></label>
+						</td>
+                        <td><select class="form-control" id="utenti<?php echo $i; ?>"  name="utente[]"  class="form-control" >
+                        @if(isset($action) && $action == 'add')
+                        <option>{{trans('messages.keyword_no_participants')}}</option>
+                         @foreach($users as $utente)
+                            <option value="{{$utente->id}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $utente->id ){ echo 'selected';}?>>{{$utente->id.' | '.$utente->name}}</option>
+                         @endforeach
+                        @else
+                        	<option>{{trans('messages.keyword_no_participants')}}</option>
+                            @foreach($participant as $partecipante)
+                            <option value="{{$partecipante->id_user}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $partecipante->id_user ){ echo 'selected';}?>>
+                             @foreach($users as $utente)
+                                            @if($utente->id == $partecipante->id_user)
+                                                {{$partecipante->id_user.' | '.$utente->name}}
+                                                @break
+                                            @endif
+                                        @endforeach
+                            </option>
+                            @endforeach
+                        @endif
+	        	        </select>
+						</td>
+						<td>
+							<input type="text" id="editable<?php echo $i; ?>" name="ric[]" class="form-control" value="<?php echo isset($actionmessages->appunti) ? $actionmessages->appunti : ""; ?>">
+						</td>
+						<td>
+							<span class="datapicker-icon"><i class="fa fa-calendar" aria-hidden="true"></i></span> <span class="select-date"><input type="text" id="datepicker_to<?php echo $i; ?>" name="datepicker_to[]" class="form-control" value="<?php echo $actionmessages->datainserimento; ?>"></span>                            
+						</td>
+                        <td>
+							<input type="text" name="banca[]" class="form-control" value="<?php echo isset($actionmessages->banca) ? $actionmessages->banca : ""; ?>">
+						</td>
+                        <td>
+							<input type="text" name="cassa[]" class="form-control" value="<?php echo isset($actionmessages->cassa) ? $actionmessages->cassa : ""; ?>">
+						</td>
+                        <td><?php 
+                        	$arrFrequen = array('1_M'=>'1 M.','2_M'=>'2 M.','3_M'=>'3 M.','6_M'=>'6 M.','1_A'=>'1 A.');
+							foreach($frequency as $frequencyval) {
+                        		?><div class="cust-radio"><input type="radio" name="frequenza[<?php echo $i; ?>]" <?php if($frequencyval->rinnovo == $actionmessages->frequenza){ echo 'checked';}?> id="frequenza_<?php echo $i.$frequencyval->rinnovo; ?>" value="{{ $frequencyval->rinnovo }}" />
+                                <label for="frequenza_<?php echo $i.$frequencyval->rinnovo; ?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div> <?php
+							}
+						?></td>
+						<td><div class="switch"><input type="checkbox" name="notifiche[<?php echo $i;?>]" id="notifiche_<?php echo $i;?>" value="1" <?php if(isset($actionmessages->notifiche) && $actionmessages->notifiche == '1') { echo 'checked';}?>/><label for="notifiche_<?php echo $i;?>"></label></div>
+                        </td>
+						<?php /*<td>
+							<input type="text" id="impedisci<?php echo $i; ?>" name="datainserimento[]" class="form-control " value="<?php echo $actionmessages->datainserimento; ?>">
+						</td>*/?>	
+						</tr>
+						<script>                                             
+						var impedisciModifica2 = function() {
+							this.blur();
+							this.value = "<?php echo $actionmessages->datainserimento; ?>";
+						}	
+						//$j("#datepicker_to<?php echo $i; ?>").datepicker();
+						//$(function() {
+						$j("#datepicker_to<?php echo $i; ?>").daterangepicker({
+						 	autoApply: true,
+							timePicker: true,
+							timePickerIncrement: 30,
+							locale: {
+								format: 'MM/DD/YYYY h:mm A'
+							}
+						});
+						//});
+						$j('.selezione').on("click", function() {
+							ele = $j(this).parent().parent();
+						});
+						$j('#impedisci<?php echo $i; ?>').bind("click", impedisciModifica2);
+						k++;
+						</script>
+					@endforeach
+				</tbody>
+			</table>
+		</div>
+		<script>		
+		$j('#removeNote').on("click", function() {
+			$j('.selezione_note:checked').parents("tr").remove();
+			/*var inputs = $j(".selezione_note");
+			for(var i = 0; i < inputs.length; i++){
+				 if($j(inputs[i]).is(":checked")){
+					 $j(inputs[i]).parents('tr').remove();
+				}
+			}*/			
+		});
+		var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth()+1; //January is 0!
+			var yyyy = today.getFullYear();
+			var tbody = document.createElement("tbody");
+			if(dd<10) {
+				dd='0'+dd;
+			} 
+			if(mm<10) {
+				mm='0'+mm;
+			}
+		var vecchiaData = dd + "/" + mm + "/" + yyyy + " " + new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+		var test = vecchiaData.toString();
+		$j('#creaNuovaChiamata').on("click", function() {
+			/*lenght = $j('#tb').length();*/
+			var count = $j('#tb').children('tr').length;
+			var tr = '<tr>';
+			var td = '<td><input type="checkbox" onchange="checkboxevent(this.id)" id="checkNu'+count+'" class="selezione_note"><label for="checkNu'+count+'">  </label></td>';
+				td +='<td><select class="form-control" id="utenti'+count+'" name="utente[]"  class="form-control">';
+                td +='<?php 
+				        if(isset($action) && $action == 'add'){
+                         foreach($users as $utente){
+                            ?><option value="{{$utente->id}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $utente->id ){ echo 'selected';}?>>{{$utente->id.' | '.ucwords(strtolower($utente->name)) }}</option><?php
+						 }
+						}
+						else {
+							?><option>{{trans('messages.keyword_no_participants')}}</option><?php
+                            foreach($participant as $partecipante) {
+                            ?><option value="{{$partecipante->id_user}}" <?php if(isset($actionmessages->id_utente) && $actionmessages->id_utente == $partecipante->id_user ){ echo 'selected';}?>><?php
+                             foreach($users as $utente){
+                                 if($utente->id == $partecipante->id_user){
+                                    echo $partecipante->id_user.' | '.ucwords(strtolower($utente->name));
+	                                 break;
+								 }
+							 }
+                            ?></option><?php 
+							}
+					}
+				
+				/*foreach($users as $utente){
+                	    ?><option value="<?php echo $utente->id;?>"><?php echo $utente->name;?></option><?php
+					}*/
+					
+
+	        	    ?></select></td>';				
+				td +='<td><input type="text" id="editable'+count+'" name="ric[]" class="form-control" value=""></td>';
+				td +='<td><span class="datapicker-icon"><i class="fa fa-calendar" aria-hidden="true"></i></span><span class="select-date"><input type="text" id="datepicker_to'+count+'" name="datepicker_to[]" class="form-control" value=""></span></td>';
+				td +='<td><input type="text" name="banca[]" class="form-control" value=""></td>';
+                td +='<td><input type="text" name="cassa[]" class="form-control" value=""></td>';
+                td +='<td><?php 
+                        	$arrFrequen = array('1_M'=>'1 M.','2_M'=>'2 M.','3_M'=>'3 M.','6_M'=>'6 M.','1_A'=>'1 A.');
+							/*foreach($frequency as $frequencyval) {
+                        		?><div class="cust-radio"><input type="radio" name="frequenza[<?php echo $i; ?>]" <?php if($frequencyval->rinnovo == $actionmessages->frequenza){ echo 'checked';}?> id="frequenza_<?php echo $i.$frequencyval->rinnovo; ?>" value="{{ $frequencyval->rinnovo }}" />
+                                <label for="frequenza_<?php echo $i.$frequencyval->rinnovo; ?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div> <?php
+							}*/
+
+							foreach($frequency as $key => $frequencyval){
+                        		?><div class="cust-radio"><input type="radio" <?php if($key=='0'){echo 'checked';}?> name="frequenza['+count+']" id="frequenza_'+count+'<?php echo $frequencyval->rinnovo;?>" value="{{ $frequencyval->rinnovo }}" /><label for="frequenza_'+count+'<?php echo $frequencyval->rinnovo;?>"> <?php echo $frequencyval->rinnovo.' Days'; ?></label><div class="check"><div class="inside"></div></div></div><?php
+							}
+						?></td>';
+				td +='<td><div class="switch"><input type="checkbox" id="notifiche_'+count+'" name="notifiche['+count+']" value="1" /> <label for="notifiche_'+count+'"></label></div></td>';
+				tr += td+'</tr>'
+			$j("#tb").append(tr);	
+			$j("#datepicker_to"+ count).daterangepicker({
+						 	autoApply: true,
+							timePicker: true,
+							timePickerIncrement: 30,
+							locale: {
+								format: 'MM/DD/YYYY h:mm A'
+							}
+						});
+			//$j("#datepicker_to" + count).datepicker();
+			/*$j("#datepicker_from" + count).datepicker();*/
+			$j('.selezione').on("click", function() {
+				ele = $j(this).parent().parent();
+			});
+			//$j('#impedisci' + k).bind("click", impedisciModifica);
+			k++;
+			
+			/*			
+			var tabella = document.getElementById("tb");
+			var tr = document.createElement("tr");
+			var data = document.createElement("td");
+			var ora = document.createElement("td");
+			var check = document.createElement("input");
+			check.type = "checkbox";
+			check.className = "selezione";
+			var checkbox = document.createElement("td");
+			var select = document.createElement("select");
+			for(var i = 0; i < 24; i++) {
+				var opz = document.createElement("option");
+				var opz2 = document.createElement("option");
+				opz.appendChild(document.createTextNode(i + ":00"));
+				opz2.appendChild(document.createTextNode(i + ":30"));
+				select.appendChild(opz);
+				select.appendChild(opz2);
+			}
+			var input = document.createElement("input");
+			input.name = "datainserimento[]";
+			input.id = "impedisci" + k;
+			input.className = "form-control";
+			input.value = vecchiaData;
+			data.appendChild(input);
+			var appunti = document.createElement("td");
+			var input = document.createElement("input");
+			input.placeholder = "Scrivi qui...";
+			input.name = "ric[]";
+			input.className = "form-control";
+			appunti.appendChild(input);
+			var ric = document.createElement("td");
+
+			checkbox.appendChild(check);
+			tr.appendChild(checkbox);
+			tr.appendChild(appunti);
+			tr.appendChild(ric);
+			select.className = "form-control";
+			ora.appendChild(select);
+			tr.appendChild(ora);
+			tr.appendChild(data);
+			var input = document.createElement("input");
+			input.className = "form-control";
+			input.id = "datepicker" + k;
+			input.placeholder = "__/__/____";
+			input.name = "ricontattare[]";
+			ric.appendChild(input);
+			/*
+				Appunti = appunti
+				Ricontattare il giorno = ric
+				Alle = select
+				Data inserimento = data
+			*
+			select.name = "alle[]";
+			tabella.appendChild(tr);
+			$j("#datepicker" + k).datepicker();
+			$j('.selezione').on("click", function() {
+				ele = $j(this).parent().parent();
+			});
+			$j('#impedisci' + k).bind("click", impedisciModifica);
+			k++;
+		*/});	
+		</script>
+	</div></div>
+	@endif
+	<!-- fine chiamata -->
+	<!-- colonna a sinistra -->
+  <div class="row">
+	<div class="col-md-6">
+    	<div class="form-group">
+		<label for="nomeazienda">{{trans('messages.keyword_company_name')}}</label>
+		<input value="{{ isset($corp->nomeazienda) ? $corp->nomeazienda : old('nomeazienda')}}" class="form-control required-input" type="text" name="nomeazienda" id="nomeazienda" placeholder="{{trans('messages.keyword_company_name')}}">
+        </div>
+        <div class="form-group">
+		<label for="nomereferente">{{trans('messages.keyword_reference_name')}}</label>
+		<input value="{{ isset($corp->nomereferente) ? $corp->nomereferente : old('nomereferente')}}" class="form-control required-input" type="text" name="nomereferente" id="nomereferente" placeholder="{{trans('messages.keyword_reference_name')}}">
+        </div>
+        <div class="form-group">
+		<label for="telefonoazienda">{{trans('messages.keyword_primary_phone')}}</label>
+		<input value="{{ isset($corp->telefonoazienda) ? $corp->telefonoazienda : old('telefonoazienda')}}" class="form-control required-input" type="text" name="telefonoazienda" id="telefonoazienda" placeholder="{{trans('messages.keyword_primary_phone')}}">
+        </div>
+        <div class="form-group">
+		<label for="email">{{trans('messages.keyword_primary_email')}}</label>
+		<input value="{{isset($corp->email) ? $corp->email : old('email')}}" class="form-control required-input" type="email" name="email" id="email" placeholder="{{trans('messages.keyword_primary_email')}}">
+		<datalist id="settori"></datalist>
+        </div>
+        <div class="form-group">
+		<label for="settore">{{trans('messages.keyword_sector')}} </label>
+		<input value="{{isset($corp->settore) ? $corp->settore : old('settore')}}" list="settori" class="form-control required-input" type="text" id="settore" name="settore" placeholder="{{trans('messages.keyword_seek_an_industry')}}">
+        </div>
+	</div>
+     <div class="col-md-6">
+	<div class=""><div class=""><label>{{trans('messages.keyword_address')}} </label></div>
+	 <input value="{{ isset($corp->indirizzo) ? $corp->indirizzo : old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls required-input" type="text"
+        placeholder="{{trans('messages.keyword_enter_an_address')}} (*)">
+    <div id="type-selector" class="controls">
+      <input type="radio" name="type" id="changetype-all" checked="checked">
+      <label for="changetype-all">{{trans('messages.keyword_all')}}</label>
+
+      <input type="radio" name="type" id="changetype-establishment">
+      <label for="changetype-establishment">{{trans('messages.keyword_company')}}</label>
+
+      <input type="radio" name="type" id="changetype-address">
+      <label for="changetype-address">{{trans('messages.keyword_addresses')}}</label>
+
+      <input type="radio" name="type" id="changetype-geocode">
+      <label for="changetype-geocode">{{trans('messages.keyword_postal_code')}}</label>
+    </div>
+	
+    <div id="map"></div>
+	</div></div></div>
+	<!-- colonna centrale -->
+	@if($action=='edit')
+    <div class="row">
+	<div class="col-md-6">
+		<div class="form-group">
+		<label for="cellulareazienda">{{trans('messages.keyword_secondary_telephone')}} </label>
+		<input value="{{isset($corp->cellulareazienda) ? $corp->cellulareazienda : ""}}" class="form-control" type="text" name="cellulareazienda" id="cellulareazienda" placeholder="{{trans('messages.keyword_secondary_telephone')}}">
+        </div>
+        <div class="form-group">
+		<label for="emailsecondaria">{{trans('messages.keyword_secondary_email')}}</label>
+		<input value="{{isset($corp->emailsecondaria) ? $corp->emailsecondaria : old('emailsecondaria')}}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="{{trans('messages.keyword_secondary_email')}}">
+        </div>
+        <div class="form-group">
+		<label for="fax">Fax</label>
+		<input value="{{isset($corp->fax) ? $corp->fax :""}}" class="form-control" type="text" name="fax" id="fax" placeholder="Fax">
+        </div>
+        <div class="form-group">
+		<label for="statoemotivo">{{trans('messages.keyword_emotional_state')}}</label>
+		<select name="statoemotivo" class="form-control" id="statoemotivo">
+			<!-- selectedemotionState -->
+			<option></option>
+			@if($selectedemotionState!=null)
+				@foreach($emotionState as $statoemotivo)
+					<option @if($statoemotivo->id == $selectedemotionState->id_tipo) selected @endif style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{ ucwords(strtolower($statoemotivo->name)) }}</option>
+				@endforeach
+			@else
+				@foreach($emotionState as $statoemotivo)
+					<option style="background-color:{{$statoemotivo->color}};color:#ffffff" value="{{$statoemotivo->name}}">{{ ucwords(strtolower($statoemotivo->name)) }}</option>
+				@endforeach
+			@endif
+		</select>
+        </div>
+		<script>
+		var yourSelect = document.getElementById( "statoemotivo" );
+			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
+		$j('#statoemotivo').on("change", function() {
+			var yourSelect = document.getElementById( "statoemotivo" );
+			document.getElementById("statoemotivo").style.backgroundColor = yourSelect.options[yourSelect.selectedIndex].style.backgroundColor;
+		});
+		</script>		
+	</div>
+	<!-- colonna a destra -->
+	<div class="col-md-6">
+		<div class="form-group">
+		<label for="piva">{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}</label>
+		<input value="{{isset($corp->piva) ? $corp->piva : ""}}" class="form-control" type="text" name="piva" id="piva" placeholder="{{trans('messages.keyword_vat_number')}} / {{trans('messages.keyword_fiscal_code')}}">
+        </div>
+        <div class="form-group">
+		<label for="cf">{{trans('messages.keyword_credit_card')}} </label>
+		<input value="{{isset($corp->cf) ? $corp->cf : ""}}" class="form-control" type="text" name="cf" id="cf" placeholder="{{trans('messages.keyword_credit_card')}}">
+        </div>
+        <div class="form-group">
+		<label for="iban">IBAN</label>
+		<input value="{{isset($corp->iban) ? $corp->iban : ""}}" class="form-control" type="text" name="iban" id="iban" placeholder="IBAN">
+        </div>
+        <div class="form-group">
+        <label for="swift">{{trans('messages.keyword_swift')}}</label>
+		<input value="{{isset($corp->swift) ? $corp->swift : ""}}" class="form-control" type="text" name="swift" id="swift" placeholder="{{trans('messages.keyword_swift')}}">
+        </div>
+	</div></div>
+	@endif
+ 
+ 
+ 
+  <div class="row">
+   <?php /*<div class="col-md-4">
+    	<!-- Note enti -->
+        <br><label for="noteenti">Note private del commerciale</label><a onclick="mostra()" id="mostra"> <i class="fa fa-eye"></i></a>
+        	<textarea style="background-color:#f39538;color:#ffffff" rows="9" title="Note nascoste, clicca l'occhio per mostrare" class="form-control nascondi" name="noteenti" id="noteenti" placeholder="Inserisci note per caratteristiche ente"></textarea>
+        <!-- /note enti -->
+    </div>*/?>
+    <script>
+	var testo = "<?php echo isset($corp->noteenti) ? $corp->noteenti : old('noteenti'); ?>";
+	function mostra() {
+		if($j('#noteenti').val()) {
+			testo = $('#noteenti').val();
+			$j('#noteenti').val("");
+		} else {
+			$j('#noteenti').val(testo);
+			testo = "";
+		}
+	}
+	function mostra2() {
+		if(!$j('#noteenti').val())
+			$j('#noteenti').val(testo);
+	}
+	</script>
+    
+    <div class="col-md-6">
+      <div class="row modifica-set-textarea">
+      	<div class="col-md-6">
+    		<!-- sede legale -->
+        	<div class="form-group"><label for="sedelegale">{{trans('messages.keyword_registered_office')}}</label>
+        		<textarea rows="9" title="{{trans('messages.keyword_headquarters_estimate')}}" class="form-control" name="sedelegale" id="sedelegale" placeholder="{{trans('messages.keyword_registered_office')}}">{{ isset($corp->sedelegale) ? $corp->sedelegale : old('sedelegale')  }}</textarea></div>
+        </div>
+          <div class="col-md-6">
+        	<div class="form-group"><label for="indirizzospedizione">{{trans('messages.keyword_shipping_address')}}</label>
+        	<textarea rows="9" title="Sede dell'ente che verrà riporata nel preventivo" class="form-control" name="indirizzospedizione" id="indirizzospedizione" placeholder="{{trans('messages.keyword_shipping_address')}}">{{ isset($corp->indirizzospedizione) ? $corp->indirizzospedizione :  old('sedelegale') }}</textarea>
+            </div>
+        </div>
+        
+        
+        
+          <div class="col-md-12"> <label for="partecipanti">{{trans('messages.keyword_participants')}}</label></div>
+	            <div class="col-md-10">
+                	<div class="form-group">
+                   
+	                <select class="form-control" id="utenti">
+                	    @foreach($users as $utente)
+                	    <option value="{{$utente->id}}">{{$utente->id.' | '.ucwords(strtolower($utente->name)) }}</option>
+                	    @endforeach
+        	        </select>
+                    </div>
+	            </div>
+	            <div class="col-md-2">
+	                <a class="btn btn-warning" id="aggiungiPartecipante"><i class="fa fa-plus"></i></a>
+	                <a class="btn btn-danger"  id="elimina"><i class="fa fa-trash"></i></a>
+	            </div>
+	        
+        
+        
+        
+        <!-- /sede legale -->
+       </div> 
+    </div>
+    
+    
+    <div class="col-md-6">
+    	<!-- logo resp tel participant -->
+		<div class="form-group">
+        	<label for="skype_id">Skype Id</label>
+			<input value="{{isset($corp->skype_id) ? $corp->skype_id : old('skype_id')}}" class="form-control" type="text" name="skype_id" id="skype_id" placeholder="Skype Id">
+        </div>
+		<div class="form-group">
+        	<div class="row">
+            	<div class="col-md-10">
+                    <label for="{{trans('messages.keyword_logo')}}">{{trans('messages.keyword_logo')}}</label>
+                    <?php echo Form::file('logo', ['class' => 'form-control','id'=>'logo']); ?>
+                </div>
+                <div class="col-md-2 logopreview" id="logopreview"><?php if(isset($corp->logo)) { ?> <img src="{{url('/storage/app/images/').'/'.$corp->logo}}" height="100" width="100" class="img-responsive" ><?php } ?>
+                </div>
+                
+            </div>    
+        </div>    
+    
+    
+    <div class="row">
+    <div class="col-md-6">
+    	<div class="form-group">
+    <label for="responsabilelanga">{{trans('messages.keyword_responsible')}} LANGA</label>
+		<select title="{{trans('messages.keyword_responsible_associated_body')}}" name="responsabilelanga" id="responsabilelanga" class="form-control required-input" 
+		 onchange="trovaTelefono()">
+			<option value="">-- {{trans('messages.keyword_select')}} --</option>
+			@for($i = 1; $i < count($users); $i++)
+				<option value="{{$users[$i]->name}}" @if(isset($corp->responsabilelanga) && $corp->responsabilelanga == $users[$i]->name) selected @endif >{{ $users[$i]->id.' | '.ucwords(strtolower($users[$i]->name)) }}</option>
+			@endfor
+		</select>
+        	</div>
+    </div>    
+     <div class="col-md-6">
+     	<div class="form-group">
+     <label for="telefonoresponsabile">{{trans('messages.keyword_responsible_phone_langa')}}</label>
+		<input class="form-control" type="text" name="telefonoresponsabile" value="<?php if(isset($corp->telefonoresponsabile)){ echo $corp->telefonoresponsabile;}?>" readonly id="telefonoresponsabile" placeholder="{{trans('messages.keyword_responsible_phone_langa')}}" />
+
+		<?php /*<div title="Se Sì, ente mostrato solamente all'utente che l'ha creato e all'admin" style="text-align:right">
+			<label for="privato">Ente Privato?</label>
+			No <input type="radio" @if(isset($corp->privato) && $corp->privato == '0') checked @endif value="0" name="privato">
+			Sì <input type="radio" @if(isset($corp->privato) && $corp->privato == '1') checked @endif value="1" name="privato">
+            <label for="cliente">         Login Attivo?</label>
+			No <input type="radio" @if(isset($corp->id_cliente) && $corp->id_cliente == 0) checked @endif value="0" name="cliente">
+			Sì <input type="radio" @if(isset($corp->id_cliente) && $corp->id_cliente != 0) checked @endif value="1" name="cliente">
+		</div>*/?>
+        	</div>
+    </div>
+    </div>
+    
+        
+	    </div><!-- FINE 3 COLONNE (NOTE SEDE LOGO/RESP/TEL/PARTECIPANTI) -->
+  </div>
+  @if($action=='edit')
+<div class="row">
+	
+    	<?php /*?><div class="col-md-4">
+	<br><label for="tipi[]">Tipo</label><br>
+		<!-- tipiselezionati -->
+		<div class="table table-responsive">
+		<table class="table-bordered">
+		<tr>
+		<?php $check = false; ?>
+		@for($i = 0; $i < count($type); $i++)
+			@if($i%4==0)
+				</tr><tr>
+			@endif
+			@for($k = 0; $k < count($selectedtype); $k++)
+				@if($selectedtype[$k]->id_tipo == $type[$i]->id)
+					<td class="ciao"><input type="checkbox" checked name="tipi[]" id="tipi[]" value="<?php echo $type[$i]->name; ?>"><?php echo " " . $type[$i]->name; ?></td>
+					<?php $check = true; ?>
+				@endif
+			@endfor
+			@if($check==false)
+				<td class="ciao"><input type="checkbox" name="tipi[]" id="tipi[]" value="<?php echo $type[$i]->name; ?>"><?php echo " " . $type[$i]->name; ?></td>
+			@endif
+			<?php $check = false; ?>
+		@endfor
+		</tr>
+		</table>
+	</div></div><?php */?>
+	<div class="col-md-12">
+     		
+	      
+         
+            
+	        <div class="set-height">
+	            <table class="table table-striped table-bordered">
+	                <thead>
+	                    <th>#</th>
+	                    <th>{{trans('messages.keyword_id')}}</th>
+	                    <th>{{trans('messages.keyword_user')}}</th>
+                        <th>{{trans('messages.keyword_notifications')}}</th>
+	                </thead>
+	                <tbody id="partecipanti"><?php $ip = 0;?>
+						@foreach($participant as $partecipante)
+	                        <tr>
+	                            <td>
+	                                <input type="checkbox" onchange="checkboxevent(this.id)" id="partecipantichk_<?php echo $partecipante->id_user.$ip;?>" class="selezione">
+	                                <label for="partecipantichk_<?php echo $partecipante->id_user.$ip;?>"></label>
+	                            </td>
+	                            <td>
+	                                <input type="text" name="partecipanti[]" readonly value="<?php echo $partecipante->id_user; ?>" class="form-control">
+	                            </td>
+	                            <td>
+	                                @foreach($users as $utente)
+	                                	@if($utente->id == $partecipante->id_user)
+	                                		{{$utente->name}}
+	                                		@break
+	                                	@endif
+	                                @endforeach
+	                            </td>
+                                <td>
+								<div class="switch">
+                                	<input type="checkbox" name="partecipantiNotifiche[<?php echo $partecipante->id_user;?>]" id="partecipantiNotifiche_<?php echo $partecipante->id_user;?>" <?php if($partecipante->notifiche=='1'){ echo 'checked';}?> value="1" />	
+									<label for="partecipantiNotifiche_<?php echo $partecipante->id_user;?>"></label>
+                                </div>
+                                </td>
+	                            <script>
+	                                $j('.selezione').on("click", function() {
+				                selezione[n] = $j(this).parent().parent();
+				                n++;
+		                	});
+	                            </script>
+	                        </tr><?php $ip++;?>
+	                    @endforeach
+	                </tbody>
+
+	                <script>
+
+	                    var selezione = [];
+	                    var n = 0;
+	                    var k = 0;
+	                    $j('#aggiungiPartecipante').on("click", function() {
+	                        var tab = document.getElementById("partecipanti");
+	                        var tr = document.createElement("tr");
+	                        var check = document.createElement("td");
+	                        var checkbox = document.createElement("input");
+	                        checkbox.id = "partecipantichk"+$j("#utenti option:selected").val()+k;
+
+	                        var checkboxlabel = document.createElement("label");
+	                        checkboxlabel.for = "partecipantichk"+$j("#utenti option:selected").val()+k;
+							checkboxlabel.setAttribute('for', "partecipantichk"+$j("#utenti option:selected").val()+k);
+	                        checkbox.type = "checkbox";
+	                        checkbox.className = "selezione";
+	                        checkbox.onchange="checkboxevent(this.id)";
+	                        checkbox.setAttribute('onchange','checkboxevent(this.id)');
+
+	                       
+	                        check.appendChild(checkbox);
+	                        check.appendChild(checkboxlabel);
+	                        k++;
+	                        var td = document.createElement("td");
+	                        var td1 = document.createElement("td");
+							var td2 = document.createElement("td");							
+							var username = $j("#utenti option:selected").text()
+							 var Arrusername = username.split(" | ");
+	                        var nomeUtente = document.createTextNode(Arrusername[1]);
+	                        
+							var idNotificheDiv = document.createElement("div");
+							idNotificheDiv.className='switch';
+							
+							var idNotificheLabel = document.createElement("label");
+							idNotificheLabel.for = "partecipantiNotifiche_"+$j("#utenti option:selected").val()+k;
+							idNotificheLabel.setAttribute('for', "partecipantiNotifiche_"+$j("#utenti option:selected").val()+k);
+							var idNotifiche = document.createElement("input");
+	                        idNotifiche.type = "checkbox";	                        
+	                        idNotifiche.value = '1';
+	                        idNotifiche.name = "partecipantiNotifiche["+$j("#utenti option:selected").val()+"]";
+							idNotifiche.id = "partecipantiNotifiche_"+$j("#utenti option:selected").val()+k;
+							idNotificheDiv.appendChild(idNotifiche);
+							idNotificheDiv.appendChild(idNotificheLabel);
+					 		/*var idNotificheHidden = document.createElement("input");
+	                        idNotificheHidden.type = "hidden";	                        
+	                        idNotificheHidden.value = '0';
+	                        idNotificheHidden.name = "partecipantiNotifiche[]";*/
+							
+							var idUtente = document.createElement("input");
+	                        idUtente.type = "text";
+	                        idUtente.className = "form-control";
+	                        idUtente.value = $j("#utenti option:selected").val();
+	                        idUtente.name = "partecipanti[]";
+							/*idUtente.readonly = true;*/
+							idUtente.setAttribute('readonly','true')
+	                        td.appendChild(nomeUtente);
+	                        td1.appendChild(idUtente);
+							td2.appendChild(idNotificheDiv);
+							/*td2.appendChild(idNotificheHidden);*/							
+	                        tr.appendChild(check);
+	                        tr.appendChild(td1);							
+	                        tr.appendChild(td);
+							tr.appendChild(td2);
+	                        tab.appendChild(tr);
+	                        $j('.selezione').on("click", function() {
+				                selezione[n] = $j(this).parent().parent();
+				                n++;
+		                	});
+	                    });
+	                    $j('#elimina').on("click", function() {
+	                       for(var i = 0; i < n; i++) {
+	                           selezione[i].remove();
+	                       }
+	                       n = 0;
+	                    });
+	                </script>
+	            </table>
+	        </div></div>
+            </div>
+       
+        @endif
+      <!-- /partecipanti -->
+
+<script>
+	setTimeout(function() {
+		var cellulari = ["<?php
+			for($i=1;$i<count($users);$i++) {
+				if($i == count($users) - 1)
+					echo $users[$i]->cellulare . "\"";
+				else
+					echo $users[$i]->cellulare . "\",\"";
+			}
+		?>];
+		var nomi = ["<?php
+			for($i=1;$i<count($users);$i++) {
+				if($i == count($users) - 1)
+					echo $users[$i]->name . "\"";
+				else
+					echo $users[$i]->name . "\",\"";
+			}
+		?>];
+			var k;
+			var nome = $j("#responsabilelanga option:selected" ).text();
+			for(var i = 0; i < <?php echo count($users)-1;?>;i++) {
+				if(nomi[i] == nome) {
+					k = i;
+					break;
+				}
+			}
+			$j('#telefonoresponsabile').val(cellulari[k]);
+	}, 100);
+	function trovaTelefono() {
+		var cellulari = ["<?php
+			for($i=1;$i<count($users);$i++) {
+				if($i == count($users) - 1)
+					echo $users[$i]->cellulare . "\"";
+				else
+					echo $users[$i]->cellulare . "\",\"";
+			}
+		?>];
+		var nomi = ["<?php
+			for($i=1;$i<count($users);$i++) {
+				if($i == count($users) - 1)
+					echo $users[$i]->name . "\"";
+				else
+					echo $users[$i]->name . "\",\"";
+			}
+		?>];
+			var k;
+			var nome = $j("#responsabilelanga option:selected" ).val();
+			for(var i = 0; i < <?php echo count($users)-1;?>;i++) {
+				if(nomi[i] == nome) {
+					k = i;
+					break;
+				}
+			}
+			$j('#telefonoresponsabile').val(cellulari[k]);
+	}
+</script>
+<?php /*?><div class="col-md-12">
+<!-- SEZIONE COSTI ENTI -->
+            	<h4>Costi</h4>
+            <a id="creaNuovoCosto" class="btn btn-warning" name="create" title="Crea nuovo"><i class="fa fa-plus"></i></a>
+            <a class="btn btn-danger" onclick="eliminaCosto()" name="remove" title="Elimina"><i class="fa fa-eraser"></i></a>
+            <div class="table-responsive table-editable" style="padding-top:10px">
+                <table class="table table-striped table-bordered">
+                <thead>
+                    <th>#
+                    <th>Oggetto
+                    <th>Costo (€)
+                    <th>Data inserimento
+                </thead>
+                    <script>
+					
+                     
+                    function eliminaCosto() {
+                        eleme.remove();
+                    }
+                    var impedisciModifica = function(e) {
+                        this.blur();
+                        this.value = test;
+                    }
+                    var eleme;
+                    var kCosti = 0;
+                    </script>
+                    <tbody id="tab">
+
+                        @for($i = 0; $i < count($cost); $i++)
+                            <tr>
+                            <td>
+                                <input type="checkbox" class="selezione">
+                            </td>
+                            <td>
+                                <input type="text" name="oggettocosto[]" class="form-control" value="<?php echo $cost[$i]->oggetto; ?>">
+                            </td>
+                            <td>
+                                <input type="text" name="costi[]" class="form-control" value="<?php echo $cost[$i]->costo; ?>">
+                            </td>
+                            <td>
+                                <input type="text" id="datepicker<?php echo $i; ?>" name="datainserimentocosto[]" class="form-control " value="<?php echo $cost[$i]->datainserimento; ?>">
+                            </td>
+                            <td>
+                            	<a href="{{url('/costo/delete/') . '/' . $cost[$i]->id}}" onclick="return confirm('Sei sicuro di voler cancellare questo costo?');" class="btn btn-danger" style="text-decoration:none">Cancella</a>
+                            </td>
+                            </tr>
+                            <script>
+                                                 
+                            var impedisciModifica2 = function() {
+                                this.blur();
+                                this.value = "<?php echo $cost[$i]->datainserimento; ?>";
+                            }
+                            $j("#datepicker<?php echo $i; ?>").datepicker();
+                            $j('.selezione').on("click", function() {
+                                eleme = $j(this).parent().parent();
+                            });
+                            kCosti++;
+                            </script>
+                        @endfor
+                    </tbody>
+                </table>
+                
+            </div>
+
+<!-- hide buttons Crea nuovo and Elimina  -->
+
+         <!--   <a id="creaNuovoCosto2" class="btn btn-warning" name="create" title="Crea nuovo"><i class="fa fa-plus"></i></a>
+            	<a class="btn btn-danger" onclick="eliminaCosto()" name="remove" title="Elimina"><i class="fa fa-eraser"></i></a> -->
+            	
+		<script>
+			var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth()+1; //January is 0!
+			var yyyy = today.getFullYear();
+			var tbody = document.createElement("tbody");
+			if(dd<10) {
+				dd='0'+dd;
+			} 
+			if(mm<10) {
+				mm='0'+mm;
+			}
+			var vecchiaData = dd + "/" + mm + "/" + yyyy + " " + new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*, "$1");
+			var test = vecchiaData.toString();
+			function aggiungi() {
+				var tabella = document.getElementById("tab");
+				var tr = document.createElement("tr");
+				
+				var data = document.createElement("td"); // oggetto
+				var costo = document.createElement("td"); // Costo
+				var ora = document.createElement("td"); // data inserimento
+				var check = document.createElement("input");
+				
+				check.type = "checkbox";
+				check.className = "selezione";
+				var checkbox = document.createElement("td");
+
+				var input = document.createElement("input");
+				input.name = "datainserimentocosto[]";
+				input.id = "datepicker" + kCosti;
+				input.className = "form-control";
+				data.appendChild(input);
+				
+				var appunti = document.createElement("td");
+				var input = document.createElement("input");
+				input.placeholder = "Scrivi qui...";
+				input.name = "oggettocosto[]";
+				input.className = "form-control";
+				appunti.appendChild(input);
+				var ric = document.createElement("td");
+				checkbox.appendChild(check);
+				tr.appendChild(checkbox);
+				tr.appendChild(appunti);
+				
+				var costoInput = document.createElement("input");
+				costoInput.name = "costi[]";
+				costoInput.className = "form-control";
+
+				costo.appendChild(costoInput);
+				tr.appendChild(costo);
+				tr.appendChild(data);
+				/*
+					Appunti = appunti
+					Ricontattare il giorno = ric
+					Alle = select
+					Data inserimento = data
+				*
+
+				tabella.appendChild(tr);
+				$j("#datepicker" + kCosti).datepicker();
+				$j('.selezione').on("click", function() {
+					eleme = $j(this).parent().parent();
+				});
+				kCosti++;	
+			}
+			$j('#creaNuovoCosto').on("click", aggiungi);
+			$j('#creaNuovoCosto2').on("click", aggiungi);	
+			</script>
+            <!-- FINE COSTI -->
+			
+ </div><?php */?>
+
+<div class="row"> 
+<div class="col-md-6 tpbtm10">
+</div>
+<div class="col-md-6 tpbtm10 text-right">
+		@if($loginuser['id']=='0' || $loginuser['dipartimento'] == '2')
+		<button onclick="mostra2()" id="btnSubmitEnti" type="submit" class="btn btn-warning marg0">{{trans('messages.keyword_save')}}</button>
+		@endif
+</div>
+</div>
+    
+    
+    
+    
+<div class="footer-svg">
+  <img src="{{url('images/FOOTER3-ORIZZONTAL_ENTITY.svg')}}" alt="footer enti image">
+</div>
+
+<?php echo Form::close(); ?>
+<script>
+function punto() {
+	$j('#prova').val($('#pac-input').val());
+}
+$j('.ciao').on("click", function() {
+	$(this).children()[0].click();
+});
+$j('#btnSubmiTop').on("click", function() {
+	$j("#btnSubmitEnti").click();
+});
+// Carica i settori nel datalist dal file.json
+var datalist = document.getElementById("settori");
+var xhr = new XMLHttpRequest();
+xhr.onreadystatechange = function(response) {
+	if (xhr.readyState === 4 && xhr.status === 200) {
+		var json = JSON.parse(xhr.responseText);
+		json.forEach(function(item) {
+			var option = document.createElement('option');
+			option.value = item;
+			datalist.appendChild(option);
+		});
+    }
+}
+xhr.open('GET', "{{ asset('public/json/settori.json') }}", true);
+xhr.send();
+</script>
+<script>
+      // This example requires the Places library. Include the libraries=places
+      // parameter when you first load the API. For example:
+      // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
+
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 44.8688, lng: 8.2195},
+          zoom: 13
+        });
+        var input = /** @type {!HTMLInputElement} */(
+            document.getElementById('pac-input'));
+
+        var types = document.getElementById('type-selector');
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(types);
+
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo('bounds', map);
+		var image = "{{asset('public/marker.png')}}";
+        var infowindow = new google.maps.InfoWindow();
+        var marker = new google.maps.Marker({
+		  icon: image,
+          map: map,
+		  draggable: true,
+		  animation: google.maps.Animation.DROP,
+          anchorPoint: new google.maps.Point(0, -29)
+        });
+
+        autocomplete.addListener('place_changed', function() {
+          infowindow.close();
+          marker.setVisible(false);
+          var place = autocomplete.getPlace();
+          if (!place.geometry) {
+            window.alert("Autocomplete's returned place contains no geometry");
+            return;
+          }
+
+          // If the place has a geometry, then present it on a map.
+          if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+          } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);  // Why 17? Because it looks good.
+          }
+          marker.setIcon(/** @type {google.maps.Icon} */({
+            
+            size: new google.maps.Size(71, 71),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(17, 34),
+            scaledSize: new google.maps.Size(35, 35)
+          }));
+          marker.setPosition(place.geometry.location);
+          marker.setVisible(true);
+
+          var address = '';
+          if (place.address_components) {
+            address = [
+              (place.address_components[0] && place.address_components[0].short_name || ''),
+              (place.address_components[1] && place.address_components[1].short_name || ''),
+              (place.address_components[2] && place.address_components[2].short_name || '')
+            ].join(' ');
+          }
+
+          infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+          infowindow.open(map, marker);
+        });
+
+        // Sets a listener on a radio button to change the filter type on Places
+        // Autocomplete.
+        function setupClickListener(id, types) {
+          var radioButton = document.getElementById(id);
+          radioButton.addEventListener('click', function() {
+            autocomplete.setTypes(types);
+          });
+        }
+
+        setupClickListener('changetype-all', []);
+        setupClickListener('changetype-address', ['address']);
+        setupClickListener('changetype-establishment', ['establishment']);
+        setupClickListener('changetype-geocode', ['geocode']);
+      }
+	  
+	  $j(document).ready(function() {
+	  	/*jQuery.validator.addMethod("intlTelNumber", function(value, element) {
+    	value = value.replace( /\s+/g, "" );
+		return this.optional( element ) || value.length > 9 &&
+		    value.match( /^(\+?1-?)?(\([2-9]([02-9]\d|1[02-9])\)|[2-9]([02-9]\d|1[02-9]))-?[2-9]([02-9]\d|1[02-9])-?\d{4}$/ );
+		}, "Please enter a valid International Phone Number");*/
+        // validate signup form on keyup and submit
+        $("#frmModificaente").validate({
+
+            rules: {
+                nomeazienda: {
+                    required: true,
+                    maxlength: 35
+                },
+                nomereferente: {
+					required: true,
+                    maxlength: 35
+                },
+                telefonoazienda: {
+                    required: true,                    
+                    maxlength: 15,
+                   
+                },
+                cellulareazienda:{
+                	maxlength: 15,
+                    //digits: true	
+                },
+                fax:{
+                	maxlength: 15,
+                    digits: true		
+                },
+                cf:{
+                	maxlength: 16,
+                    digits: true		
+                },
+                email: {
+                    required: true,   
+                    email: true                 
+                },
+                emailsecondaria: {
+                    email: true
+                },
+                responsabilelanga: {   
+                    required: true                
+                },
+				indirizzo:{
+					required: true                
+				},
+				settore:{
+					required: true                	
+				}
+            },
+            messages: {
+                nomeazienda: {
+                    required: "<?php echo trans('messages.keyword_please_enter_company_name');?>",
+                    maxlength: "<?php echo trans('messages.keyword_company_name_must_be_less_than_35_characters');?>"
+                },
+                nomereferente: {
+					required: "<?php echo trans('messages.keyword_please_enter_reference_name');?>",
+                    maxlength: "<?php echo trans('messages.keyword_the_reference_name_must_be_less_than_35_characters');?>"
+                },
+                telefonoazienda: {
+                    required: "<?php echo trans('messages.keyword_please_enter_primary_phone'); ?>",                    
+                    maxlength: "<?php echo trans('messages.keyword_primary_phone_must_be_less_than_15');?>",
+                   // digits:"<?php echo trans('messages.keyword_please_enter_valid_number');?>",
+                },
+                cellulareazienda: {                  
+                    maxlength: "<?php echo trans('messages.keyword_number_must_be_less_than_15');?>",
+                   // digits:"<?php echo trans('messages.keyword_please_enter_valid_number');?>",
+                },
+                cf:{
+                 	maxlength: "<?php echo trans('messages.keyword_number_must_be_less_than_19');?>",
+                    digits:"<?php echo trans('messages.keyword_please_enter_valid_number');?>",
+                },                	
+                fax:{
+                	maxlength: "<?php echo trans('messages.keyword_number_must_be_less_than_15');?>",
+                    digits:"<?php echo trans('messages.keyword_please_enter_valid_number');?>",
+                },
+                email: {
+                    required: "<?php echo trans('messages.keyword_please_enter_primary_email');?>",   
+                    email: "<?php echo trans('messages.keyword_please_enter_a_valid_primary_email');?>"                 
+                },
+                emailsecondaria: {
+                    email: "<?php echo trans('messages.keyword_enter_a_valid_secondary_email');?>"
+                },
+                responsabilelanga: {   
+                    required: "<?php echo trans('messages.keyword_please_select_a_responsabile_langa');?>"                
+                },
+				indirizzo:{
+					required: "<?php echo trans('messages.keyword_please_enter_a_address');?>"                
+				},
+				settore:{
+					required: "<?php echo trans('messages.keyword_please_select_a_sector');?>"                
+				}
+            }
+
+        });
+
+
+        var selezione = [];
+var indici = [];
+var n = 0;
+
+/*$(".selezione_note input[type=checkbox]:checked").each(function() {
+	alert("cc");
+    $(this).closest("tr").addClass("selected");
+});*/
+
+/*$(".selezione_note input[type=checkbox]").on("change", function() {	
+	alert("cc");
+    $(this).closest("tr").toggleClass("selected");
+});*/
+
+$('.table').on('click-row.bs.table', function (row, tr, el) {
+	alert("cc");
+    var cod = $(el[0]).children()[0].innerHTML;
+	if (!selezione[cod]) {        
+        $('#table tr.selected').removeClass("selected");       
+		$(el[0]).addClass("selected");
+		selezione[cod] = cod;
+		indici[n] = cod;
+		n++;
+	} else {        
+		$(el[0]).removeClass("selected");
+		selezione[cod] = undefined;
+		for(var i = 0; i < n; i++) {
+			if(indici[i] == cod) {
+				for(var x = i; x < indici.length - 1; x++)
+					indici[x] = indici[x + 1];
+				break;	
+			}
+		}
+		n--;
+
+        $('#table tr.selected').removeClass("selected");       
+        $(el[0]).addClass("selected");
+        selezione[cod] = cod;
+        indici[n] = cod;
+        n++;
+	}
+});
+
+
+	  });
+function checkboxevent(id){		
+	$this=$('#'+id);
+	//$('.selezione_note:checkbox').change(function(){	
+	    if($this.is(":checked")) {    	
+	    	$this.closest("tr").addClass("selected");
+	    } else {    	
+	        $this.closest("tr").removeClass("selected");
+	    }
+	//});
+}
+
+var $jp = jQuery.noConflict();
+function readURL(input) {
+if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+    	$jp('#logopreview').html('<br><img height="100" width="100" src="'+e.target.result+'">');
+        /*$('#logopreview').attr('src', e.target.result);*/
+    }
+    reader.readAsDataURL(input.files[0]);
+    }
+}
+
+$jp("#logo").change(function(){	
+    readURL(this);
+});
+$jp(window).load(function()
+{
+   var phones = [{ "mask": "(###) ###-####"}, { "mask": "(###) ###-##############"}];
+    $jp('#telefonoazienda').inputmask({ 
+        mask: phones, 
+        greedy: false, 
+        definitions: { '#': { validator: "[0-9]", cardinality: 1}} });
+
+ $jp('#cellulareazienda').inputmask({ 
+        mask: phones, 
+        greedy: false, 
+        definitions: { '#': { validator: "[0-9]", cardinality: 1}} });
+});
+
+    </script>
+	<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&sensor=false&libraries=places&callback=initMap"
+        async defer></script>-->
+	<!--AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI -->
+	<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjhyTxmz9i9mGwzB1xy6mvVYH46PD2ylE&libraries=places&callback=initMap" async defer></script>-->
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&libraries=places&callback=initMap" async defer></script>
+@endsection

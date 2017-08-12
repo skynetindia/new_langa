@@ -517,8 +517,9 @@
 
 
 function aggiungiEvento(selecteddate) {    
-    $( "#newEvent" ).modal();
-    $('#newEvent').on('shown.bs.modal', function(){
+
+  $( "#newEvent" ).modal();
+	$('#newEvent').on('shown.bs.modal', function(){
 	  initMap2();             
       if (typeof selecteddate != 'undefined'){        
         $("#giorno").val(selecteddate+' - '+selecteddate);
@@ -1152,7 +1153,7 @@ jq223 = jQuery.noConflict(false);
 			},
 			defaultDate: "<?php echo date('Y-m-d',time())?>",
 			editable: true,
-			navLinks: false, // can click day/week names to navigate views
+			navLinks: true, // can click day/week names to navigate views
 			eventLimit: true, // allow "more" link when too many events
 			events: {
 				url: "{{url('/calendario/json/'.$tipo)}}",

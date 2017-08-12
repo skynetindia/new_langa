@@ -1,0 +1,411 @@
+@extends('layouts.app')
+
+@section('content')
+
+
+
+
+<div class="">
+
+	<div class="login-process-step">
+<div class="navigation-root">
+    <ul class="navigation-list">
+        <li class="navigation-item navigation-previous-item  navigation-active-item" id="firstst"></li>
+        <li class="navigation-item " id="secondst"></li>
+        <li class="navigation-item" id="thirdst"></li>
+        <li class="navigation-item" id="fourthst"></li>
+        <li class="navigation-item" id="fifthst"></li>
+       
+    </ul>
+</div>
+</div>
+
+<div class="reg-step-two">
+	<div class="height-width100">
+    	<div class="registration-wrap">
+        <div class="row">
+        	<div class="col-md-6 col-sm-12 col-xs-12">
+            	<div class="registrtion-left-side firstpart" id="firstpart">
+                    <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                    <div class="registration-content heading"><h3>Let's get started!</h3><p>Three things you need to know about being an envato author.</p></div>
+                    <div class="registration-content"><h3>we live for quality and originality</h3><p>only the best authors and items make it throught our review process this way we make sure that all products meet our quality and originally standards.</p></div>
+                    <div class="registration-content"><h3>make it clear and meaningful.</h3><p>Only three best authors and items make it through our review process. this way we make sure that all products meet our quality and originality standards.</p></div>
+                    
+                    <div class="i-agree"><a href="Javascript:void(0);" onclick="fun_next();" class="btn btn-warning">I agree, sign me up!</a>
+                    <p>By continuing you agree to the Envato Market author terms and envato elements contributor terms.</p>
+                    </div>
+                    
+                </div>
+                <div class="registrtion-left-side reg-step-3 none secondpart" id="secondpart">
+                    <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                        <div class="registration-content heading"><h3>create your easy user</h3></div>
+                       	
+                       <form name="signupForm" id="signupForm" role="form" method="POST" action="{{ url('/register') }}">
+                        	<div class="row">
+                            	<div class="col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                       <input id="firstname" name="firstname" type="text" class="form-control" placeholder="{{ trans('messages.keyword_firstname') }}" value="@isset($reg_user->name) {{ $reg_user->name }} @endisset" />
+                                    </div>
+                                     <span id="span_firstname" style="display: none;"> 
+                                    {{ trans('messages.keyword_firstname_not_null') }} 
+                                    </span>
+                                </div>
+                                <div class="col-md-6 col-sm-12 col-xs-12">
+                                  <div class="form-group">
+                                   <input id="lastname" name="lastname" type="text" class="form-control" placeholder="{{ trans('messages.keyword_lastname') }}" value="@isset($reg_user->name) {{ $reg_user->name }} @endisset" />
+                                  </div>
+                                    <span id="span_lastname" style="display: none;"> 
+                        {{ trans('messages.keyword_lastname_not_null') }} 
+                        </span>
+                                </div> 
+                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                  <div class="form-group">
+                                   <input id="email" name="email" type="text" class="form-control" placeholder="{{ trans('messages.keyword_email') }}" value="@isset($reg_user->email) {{ $reg_user->email }} @endisset" />
+                                  </div>
+                                   <span id="span_email" style="display: none;"> 
+                {{ trans('messages.keyword_email_not_null') }} 
+            </span>
+                                </div> 
+                                
+                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                  <div class="form-group">
+                                   <input id="username" name="username" type="text" class="form-control" placeholder="{{ trans('messages.keyword_username') }}" value="@isset($reg_user->username) {{ $reg_user->username }} @endisset" />
+                                  </div>
+                                  <span id="span_username" style="display: none;"> 
+                {{ trans('messages.keyword_username_not_null') }} 
+            </span>
+                                </div> 
+                                
+                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                  <div class="form-group">
+                                   <input id="password" name="password" type="password" class="form-control" placeholder="{{ trans('messages.keyword_password') }}" value="@isset($reg_user->password) {{ $reg_user->password }} @endisset" />
+                                  </div>
+                                  <span id="span_password" style="display: none;"> 
+                                {{ trans('messages.keyword_password_not_null') }} 
+                            </span>
+                                </div> 
+                                
+                                <div class="col-md-12 col-sm-12 col-xs-12"><div class="form-group"><div class="capcha-block"></div></div></div>
+                                 
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                    	<p>By creating an account you agree to our <a href="#">Privacy Policy</a></p>
+                                        <button type="submit" class="btn btn-warning" id="create_account">Create account and countinue</button>
+                                        <p>Already got an account? <a href="{{ url('/register') }}">Sign in here</a></p>
+                                    </div>
+                                 </div>   
+                                 
+                             </div>   
+                        </form>
+                       
+                       
+                    </div>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12">
+            	<div class="registrtion-right-side firstpart" id="rightone">
+                </div>
+                <div class="registrtion-right-side reg-step-3 none secondpart" id="rightsecond">
+                	<img src="images/easy-logo.svg" width="150" height="150"/>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<script src="{{ url('public/scripts/jquery.min.js')}}"></script>
+<!-- jQuery validation js --> 
+<script src="http://localhost/easylanganew/public/scripts/jquery.validate.min.js"></script> 
+<script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script>
+<script type="text/javascript" src="{{asset('public/scripts/jqColorPicker.min.js')}}"></script>
+
+<script type="text/javascript"> 
+    $('.color').colorPicker();   
+</script>
+
+<script type="text/javascript">
+	function fun_next()
+	{
+		$('.firstpart').hide(400);
+		$('.secondpart').show(400);
+		$('#firstst').removeClass('navigation-active-item');
+		$('#secondst').addClass('navigation-previous-item');
+		$('#secondst').addClass('navigation-active-item');
+	}
+
+    $(document).ready(function() {
+		$('.container').addClass('register-wrap');
+
+        $('#steptwo_back').click(function() {        
+            $('#second-step').css('display', 'none');
+            $('#first-step').css('display', 'block'); 
+        });
+
+        $('#stepthree_back').click(function() {
+            $('#third-step').css('display', 'none');
+            $('#second-step').css('display', 'block'); 
+        });
+
+        $('#stepfour_back').click(function() {
+            $('#forth-step').css('display', 'none');
+            $('#third-step').css('display', 'block'); 
+        });
+
+        $('#stepfive_back').click(function() {
+            $('#fifth-step').css('display', 'none');
+            $('#forth-step').css('display', 'block');
+        });
+
+        $('#signupForm').on('submit', function(e){ 
+		e.preventDefault();      
+			
+            var firstname = $('#firstname').val();
+            var lastname = $('#lastname').val();
+            var email = $('#email').val();   
+			 var username = $('#username').val();           
+            var password = $('#password').val();
+
+            if (firstname == '') {
+                document.getElementById("span_firstname").style.display="block";
+                document.getElementById("span_firstname").style.color = "red";
+				 document.getElementById("span_firstname").style.marginBottom = "8px";
+                $('#firstname').focus();        
+                return false;
+
+            } else if (lastname == '') {            
+                document.getElementById("span_lastname").style.display="block";
+                document.getElementById("span_lastname").style.color = "red";
+				 document.getElementById("span_lastname").style.marginBottom = "8px";
+                document.getElementById("span_firstname").style.display="none";
+                $('#lastname').focus();        
+                return false;
+
+            } else if (email == '') {            
+                document.getElementById("span_email").style.display="block";
+                document.getElementById("span_email").style.color = "red";
+				document.getElementById("span_email").style.marginBottom = "8px";
+                document.getElementById("span_lastname").style.display="none";
+                $('#email').focus();        
+                return false;
+			}
+            else if (username == '') {            
+                document.getElementById("span_username").style.display="block";
+                document.getElementById("span_username").style.color = "red";
+				document.getElementById("span_username").style.marginBottom = "8px";
+                document.getElementById("span_email").style.display="none";
+                $('#email').focus();        
+                return false;
+
+            }
+			 else if (password == '') {            
+                document.getElementById("span_password").style.display="block";
+                document.getElementById("span_password").style.color = "red";
+				document.getElementById("span_password").style.marginBottom = "8px";
+                document.getElementById("span_username").style.display="none";
+                $('#password').focus();        
+                return false;
+            } 
+
+            var atpos = email.indexOf("@");
+            var dotpos = email.lastIndexOf(".");
+            if (atpos<1 || dotpos<atpos+2 || dotpos+2>=email.length){
+              alert(" {{ trans('messages.keyword_valid_email_required') }} ");
+              email.focus();
+              return false;
+            } 
+
+            $.ajax({            
+                url: '{{ url('register') }}',
+                type:'POST',
+                data: { 'firstname': firstname, 'lastname': lastname, 
+                        'email': email,'username':username, 'password': password, '_token': '{{ csrf_token() }}' 
+                    },              
+                success:function(data) { 
+                    if(data == 1){                        
+                        $('#second-step').css('display', 'block');
+                        $('#first-step').css('display', 'none');
+						$('#firstst').removeClass('navigation-active-item');
+						$('#secondst').addClass('navigation-previous-item');
+						$('#secondst').addClass('navigation-active-item');
+                    } else {
+                        var data = $.parseJSON(data); 
+                        var user_id = data.id;           
+                        if(user_id) { window.location="{{url('/register/step-two')}}";
+						 }
+                    }
+                },
+                error: function (request) {
+                    alert(request.responseText);
+                   
+                }
+            });
+        });
+
+		$('#logo').change(function() {
+		  var i = $(this).prev('label').clone();
+		  var file = $('#logo')[0].files[0].name;
+		  $(this).prev('label').text(file);
+		});
+
+
+		$('#second-step-form .radio-button-radio').click(function(){
+			$('.form-group').removeClass('selected');
+			if($(this).prop('checked')==true)
+			{
+				$(this).parents('.form-group').addClass('selected');
+			}
+		});
+        $('#steptwo_next').on('click', function(){       
+            
+            var role = $("input[name='role']:checked").val();  
+            var user_id = $('#user_id_two').val(); 
+
+            if(role == null){
+                document.getElementById("span_role").style.display="block";
+                document.getElementById("span_role").style.color = "red";
+				document.getElementById("span_role").style.marginBottom = "8px";
+				
+                return false;
+            } 
+                   
+            $.ajax({            
+                url: '{{ url('registration-step-two') }}',
+                type:'POST',
+                data: { 'role': role, 'user_id' : user_id, '_token': '{{ csrf_token() }}' 
+                    },              
+                success:function(data) { 
+                    console.log(data);
+                    if(data != 'false'){
+                        var data = $.parseJSON(data);
+                        var user_id = data.id;     
+                        var role_dept = data.dipartimento;
+                        $('#user_id_three').val(user_id);                        
+                         if(role_dept ==2 || role_dept == 4 || role_dept == 5) {
+                            $('#third-step').css('display', 'block');
+                            $('#second-step').css('display', 'none');
+                            $('#five_five').css('display', 'inline-block');
+							$('#four_four').css('display', 'inline-block');
+							 $('#four_three').css('display', 'none');
+                            $('#five_four').css('display', 'none');
+							$('.login-process-step').removeClass('four-sign');
+                        }  else {
+                            $('#forth-step').css('display', 'block');
+                            $('#second-step').css('display', 'none');
+							 $('#five_five').css('display', 'none');
+							$('#four_four').css('display', 'none');
+                            $('#four_three').css('display', 'inline-block');
+                            $('#five_four').css('display', 'inline-block');
+							$('.login-process-step').addClass('four-sign');
+                            $('#user_id_forth').val(user_id);
+                        }
+						$('#secondst').removeClass('navigation-active-item');
+						$('#thirdst').addClass('navigation-previous-item');
+						$('#thirdst').addClass('navigation-active-item');
+                    } 
+                    if(data == 'false'){
+                        alert("this value is aleady save.");
+                    } 
+                }
+            });
+        });
+
+        $('#stepthree_next').on('click', function(){       
+            
+            var city = $('#city').val();
+            var state = $('#state').val();
+            var user_id_three = $('#user_id_three').val();
+
+            $.ajax({            
+                url: '{{ url('registration-step-three') }}',
+                type:'POST',
+                data: { 'city': city, 'state': state, '_token': '{{ csrf_token() }}', 'user_id_three' : user_id_three
+                },              
+                success:function(data) {                      
+                    if(data != 'false'){
+                        var data = $.parseJSON(data);
+                        var user_id = data.id;     
+                        var role_dept = data.dipartimento;
+                        $('#user_id_forth').val(user_id);
+                        $('#forth-step').css('display', 'block');
+                        $('#second-step').css('display', 'none'); 
+                        $('#third-step').css('display', 'none'); 
+                    }  
+                    if(data == 'false'){
+                        alert("this value is aleady save.");
+                    }                   
+                }
+            });
+        });
+
+        $('#stepfour_next').on('click', function(){       
+            
+            var color = $('#color').val();
+            var cellphone = $('#cellphone').val();
+            var logo = $('#logo').val();
+            var user_id_forth = $('#user_id_forth').val();
+
+            var mob = /^[1-9]{1}[0-9]{9}$/;
+            if (cellphone != false) {
+                if (mob.test(cellphone) == false) {
+                    alert("{{ trans('messages.keyword_mobile_number_range') }} ");
+                    $('#cellphone').focus();
+                    return false;
+                }
+            }
+
+            $.ajax({            
+                url: '{{ url('registration-step-four') }}',
+                type:'POST',
+                data: { 'color': color, 'cellphone': cellphone, 'logo': logo,'_token': '{{ csrf_token() }}', 'user_id_forth' : user_id_forth
+                },              
+                success:function(data) {                      
+                    if(data != 'false'){
+                        var data = $.parseJSON(data);
+                        var user_id = data.id;     
+                        var role_dept = data.dipartimento;                       
+                        $('#fifth-step').css('display', 'block');
+                        $('#forth-step').css('display', 'none'); 
+                    }
+                    if(data == 'false'){
+                        alert("this value is aleady save.");
+                    } 
+                }
+            });
+        });
+
+        $('#submit').on('click', function(){  
+            var iagree = $('#iagree').val();
+            if($('#iagree').prop("checked") == false){
+                alert("{{ trans('messages.keyword_please_check_i_agree ') }} ");
+            } else{
+                window.location = "<?php /*Session::forget('reg_user_id'); Session::forget('reg_user_role');*/ echo url('/login'); ?>";
+            }           
+        });
+
+        $('select[name="state"]').on('change', function() {
+
+            var stateID = $(this).val();
+            if(stateID) {
+
+                $.ajax({
+                    url: '{{ url('/cities/') }}'+ '/' + stateID,
+                    type: "GET",
+                    dataType: "json",
+                    success:function(data) {
+                        $('select[name="city"]').empty();
+                         $('select[name="city"]').append('<option style="background-color:white" selected disabled>-- {{ trans('messages.keyword_selectcity') }} --</option>');
+                        $.each(data, function(key, value) {
+                            $('select[name="city"]').append('<option value="'+ key +'">'+ value +'</option>');
+                        });
+                    }
+                });
+            }else{
+                $('select[name="city"]').empty();
+            }
+        });
+
+    });
+</script>
+@endsection

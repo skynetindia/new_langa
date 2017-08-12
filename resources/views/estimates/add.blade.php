@@ -136,6 +136,7 @@
         <table id="table" class="table table-bordered packages_and_optional">
             <thead>
                 <th>#</th>
+                <th> {{ trans('messages.keyword_order') }} </th>                
                 <th> {{ trans('messages.keyword_object') }}, {{ trans('messages.keyword_qty') }}, {{ trans('messages.keyword_unit_price') }} </th>
                 <th> {{ trans('messages.keyword_description') }} </th>                
                 <th> {{ trans('messages.keyword_subtotal') }}, {{ trans('messages.keyword_cyclicity') }}, {{ trans('messages.keyword_asterisca') }}</th>                
@@ -188,13 +189,14 @@
                                      td.appendChild(checkbox);
                                     td.appendChild(checkboxLabel);
                                     
-                                    /*var ordine = document.createElement("input");
+                                    var ordine = document.createElement("input");
                                     ordine.type = "number";
                                     var qt1 = document.createElement("td");
                                     ordine.value = 1;
                                     ordine.name = "ordine[]";
-                                    ordine.className = "form-control";
-                                    qt1.appendChild(ordine);*/
+                                    ordine.className = "form-control priority";
+                                    ordine.placeholder="{{ trans('messages.keyword_order') }}";
+                                    qt1.appendChild(ordine);
                                     
                                     // Codice
                                
@@ -215,6 +217,7 @@
                                     input.value = code;
                                     input.name = "oggetti[]";
                                     input.className ="form-control";
+                                    input.placeholder="{{ trans('messages.keyword_object') }}";
                                     oggetto.appendChild(input);
 
                                     var oggettorow = document.createElement("div");
@@ -235,6 +238,7 @@
                                     qt.value = 1;
                                     qt.name = "qt[]";
                                     qt.className = "form-control qt";
+                                    qt.placeholder="{{ trans('messages.keyword_qty') }}";
                                     //tdQt.appendChild(qt);
                                     oggettodiv1.appendChild(qt);
                                     
@@ -246,6 +250,7 @@
                                     inputPrezzo.value = prez;
                                     inputPrezzo.name = "pru[]";
                                     inputPrezzo.className = "form-control pr";
+                                    inputPrezzo.placeholder="{{ trans('messages.keyword_unit_price') }}";
                                     oggettodiv2.appendChild(inputPrezzo);
                                     oggetto.appendChild(oggettorow);
                                     //prezzo.appendChild(inputPrezzo);
@@ -258,6 +263,7 @@
                                     inputDesc.name = "desc[]";
                                     inputDesc.value = desc;
                                     inputDesc.className = "form-control";
+                                    inputDesc.placeholder="{{ trans('messages.keyword_description') }}";
                                     descrizione.appendChild(inputDesc);
 
                                      var totalerow = document.createElement("div");
@@ -277,6 +283,7 @@
                                     totale.value = prez;
                                     totale.name = "tot[]";
                                     totale.className = "form-control tot";
+                                    totale.placeholder="{{ trans('messages.keyword_subtotal') }}";
                                     tdTot.appendChild(totale);
                                     
                                     // Asterisca
@@ -329,6 +336,7 @@
                 check.type = "checkbox";
                 check.name = "ast[]";
                 check.id = "ast"+count;
+                check.className = 'astircflag';
                 var checkLabel = document.createElement("label");
                 checkLabel.for="ast"+count;
                 checkLabel.setAttribute('for', "ast"+count);
@@ -340,7 +348,7 @@
                                     tdTot.appendChild(totalerow);
                                     
                                     tr.appendChild(td);
-                                    //tr.appendChild(qt1);
+                                    tr.appendChild(qt1);
                                     //tr.appendChild(codice);
                                     tr.appendChild(oggetto);
                                     tr.appendChild(descrizione);
@@ -360,6 +368,7 @@
                     break;
                 }
             }
+            calculateTotal();
         });
         
         
@@ -385,13 +394,14 @@
 
                     tr.appendChild(td);
                     var ordine = document.createElement("input");
-                                    ordine.type = "number";
-                                    var qt1 = document.createElement("td");
-                                    ordine.value = 1;
-                                    ordine.name = "ordine[]";
-                                    ordine.className = "form-control";
-                                   // qt1.appendChild(ordine);
-                    //tr.appendChild(qt1);
+                    ordine.type = "number";
+                    var qt1 = document.createElement("td");
+                    ordine.value = 1;
+                    ordine.name = "ordine[]";
+                    ordine.className = "form-control priority";
+                    ordine.placeholder="{{ trans('messages.keyword_order') }}";
+                    qt1.appendChild(ordine);
+                    tr.appendChild(qt1);
                     // Codice
 
                     var oggettorow = document.createElement("div");
@@ -423,6 +433,7 @@
                     input.value = code;
                     input.name = "oggetti[]";
                     input.className ="form-control";
+                    input.placeholder="{{ trans('messages.keyword_object') }}";
                     oggetto.appendChild(input);
                     oggetto.appendChild(oggettorow);
 
@@ -437,6 +448,7 @@
                     qt.value = 1;
                     qt.name = "qt[]";
                     qt.className = "form-control qt";
+                    qt.placeholder="{{ trans('messages.keyword_qty') }}";
                     oggettodiv1.appendChild(qt);
                     /*tdQt.appendChild(qt);
                     tr.appendChild(tdQt);*/
@@ -449,6 +461,7 @@
                     inputPrezzo.value = prez;
                     inputPrezzo.name = "pru[]";
                     inputPrezzo.className = "form-control pr";
+                    inputPrezzo.placeholder="{{ trans('messages.keyword_unit_price') }}";
                     oggettodiv2.appendChild(inputPrezzo);
                     /*prezzo.appendChild(inputPrezzo);
                     tr.appendChild(prezzo);*/
@@ -461,6 +474,7 @@
                     inputDesc.name = "desc[]";
                     inputDesc.value = desc;
                     inputDesc.className = "form-control";
+                    inputDesc.placeholder="{{ trans('messages.keyword_description') }}";
                     descrizione.appendChild(inputDesc);
                     tr.appendChild(descrizione);
 
@@ -481,6 +495,7 @@
                     totale.value = prez;
                     totale.name = "tot[]";
                     totale.className = "form-control tot";
+                    totale.placeholder="{{ trans('messages.keyword_subtotal') }}";
                     tdTot.appendChild(totale);
                     tr.appendChild(tdTot);
                     
@@ -518,6 +533,7 @@
                     check.type = "checkbox";
                     check.name = "ast[]";
                     check.id = "ast"+count;
+                    check.className = 'astircflag';
                     var checkLabel = document.createElement("label");
                     checkLabel.for="ast"+count;
                     checkLabel.setAttribute('for', "ast"+count);
@@ -535,6 +551,7 @@
 					count++;            
                 }
             }
+            calculateTotal();
         });
         
         
@@ -570,15 +587,17 @@
             var qt1 = document.createElement("td");
             ordine.value = 1;
             ordine.name = "ordine[]";
-            ordine.className = "form-control";
-                                   // qt1.appendChild(ordine);
-            //tr.appendChild(qt1);
+            ordine.className = "form-control priority";
+            ordine.placeholder="{{ trans('messages.keyword_order') }}";
+            qt1.appendChild(ordine);
+            tr.appendChild(qt1);
             // Oggetto
             var oggetto = document.createElement("td");
             var input = document.createElement("input");
             input.type = "text";
             input.name = "oggetti[]";
             input.className ="form-control";
+            input.placeholder="{{ trans('messages.keyword_object') }}";
 
             //oggetto.appendChild(input);
             //tr.appendChild(oggetto);
@@ -611,6 +630,7 @@
             //inputDesc.type = "text";
             inputDesc.name = "desc[]";
             inputDesc.className = "form-control";
+            inputDesc.placeholder="{{ trans('messages.keyword_description') }}";
             descrizione.appendChild(inputDesc);
             tr.appendChild(descrizione);
 
@@ -620,6 +640,7 @@
             var tdQt = document.createElement("td");
             qt.name = "qt[]";
             qt.className = "form-control qt";
+            qt.placeholder="{{ trans('messages.keyword_qty') }}";
             oggettodiv1.appendChild(qt);
             /*tdQt.appendChild(qt);
             tr.appendChild(tdQt);*/
@@ -629,6 +650,7 @@
             inputPrezzo.type = "number";
             inputPrezzo.name = "pru[]";
             inputPrezzo.className = "form-control pr";
+            inputPrezzo.placeholder="{{ trans('messages.keyword_unit_price') }}";
             oggettodiv2.appendChild(inputPrezzo);
             /*prezzo.appendChild(inputPrezzo);
             tr.appendChild(prezzo);*/
@@ -638,6 +660,7 @@
             var tdTot = document.createElement("td");
             totale.name = "tot[]";
             totale.className = "form-control tot";
+            totale.placeholder="{{ trans('messages.keyword_subtotal') }}";
             tdTot.appendChild(totale);
             tr.appendChild(tdTot);
 
@@ -674,6 +697,7 @@
             check.type = "checkbox";
             check.name = "ast[]";
             check.id = "ast"+count;
+            check.className = 'astircflag';
             var checkLabel = document.createElement("label");
             checkLabel.for="ast"+count;
             checkLabel.setAttribute('for', "ast"+count);
@@ -741,12 +765,44 @@
              var prezzo = $(this).parent().closest('tr').find("input.pr").val();
              var qta = $(this).val();
              $(this).parent().closest('tr').find("input.tot").val(prezzo * qta);
+             calculateTotal();
         });
         
         $('table').on('change','tr input.pr', function() {
              var prezzo = $(this).val();
              var qta = $(this).parent().closest('tr').find("input.qt").val();
              $(this).parent().closest('tr').find("input.tot").val(prezzo * qta);
+             calculateTotal();
+        });
+         $('table').on('change','tr input.tot', function() {             
+             calculateTotal();
+        });
+          $('table').on('change','tr input.astircflag', function() {             
+            if ($(this).is(':checked')) {
+                $(this).parent().closest('tr').find("input.qt").hide();
+                $(this).parent().closest('tr').find("input.pr").hide();
+                $(this).parent().closest('tr').find("input.tot").hide();                 
+            }
+            else {
+                $(this).parent().closest('tr').find("input.qt").show();
+                $(this).parent().closest('tr').find("input.pr").show();
+                $(this).parent().closest('tr').find("input.tot").show();                    
+            }
+             calculateTotal();
+        });
+        $(function() {
+             $(".astircflag").each(function(index) {            
+                if ($(this).is(':checked')) {
+                    $(this).parent().closest('tr').find("input.qt").hide();
+                    $(this).parent().closest('tr').find("input.pr").hide();
+                    $(this).parent().closest('tr').find("input.tot").hide();                 
+                }
+                else {
+                    $(this).parent().closest('tr').find("input.qt").show();
+                    $(this).parent().closest('tr').find("input.pr").show();
+                    $(this).parent().closest('tr').find("input.tot").show();                    
+                }
+            });
         });
         
         var tabella = document.getElementById("tabella");
@@ -774,8 +830,8 @@
                     </div>
                    
                    <div class="form-group"> 
-                    <label for="finelavori"> {{ trans('messages.keyword_end_date_works') }} <span class="required">(*)</span></label>
-                    <input value="{{old('finelavori')}}" type="text" id="finelavori" name="finelavori" placeholder=" {{ trans('messages.keyword_date_expected_end_of_work') }} " class="form-control">
+                    <label for="finelavori"> {{ trans('messages.keyword_end_date_works') }}</label>
+                    <input value="{{old('finelavori')}}" type="text" id="finelavori" name="finelavori" placeholder=" {{ trans('messages.keyword_date_expected_end_of_work') }} " class="form-control required-input">
                     </div>
                 </div>
                     
@@ -810,13 +866,13 @@
                     <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
                         <div class="form-group">
                         <label for="subtotale"> {{ trans('messages.keyword_total') }}  <span class="required">(€)</span><a onclick="calcola()" class="" title="Compilazione assistita">  {{ trans('messages.keyword_click') }}  <i class="fa fa-info"></i> {{ trans('messages.keyword_for_compilation') }} </a></label>
-        <input value="{{old('subtotale')}}" step="any" type="number" id="subtotale" name="subtotale" placeholder="{{ trans('messages.keyword_initial_price') }} " class="form-control" title=" {{ trans('messages.keyword_initial_value_calculated_individual_packages') }} "> 
+        <input value="{{old('subtotale')}}" step="any" type="number" id="subtotale" name="subtotale" placeholder="{{ trans('messages.keyword_total_price') }} " class="form-control" title=" {{ trans('messages.keyword_initial_value_calculated_individual_packages') }} "> 
                         </div> </div>
                     
             	<div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
                 <div class="form-group">
                  <label for="totale"> {{ trans('messages.keyword_discounted_total') }}  <span class="required">(€)</span></label>
-    <input value="{{old('totale')}}" type="number" step=any id="totale" name="totale" placeholder=" {{ trans('messages.keyword_total_price') }} " class="form-control" title="{{ trans('messages.keyword_discounted_value_or_overwritten_value') }} ">
+    <input value="{{old('totale')}}" type="number" step=any id="totale" name="totale" placeholder=" {{ trans('messages.keyword_discounted_total') }} " class="form-control" title="{{ trans('messages.keyword_discounted_value_or_overwritten_value') }} ">
                 </div>
                 </div>
            
@@ -929,9 +985,9 @@
                     <tbody id="filespay">
                     @for($i=0;$i< 3;$i++)
                     <tr><td><input class="selezione" id="payment_{{$i}}" type="checkbox"><label for="payment_{{$i}}"></label></td>
-                        <td><input class="form-control datapicker" name="datapay[]" value="" id="datapay{{$i}}" placeholder="Data" type="text"></td>
-                        <td><input class="form-control" name="amountper[]" placeholder="%" value="" type="text"></td>
-                        <td><input class="form-control" name="importo[]" placeholder="importo" value="" type="text"></td>
+                        <td><input class="form-control datapicker" name="datapay[]" value="{{date('d/m/Y')}}" id="datapay{{$i}}" placeholder="Data" type="text"></td>
+                        <td><input class="form-control paymentPercentage" name="amountper[]" placeholder="%" value="0" type="text"></td>
+                        <td><input class="form-control paymentAmount" name="importo[]" placeholder="importo" value="0" type="text"></td>
                     </tr>
                     @endfor
                     </tbody>
@@ -1324,6 +1380,71 @@
     </div>
 </div>
 <script type="text/javascript">
+$('#scontoagente').on('change', function() {     
+     calculateTotal();
+});
+$('#scontobonus').on('change', function() {     
+     calculateTotal();
+});
+$('#subtotale').on('change', function() {     
+     calculateTotal();
+});
+$('#totale').on('change', function() {     
+    var total = $("#subtotale").val();  
+    var discount = $(this).val();
+    var paytotal = (total - discount);
+    $("#totaledapagare").val(paytotal);
+});
+
+$('table').on('keyup','tr input.paymentPercentage', function() {
+    if($(this).val() != ""){       
+        $(this).parent().closest('tr').find("input.paymentAmount").val("0");
+     $(this).parent().closest('tr').find("input.paymentAmount").attr('disabled',true);   
+
+    }
+    else {
+        $(this).parent().closest('tr').find("input.paymentAmount").attr('disabled',false);   
+    }    
+});
+$('table').on('keyup','tr input.paymentAmount', function() {
+    if($(this).val() != ""){       
+    $(this).parent().closest('tr').find("input.paymentPercentage").val("0");
+     $(this).parent().closest('tr').find("input.paymentPercentage").attr('disabled',true);   
+    }
+    else {
+        $(this).parent().closest('tr').find("input.paymentPercentage").attr('disabled',false);   
+    }    
+});
+
+
+function calculateTotal(){
+ var totalval = 0;   
+   var arrchekedp=[];
+    $(".astircflag").each(function(index) {
+        arrchekedp[index] = false;
+        if ($(this).is(':checked')) {
+            arrchekedp[index] = true;    
+        }
+    });
+    $(".tot").each(function(index) {
+        //if(arrchekedp[index]==false){
+            totalval = (parseFloat(totalval) + parseFloat($(this).val()));        
+        //}
+    });
+    $("#subtotale").val(totalval);
+    var scontoagente = $("#scontoagente").val();
+    var scontobonus = $("#scontobonus").val();
+    var agentdiscount = ((totalval * scontoagente) / 100);
+    var topay = (totalval - agentdiscount);
+
+    var agentbonus = ((topay * scontobonus) / 100);
+    var TotalDiscount = (agentdiscount + agentbonus);    
+    topay = (topay - agentbonus);
+    $("#totale").val(TotalDiscount);
+    $("#totaledapagare").val(topay);
+    /*$("#agentdiscount").val(agentdiscount);
+    $("#agentbonus").val(agentbonus);*/
+}
 $(document).ready(function() {
      $("#add_preventivo").validate({            
       rules: {

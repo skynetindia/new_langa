@@ -37,7 +37,7 @@ $arrSettings = adminSettings();
   <div class="main_container">
   <div class="col-md-3 left_col">
     <div class="left_col scroll-view">
-      <div class="navbar nav_title"> <a href="{{url('/')}}" class="site_title md"><img src="<?php echo (isset($arrSettings->frontlogo) && !empty($arrSettings->frontlogo)) ? asset('storage/app/images/logo/'.$arrSettings->frontlogo) :  asset('images/LOGO_Easy_LANGA_without_contour.svg');?>" class="easy_fron_logo" alt="Easy Langa" class="img" > </a>
+      <div class="navbar nav_title"> <a href="{{url('/')}}" class="site_title md"><img src="<?php echo(isset($arrSettings->frontlogo) && !empty($arrSettings->frontlogo))?asset('storage/app/images/logo/'.$arrSettings->frontlogo):asset('images/LOGO_Easy_LANGA_without_contour.svg');?>" class="easy_fron_logo img" alt="Easy Langa"/> </a>
       	<a href="{{url('/')}}" class="site_title sm"><img src="{{asset('images/easy-logo.svg')}}" alt="Easy Langa" class="img" > </a>
        </div>       
       <br>      
@@ -96,24 +96,24 @@ $arrSettings = adminSettings();
             <span class="fa fa-chevron-down"></span>
           </a> 
             <ul class="nav child_menu mapmenu">
-                <div class="container-fluid col-md-12" style="background:#2A3F54;color:#ffffff">
+                <div class="container-fluid col-md-12" style="background:#113c6f;color:#ffffff">
                       <form action="http://maps.google.com/maps" onsubmit="punto()" method="get" target="new">
                           <div>
                             <div class="menu_map">
                               <div class="col-md-12">
-                                  <br><br><input style="display:inline" class="form-control" onkeyup="changetextlocationval()" style="color:#000000;max-width:250px;" type="text" name="saddrhd" id="saddrhd" placeholder="{{ trans('messages.keyword_from') }}">
+                                  <br><br><input class="form-control" onkeyup="changetextlocationval()" style="color:#000000;max-width:250px;display:inline;" type="text" name="saddrhd" id="saddrhd" placeholder="{{ trans('messages.keyword_from') }}">
                                   <input type="hidden" name="saddr" id="saddr" value="{{$currentlocation}}">
                               </div>
                               <br>
                                 <div class="col-md-12">
                                   <br>
-                                  <select name="daddr" id="mapfromaddress" class="form-control">                        
-                                    @foreach($enti as $ente)
+                                  <select name="daddr" id="mapfromaddress" class="form-control" >
+                                   @foreach($enti as $entekey=>$ente)
                                       @if($ente->indirizzo != "")
-                                       <option value="{{$ente->indirizzo}}">{{$ente->id.' | '.$ente->nomeazienda}}</option>
-                                      @endif
+                                       <option value="{{$ente->indirizzo}}">{{ $ente->id.' | '.$ente->nomeazienda}}</option>
+                                     @endif
                                     @endforeach
-                                  </select>
+                                 </select>
                                 </div>
                               <div class="col-md-12">
                                   <input style="display:inline" type="hidden" id="prova" name="daddr1">
@@ -156,12 +156,18 @@ $arrSettings = adminSettings();
             }
         }
       }
-    ?></div><?php 
+    ?></ul></div><?php 
   $request = parse_url($_SERVER['REQUEST_URI']);
-  $path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylangaw/', '', $request["path"]), '/') : $request["path"]; 
+  $path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/betaeasy/', '', $request["path"]), '/') : $request["path"]; 
   
-  $result = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');
-  $result=trim($result,'/');
+  $c = explode('/',$path);
+		$last = explode('/', end($c));		
+		
+		$path = preg_replace('/[0-9]+/', '', $path);
+		$quizkey = trim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');
+  
+  $result = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $quizkey), '/');
+ $result=trim($result,'/');
   $comic = DB::table('quiz_comic')->where('url', $result)->first();
   if(isset($comic)){
     $language_transalation = DB::table('language_transalation')->where('language_key', $comic->lang_key)->first();
@@ -273,10 +279,10 @@ function avataranimation($this){
 				  ?>
             <img src="{{ url('/storage/app/images').'/'}}<?php if(isset($idente->logo)) echo $idente->logo; ?>" id="immagineprofilo" alt="">@if (!Auth::guest()) {{Auth::user()->name}} @endif <span class=" fa fa-angle-down"></span> </a>
             <ul class="dropdown-menu dropdown-usermenu pull-right">
-              <li><a href="{{url('/profilo')}}"><i class="fa fa fa-user pull-right"></i> {{trans('messages.keyword_profile')}}</a></li>
+              <li><a href="{{url('/profilo')}}"><i class="fa fa fa-user pull-right"></i> {{trans('messages.keyword_profile')}}</a></li> 
               <li><a href="{{url('/faq')}}"><i class="fa fa-question pull-right"></i> {{trans('messages.keyword_help')}}</a></li>
               @if(Auth::user()->id == 0)
-              <li> <a href="{{url('/admin')}}"> <span class="badge bg-red pull-right fa fa-lock pull-right">  admin </span> <span>{{trans('messages.keyword_settings')}}</span> </a></li>
+              <li> <a href="{{url('/admin')}}"> <span class="badge bg-red pull-right fa fa-rocket pull-right">  BACKEND</span> <span>{{trans('messages.keyword_settings')}}</span> </a></li>
               @endif
               <li><a href="{{url('/logout')}}"><i class="fa fa-sign-out pull-right"></i> {{trans('messages.keyword_logout')}}</a></li>
             </ul>
@@ -576,16 +582,21 @@ function avataranimation($this){
 
 		<?php  
 
-			$userId = Auth::id();
+			$userId = Auth::user()->id;
 
 			$notifications = DB::table('invia_notifica')
 	          ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
 	          ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
-	          ->where('user_id', $userId)
-	          ->where('is_enabled', 0)
-	          ->where('is_deleted', 0)
-	          ->orderBy('data_lettura', 'asc')	         
+	          ->where('invia_notifica.user_id', $userId)
+            ->where('notifica.notification_type', '!=',"")
+	          ->where('invia_notifica.is_enabled', 0)
+	          ->where('invia_notifica.is_deleted', 0)
+	          ->orderBy('invia_notifica.data_lettura', 'desc')	         
 	          ->get();
+            /*DB::enableQueryLog();
+            $queries = DB::getQueryLog();
+            $last_query = end($queries);
+            print_r($last_query);*/
 
 	        $alerts = DB::table('inviare_avviso')
 	          ->leftjoin('alert', 'inviare_avviso.alert_id', '=', 'alert.alert_id')
@@ -600,81 +611,73 @@ function avataranimation($this){
 
 
 		<li role="presentation" class="dropdown"> <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false"> 
-
-    	<i class="fa fa-envelope-o"></i> <span class="badge bg-green">
-            
-        <?php if(Auth::user()->id === 0) echo '!'; else echo count($notifications); ?>
-        </span> </a>
-
-       <div id="menu1" class="dropdown-menu list-unstyled msg_list notification-header">      	
-
-            <div class="chkbox-blk">
-            
-                <div class="chkbox"><input type="checkbox" id="notifi1">
-					<label for="notifi1"> notifi1 </label>
-				</div>
-
-        		<div class="info"><input type="text" id="find-noti" /></div>
-	    	</div>
-
-	    	<div id="replace-noti">
-	    	<?php $i = 1; ?>
-			@foreach($notifications as $notification)
-			 <?php 
+    	<i class="fa fa-envelope-o"></i><?php
+        if((count($notifications)) > 0){
+          ?><span class="badge bg-green"><?php /*if(Auth::user()->id === 0) echo '!'; else echo count($notifications); */
+          echo count($notifications);
+        ?></span><?php } ?></a>
+       <div id="menu1" class="dropdown-menu list-unstyled msg_list notification-header <?php echo (count($notifications) <= 0) ? 'emptynotifications' : '';?>">      	
+              @if(count($notifications) > 0)
+              <div class="chkbox-blk">            
+                <div class="chkbox"><input type="checkbox" id="notifi1"><label for="notifi1"> notifi1 </label></div>
+        		    <div class="info"><input type="text" id="find-noti" /></div>
+              </div>
+              @else
+                <div>{{trans('messages.keyword_no_record_found')}}</div>
+              @endif
+	    	    
+	    	<div id="replace-noti"><?php 
+        $i = 1; ?>
+			   @foreach($notifications as $notification)
+			     <?php 
 	            $date = $notification->created_at; 
-	            $date = date_format(new DateTime($date), 'D-m-Y H:i:s'); 
+	            $date = date_format(new DateTime($date), 'd-m-Y H:i:s'); 
 	          ?>	
-
-			<div class="chkbox-blk" >
-
+			   <div class="chkbox-blk">
             <div class="chkbox"><input class="checkgrp" type="checkbox" onclick="setclass(<?php echo $notification->id; ?>);" value="<?php echo $notification->id; ?>" id="notifi2<?php echo $i; ?>">
-			<label for="notifi2<?php echo $i; ?>"> notifi2 </label>
-			</div>
-
+			       <label for="notifi2<?php echo $i; ?>"> notifi2 </label>
+			       </div>
             <div class="info">
-    	  		<a href="{{url('/notifiche/delete') . '/' . $notification->id}}" onclick="return confirm('{{ trans('messages.keyword_sure_to_disable_notification')}}?')">
+    	  		 <a href="{{url('/notifiche/delete') . '/' . $notification->id}}" onclick="return confirm('{{ trans('messages.keyword_sure_to_disable_notification')}}?')">
           		<span> {{$notification->notification_type}} </span>
           		<span class="time"> {{ $date }} </span>
           		<div class="message"> {{$notification->notification_desc}} </div>
                 </a>
-	         </div>
-			</div>
+	           </div>
+			    </div>
 			<?php $i++; ?>
           	@endforeach	 
-
+            <?php 
+            /*
           	@foreach($alerts as $alert)
-			  <?php 
+			     <?php 
 	            $date = $alert->created_at; 
 	            $date = date_format(new DateTime($date), 'D-m-Y H:i:s'); 
 	          ?>	
-
-			<div class="chkbox-blk" >
-
-            <div class="chkbox"><input class="alertcheckgrp" type="checkbox" onclick="alertdisable(<?php echo $alert->id; ?>);" value="<?php echo $alert->id; ?>" id="alert2<?php echo $i; ?>">
-				<label for="alert2<?php echo $i; ?>"> notifi2 </label>
-			</div>
-
-			<div class="info">
-    	  		<a href="{{url('/alert/delete') . '/' . $alert->id}}" onclick="return confirm('{{ trans('messages.keyword_sure_to_disable_notification')}}?')">
-          		<span> {{$alert->nome_alert}} </span>
-          		<span class="time"> {{ $date }} </span>
-          		<div class="message"> {{$alert->messaggio}} </div>
-                </a>
-	         </div>
-			</div>
-			<?php $i++; ?>
+      			<div class="chkbox-blk" >
+                  <div class="chkbox"><input class="alertcheckgrp" type="checkbox" onclick="alertdisable(<?php echo $alert->id; ?>);" value="<?php echo $alert->id; ?>" id="alert2<?php echo $i; ?>">
+      				<label for="alert2<?php echo $i; ?>"> notifi2 </label>
+      			</div>
+      			<div class="info">
+          	  		<a href="{{url('/alert/delete') . '/' . $alert->id}}" onclick="return confirm('{{ trans('messages.keyword_sure_to_disable_notification')}}?')">
+                		<span> {{$alert->nome_alert}} </span>
+                		<span class="time"> {{ $date }} </span>
+                		<div class="message"> {{$alert->messaggio}} </div>
+                      </a>
+      	         </div>
+      			</div>
+			      <?php $i++; ?>
           	@endforeach	   
-
+            */?>
           	</div>
             <div class="btn-blk">
                 <button class="btn btn-submit" id="disabled"> 
                 {{ trans('messages.keyword_hide')}} </button>
-		        <button class="btn btn-cancel" id="view-all">
-		        {{ trans('messages.keyword_see_table')}}
-		        </button>
+		            <button class="btn btn-cancel" id="view-all">
+		            {{ trans('messages.keyword_see_table')}}
+		            </button>
+		        </div>
 		    </div>
-
-		</div>
 
            <?php /* <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu" >
               <?php $count = 0; ?>
@@ -763,7 +766,7 @@ function avataranimation($this){
        
   <?php foreach ($alert as $alert) {  ?>
 
-  		<div class="col-md-6 main_class_alert"> 
+  		<div class="col-md-6 col-sm-12 col-xs-12 main_class_alert"> 
 
   			<button data-id="alert_comment<?php echo $i; ?>" id="myclose<?php echo $i; ?>" type="button" class="close alert_close" aria-label="Close" onclick="myalertclose(this.id, <?php echo $i; ?>)"> 
 				<span aria-hidden="true">&times;</span>
@@ -823,7 +826,7 @@ function avataranimation($this){
        	$i = 1; ?>
 
        	
- 		<?php foreach ($notifications as $notification) { ?>
+ 		<?php /* foreach ($notifications as $notification) { ?>
 
 		<div class="col-md-6 main_class_notification">
 
@@ -863,11 +866,11 @@ function avataranimation($this){
 
       	</div>
 
-  <?php $i++; } ?>
+  <?php $i++; } */?>
 
     </div><?php 
     	$request = parse_url($_SERVER['REQUEST_URI']);
-		$path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/easylangaw/', '', $request["path"]), '/') : $request["path"];		
+		$path = ($_SERVER['HTTP_HOST'] == 'localhost') ? rtrim(str_replace('/betaeasy/', '', $request["path"]), '/') : $request["path"];		
 		//$result = trim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');		
 		$c = explode('/',$path);
 		$last = explode('/', end($c));		
@@ -888,7 +891,7 @@ function avataranimation($this){
   <!-- footer content -->
   <footer>
     <div class="pull-right">
-      <p><small>2017 © Easy <strong>LANGA</strong> da e per <a href="http://www.langa.tv/"><strong>LANGA Group</strong></a></small><small><a href="http://easy.langa.tv/changelog"> versione 1.04  </a></small></p>
+      <p align="right"><small><a href="http://www.langa.tv/" target="_blank"><strong>Marketing with Method</strong> by LANGA Group</a><br>2017 © Easy <strong>LANGA 2.01</strong><br></small></p>
      </div>
     <div class="clearfix"></div>
    <!-- </div>-->
@@ -914,19 +917,19 @@ function avataranimation($this){
 <script src="{{asset('/build/js/custom.js')}}"></script> 
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
 <script type="text/javascript">
+  $('.notification-header').click(function(e) {
+      e.stopPropagation();
+  });
   $(".alert_msg_textbox").click(function( event ) {
     event.stopPropagation();
     // Do something
-  })
+  }); 
     $("#mapfromaddress").select2({dropdownParent: $('.menu_map')});                                                              
 		function setclass(i) {		
-
 			var arr_id = [];
-
 			$(".checkgrp:checked").each(function() {
 			    arr_id.push($(this).val());
 			});
-
 			$('#disabled').on('click', function(e) { 		 
 				$.ajax({
 	              	type:'GET',
@@ -959,17 +962,19 @@ function avataranimation($this){
 		}
 
 		$( "#find-noti" ).keyup(function() {
-
 			var find = $("#find-noti").val();	
+      if(find.length > 1){
   			$.ajax({
-              type:'GET',
-              data: { 'find': find },
-              url: '{{ url('notification-json') }}',
-              success:function(data) {
-                console.log(data);
-                 $('#replace-noti').html(JSON.stringify(data));                     
-              }
-            });
+            type:'GET',
+            data: { 'find': find },
+            url: '{{ url('notification-json') }}',
+            success:function(data) {
+             /* console.log(data);
+              alert(JSON.stringify(data));*/
+               $('#replace-noti').html(data);                     
+            }
+        });
+      }
 		});	
 
     	var path_url = "<?php echo url('/notifiche'); ?>";

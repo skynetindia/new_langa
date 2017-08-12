@@ -797,7 +797,7 @@ $arrSettings = adminSettings();
 
 		$path = preg_replace('/[0-9]+/', '', $path);
 		$result = trim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $path), '/');							
-		
+
 		$arrPageurl = array('enti/myenti','enti','enti/add','enti/modify/corporation','pagamenti','pagamenti/mostra/accounting','pagamenti/tranche/modifica','pagamenti/tranche/add','pagamenti/tranche/elenco','pagamenti/coordinate');
 		$class = (in_array($result, $arrPageurl)) ? 'left_breadcrumbs' : '';
     ?>

@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Untitled Document</title>
+
+
+<link href="http://betaeasy.langa.tv/vendors/bootstrap/dist/css/bootstrap_admin.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link href="http://betaeasy.langa.tv/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+<!-- Custom Theme Style 
+<link href="http://betaeasy.langa.tv/build/css/custom_admin.min.css" rel="stylesheet">-->
+
+<!-- Font -->
+<link rel="stylesheet" href="http://betaeasy.langa.tv/public/css/stylesheet.css">
+
+<style>
+	#please_wait_bg{ 
+	background: rgba(0, 0, 0, 1) ;
+    height: 100%;
+    left: 0;
+    position: fixed;
+	display:none;
+    top: 0;
+    transition: all 0.3s ease 0s;
+    width: 100%;
+	opacity:0.85;
+    z-index: 10;}
+	
+	#please_wait
+	{
+		position:fixed;
+		z-index:1000;
+		text-align:center;
+		margin:0 auto;
+		display:none;
+		text-align:center;
+		background-color:transparent;
+		font-size:16px;
+		vertical-align:middle;
+/*		box-shadow:0px 0px 10px 1px #333;*/
+		z-index:13;
+		padding:50px 0;
+		top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+backface-visibility: hidden;
+    height: auto;
+    left: 50%;
+    max-width:1040px;
+    min-width: 320px;    width: 60%;
+		
+	}
+	.height1{ background-color:#f2f2f2; min-height:110vh;}
+	
+	
+	/************popup country css***/
+	.language-wrap .language-wrap {
+  display: inline-block;
+  margin-bottom: 60px;
+  margin-right: 50px;
+}
+.language-wrap h1 {
+  color: #fff;
+  margin-bottom: 60px;
+}
+
+
+/**********************/
+.lang-select {
+  position: relative;
+}
+.lang-select > img {
+  height: 20px;
+  max-width: 100%;
+  position: absolute;
+  right: 5px;
+  top: 9px;
+  width: auto;
+}
+.login-form .form-group input {
+  padding: 0 36px 0 12px;
+}
+
+	
+</style>
+
+</head>
+
+<body style="background:#fff;">
+
+
+<!-------------------------------------------------------------------------------------------->
+
+<div class="container-fluid bg-blue">
+	<div class="height-width100">
+    	<div class="login-wrap">
+        	<div class="logo-langa-login"><img src="images/easy-logo.svg" height="150" width="150"/></div>
+            <div class="login-form">
+            	<form>
+                	<div class="form-group">
+                      	<div class="lang-select"><input type="text" class="form-control" id="" placeholder="" name="">
+                        <img src="images/country1.png" alt="Country" onclick="showHide()"/></div>
+                    </div>
+                    <div class="form-group">
+                      <input type="text" class="form-control" id="" placeholder="" name="">
+                    </div>
+                    <div class="login-btn">
+                    <button type="submit" class="btn btn-warning">Sign in</button>
+                    <button type="submit" class="btn btn-warning">registration here</button>
+                    <button type="submit" class="btn btn-warning"><img src="images/information-icon.jpg"/></button>
+                    </div>
+                    
+                    <div class="forgot-pass"><a href="#">Forgot your passowrd</a></div>
+                    
+                </form>
+                
+                
+                <div class="access-social">
+                	<p class="text">Access with your social</p>
+                	<a href="#" class="btn btn-warning"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+                    <a href="#" class="btn btn-warning"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+                    <a href="#" class="btn btn-warning"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!---popup--->
+<div id="please_wait">
+	<div class="language-wrap">
+		<h1>Choose your language</h1>
+        <div class="language-img-wrap">
+        	<div class="language-wrap"><img src="images/country1.png"/></div>
+            <div class="language-wrap"><img src="images/country2.png"/></div>
+            <div class="language-wrap"><img src="images/country3.png"/></div>
+             <div class="language-wrap"><img src="images/country4.png"/></div>
+              <div class="language-wrap"><img src="images/country5.png"/></div>
+              <div class="language-wrap"><img src="images/country6.png"/></div>
+              <div class="language-wrap"><img src="images/country7.png"/></div>
+              <div class="language-wrap"><img src="images/country8.png"/></div>
+              <div class="language-wrap"><img src="images/country9.png"/></div>
+              <div class="language-wrap"><img src="images/country10.png"/></div>
+              <div class="language-wrap"><img src="images/country11.png"/></div>
+              <div class="language-wrap"><img src="images/country12.png"/></div>
+        </div>
+    </div>
+</div>
+<div id="please_wait_bg" onclick="showHide()">
+</div>
+
+<script>
+function showHide(){
+	var el = document.getElementById("please_wait");
+	var bg = document.getElementById("please_wait_bg");
+    if( el && el.style.display == 'block')    
+        el.style.display = 'none';
+    else 
+        el.style.display = 'block';
+		
+	if( bg && bg.style.display == 'block'){    
+        bg.style.display = 'none';
+		JQuery(window).unbind('scroll');
+		  
+	}
+    else {
+        bg.style.display = 'block';
+		JQuery(window).scroll(function() { return false; });
+	}
+}
+
+</script>
+
+
+<!--------------------------------------------------------------------------------------------------------------------------->
+
+
+
+<script src="http://betaeasy.langa.tv/vendors/jquery/dist/jquery.min.js"></script> 
+<!-- Bootstrap --> 
+<script src="http://betaeasy.langa.tv/vendors/bootstrap/dist/js/bootstrap.min.js"></script> 
+
+<!-- jQuery validation js --> 
+<script src="http://betaeasy.langa.tv/public/scripts/jquery.validate.min.js"></script> 
+
+<!-- Custom Theme Scripts -->
+<!-- <script src="http://betaeasy.langa.tv/build/js/custom.min.js"></script> -->
+
+<script src="http://betaeasy.langa.tv/build/js/custom.js"></script>
+
+</body>
+</html>

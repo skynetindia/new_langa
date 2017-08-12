@@ -15,6 +15,7 @@
 @endif
 
 <fieldset>
+<div class="social-admin">
 <legend> {{ trans('messages.keyword_types') }} </legend>
 
 <h4>{{ trans('messages.keyword_add_type')}}</h4>
@@ -85,11 +86,16 @@
                 <td>
 
                 <input type="checkbox" class="form-control social" name="social[{{$social->social_id}}]" id="social_{{$social->social_id}}" value="{{$social->social_id}}">
+
                 <label for="social_{{$social->social_id}}"></label></td>
                 <td><input type="text" class="form-control" name="title[{{$social->social_id}}]" id="title" value="{{$social->title}}"></td>
+
                 <td><input type="text" class="form-control" name="url[{{$social->social_id}}]" value="{{$social->url}}"></td>
-                <td><input type="file" class="form-control" name="imageicon[{{$social->social_id}}]"></td>
+
+                <td><input type="file" class="form-control" name="image[{{$social->social_id}}]"></td>
+
                 <td><img src="{{ url('/storage/app/images/social/'.$social->image) }}" height="100" width="100" class="img-responsive" alt="image not exists"></td>
+
                 <td>
                   <select class="form-control" name="is_active[{{$social->social_id}}]">
                     <option value="1" <?php if(isset($social->is_active) && $social->is_active == 1) echo "selected"; ?> >Active</option>
@@ -109,6 +115,7 @@
     </table>
   </div>
 </form>
+</div>
 
 <script type="text/javascript">
 

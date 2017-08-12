@@ -46,10 +46,10 @@ $('.color').colorPicker();
 <fieldset class="top-up-wrap">
 <form action="{{url('/admin/taxonomies/addprocessing')}}" method="post" id="frmemotionalProcessing">
 	<div class="row">
-		<div class="col-md-8">
+		<div class="col-md-8 col-sm-12 col-xs-12">
     		<legend>{{$departments->nomedipartimento}}</legend>
     	</div>
-    	<div class="col-md-4">
+    	<div class="col-md-4 col-sm-12 col-xs-12">
         <div class="form-group">
     		<input class="form-control color no-alpha" onblur="departmentcolor('{{$departments->id}}')" id="departmentcolor_{{$departments->id}}" value="<?php echo isset($departments->color) ? $departments->color : '#f37f0d';?>" name="color" />
     	</div>
@@ -60,12 +60,12 @@ $('.color').colorPicker();
     {{ csrf_field() }}
     <input type="hidden" name="departments_id" id="departments_id" value="{{$departments->id}}" />
     <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<div class="form-group">
 			<input type="text" class="form-control" required="required" name="name" placeholder="{{trans('messages.keyword_name')}}">
 		</div>
 	</div>
-	<div class="col-md-8">
+	<div class="col-md-8 col-sm-12 col-xs-12">
 		<div class="form-group">
 			<input type="text" class="form-control" name="description" placeholder="{{trans('messages.keyword_description')}}">
 		</div>

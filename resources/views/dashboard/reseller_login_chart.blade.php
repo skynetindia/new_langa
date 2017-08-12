@@ -99,21 +99,7 @@ foreach ($resellerdetails as $key => $value) {
 }
 $string  = json_encode($region);
 ?>
-<style>
-#myToolTip { 
-    display: none;position:absolute;  
-    width: 150px;
-    background-color:#FAFAFA;
-    color: #606060;
-    text-align: center;
-    border-radius: 6px;
-    border:solid 1px #818181;
-    padding: 5px 0;
-    z-index: 1;
-}
 
-
-</style>
 <script>
 
 function mouseX(evt) {
@@ -160,9 +146,13 @@ jQuery("g").each(function() {
                 //alert(json_data[i].region_name);
             }            
         }
-        
-        var left = e.pageX+30;
-        var top  = e.pageY+20;
+      //  alert (e.pageX);
+        var left = e.pageX-210;
+		//alert (left);
+		 //alert (e.pageY);
+        var top  = e.pageY-120;
+		
+		//alert (top);
         var tip  = jQuery(this).attr('title');
 
         jQuery('#myToolTip').css('top',top);
@@ -192,8 +182,9 @@ jQuery("g").each(function() {
 })
 
 </script>
-<div id="myToolTip"></div>
+
 <div class="map">
+<div id="myToolTip"></div>
   <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
        viewBox="0 -21.6 761 919" style="enable-background:new 0 -21.6 761 919;" xml:space="preserve">
     <g id="sar"  style="fill: rgb(11, 104, 170);">

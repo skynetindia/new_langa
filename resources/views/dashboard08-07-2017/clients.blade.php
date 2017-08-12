@@ -26,7 +26,7 @@
     </div>    
     <hr/>*/?>    
     <div class="row">
-		<div class="col-sm-6">
+		<div class="col-md-6 col-sm-12 col-xs-12">
         	<div class="set-height-lft-bacheca-user">
             	<div class="bg-white">                    
                     <h4><strong>{{trans('messages.keyword_your_responsible_langa')}}</strong></h4><hr>

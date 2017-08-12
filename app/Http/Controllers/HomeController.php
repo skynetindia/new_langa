@@ -255,24 +255,27 @@ class HomeController extends Controller {
         return json_encode($newsletter);
     }
 
-    public function getjsonnotifiche(Request $request) {
-
+    public function getjsonnotifiche(Request $request) {        
         $userId = $request->user()->id;
-
         $notifications = DB::table('invia_notifica')
           ->leftjoin('notifica', 'invia_notifica.notification_id', '=', 'notifica.id')
-          ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc'))
-          ->where('user_id', $userId)
-          ->where('is_deleted', 0)       
+          ->join('corporations', 'invia_notifica.id_ente', '=', 'corporations.id')
+          ->select(DB::raw('invia_notifica.*, notifica.id as noti_id, notifica.notification_type, notifica.notification_desc, corporations.nomeazienda as entityName,corporations.id as entityID'))
+          ->where('invia_notifica.user_id', $userId)
+          ->orderBy('invia_notifica.id', 'desc')      
+          /*->where('invia_notifica.is_deleted', 0)*/
           ->get();
 
         $notifications_json = [];
         foreach ($notifications as $value) {
             $value->type = $value->id.'_n';
+            $value->id_ente = $value->entityID." | ".$value->entityName;
+            $value->data_lettura = ($value->data_lettura != "0000-00-00 00:00:00") ? $value->data_lettura : "-";
+            $value->comment = ($value->comment != "") ? $value->comment : $value->notification_type; 
             $notifications_json[] = $value;
         }
 
-        $alerts = DB::table('inviare_avviso')
+        /*$alerts = DB::table('inviare_avviso')
             ->leftjoin('alert', 'inviare_avviso.alert_id', '=', 'alert.alert_id')
             ->select(DB::raw('inviare_avviso.*, alert.alert_id as alrt_id, alert.nome_alert, alert.messaggio'))
             ->where('user_id', $userId)
@@ -284,8 +287,7 @@ class HomeController extends Controller {
             $value->type = $value->id.'_a';
             $alerts_json[] = $value;
         }          
-
-        $notifications_json = array_merge($notifications_json, $alerts_json);
+        $notifications_json = array_merge($notifications_json, $alerts_json);*/
         
         return json_encode($notifications_json);
     }
@@ -431,8 +433,8 @@ class HomeController extends Controller {
         if (Auth::user()->id === 0 || $type === 'Administration') {
             return $this->adminstrator();        
         }
-        elseif($type === 'Commerical') { /* Commercial */
-            return $this->commercial(); 
+        elseif($type === 'Commercial') { /* Commercial */            
+            return $this->commercial();             
         }
         elseif($type === 'Technician') { /* Technician */
             return $this->technician();
@@ -440,14 +442,16 @@ class HomeController extends Controller {
         elseif($type === 'Reseller') { /* Reseller */        
             return $this->reseller($request); 
         }
-        elseif($type === 'Client' || $type === 'Customer') { /* Client */                    
-            return $this->clients($request); 
+        elseif($type === 'Customer') { /* Client */                    
+            return $this->customer($request); 
+        }
+        else { /* Client and other profiles */
+            return $this->otherprofile($request);
         }
     }
 
     /* this is used for temparary in dashboard */
-    public function temp(Request $request) {        
-        
+    public function temp(Request $request) {                
         /* return view('onworking'); */
         $Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
         $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
@@ -466,8 +470,116 @@ class HomeController extends Controller {
             return $this->reseller($request); 
         }
         elseif($type === 'Client' || $type === 'Customer') { /* Client */                    
-            return $this->clients($request); 
+            return $this->customer($request); 
         }
+    }
+
+    public function getmediafiles(Request $request){  
+        DB::enableQueryLog();
+        /*$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0'";*/
+        //$query = "SELECT * FROM media_files WHERE `media_files`.`master_type` IN('1','6') order by id desc";
+        /*$query = "select `media_files`.* from `media_files` where `media_files`.`master_id` IN(select id from projects where is_deleted = 0) and ( `media_files`.`master_type` IN('1','6')) order by id desc";*/
+        $userid = Auth::user()->id;
+        $userprofileid = Auth::user()->dipartimento;
+
+        if ($userid === 0 || $userprofileid === '0') {            
+            $query = "select `media_files`.* from `media_files` where (`media_files`.`master_id` IN(select id from projects where is_deleted = 0) and `media_files`.`master_type`='1') or (`media_files`.`master_type` = '6') order by id desc";
+            $quotefiles = DB::select($query);               
+        }
+        else {  
+            $query = "select `media_files`.* from `media_files` where (`media_files`.`master_id` IN(select id from projects where is_deleted = 0 and `projects`.`user_id` = $userid) and `media_files`.`master_type`='1') or (`media_files`.`master_id` = $userid and `media_files`.`master_type` = '6') order by id desc";
+        }
+        $userprofileid = $request->user()->dipartimento;
+        $userid = $request->user()->id;
+        $Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
+        $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+            
+        if(isset($request->term) && $request->term != "") {
+            $where = ($request->user()->id === 0 || $userprofileid === '0') ? "" : " AND find_in_set('$userprofileid',type) <> 0";
+            /*$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0' $where  AND (title LIKE '%$request->term%' OR  description LIKE '%$request->term%')";*/    
+              $query = "select `media_files`.* from `media_files` where `media_files`.`master_id` IN(select id from projects where is_deleted = 0 and `projects`.`user_id` = $userid) and (`media_files`.`master_type` IN('1','6')) order by id desc";
+            
+            /*$query = "select `media_files`.* from `media_files` 
+                        inner join `projects` on `media_files`.`master_id` = `projects`.`id` where (`quotes`.`is_deleted` = 0 and `media_files`.`master_type` IN('1','6')) and (`projects`.`user_id` = '$userid') and (`media_files`.title LIKE '%$request->term%' OR `media_files`.description LIKE '%$request->term%') $where";*/
+
+           /* $query = "select `media_files`.* from `media_files` inner join `projects` on `media_files`.`master_id` = `projects`.`id` where (`projects`.`is_deleted` = 0 and `media_files`.`master_type` = 1) and (`projects`.`user_id` = '$userid') and (`media_files`.title LIKE '%$request->term%' OR  `media_files`.description LIKE '%$request->term%') $where
+                    union ALL
+                    (select `media_files`.* from `media_files` inner join `quotes` on `media_files`.`master_id` = `quotes`.`id` where (`quotes`.`is_deleted` = 0 and `media_files`.`master_type` = 0) and (`quotes`.`user_id` = '$userid' or `quotes`.`idutente` = '$userid') and (`media_files`.title LIKE '%$request->term%' OR `media_files`.description LIKE '%$request->term%') $where)
+                    union ALL
+                    (select `media_files`.* from `media_files` inner join `tranche` on `media_files`.`master_id` = `tranche`.`id` where (`tranche`.`is_deleted` = 0 and `media_files`.`master_type` = 3) and (`tranche`.`user_id` = '$userid') and (`media_files`.title LIKE '%$request->term%' OR `media_files`.description LIKE '%$request->term%') $where)";*/
+
+            //$query = "SELECT * FROM media_files WHERE  (title LIKE '%$request->term%' OR  description LIKE '%$request->term%') $where";
+        }
+        /*else if(isset($request->code) && $request->code != "") {
+           $query = "SELECT * FROM media_files WHERE `media_files`.`master_type` IN('0','1','6') AND code=$request->code";            
+        }*/         
+        $updateData = DB::select($query);        
+        
+        foreach($updateData as $prev) {
+            $arrFolder[0]='quote';
+            $arrFolder[1]='projects';
+            $arrFolder[3]='invoice';
+            $arrFolder[4]='quiz';
+            $arrFolder[5]='user';
+            $arrFolder[6]='dashboard';
+            $imagPath = url('/storage/app/images/'.$arrFolder[$prev->master_type].'/'.$prev->name);
+            $downloadlink = url('/storage/app/images/'.$arrFolder[$prev->master_type].'/'.$prev->name);
+            
+            $filename = $prev->name;            
+            $arrcurrentextension = explode(".", $filename);
+            $extention = end($arrcurrentextension);                            
+            $arrextension['docx'] = 'docx-file.jpg';
+            $arrextension['pdf'] = 'pdf-file.jpg';
+            $arrextension['xlsx'] = 'excel.jpg';
+            if(isset($arrextension[$extention])){
+                continue;
+                $imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);          
+            }
+
+            $titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";            
+            if($prev->master_type=='6' && $prev->master_id==Auth::user()->id){
+                $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+            }
+            else {
+            $html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a>'.$titleDescriptions.'</td></tr>';
+            }
+
+            $html .='<tr class="quoteFile_'.$prev->id.'"><td>';
+           /* $utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->where('nome_ruolo','!=','SupperAdmin')->get();                            
+            foreach($utente_file as $key => $val){
+                if($request->user()->dipartimento == $val->ruolo_id){
+                    $response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));      
+                    $specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
+                }
+                else {
+                    $check = '';
+                    $array = explode(',', $prev->type);
+                    if(in_array($val->ruolo_id,$array)){                    
+                        $check = 'checked';
+                    }
+                    $specailcharcters = array("'", "`");
+                    $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" '.$check.' id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.wordformate($val->nome_ruolo).'</label><div class="check"><div class="inside"></div></div></div>';
+                }
+            }*/
+            echo $html .='</td></tr>';
+        }
+        exit;           
+    }
+    
+    public function uploadmedia(Request $request){
+        Storage::put('images/dashboard/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath()));
+        $nome = $request->file('file')->getClientOriginalName();            
+            DB::table('media_files')->insert([
+            'name' => $nome,
+            'code' => $request->code,
+            'type'=>$request->user()->dipartimento,
+            'master_id'=>$request->user()->id,
+            'master_type'=>'6',
+            'date_time'=>time()
+        ]);                           
     }
 
 
@@ -947,10 +1059,10 @@ class HomeController extends Controller {
                     ->whereBetween('statipreventivi.created_at',$arrbetween)
                     ->where('quotes.is_deleted', 0)->first();                  
                     
-                    /*$queries = DB::getQueryLog();
+                   /* $queries = DB::getQueryLog();
                     $last_query = end($queries);
                     print_r($last_query);                
-                    /*exit;*/
+                    exit;*/
 
                     $confirm[] =  ($preventivi->confirmamount!=null)?$preventivi->confirmamount:0;               
             }
@@ -976,10 +1088,10 @@ class HomeController extends Controller {
                     // $lastQuery = end($query);
         
                     // dd($preventivi);
-                    /*$queries = DB::getQueryLog();
+                   /* $queries = DB::getQueryLog();
                     $last_query = end($queries);
                     print_r($last_query);                
-                    /*exit;*/
+                    exit;*/
                     $confirm[] =  ($preventivi->confirmamount!=null)?$preventivi->confirmamount:0;
                 }
             }
@@ -1212,8 +1324,8 @@ class HomeController extends Controller {
   /*=============== Technician Dashboard Sections End ============== */
 
 
-    /*=============== Client Dashboard Sections Start ============== */
-    public function clients(Request $request) {
+    /*=============== Customer Dashboard Sections Start ============== */
+    public function customer(Request $request) {
         $day = date('j');
         $month = date('n');
         $year = date('Y');
@@ -1300,7 +1412,113 @@ class HomeController extends Controller {
             'tipo' => 1
         ]);
     }
-    /*=============== Client Dashboard Sections End ============== */
+    /*=============== Customer Dashboard Sections End ============== */
+
+    
+    /*=============== Other Profile Dashboard Sections Start ============== */
+    public function otherprofile(Request $request) {
+        $day = date('j');
+        $month = date('n');
+        $year = date('Y');
+        $arrCurrentLocation = getLocationInfoByIp();
+
+        /* ===================== Weather section =========================== */     
+        $url = str_replace(' ', '%20', 'http://api.wunderground.com/api/2d5fc4594633a8dc/forecast10day/q/'.$arrCurrentLocation['country'].'/'.$arrCurrentLocation['city'].'.json');
+        //$url = urlencode();
+        $str = file_get_contents($url);        
+        $json = json_decode($str, true);            
+        $forecastday = (isset($json['forecast']['simpleforecast']['forecastday']) && !isset($json['error'])) ? $json['forecast']['simpleforecast']['forecastday'] : array();
+        DB::enableQueryLog();        
+        $partecipanti = DB::table('progetti_partecipanti')
+            ->select('id_progetto')
+            ->where('id_user', Auth::user()->id)
+            ->get();
+
+        $projects = DB::table('projects')
+            ->join('users', 'projects.user_id', '=', 'users.id')
+            ->select('projects.*')
+            ->whereIn('projects.id', json_decode(json_encode($partecipanti), true))
+            ->orWhere('projects.user_id', Auth::user()->id)
+            ->where('users.is_delete', '=', 0)
+            ->where('projects.statoemotivo','!=','12')
+            ->where('projects.progresso','!=','100')
+            ->where('projects.statoemotivo','!=','FINE PROGETTO')
+            ->paginate(2);
+        /*$arrWhere = array('user_id'=>Auth::user()->id,'is_deleted'=>0);        
+        $projects = DB::table('projects')->where($arrWhere)->where('statoemotivo','!=','12')->where('progresso','!=','100')->where('statoemotivo','!=','FINE PROGETTO')->paginate(2);*/
+        
+        $arrchartdetails = array();
+        $arrProjectdetails = array();
+        foreach($projects as $keyp => $valp) {            
+            $quote = DB::table('quotes')->where('id', $valp->id_preventivo)->first();
+            $dipartimento= (isset($quote->dipartimento) && !empty($quote->dipartimento)) ? $quote->dipartimento : '1';
+            /*$processing = DB::table('lavorazioni')->where('departments_id', $dipartimento)->get();*/
+
+           //$arrProjectdetails[$valp->id] = $valp;
+           /*$arrchartdetails[$valp->id] = DB::select("select `oggettostato`.*, `progetti_lavorazioni`.`completamento` as `completedPercentage` from `oggettostato` left join `progetti_lavorazioni` on `oggettostato`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $valp->id");*/
+
+           $arrchartdetails[$valp->id] = DB::select("select `lavorazioni`.*, AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `lavorazioni` left join `progetti_lavorazioni` on `lavorazioni`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $valp->id WHERE `lavorazioni`.`departments_id`=$dipartimento GROUP BY id ORDER BY completedPercentage DESC");
+        }       
+
+        $whereid = explode(',',Auth::user()->id_ente);
+        $responsabilelangaEntity = DB::table('corporations')->whereIn('id', $whereid)->get();
+        $arrresponsibleid = array();
+        foreach($responsabilelangaEntity as $rkey => $rval){
+            if($rval->responsiblelang_id != ""){
+             array_push($arrresponsibleid, $rval->responsiblelang_id);               
+            }            
+        }
+        $arrresponsibleid = implode(',',$arrresponsibleid);
+        $arrresponsibleid = explode(',',$arrresponsibleid);
+        
+        $responsabilelanga = DB::table('users')->whereIn('id', $arrresponsibleid)->get();                    
+
+         if ($request->ajax()) {
+            return view('dashboard.client_projects_ajax', [
+            'view' => 'clients',            
+            'chartdetails' =>$arrchartdetails,
+            'projects' =>$projects,
+            'enti' => $this->corporations->forUser(Auth::user()),
+            'utenti' => DB::table('users')->get(),
+            'tipo' => 1
+            ])->render();  
+        }          
+        return view('dashboard',[
+            'view' => 'otherprofile',            
+            'chartdetails' =>$arrchartdetails,
+            'projects' =>$projects,
+            'year' => $year,
+            'day' => $day,
+            'month' => $month,
+            'forecastday'=>$forecastday,
+            'location'=>$arrCurrentLocation['city'].', '.$arrCurrentLocation['country'],
+            'giorniMese' => date('t', mktime(0, 0, 0, $month, $day, $year)),
+            'nomiMesi' => $this->monthnames,            
+            'enti' => $this->corporations->forUser(Auth::user()),
+            'utenti' => DB::table('users')->get(),
+            'responsabilelanga'=>$responsabilelanga,
+            'departments'=> DB::table('departments')->get(),
+            'tipo' => 1
+        ]);
+    }
+    public function getdepartmentpackage(Request $request){
+        $packagedetails = DB::table('pack')->where('departments_id',$request->departmentid)->get();
+        $html = "";
+        foreach ($packagedetails as $key => $value) {
+            $imageurl = url('storage/app/images/'.$value->icon);
+            $html.='<div class="wrap-shot" onclick="fun_package('.$value->id.')">
+                            <div class="icon-shot"><img src="'.$imageurl.'" alt="Video Shooting" class="img-responsive"></div>
+                            <div class="video-shot-content">
+                                <h3>'.$value->code.'</h3>
+                                <p>'.$value->label.'</p>
+                                <p>'.nl2br($value->description).'</p>
+                                <input type="hidden" class="hidden-package" value="'.$value->id.'">
+                            </div>
+                        </div>';
+        }
+        return $html;        
+    }
+    /*=============== Other Profile Dashboard Sections End ============== */
 
     /*=============== Reseller Dashboard Sections Start ============== */
     public function reseller(Request $request) {

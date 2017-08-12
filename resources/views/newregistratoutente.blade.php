@@ -1,6 +1,6 @@
-@extends('adminHome')
+@extends('layouts/app')
 
-@section('page')
+@section('content')
 
 <h1>{{ trans('messages.keyword_newuser') }} Easy <strong>LANGA</strong></h1><hr>
 
@@ -29,7 +29,13 @@
     </div>
 @endif
 </div>
-
+<?php if(Auth::user()->dipartimento==0){?>
+ <a onclick="multipleAction('add');" id="add" class="btn btn-warning" name="add" title="{{ trans('messages.keyword_adduser') }}"><i class="glyphicon glyphicon-plus"></i></a>    
+        <a class="btn btn-primary" onclick="multipleAction('modify');" id="modifica" name="update" title="{{ trans('messages.keyword_edit') }}"><i class="glyphicon glyphicon-pencil"></i></a>
+        <a id="delete" class="btn btn-danger" onclick="multipleAction('delete');" name="remove" title="{{ trans('messages.keyword_delete') }}"><i class="fa fa-trash"></i></a>
+        
+        <div class="space10"></div>
+        <?php }?>
 <div class="panel panel-default">
 <div class="panel-body">
 
@@ -45,7 +51,9 @@
         <th data-field="id_ente" data-sortable="true">
         {{ trans('messages.keyword_entity') }} </th>
         <th data-field="cellulare" data-sortable="true">
-        {{ trans('messages.keyword_cell') }} </th>        
+        {{ trans('messages.keyword_cell') }} </th>     
+         <th data-field="nome_ruolo" data-sortable="true">
+        {{ trans('messages.keyword_profile') }} </th>      
         <th data-field="azione" data-sortable="true"> {{trans('messages.keyword_action')}} </th>
     </thead>
 </table>

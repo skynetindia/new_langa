@@ -23,7 +23,7 @@
     </script>
 @endif
 @include('common.errors')
-
+<div class="add-blade-estimate">
 <div class="header-right">
   <div class="float-left">
       <h1>{{trans('messages.keyword_addproject')}}</h1><hr>
@@ -32,8 +32,8 @@
          <img src="{{url('images/HEADER1_RT_PROJECT.svg')}}" alt="header image">
     </div>
 </div>
-
-<?php /*<div class="progetti-header">
+</div><?php 
+/*<div class="progetti-header">
   <div class="header-svg float-left">
         <img src="{{url('images/HEADER1_LT_PROJECT.svg')}}" alt="header image">
     </div>    
@@ -65,15 +65,18 @@
     <div class="col-md-8 col-sm-12 col-xs-12">
           <div class="form-group project-name">
       <label for="prev">{{trans('messages.keyword_linktoquote')}}</label>
-        <select class="js-example-basic-multiple form-control" id="prev">
+        <select class="js-example-basic-multiple form-control" name="quote_id" id="prev">
           <option></option>
           @foreach($confirmQuote as $prev)
-            <option value="{{$prev->id}}">{{$prev->idente}} - {{$prev->oggetto}}</option>
+            <option value="{{$prev->id}}">{{$prev->id}} - {{$prev->oggetto}}</option>
           @endforeach
         </select>       
         <script>
-            $(".js-example-basic-multiple").select2();
+            
+              $(".js-example-basic-multiple").select2();
+            
               var $j = jQuery.noConflict();
+                //$j(".js-example-basic-multiple").select2({ containerCssClass : "required-input" });
                     var clickEvent = new MouseEvent("click", {
                     "view": window,
                     "bubbles": true,
@@ -86,6 +89,7 @@
                 link.dispatchEvent(clickEvent);
               });
         </script>
+        <label for="prev" generated="true" class="error"></label>
               </div>
     </div>
   </div>
@@ -225,6 +229,7 @@
                 // descrizione.type = "textarea";
                 descrizione.className = "form-control";
                 descrizione.name = "descrizione[]";
+                descrizione.placeholder = "{{trans('messages.keyword_description')}}";
                 desc.appendChild(descrizione);
 
                 var progress = document.createElement("td");
@@ -470,7 +475,7 @@
                             <div class="">
                              <div class="form-group">
                                 <label for="ente" class="control-label">{{ trans('messages.keyword_comment') }}</label>
-                                <textarea class="form-control required-input" name="comments" id="comments" rows="5" cols="10"></textarea>
+                                <textarea class="form-control required-input" placeholder="{{trans('messages.keyword_comment')}}" name="comments" id="comments" rows="5" cols="10"></textarea>
                                 </div>                    
                             </div>                    
                             <br />
@@ -563,9 +568,9 @@
             @for($i=0;$i< 3;$i++)
               <tr>
                 <td><input class="selezione" id="Sensitiv{{$i}}" val="{{$i}}" type="checkbox"><label for="Sensitiv{{$i}}"></label></td>
-                <td><input class="form-control" id="url_{{$i}}" name="nome[]" type="text"></td>
-                <td><input class="form-control" name="dett[]" type="text"></td>
-                <td><input class="form-control" name="pass[]" type="text"></td>
+                <td><input class="form-control" id="url_{{$i}}" name="nome[]" placeholder="{{trans('messages.keyword_url')}}" type="text"></td>
+                <td><input class="form-control" name="dett[]" placeholder="{{trans('messages.keyword_user')}}" type="text"></td>
+                <td><input class="form-control" name="pass[]" placeholder="{{trans('messages.keyword_password')}}" type="text"></td>
               </tr>
             @endfor
             </tbody>
@@ -622,6 +627,7 @@
                   fileInput.className = "form-control";
 
                   fileInput.name = "nome[]";
+                  fileInput.placeholder="{{trans('messages.keyword_url')}}";
                   fileInput.id = "url_"+countnoteprivate;
                   
 
@@ -632,11 +638,13 @@
                   dettagli.className = "form-control";
 
                   dettagli.name = "dett[]";
+                  dettagli.placeholder="{{trans('messages.keyword_user')}}"
                 
                   var password = document.createElement("input");
                             password.type = "text";
                             password.className = "form-control";
                             password.name = "pass[]";
+                            password.placeholder="{{trans('messages.keyword_password')}}";
                 
                 // var scadenza = document.createElement("input");
                 // scadenza.type = "text";
@@ -1239,9 +1247,6 @@
 <!--    </div>
   </div> -->
 </div></div><!-- /row -->
-<div class="footer-svg">
-  <img src="{{url('images/FOOTER3_ORIZZONTAL_PROJECT.svg')}}" alt="ORIZZONTAL PROJECT">
-</div>
 
 <div class="modal fade" id="addMediacommnetmodal" role="dialog" aria-labelledby="modalTitle">
     <div class="modal-dialog modal-l">
@@ -1285,12 +1290,19 @@ $(document).ready(function() {
             rules: {
                 nomeprogetto: {
                     required: true
+                },
+                quote_id:{
+                  required: true
                 }
             },
             messages: {
                 nomeprogetto: {
                     required: "{{trans('messages.keyword_please_enter_projectname')}}"
+                },
+                quote_id:{
+                  required: "Please select a quote"
                 }
+
             }
         });
 

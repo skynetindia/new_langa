@@ -1,0 +1,289 @@
+@extends('layouts.app')
+
+@section('content')
+
+
+ <!-- top -->
+
+<!-- <div class="login-process-step">
+<div class="navigation-root">
+    <ul class="navigation-list">
+        <li class="navigation-item"></li>
+        <li class="navigation-item"></li>
+        <li class="navigation-item"></li>
+        <li class="navigation-item"></li>
+        <li class="navigation-item"></li>
+        <li class="navigation-item"></li>
+        <li class="navigation-item"></li>
+    </ul>
+</div>
+</div> -->
+
+<!-- Sign Up -->
+
+<div class="row sign-in sign-up-step-three">
+    <div class="col-md-12">
+        <div class="signin-innr">
+        <h3>Sign in to your Langa</h3>
+        <form name="signupForm" id="signupForm" role="form" method="POST" action="{{ url('/register') }}>
+            <div class="row">
+                <div class="col-lg-6 col-md-12">
+                    <div class="form-group">
+                        <div class="label-box"><label>{{ trans('messages.keyword_firstname') }} <p style="color:#f37f0d; display:inline">(*)</p></label></div>
+                        <div class="txt-box"><input id="firstname" name="firstname" type="text" class="form-control"/></div>
+                    </div>
+                </div>
+             
+                <div class="col-lg-6 col-md-12">
+                    <div class="form-group">
+                        <div class="label-box"><label>{{ trans('messages.keyword_lastname') }} <p style="color:#f37f0d; display:inline">(*)</p></label></div>
+                        <div class="txt-box"><input id="lastname" name="lastname" type="text" class="form-control"/></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="label-box"><label>{{ trans('messages.keyword_email') }} <p style="color:#f37f0d; display:inline">(*)</p></label></div>
+                <div class="txt-box"><input id="email" name="email" type="text" class="form-control"/></div>
+            </div>
+            
+            <div class="form-group">
+                <div class="label-box"><label>{{ trans('messages.keyword_username') }} <p style="color:#f37f0d; display:inline">(*)</p></label></div>
+                <div class="txt-box"><input id="username" name="username" type="text" class="form-control"/></div>
+            </div>
+            
+            <div class="form-group">
+                <div class="label-box"><label>{{ trans('messages.keyword_password') }} <p style="color:#f37f0d; display:inline">(*)</p></label></div>
+                <div class="txt-box"><input id="password" name="password" type="text" class="form-control"/></div>
+            </div>
+            
+            <div class="password-strong"><b class="line1"></b><b class="line2"></b><b class="line3"></b><b class="line4"></b></div>
+            
+            
+            <!-- Capcta here  -->
+            
+            <div class="newhere"><p>By creating an account you agree to our <a href="#">Privacy Policy</a></p></div>
+            
+            <div class="form-group">
+                <a href="#" class="btn btn-warning" id="create_account">
+                <!--<i class="fa fa-btn fa-sign-in"></i> -->Create account & continue</a>
+            </div>
+        </form>
+            <div class="newhere"><p>Already got an account? <a href="#" class="login-process-pra">Sign in here</a></p></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- Designer 1 step-4 -->
+
+<div class="row signup-process-four" style="display: none">
+<div class="signup-process-innr">
+<h3>designerm1 <br /> Welcome on board!</h3>
+<p>Tell us your plans so that we can give you the information you need to be successful.</p>
+<form>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check1" type="radio">
+            <label for="check1" class="radio-button-label">I already make my living from making and selling items online
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check2" type="radio">
+            <label for="check2" class="radio-button-label">I plan to make and sell items full time
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check3" type="radio">
+            <label for="check3" class="radio-button-label">I plan to make and sell items part time
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check3" type="radio">
+            <label for="check3" class="radio-button-label">This is just a hobby for me
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    
+    <div class="form-group m-select lblshow">
+        <input name="" id="check4" type="checkbox">
+        <label for="check4">Join our author mailing list to get all the latest tips from our community</label>
+    </div>
+    
+            <div class="form-group">
+                <a href="#" class="btn btn-warning"><!--<i class="fa fa-btn fa-sign-in"></i> -->Next</a>
+            </div>
+    
+</form>
+</div>
+</div>
+
+
+
+ <!-- step 5 -->
+
+
+<div class="row signup-process-five" style="display: none">
+<div class="signup-process-innr">
+<h3>Where do you want to sell?</h3>
+<p>If you sell your items with us exclusively you get better. You can always change your mind later.</p>
+<form>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check5" type="radio">
+            <label for="check5" class="radio-button-label"><span>I will sell exclusively on Envato</span> Selling exclusively gives you higher earnings per sale.
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check6" type="radio">
+            <label for="check5" class="radio-button-label"><span>I will sell on Envato and elsewhere</span> You'll earn less but you can sell your items anywhere.
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    
+            <div class="form-group">
+                <a href="#" class="btn btn-warning"><!--<i class="fa fa-btn fa-sign-in"></i> -->Next</a>
+            </div>
+    
+</form>
+</div>
+</div>
+
+
+
+<!-- step 6 -->
+
+<div class="row signup-process-six" style="display: none">
+<div class="signup-process-innr">
+<h3>What’s your specialty?</h3>
+<form>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check6" type="radio">
+            <label for="check6" class="radio-button-label">Website themes and templates
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check7" type="radio">
+            <label for="check7" class="radio-button-label">Code scripts and plugins
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check8" type="radio">
+            <label for="check8" class="radio-button-label">Video footage and After Effects templates
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check9" type="radio">
+            <label for="check9" class="radio-button-label">Music tracks and sound effects
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check10" type="radio">
+            <label for="check10" class="radio-button-label">Graphic design assets and templates
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check11" type="radio">
+            <label for="check11" class="radio-button-label">Stock photography
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="radio-question">
+            <input class="radio-button-radio" name="" id="check12" type="radio">
+            <label for="check12" class="radio-button-label">3D models
+            <div class="radio-button-check"><div class="radio-button-innr"></div></div></label>
+        </div>
+    </div>
+    
+            <div class="form-group">
+                <a href="#" class="btn btn-warning"><!--<i class="fa fa-btn fa-sign-in"></i> -->Next</a>
+            </div>
+</form>
+</div>
+</div>
+
+
+<!-- step 7 -->
+<div class="row login-step login-step-text-seven" style="display: none">
+    <div class="col-md-12">
+        <div class="login-text-innr">
+        
+            <h3>2 dimensions are not enough!</h3>
+            <p>Here are a few things you need to know about selling 3D models with Envato.</p>
+            
+            <h3>Quality over quantity</h3>
+            <p>Focus on selling your best 3D work.</p>
+            
+            <h3>You get to price your items</h3>
+            <p>Any price you want. It’s totally up to you.</p>
+            
+            <h3>Learn what’s required</h3>
+            <p>Following our guidelines and requirements means faster review process and a better chance of success.</p>
+            
+            <a href="#" charset="btn btn-warning">Take me to my dashboard</a>
+            <div class="newhere"><p>Not your bag? <a href="#" class="login-process-pra">Go back and change your choice</a></p></div>
+        </div>
+    </div>
+</div>
+
+<!-- script -->
+<script src="{{ url('public/scripts/jquery.min.js')}}"></script>
+<script type="text/javascript">
+
+    $(document).ready(function() {
+
+       
+    });
+
+    $('#create_account').on('click', function(){
+        
+        var firstname = $('#firstname').val();
+        var lastname = $('#lastname').val();
+        var email = $('#email').val();
+        var username = $('#username').val();
+        var password = $('#password').val();
+                
+        $.ajax({            
+            url: '{{ url('register') }}',
+            type:'POST',
+            data: {
+                    'firstname': firstname,
+                    'lastname': lastname,
+                    'email': email,
+                    'username': username,
+                    'password': password,
+                    '_token': '{{ csrf_token() }}',
+                  },              
+            success:function(data) {                        
+                console.log(data);                   
+            }
+        });
+    });
+</script>
+@endsection

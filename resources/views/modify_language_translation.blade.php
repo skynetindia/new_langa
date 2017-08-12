@@ -12,11 +12,11 @@
 <!--<link href="{{asset('build/js/jquery.datetimepicker.min.css')}}" rel="stylesheet">
 <script src="{{asset('build/js/jquery.datetimepicker.full.js')}}"></script>-->
 <div class="row">
-<div class="col-sm-6">
+<div class="col-md-9 col-sm-12 col-xs-12">
 <h1><?php echo (isset($language_transalation->language_key) ) ? trans('messages.keyword_edit_language_translation') : trans('messages.keyword_add').' '.trans('messages.keyword_language_translation');  ?></h1>
 </div>
-<div class="col-sm-6">
-        <div class="form-group">
+<div class="col-md-3 col-sm-12 col-xs-12">
+        <div class="form-group admin-dropdown">
           <label>{{trans('messages.keyword_search')}}</label>
           <input type="text" class="form-control" id="txtsearchpharse" value="">           
         </div>
@@ -300,10 +300,11 @@ function multipleAction(act) {
         $j.ajax( {
           url: "{{url('admin/searchtranslation/')}}",
           dataType: "json",
-          type: 'post',
-          data: { "_token": "{{ csrf_token() }}",type: type },
-          success:function(data){                               
-               $('#preview_content').html(data);
+          data: {
+            term: request.term
+          },
+          success: function( data ) {
+            response( data );
           }
         } );
       },

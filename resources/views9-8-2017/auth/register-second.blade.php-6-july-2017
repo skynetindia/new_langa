@@ -1,0 +1,693 @@
+@extends('layouts.app')
+
+@section('content')
+
+
+
+
+<div class="">
+
+	<div class="login-process-step">
+<div class="navigation-root">
+    <ul class="navigation-list">
+        <li class="navigation-item navigation-previous-item " id="firstst"></li>
+        <li class="navigation-item navigation-previous-item  " id="secondst"></li>
+        <li class="navigation-item navigation-previous-item  navigation-active-item" id="thirdst"></li>
+        <li class="navigation-item" id="fourthst"></li>
+        <li class="navigation-item" id="fifthst"></li>
+       
+    </ul>
+</div>
+</div>
+
+<div class="reg-step-four">
+	<div class="height-width100">
+    	<div class="registration-wrap">
+        	<div class="row">
+        	<div class="col-md-6 col-sm-12 col-xs-12">
+            	<div class="registrtion-left-side">
+                    
+                       	
+                    <form action="" method="post">
+                      <div class="reg-five-left-side threestep activestep">
+                       <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                        <div class="registration-content heading"><h3>Entity Informations</h3><p>Tell us your plans so that we can give you the information you need to be successful?</p></div>
+                        	<div class="row">
+                            	<div class="col-md-6 col-sm-12 col-xs-12">
+                                	<div class="form-group">
+                                    <div class="radio-question">
+                                        <input class="radio-button-radio" value="1" name="role" id="role_1" type="radio" onclick="fun_role();">
+                                        <label for="role_1" class="radio-button-label"> Private
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                        </div>
+                                </div>
+                                <div class="col-md-6 col-sm-12 col-xs-12">
+                                	<div class="form-group">
+                                    <div class="radio-question">
+                                        <input class="radio-button-radio" value="2" name="role" id="role_2" type="radio" onclick="fun_role();">
+                                        <label for="role_2" class="radio-button-label">Company
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                     </div>   
+                                </div>
+                                
+                                <div class="col-md-12 col-sm-12 col-xs-12 roletype none">
+                                    <div class="form-group">
+                                   		 <input type="text" class="form-control" id="compnayname" name="compnayname" placeholder="Company Name">
+                                  	</div>
+                                </div>
+                                <div class="col-md-12 col-sm-12 col-xs-12 roletype none">
+                                    <div class="form-group">
+                                   		 <input type="text" class="form-control" id="sector" name="sector" placeholder="Sector">
+                                  	</div>
+                                </div>
+                                
+                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                   		 <input type="text" class="form-control" id="phone" name="phone" placeholder="Your Phone">
+                                  	</div>
+                                </div>
+                                
+                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                   		 <input type="text" class="form-control" id="address" name="address" placeholder="Your Location">
+                                  	</div>
+                                </div>
+                                
+                                 
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                        <div class="btn btn-warning" id="fourstep" onclick="fun_hide(this.id);">Next</div>
+                                    </div>
+                                 </div>   
+                                 
+                             </div>  
+                           </div> 
+                           <script>
+						   function fun_hide(id)
+						   {
+							   $('.activestep').addClass('none').removeClass('activestep');
+							   $('.'+id).removeClass('none').addClass('activestep');
+						   }
+						   </script> 
+                           
+                           <div class="reg-left-side-step-six fourstep none">
+                           <div class="row">
+                            	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                        <div class="registration-content heading"><h3>Hi User,<br/> Welcome on board!</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
+                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <div class="radio-question">
+                                        <input class="radio-button-radio" value="client" name="profile" id="profile_1" type="radio">
+                                        <label for="profile_1" class="radio-button-label"> Client
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="radio-question">
+                                        <input class="radio-button-radio" value="administration" name="profile" id="profile_2" type="radio">
+                                        <label for="profile_2" class="radio-button-label"> Administration
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="radio-question">
+                                        <input class="radio-button-radio" value="commerical" name="profile" id="profile_3" type="radio">
+                                        <label for="profile_3" class="radio-button-label"> Commerical
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="radio-question">
+                                        <input class="radio-button-radio" value="reseller" name="profile" id="profile_4" type="radio">
+                                        <label for="profile_4" class="radio-button-label"> Reseller
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="radio-question">
+                                        <input class="radio-button-radio" value="technician" name="profile" id="profile_5" type="radio">
+                                        <label for="profile_5" class="radio-button-label"> Technician
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                    <div class="join-author form-group"><input class="selezione" id="check-select" type="checkbox"><label for="check-select"></label><span>join our author malling list to get all the latest tips from our community</span></div>
+                                    
+                                    
+                                </div>
+                               
+                                
+                                 
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                        <div class="btn btn-warning" id="fivestep" onclick="fun_hide(this.id);">Next</div>
+                                    </div>
+                                 </div>   
+                                 
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                        <p>Already got an account? <a href="#">Sign in here</a></p>
+                                    </div>
+                                 </div>
+                                 
+                             </div>
+                             </div>
+                             
+                             <div class="reg-left-side-step-seven fivestep none">
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                        <div class="registration-content heading"><h3>Client requests</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
+                             <div class="row">
+                                
+                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <div class="radio-question">
+                                        <input class="radio-button-radio" value="1" name="role" id="depart_1" type="radio">
+                                        <label for="depart_1" class="radio-button-label"> Langa Web
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                    <div class="form-group">
+                                        <div class="radio-question">
+                                        <input class="radio-button-radio" value="1" name="role" id="depart_2" type="radio">
+                                        <label for="depart_2" class="radio-button-label"> Langa Print
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                    </div>
+                                    
+                                   
+                                   <div class="form-group">
+                                        <div class="radio-question">
+                                        <input class="radio-button-radio" value="1" name="role" id="depart_3" type="radio">
+                                        <label for="depart_3" class="radio-button-label"> Langa Video
+                                            <div class="radio-button-check">
+                                                <div class="radio-button-innr"></div>
+                                            </div>
+                                        </label>
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                    <div class="form-group">
+                                        <textarea role="4" class="form-control"></textarea>
+                                    </div>
+                                    
+                                </div>
+                               
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                        <div class="btn btn-warning" onclick="fun_newprofile();">Next</div>
+                                    </div>
+                                 </div>   
+                                 
+                                 
+                                 
+                             </div>
+                             </div>
+                             
+                             <div class="reg-left-side-step-eight administration csthide">
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                        <div class="registration-content heading"><h3>Administration details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
+                       	
+                        	<div class="row">
+                            	
+                               <div class="col-md-12 col-sm-12 col-xs-12">  
+                               		
+                                    <div class="form-group">
+                                        <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                    </div>
+                                    
+                                </div>
+                               
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                        <div class="btn btn-warning">Next</div>
+                                    </div>
+                                 </div>   
+                                 
+                            	 </div>   
+                             </div>
+                             
+                             <div class="reg-left-side-step-nine commerical csthide">
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                        <div class="registration-content heading"><h3>Commercial details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
+                             	<div class="row">
+                                   <div class="col-md-12 col-sm-12 col-xs-12">  
+                                        
+                                        
+                                        <div class="form-group">
+                                             <input type="text" class="form-control" id="" placeholder="Area of interest">
+                                        </div>
+                                        
+                                        
+                                        <div class="form-group">
+                                            <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                        </div>
+                                        
+                                    </div>
+                               
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                        <div class="btn btn-warning">Next</div>
+                                    </div>
+                                 </div>   
+                                
+                                 
+                                 
+                           	  </div>
+                             </div>
+                             
+                             <div class="reg-left-side-step-ten reseller csthide">
+                             	 <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                        <div class="registration-content heading"><h3>Reseller details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
+                    
+                                 <div class="row">                
+                                   <div class="col-md-12 col-sm-12 col-xs-12">  
+                                        
+                                        
+                                        <div class="form-group">
+                                             <input type="text" class="form-control" id="" placeholder="Location of my store">
+                                        </div>
+                                        
+                                        
+                                        <div class="form-group">
+                                            <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                        </div>
+                                        
+                                    </div>
+                                   
+                                     <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <div class="privacy-blk">
+                                            <div class="btn btn-warning">Next</div>
+                                        </div>
+                                     </div>   
+                                    
+                                     
+                                     
+                                 </div>
+                             </div>
+                             
+                             <div class="reg-left-side-step-eleven technician csthide">
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                       			 <div class="registration-content heading"><h3>Technician details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>            
+                                <div class="row">
+                            	
+                               <div class="col-md-12 col-sm-12 col-xs-12">  
+                               		
+                                    
+                                    <div class="form-group">
+                                   		 <input type="text" class="form-control" id="" placeholder="Location of my store">
+                                  	</div>
+                                    
+                                    
+                                    <div class="form-group">
+                                        <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                    </div>
+                                    
+                                </div>
+                               
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                        <div class="btn btn-warning">Next</div>
+                                    </div>
+                                 </div>   
+                                
+                                 
+                                 
+                             </div>
+                             
+                             </div>
+                             <div class="reg-left-side-step-eleven client csthide">
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                       			 <div class="registration-content heading"><h3>Client details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>            
+                                <div class="row">
+                            	
+                               <div class="col-md-12 col-sm-12 col-xs-12">  
+                               		
+                                    
+                                    <div class="form-group">
+                                   		 <input type="text" class="form-control" id="" placeholder="Location of my store">
+                                  	</div>
+                                    
+                                    
+                                    <div class="form-group">
+                                        <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                    </div>
+                                    
+                                </div>
+                               
+                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                 	<div class="privacy-blk">
+                                        <div class="btn btn-warning">Next</div>
+                                    </div>
+                                 </div>   
+                                
+                                 
+                                 
+                             </div>
+                             
+                             </div>
+                             
+                             <div class="reg-left-side-step-twelve thank none">
+                              <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo.jpg')}}"/> <h1><b>langa</b> group</h1> </div>
+                       			 <div class="registration-content heading"><h3>Thank You</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div> 
+                             	<div class="row">
+                            	
+                                  
+                                   
+                                     <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <div class="privacy-blk">
+                                            <div class="btn btn-warning">Go To Easy Langa</div>
+                                        </div>
+                                     </div>   
+                                    
+                                     
+                                     
+                                 </div>
+                             </div>
+                             
+                        </form>
+                       
+                    </div>
+                    
+                </div>
+            
+            
+            <div class="col-md-6 col-sm-12 col-xs-12">
+            	<div class="registrtion-right-side">
+            	<div class="reg-right-side-step-five threestep activestep">
+                	<div id="map" class="map"></div>
+                </div>
+                <div class="reg-right-side-step-six fourstep none">
+                	<div class="animated-svg"></div>
+                </div>
+                
+                <div class="reg-right-side-step-seven fivestep none">
+                	<div class="shotting-video">
+                    	<div class="wrap-shot">
+                        	<div class="icon-shot"><img src="{{url('public/images/video-shooting.jpg')}}" alt="Video Shooting"/></div>
+                            <div class="video-shot-content">
+                            	<h3>Pacchetto %Shooting</h3>
+                                <p>Post-produzione %Editing, post-produzione %3d</p>
+                                <p>Tell us your plans so that we can give you the information you need to be successful? Tell us your plans so that we can give you the information you need to be successful?</p>
+                            </div>
+                        </div>
+                        <div class="wrap-shot">
+                        	<div class="icon-shot"><img src="{{url('public/images/video.jpg')}}" alt="Video"/></div>
+                            <div class="video-shot-content"><h3>Pacchetto %video</h3>
+                            <p>Post-produzione %Editing, post-produzione %3d</p>
+                                <p>Tell us your plans so that we can give you the information you need to be successful? Tell us your plans so that we can give you the information you need to be successful?</p></div>
+                        </div>
+                        <div class="wrap-shot">
+                        	<div class="icon-shot"><img src="{{url('public/images/film.jpg')}}" alt="Film"/></div>
+                            <div class="video-shot-content"><h3>Pacchetto %video</h3>
+                            <p>Post-produzione %Editing, post-produzione %3d</p>
+                                <p>Tell us your plans so that we can give you the information you need to be successful? Tell us your plans so that we can give you the information you need to be successful?</p></div>
+                        </div>
+                        
+                        <div class="image_upload_div">
+                            <form method="" action="" accept-charset="" class="dropzone dz-clickable" enctype=""><input name="" value="" type="hidden">                        <input name="_" value="" type="hidden">
+                                    <input name="" value="" type="hidden">
+                            <div class="dz-default dz-message"><span>Drop files here to upload</span></div></form>				
+				</div>
+                </div>
+                
+            </div>
+            
+            <div class="reg-right-side-eight administration csthide"><div class="drag-area"></div></div>
+            <div class="reg-right-side-step-nine commerical csthide"><div class="map" id="map2" style="height: 100vh"></div></div>
+             <div class="reg-right-side-step-ten reseller csthide"><div class="map" id="map3" style="height: 100vh"></div></div>
+             <div class="reg-right-side-step-elevan technician csthide"><div class="drag-area"></div></div>
+             <div class="reg-right-side-step-elevan client csthide"><div class="drag-area"></div></div>
+            <div class="reg-right-side-step-twelve none"><div class="animated-svg thankyou"></div></div>
+            
+            
+            </div>
+            
+            
+            </div>
+       </div>     
+            
+        </div>
+    </div>
+</div>
+</div>
+
+
+<script src="{{ url('public/scripts/jquery.min.js')}}"></script>
+<!-- jQuery validation js --> 
+<script src="http://localhost/easylanganew/public/scripts/jquery.validate.min.js"></script> 
+<script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script>
+<script type="text/javascript" src="{{asset('public/scripts/jqColorPicker.min.js')}}"></script>
+
+<script type="text/javascript"> 
+    $('.color').colorPicker();   
+</script>
+ <script>
+ var maps = [];
+    var markers = [];
+    function initMap() {
+        var $maps = $('.map');
+        $.each($maps, function (i, value) {
+            var uluru = { lat: 28.579943, lng: 77.330006 };
+
+            var mapDivId = $(this).attr('id');
+			var mapDivId1 = $('#map2');
+			
+            maps[mapDivId] = new google.maps.Map(document.getElementById(mapDivId), {
+                zoom: 17,
+                center: uluru
+            });
+
+            markers[mapDivId] = new google.maps.Marker({
+                position: uluru,
+                map: maps[mapDivId]
+            });
+        })
+    }
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&callback=initMap">
+    </script>
+
+<script type="text/javascript">
+	function fun_role()
+	{
+		    var radioValue = $("input[name='role']:checked").val();
+			
+            if(radioValue==2){
+				$('.roletype').fadeIn(1000,function(){$('.roletype').removeClass('none');});
+            }
+			else
+			{
+				$('.roletype').fadeOut(1000,function(){$('.roletype').addClass('none');});
+			}
+	}
+	 function fun_newprofile()
+	   {
+		   var radioValue = $("input[name='profile']:checked").val();
+		   $('.activestep').addClass('none').removeClass('activestep');
+		   $('.'+radioValue).removeClass('csthide').addClass('activestep');
+	   }
+
+    $(document).ready(function() {
+		
+        $('#signupForm').on('submit', function(e){});
+
+		$('#logo').change(function() {
+		  var i = $(this).prev('label').clone();
+		  var file = $('#logo')[0].files[0].name;
+		  $(this).prev('label').text(file);
+		});
+
+
+		$('#second-step-form .radio-button-radio').click(function(){
+			$('.form-group').removeClass('selected');
+			if($(this).prop('checked')==true)
+			{
+				$(this).parents('.form-group').addClass('selected');
+			}
+		});
+        $('#steptwo_next').on('click', function(){       
+            
+            var role = $("input[name='role']:checked").val();  
+            var user_id = $('#user_id_two').val(); 
+
+            if(role == null){
+                document.getElementById("span_role").style.display="block";
+                document.getElementById("span_role").style.color = "red";
+				document.getElementById("span_role").style.marginBottom = "8px";
+				
+                return false;
+            } 
+                   
+            $.ajax({            
+                url: '{{ url('registration-step-two') }}',
+                type:'POST',
+                data: { 'role': role, 'user_id' : user_id, '_token': '{{ csrf_token() }}' 
+                    },              
+                success:function(data) { 
+                    console.log(data);
+                    if(data != 'false'){
+                        var data = $.parseJSON(data);
+                        var user_id = data.id;     
+                        var role_dept = data.dipartimento;
+                        $('#user_id_three').val(user_id);                        
+                         if(role_dept ==2 || role_dept == 4 || role_dept == 5) {
+                            $('#third-step').css('display', 'block');
+                            $('#second-step').css('display', 'none');
+                            $('#five_five').css('display', 'inline-block');
+							$('#four_four').css('display', 'inline-block');
+							 $('#four_three').css('display', 'none');
+                            $('#five_four').css('display', 'none');
+							$('.login-process-step').removeClass('four-sign');
+                        }  else {
+                            $('#forth-step').css('display', 'block');
+                            $('#second-step').css('display', 'none');
+							 $('#five_five').css('display', 'none');
+							$('#four_four').css('display', 'none');
+                            $('#four_three').css('display', 'inline-block');
+                            $('#five_four').css('display', 'inline-block');
+							$('.login-process-step').addClass('four-sign');
+                            $('#user_id_forth').val(user_id);
+                        }
+						$('#secondst').removeClass('navigation-active-item');
+						$('#thirdst').addClass('navigation-previous-item');
+						$('#thirdst').addClass('navigation-active-item');
+                    } 
+                    if(data == 'false'){
+                        alert("this value is aleady save.");
+                    } 
+                }
+            });
+        });
+
+        $('#stepthree_next').on('click', function(){       
+            
+            var city = $('#city').val();
+            var state = $('#state').val();
+            var user_id_three = $('#user_id_three').val();
+
+            $.ajax({            
+                url: '{{ url('registration-step-three') }}',
+                type:'POST',
+                data: { 'city': city, 'state': state, '_token': '{{ csrf_token() }}', 'user_id_three' : user_id_three
+                },              
+                success:function(data) {                      
+                    if(data != 'false'){
+                        var data = $.parseJSON(data);
+                        var user_id = data.id;     
+                        var role_dept = data.dipartimento;
+                        $('#user_id_forth').val(user_id);
+                        $('#forth-step').css('display', 'block');
+                        $('#second-step').css('display', 'none'); 
+                        $('#third-step').css('display', 'none'); 
+                    }  
+                    if(data == 'false'){
+                        alert("this value is aleady save.");
+                    }                   
+                }
+            });
+        });
+
+        $('#stepfour_next').on('click', function(){       
+            
+            var color = $('#color').val();
+            var cellphone = $('#cellphone').val();
+            var logo = $('#logo').val();
+            var user_id_forth = $('#user_id_forth').val();
+
+            var mob = /^[1-9]{1}[0-9]{9}$/;
+            if (cellphone != false) {
+                if (mob.test(cellphone) == false) {
+                    alert("{{ trans('messages.keyword_mobile_number_range') }} ");
+                    $('#cellphone').focus();
+                    return false;
+                }
+            }
+
+            $.ajax({            
+                url: '{{ url('registration-step-four') }}',
+                type:'POST',
+                data: { 'color': color, 'cellphone': cellphone, 'logo': logo,'_token': '{{ csrf_token() }}', 'user_id_forth' : user_id_forth
+                },              
+                success:function(data) {                      
+                    if(data != 'false'){
+                        var data = $.parseJSON(data);
+                        var user_id = data.id;     
+                        var role_dept = data.dipartimento;                       
+                        $('#fifth-step').css('display', 'block');
+                        $('#forth-step').css('display', 'none'); 
+                    }
+                    if(data == 'false'){
+                        alert("this value is aleady save.");
+                    } 
+                }
+            });
+        });
+
+        $('#submit').on('click', function(){  
+            var iagree = $('#iagree').val();
+            if($('#iagree').prop("checked") == false){
+                alert("{{ trans('messages.keyword_please_check_i_agree ') }} ");
+            } else{
+                window.location = "<?php /*Session::forget('reg_user_id'); Session::forget('reg_user_role');*/ echo url('/login'); ?>";
+            }           
+        });
+
+        $('select[name="state"]').on('change', function() {
+
+            var stateID = $(this).val();
+            if(stateID) {
+
+                $.ajax({
+                    url: '{{ url('/cities/') }}'+ '/' + stateID,
+                    type: "GET",
+                    dataType: "json",
+                    success:function(data) {
+                        $('select[name="city"]').empty();
+                         $('select[name="city"]').append('<option style="background-color:white" selected disabled>-- {{ trans('messages.keyword_selectcity') }} --</option>');
+                        $.each(data, function(key, value) {
+                            $('select[name="city"]').append('<option value="'+ key +'">'+ value +'</option>');
+                        });
+                    }
+                });
+            }else{
+                $('select[name="city"]').empty();
+            }
+        });
+
+    });
+</script>
+@endsection

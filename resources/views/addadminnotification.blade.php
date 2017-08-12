@@ -26,28 +26,30 @@
   <form action="{{url('/admin/notification/store')}}" method="post" name="addnotification" id="addnotification">
   {{ csrf_field() }}
 
-  @if(isset($notifica) && $action == 'edit')
-    <h1>{{trans('messages.keyword_update_notification')}}</h1><hr>
-     <div class="col-md-4">
+ <div class="col-md-12 col-sm-12 col-xs-12"> @if(isset($notifica) && $action == 'edit')
+    <h1>{{trans('messages.keyword_update_notification')}}</h1><hr></div>
+    
+	<div class="row">    
+     <div class="col-md-4 col-sm-12 col-xs-12">
     <label>{{trans('messages.keyword_types')}}<span class="required">(*)</span></label>
     <input class="form-control" id="type" name="type" value="{{ $notifica->notification_type }}" placeholder="{{trans('messages.keyword_type_of_notification')}}">
   </div>
-  <div class="col-md-4">
+  <div class="col-md-4 col-sm-12 col-xs-12">
     <label> {{trans('messages.keyword_warntime')}} <span class="required">(*)</span></label>
     <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="{{ $notifica->tempo_avviso }}" placeholder="{{trans('messages.keyword_enterwarntime')}}">
   </div>
-  <div class="col-md-4">
+  <div class="col-md-4 col-sm-12 col-xs-12">
     <label> {{trans('messages.keyword_module')}}<span class="required">(*)</span></label>
       <select class="form-control" id="modulo" name="modulo">
         <option></option>
         @foreach($modulo as $modulo)
           @if($modulo->id == $notifica->modulo)
             <option value="{{ $modulo->id }}" selected="selected">
-              {{$modulo->modulo}}
+              {{ ucwords(strtolower($modulo->modulo)) }}
             </option>
           @else
             <option value="{{ $modulo->id }}" >
-              {{$modulo->modulo}}
+              {{ ucwords(strtolower($modulo->modulo)) }}
             </option>
           @endif
         @endforeach
@@ -55,7 +57,7 @@
   </div>
   <br>
 <?php $entity = explode(",", $notifica->id_ente); ?>
-<div class="col-md-6">
+<div class="col-md-6 col-sm-12 col-xs-12">
 <label for="ente">{{trans('messages.keyword_entity')}}</label>
 
 <select id="ente" name="ente[]" class="js-example-basic-multiple form-control" onchange="myEnte()" multiple="multiple">
@@ -63,17 +65,17 @@
     @foreach($enti as $enti)
       @if( $entity[0] != '' && in_array($enti->id, $entity) )
         <option value="{{ $enti->id }}" selected="selected">
-          {{$enti->nomeazienda}}
+          {{ ucwords(strtolower($enti->nomeazienda)) }}
         </option>
       @else
          <option value="{{ $enti->id }}">
-          {{$enti->nomeazienda}}
+          {{ ucwords(strtolower($enti->nomeazienda)) }}
         </option>
       @endif
     @endforeach
   </select>
   </div>
-<div class="col-md-6">
+<div class="col-md-6 col-sm-12 col-xs-12">
 <label for="ruolo">{{trans('messages.keyword_role')}} <span class="required">(*)</span></label>
 <?php $ruolo = explode(",", $notifica->ruolo); ?>
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple" required> 
@@ -81,11 +83,11 @@
     @foreach($ruolo_utente as $ruolo_utente)
        @if(in_array($ruolo_utente->ruolo_id, $ruolo))
         <option value="{{ $ruolo_utente->ruolo_id }}" selected="selected">
-          {{$ruolo_utente->nome_ruolo}}
+          {{ ucwords(strtolower($ruolo_utente->nome_ruolo)) }}
         </option>
       @else
         <option value="{{ $ruolo_utente->ruolo_id }}">
-          {{$ruolo_utente->nome_ruolo}}
+          {{ ucwords(strtolower($ruolo_utente->nome_ruolo)) }}
         </option>
       @endif
     @endforeach
@@ -117,46 +119,47 @@
     </script>
     <input type="hidden" name="id" value="{{ $notifica->id }}">
   @else
-    <h1>{{trans('messages.keyword_addnoti')}}</h1><hr>
-  <div class="col-md-4">
+  	<div class="col-md-12 col-sm-12 col-xs-12">  <h1>{{trans('messages.keyword_addnoti')}}</h1><hr> </div>
+    <div class="row"> 
+  <div class="col-md-4 col-sm-12 col-xs-12">
     <label>{{trans('messages.keyword_types')}}<span class="required">(*)</span></label>
     <input class="form-control" id="type" name="type" value="" placeholder="{{trans('messages.keyword_type_of_notification')}}">
   </div>
-  <div class="col-md-4">
+  <div class="col-md-4 col-sm-12 col-xs-12">
     <label> {{trans('messages.keyword_warntime')}}<span class="required">(*)</span></label>
     <input class="form-control" id="tempo_avviso" name="tempo_avviso" value="" placeholder="{{trans('messages.keyword_warntime')}}">
   </div>
-  <div class="col-md-4">
+  <div class="col-md-4 col-sm-12 col-xs-12">
 
     <label> {{trans('messages.keyword_module')}}<span class="required">(*)</span></label>
       <select class="form-control" id="modulo" name="modulo">
         <option></option>
         @foreach($modulo as $modulo)
           <option value="{{ $modulo->id }}">
-            {{$modulo->modulo}}
+            {{ ucwords(strtolower($modulo->modulo)) }}
           </option>
         @endforeach
       </select><br>
   </div>  
   <br>
-<div class="col-md-6">
+<div class="col-md-6 col-sm-12 col-xs-12">
 <label for="ente">{{trans('messages.keyword_entity')}}</label>
 <select id="ente" name="ente[]" class="js-example-basic-multiple form-control " onchange="myEnte()" multiple="multiple">
     <option></option>
     @foreach($enti as $enti)
       <option value="{{ $enti->id }}">
-        {{$enti->nomeazienda}}
+        {{ ucwords(strtolower($enti->nomeazienda)) }}
       </option>
     @endforeach
   </select>
   </div>
-<div class="col-md-6">
+<div class="col-md-6 col-sm-12 col-xs-12">
 <label for="ruolo">{{trans('messages.keyword_role')}}<span class="required">(*)</span></label>
 <select id="ruolo" name="ruolo[]" class="js-example-basic-multiple form-control" onchange="myRole()"  multiple="multiple" required>
     <option></option>
     @foreach($ruolo_utente as $ruolo_utente)
       <option value="{{ $ruolo_utente->ruolo_id }}">
-        {{$ruolo_utente->nome_ruolo}}
+        {{ ucwords(strtolower($ruolo_utente->nome_ruolo)) }}
       </option>
     @endforeach
 </select>
@@ -190,6 +193,7 @@
       <br>
     <input class="btn btn-warning" type="submit" value="{{trans('messages.keyword_send')}}">
     </form>
+	</div></div>
   </div>
 <script>
 $(document).ready(function() {

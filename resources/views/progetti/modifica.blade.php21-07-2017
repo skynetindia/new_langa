@@ -13,6 +13,7 @@
  <script src="http://d3js.org/d3.v3.min.js"></script> 
  <script src="{{asset('public/scripts/RadarChart.js')}}"></script> 
 <!-- end radar chart js -->
+
 <script type="text/javascript">
 	$( document ).ready(function() {
 	    $(".setsize").each(function() {
@@ -69,7 +70,7 @@
 <?php /*<div class="col-md-12">
 	<h1>{{trans('messages.keyword_editproject')}} <?php echo '::' . $progetto->id . '/' . substr($progetto->datainizio, -2) ?></h1><hr>
 </div>*/?>
-		<div class="col-md-8">
+		<div class="col-md-8 col-sm-12 col-xs-12">
     	    	<script>
 				/*var $ = jQuery.noConflict();
     	    		var clickEvent = new MouseEvent("click", {
@@ -276,7 +277,6 @@
                                 });
                             }));
                         });
-                       
                         /*$('.btnprocesscomment').on("click", function() {
                             alert($(this).attr('val'));
                         });*/                        
@@ -474,7 +474,7 @@
 	            </table>
             </div>
             </div>
-           <div class="row"> <div class="col-md-2" >
+           <div class="row"> <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-desktop" >
 	           <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
             </div></div>
 		</div>
@@ -513,7 +513,7 @@
         </div>
 
 
-		<div class="col-md-4">
+		<div class="col-md-4 col-sm-12 col-xs-12">
 			@if(isset($progetto->datainizio) && !empty($progetto->datainizio))
             <div class="form-group bg-white pro-counter"> 
                 <div class="height">
@@ -579,13 +579,13 @@
                 });
                 </script>
 			<div class="row">            	
-                <div class="col-md-6">
+                <div class="col-md-6 col-sm-12 col-xs-12">
                 	<div class="form-group">
                		 	<label for="preventivo">{{trans('messages.keyword_starttime')}}</label>
                         <input value="{{ $progetto->datainizio }}" class="form-control" type="text" name="datainizio" id="datainizio" placeholder="{{trans('messages.keyword_starttime')}}">
                     </div>    
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 col-sm-12 col-xs-12">
                 	<div class="form-group">
 		                <label for="preventivo">{{trans('messages.keyword_endtime')}}</label>
                         <input value="{{ $progetto->datafine }}" class="form-control" type="text" name="datafine" id="datafine" placeholder="{{trans('messages.keyword_endtime')}}">
@@ -606,7 +606,7 @@
         		    </script>
        <div class="height10"></div>
          	<div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 col-sm-12 col-xs-12">
             	  <div class="bg-white image-upload-box project_graph">
         			<div class="height10">
                     <label> {{trans('messages.keyword_project_graph')}}</label></div>
@@ -615,7 +615,7 @@
 			    </div>			    
                 </div>
         	</div>
-			<div class="col-md-12">
+			<div class="col-md-12 col-sm-12 col-xs-12">
 				<div class="height10"></div>
                 <div class="form-group">
                 <label for="preventivo">{{trans('messages.keyword_sensitivedata')}}: </label> <br/>
@@ -1055,7 +1055,7 @@
 	                </script>
 	            </table> -->
   <?php echo Form::close(); ?> 
-         <div class="pull-right col-md-4">
+         <div class="pull-right col-md-4 col-sm-12 col-xs-12">
          <div class="row">
           <div class="col-md-12">
           	<div class="bg-white image-upload-box">
@@ -1206,6 +1206,11 @@
                 </div>
                 </div>
             </div>
+            
+          <div class="col-md-2 col-sm-12 col-xs-12 mb16 show-mobile" >
+	           <button onclick="mostra2()" type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>
+            </div>
+            
 <!-- 
 	            </table> -->
 		</div>

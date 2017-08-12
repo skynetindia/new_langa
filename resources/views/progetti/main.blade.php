@@ -84,7 +84,13 @@
             <th data-field="datainizio" data-sortable="true">{{ucwords(trans('messages.keyword_startdate'))}}</th>
             <th data-field="datafine" data-sortable="true">{{ucwords(trans('messages.keyword_enddate'))}}</th>
             <th data-field="progresso" data-sortable="true">{{ucwords(trans('messages.keyword_progress'))}}</th>
-            <th data-field="statoemotivo" data-sortable="true">{{ucwords(trans('messages.keyword_emotional_state'))}}</th>
+            <th data-field="statoemotivo" data-sortable="true">{{ucwords(trans('messages.keyword_emotional_state'))}}</th><?php              
+            $Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
+            $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";            
+            if($type != 'Client'){
+              ?><th data-field="publishstatus" data-sortable="true">{{trans('messages.keyword_is_published')}}</th><?php 
+            }
+            ?>
         </thead>
     </table>
     </div>
@@ -218,6 +224,21 @@ $('#table').on('click-row.bs.table', function (row, tr, el) {
 
 
 function check() { return confirm("{{trans('messages.keyword_are_you_sure_you_want_to_delete:')}} " + n + " {{trans('messages.keyword_projects')}}?"); }
+function updateStaus(id){
+     var url = "{{ url('/project/changepublishstatus') }}" + '/';
+     var status = '0';
+     if ($("#activestatus_"+id).is(':checked')) {
+           status = '1';
+        }
+        $.ajax({
+            type: "GET",
+            url: url + id +'/'+status,
+            error: function (url) {                
+            },
+            success:function (data) {             
+            }
+         });
+    }
 function multipleAction(act) {
 	var link = document.createElement("a");
 	var clickEvent = new MouseEvent("click", {

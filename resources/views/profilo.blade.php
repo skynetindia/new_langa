@@ -2,7 +2,7 @@
 @section('content')
 @include('common.errors')
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-12 col-sm-12 col-xs-12">
         <h1>Profilo</h1>
         <hr/>
   <div class="panel">
@@ -10,55 +10,55 @@
       <div class="row">       
          <?php echo Form::open(array('url' => '/profilo/aggiornaimmagine' . "/$utente->id", 'files' => true)) ?> 
          {{ csrf_field() }}                
-            <div class="col-md-5">
+            <div class="col-md-5 col-sm-12 col-xs-12">
             	<div class="row">
-             <div class="col-md-3">
+             <div class="col-md-3 col-sm-12 col-xs-12">
               <h3>User: {{$utente->name}}</h3>              
               @if(!empty($utente->logo))
-                <img src="{{ url('storage/app/images').'/'.$utente->logo }}" class="img-responsive"></img>
+                <img src="{{ url('storage/app/images').'/'.$utente->logo }}" class="img-responsive profilo-img"></img>
               @endif
             </div>            
-            <div class="col-md-9">
+            <div class="col-md-9 col-sm-12 col-xs-12">
             <input type="hidden" id="login_user_id" name="login_user_id" value="{{isset($utente->id) ? $utente->id : ''}}">            
               <div class="space40"></div>              
              	<div class="form-group">
                 <label for="logo">{{trans('messages.keyword_upload_profile_image')}}</label>
                 <input class="form-control" type="file" id="logo" name="logo">
              	</div>
-              <input class="form-control btn btn-warning" type="submit" value="Aggiorna immagine">             
+              <input class="form-control btn btn-warning" type="submit" value="{{trans('messages.keyword_update_image')}}">             
             </div>
             </div>
             
             @if($utente->dipartimento != '1')
             <h4>Percentuali</h4>
             <div class="row">
-            	<div class="col-md-6">
+            	<div class="col-md-6 col-sm-12 col-xs-12">
                 <div class="form-group">
                   <label>{{ ucfirst(trans('messages.keyword_discount')) }} <span class="required">(*)</span></label>
                   <input type="text" value="{{$utente->sconto}}" name="sconto" class="form-control">
                 </div>
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
               	<div class="form-group">
                  <label>{{ ucfirst(trans('messages.keyword_discountbonus')) }}<span class="required">(*)</span></label>
                   <input type="text" value="{{$utente->sconto_bonus}}" name="sconto_bonus" class="form-control">
                 </div>
               </div>
                 
-              <div class="col-md-12">
+              <div class="col-md-12 col-sm-12 col-xs-12">
                	<div class="form-group">
                  <label>{{ ucfirst(trans('messages.keyword_zone')) }}<span class="required">(*)</span></label>
                   <input type="text" value="{{$utente->sconto_bonus}}" name="sconto_bonus" class="form-control">
                 </div>
               </div>                
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
                 <div class="form-group">
                  <label for="url">{{ ucfirst(trans('messages.keyword_revenue')) }} <span class="required">(*)</span></label>
                   <input type="text" placeholder="{{$utente->rendita}}" name="rendita" class="form-control">
                 </div>
               </div>                
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
                 <div class="form-group">
                   <label for="url">{{ ucfirst(trans('messages.keyword_resale_on_reseller')) }} <span class="required">(*)</span></label>
                   <input type="text" placeholder="{{$utente->rendita_reseller}}" name="rendita_reseller" class="form-control">
@@ -67,7 +67,7 @@
             </div>
             @endif               
             </div>
-            <div class="col-md-7">
+            <div class="col-md-7 col-sm-12 col-xs-12">
             <div class="space40"></div>
              <div class="form-group">
                 <label for="name">{{trans('messages.keyword_user_name')}}</label>
@@ -83,11 +83,11 @@
               </div>
                   <div class="form-group">
                 	 <label for="url">{{trans('messages.keyword_profile')}}</label>
-              		    <input type="text" placeholder="{{trans('messages.keyword_profile')}}" readonly="readonly" value="{{$user_role->nome_ruolo}}" class="form-control">
+              		    <input type="text" placeholder="{{trans('messages.keyword_profile')}}" readonly value="{{$user_role->nome_ruolo}}" class="form-control">
                     </div>                    
                     <div class="form-group">
                 	     <label for="url">{{trans('messages.keyword_entity_connection')}}</label>
-              		    <input type="text" placeholder="{{trans('messages.keyword_entity_connection')}}" readonly="readonly" value="{{$utente->nomeazienda}}" class="form-control">
+              		    <input type="text" placeholder="{{trans('messages.keyword_entity_connection')}}" readonly value="{{$utente->nomeazienda}}" class="form-control">
                     </div>
                     @if($utente->dipartimento != '1')
                 	 <div class="form-group">
@@ -96,9 +96,11 @@
                         </div>
                     </div>
                     @endif
-                    <div class="col-md-2">
+                    <div class="row">
+                    <div class="col-md-2 col-sm-12 col-xs-12">
                     <div class="form-group">
                       <input class="form-control btn btn-warning" type="submit" value="{{trans('messages.keyword_save')}}">             
+                    </div>
                     </div>
                     </div>                    
                 </div>
@@ -116,7 +118,7 @@
 
         <div class="space50"></div>
       <div class="row">
-        <div class="col-md-12" id="permissionview"><?php
+        <div class="col-md-12 col-sm-12 col-xs-12" id="permissionview"><?php
 
   echo '<div class="table-responsive"><table class="selectable table table-bordered permission-table">';
     echo "<tr>";
@@ -147,12 +149,12 @@
             echo "<td><b>";
             echo $module->modulo;
             echo "</td></b> <td>";
-       ?><input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]"  value="<?php echo $module->id.'|0|lettura';?>" 
+       ?><input type="checkbox" readonly disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]"  value="<?php echo $module->id.'|0|lettura';?>" 
        <?php echo (in_array($module->id.'|0|lettura', $permessi) || ($utente->id == '0')) ? 'checked' :'';  ?>> <label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
        
         <?php
             echo "</td><td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"<?php echo (in_array($module->id.'|0|scrittura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?>><label for="scrittura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly disabled="disabled" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>"<?php echo (in_array($module->id.'|0|scrittura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?>><label for="scrittura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
 
               <!-- <div class="class_checkbox writing <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
              
@@ -168,7 +170,7 @@
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"<?php echo (in_array($module->id.'|'.$submodule->id.'|lettura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?> ><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly disabled="disabled" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>"<?php echo (in_array($module->id.'|'.$submodule->id.'|lettura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?> ><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
 
               <!-- <div class="class_checkbox lettura <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
 
@@ -176,7 +178,7 @@
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo (in_array($module->id.'|'.$submodule->id.'|scrittura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?> ><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly disabled="disabled" class="scrittura<?php echo $i; ?> input_class_checkbox" id="scrittura" name="scrittura[]" value="<?php echo $module->id.'|'.$submodule->id.'|scrittura';?>" <?php echo (in_array($module->id.'|'.$submodule->id.'|scrittura', $permessi) || ($utente->id == '0')) ? 'checked' :''; ?> ><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
 
               <!-- <div class="class_checkbox scrittura <?php //echo (in_array($module->id.'|0|scrittura', $permessi)) ? 'checked' :'';  ?> " data-info="scrittura<?php //echo $i; ?>"></div> -->
 
@@ -195,7 +197,7 @@
          echo "</td></b> ";
 
           echo "<td>"; ?>
-            <input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi) || ($utente->id == '0') ) ? 'checked' :''; ?>><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+            <input type="checkbox" readonly disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo (in_array($module->id.'|0|lettura', $permessi) || ($utente->id == '0') ) ? 'checked' :''; ?>><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
 
              <!-- <div class="class_checkbox reading <?php //echo (in_array($module->id.'|0|lettura', $permessi)) ? 'checked' :'';  ?> " data-info="lettura<?php //echo $i; ?>"></div> -->
 
@@ -229,10 +231,10 @@
             echo $module->modulo;
             echo "</td></b> <td>";
 
-       ?><input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
+       ?><input type="checkbox" readonly disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>">
        <label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label><?php
             echo "</td><td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly disabled="disabled" class="writing input_class_checkbox" id="scrittura<?php echo $i; ?>"  name="scrittura[]"  value="<?php echo $module->id.'|0|scrittura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>><label for="scrittura<?php echo $i; ?>">scrittura<?php echo $i; ?> </label>
             <?php
         echo "</td></tr>";
 
@@ -245,7 +247,7 @@
             echo "</td>";
 
             echo "<td>"; ?>
-              <input type="checkbox" readonly="readonly" disabled="disabled" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
+              <input type="checkbox" readonly disabled="disabled" class="lettura<?php echo $i; ?> input_class_checkbox" id="lettura" name="lettura[]" value="<?php echo $module->id.'|'.$submodule->id.'|lettura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>><label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
               <?php
             echo "</td>";
 
@@ -264,7 +266,7 @@
             echo $module->modulo;
          echo "</td></b>";
           echo "<td>"; ?>
-            <input type="checkbox" readonly="readonly" disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>>
+            <input type="checkbox" readonly disabled="disabled" class="reading input_class_checkbox" id="lettura<?php echo $i; ?>" name="lettura[]" value="<?php echo $module->id.'|0|lettura';?>" <?php echo ($utente->id == '0') ? 'checked' :''; ?>>
             <label for="lettura<?php echo $i; ?>">lettura<?php echo $i; ?> </label>
             <?php
           echo "</td>";

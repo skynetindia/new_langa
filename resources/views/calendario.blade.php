@@ -102,7 +102,7 @@
         			{{ csrf_field() }}
                                 @include('common.errors')
 						<div class="row">
-                         <div class="form-group col-md-10">
+                         <div class="form-group col-md-10 col-sm-12 col-xs-12">
         				<label for="ente" class="control-label">{{ trans('messages.keyword_entity') }}</label>
 						<select name="ente" id="ente" class="js-example-basic-single form-control required-input">
 						@foreach($enti as $ente)
@@ -116,12 +116,12 @@
 									$(".js-example-basic-single").select2({ containerCssClass : "required-input" });
 								</script>
         			</div>
-					<div class="form-group col-md-2 text-right"> <div class="space25"></div>
+					<div class="form-group col-md-2 col-sm-12 col-xs-12 text-right"> <div class="space25"></div>
 						<a onclick="nuovoEnte()" class="btn btn-warning"> {{ trans('messages.keyword_addente') }} </a>
 					</div>
                     </div>
            			<div class="row">
-						<div class="col-md-5">                               
+						<div class="col-md-5 col-sm-12 col-xs-12">                               
                         <div class="form-group">
                             <label for="titolo" class="control-label"> {{ trans('messages.keyword_object') }}</label>
                             <input value="{{ old('titolo') }}" type="text" name="titolo" id="titolo" class="form-control required-input" placeholder="{{ trans('messages.keyword_appointmenttodiscuss') }} ">
@@ -156,7 +156,7 @@
                         
                                 <label>{{ trans('messages.keyword_notification') }}</label>                                
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
                                             <div class="caleder-notification">
                                                 <div class="switch">
                                                     <span> {{ trans('messages.keyword_sendnotification') }} </span>
@@ -165,7 +165,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
                                             <div class="caleder-notification">
                                                 <div class="switch">
                                                  <span> {{ trans('messages.keyword_private') }} </span>
@@ -178,7 +178,7 @@
                         </div>
 
                     	</div>
-                    	<div class="col-md-7">
+                    	<div class="col-md-7 col-sm-12 col-xs-12">
                             <label>{{ trans('messages.keyword_appointmentaddress') }}</label><br>
                             <input value="" id="dove" name="dove" class="controls required-input" type="text" placeholder="{{ trans('messages.keyword_appointmentaddress') }}  (*)">
 
@@ -251,7 +251,7 @@
                                 
         			</fieldset>
                                         </div>*/?><br />
-        			<div class="modal-footer">
+        			<div class="modal-footer padding-right0">
                         <button type="button" class="btn btn-warning" data-dismiss="modal" aria-label="Close">{{ trans('messages.keyword_close') }}</button>     
                         <input type="submit" class="btn btn-warning" value=" {{ trans('messages.keyword_save') }} ">
       				</div>
@@ -389,11 +389,12 @@
 
                         @for($i = 1; $i < count($utenti); $i++)
 
-                        <option>{{ $utenti[$i]->name }}</option>
+                        <option  val="{{ $utenti[$i]->id}}" value="{{$utenti[$i]->name}}">{{ $utenti[$i]->id.' | '.ucwords(strtolower($utenti[$i]->name)) }}</option>
 
                         @endfor
 
                 </select>
+                <input type="hidden" name="responsabilelangaid" id="responsabilelangaid" value="<?php echo isset($corp->responsiblelang_id) ? $corp->responsiblelang_id : '0';?>">
 
                     <br><label for="telefonoresponsabile">{{ trans('messages.keyword_responsiblephone') }}</label>
 
@@ -401,7 +402,7 @@
 
                 <script>
 
-                var cellulari = ["<?php
+               <?php /* var cellulari = ["<?php
 
                         for($i=1;$i<count($utenti);$i++) {
 
@@ -433,57 +434,60 @@
 
                 ?>];
 
-
+                function trovaTelefono() {
+                        var k;
+                        var nome = $( "#responsabilelanga option:selected" ).text();
+                        console.log(nome);
+                        for(var i = 0; i < <?php echo count($utenti)-1;?>;i++) {
+                                if(nomi[i] == nome) {
+                                        k = i;
+                                        break;
+                                }
+                        }
+                        $('#telefonoresponsabile').val(cellulari[k]);
+                        var responsabilelangaId = $("#responsabilelanga option:selected" ).attr('val');
+                        $("#responsabilelangaid").val(responsabilelangaId);            
+                }*/?>
 
                 function trovaTelefono() {
-
-                        var k;
-
-                        var nome = $( "#responsabilelanga option:selected" ).text();
-
-                        console.log(nome);
-
-                        for(var i = 0; i < <?php echo count($utenti)-1;?>;i++) {
-
-                                if(nomi[i] == nome) {
-
-                                        k = i;
-
-                                        break;
-
-                                }
-
+                    var cellulari = ["<?php
+                        for($i=1;$i<count($utenti);$i++) {
+                            if($i == count($utenti) - 1)
+                                echo $utenti[$i]->cellulare . "\"";
+                            else
+                                echo $utenti[$i]->cellulare . "\",\"";
                         }
-
+                    ?>];
+                    var nomi = ["<?php
+                        for($i=1;$i<count($utenti);$i++) {
+                            if($i == count($utenti) - 1)
+                                echo $utenti[$i]->name . "\"";
+                            else
+                                echo $utenti[$i]->name . "\",\"";
+                        }
+                    ?>];
+                        var k;
+                        var nome = $("#responsabilelanga option:selected" ).val();
+                        for(var i = 0; i < <?php echo count($utenti)-1;?>;i++) {
+                            if(nomi[i] == nome) {
+                                k = i;
+                                break;
+                            }
+                        }
                         $('#telefonoresponsabile').val(cellulari[k]);
-
+                        var responsabilelangaId = $("#responsabilelanga option:selected" ).attr('val');
+                        $("#responsabilelangaid").val(responsabilelangaId);            
                 }
-
               </script>
-
           </div>
-
         			</div>
-
-        			<div class="modal-footer">
-
+        			<div class="modal-footer padding-right0">
         				<a onclick="aggiungiEnte()" class="btn btn-warning">{{ trans('messages.keyword_add') }}</a>
-
       				</div>
-
-
-
-
         		</form>
-
         		<!-- End form to add a new ente -->
-
       		</div>
-
-      		
-
 		</div>
-
 	</div>
 
 </div>
@@ -509,7 +513,7 @@ function aggiungiEvento(selecteddate) {
 
   $( "#newEvent" ).modal();
 	$('#newEvent').on('shown.bs.modal', function(){
-	  initMap2();             
+	  initMap2();    alert();         
       if (typeof selecteddate != 'undefined'){        
         $("#giorno").val(selecteddate+' - '+selecteddate);
       }

@@ -116,7 +116,7 @@ $(document).ready(function(){
 </script>
 <?php echo Form::open(array('url' => '/store-provincie')) ?>
 
-<div class="row indici-costo-wrap">   
+<div class="row indici-costo-wrap index-life-cost">   
 
 @php
 
@@ -128,9 +128,9 @@ $i = 1
 
 @if($i/3 == 1)
 
-<div class="row">  
-  <div class="col-md-4">
-  <div class="row"><div class="col-md-12">
+
+  <div class="col-md-4 col-sm-12 col-xs-12">
+  <div class="row"><div class="col-md-12 col-sm-12 col-xs-12">
     <label for="nome_stato"> {{ $state->nome_stato }} </label></div></div>
 
         @foreach($provincie as $citta)
@@ -138,10 +138,10 @@ $i = 1
           @if($citta->id_stato == $state->id_stato)
           @if($citta->nome_citta !='')
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-12 col-xs-12">
               <input type="text" name="citta[]" value="{{ $citta->nome_citta }}">
             </div>
-            <div class="col-md-6"> 
+            <div class="col-md-6 col-sm-12 col-xs-12"> 
               <input type="text" name="provincie[]" value="{{ $citta->provincie }}">
             </div>
           </div>
@@ -153,22 +153,22 @@ $i = 1
        @endforeach
   
 </div>
-</div>
+
 <br>
 @else
  
-  <div class="col-md-4">
-<div class="row"><div class="col-md-12">
+  <div class="col-md-4 col-sm-12 col-xs-12">
+<div class="row"><div class="col-md-12 col-sm-12 col-xs-12">
     <label for="nome_stato"> {{ $state->nome_stato }} </label></div></div>
 
         @foreach($provincie as $citta)    
           @if($citta->id_stato == $state->id_stato)
            @if($citta->nome_citta !='')
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
                   <input type="text" name="citta[]" value="{{$citta->nome_citta }}">
               </div>
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12 col-xs-12">
                   <input type="text" name="provincie[]" value="{{$citta->provincie }}">
               </div>
                   <input type="hidden" name="id_citta[]" value="{{$citta->id_citta }}">
@@ -183,6 +183,7 @@ $i = 1
 @endphp
 @endforeach
 </div>
+
   <button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}}</button>  
 <?php echo Form::close(); ?>  
 <div class="footer-svg">

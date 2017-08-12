@@ -19,15 +19,15 @@
 <form action="{{url('/admin/taxonomies/addstatepayment')}}" method="post" id="frmemotionalPayment">
     {{ csrf_field() }}
     <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<div class="form-group"><input type="text" class="form-control" name="name" placeholder="{{trans('messages.keyword_name')}}"></div>
 	</div>
 
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<div class="form-group"><input type="text" class="form-control" name="description" placeholder="{{trans('messages.keyword_description')}}"></div>
 	</div>
 
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<div class="form-group"><input class="form-control color no-alpha" value="#f37f0d" name="color" /></div>
 	</div>
 

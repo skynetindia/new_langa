@@ -14,7 +14,8 @@
 <?php echo Form::open(array('url' => '/admin/tassonomie/dipartimenti/store', 'files' => true)) ?>
 	{{ csrf_field() }}
 	<!-- colonna a sinistra -->
-	<div class="col-md-4">
+    <div class="row ">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<label for="nomedipartimento">{{trans('messages.keyword_department_name')}}<span class="required">(*)</span></label>
 		<input value="{{ old('nomedipartimento') }}" class="form-control" type="text" name="nomedipartimento" id="nomedipartimento" placeholder="{{trans('messages.keyword_department_name')}}" required="required"><br>
 		<label for="piva">{{trans('messages.keyword_vat_number')}}</label>
@@ -27,12 +28,12 @@
 		
 	</div>
 	<!-- colonna centrale -->
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<label for="nomereferente">{{trans('messages.keyword_head_of_department')}} <span class="required">(*)</span></label>
 		<select title="Responsabile associato a questo ente" name="nomereferente" id="nomereferente" class="form-control" onchange="trovaTelefono()" required>
 			<option></option>
 			@for($i = 1; $i < count($utenti); $i++)
-			<option>{{ $utenti[$i]->name }}</option>
+			<option>{{ ucwords(strtolower($utenti[$i]->name)) }}</option>
 			@endfor
                 </select><br>
 		<label for="cf">{{trans('messages.keyword_fiscal_code')}}</label>
@@ -43,7 +44,7 @@
 		<?php echo Form::file('logo', ['class' => 'form-control']); ?><br>
 	</div>
 	<!-- colonna a destra -->
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
 		<datalist id="settori"></datalist>
 		<label for="settore">{{trans('messages.keyword_sector')}}</label>
 		<input value="{{ old('settore') }}" list="settori" class="form-control" type="text" id="settore" name="settore" placeholder="{{trans('messages.keyword_search_industry')}}"><br>
@@ -87,36 +88,38 @@
 		<input value="{{ old('emailsecondaria') }}" class="form-control" type="email" name="emailsecondaria" id="emailsecondaria" placeholder="{{trans('messages.keyword_optional_email')}}"><br>
 
 	</div>
-	<div class="col-md-12"><label>{{trans('messages.keyword_address')}} <span class="required">(*)</span></label><br>
-	 <input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text" required placeholder="Inserisci un indirizzo (*)">
+	<div class="col-md-12 col-sm-12 col-xs-12"><label>{{trans('messages.keyword_address')}} <span class="required">(*)</span></label><br>
+	 <input value="{{ old('indirizzo') }}" id="pac-input" name="indirizzo" class="controls" type="text" required placeholder="{{trans('messages.keyword_enteranaddress')}}">
     <div id="type-selector" class="controls">
       <input type="radio" name="type" id="changetype-all" checked="checked">
-      <label for="changetype-all">Tutti</label>
+      <label for="changetype-all">{{trans('messages.keyword_all')}}</label>
 
       <input type="radio" name="type" id="changetype-establishment">
-      <label for="changetype-establishment">Aziende</label>
+      <label for="changetype-establishment">{{trans('messages.keyword_companies')}}</label>
 
       <input type="radio" name="type" id="changetype-address">
-      <label for="changetype-address">Indirizzi</label>
+      <label for="changetype-address">{{trans('messages.keyword_addresses')}}</label>
 
       <input type="radio" name="type" id="changetype-geocode">
-      <label for="changetype-geocode">CAP</label>
+      <label for="changetype-geocode">{{trans('messages.keyword_postal_code')}}</label>
     </div>
 	
     <div id="map"></div>
     <div class="space10"></div>
 	</div>
-	<div class="col-md-12">
+	<div class="col-md-12 col-sm-12 col-xs-12">
     <div class="form-group">
 	   <label for="noteenti">{{trans('messages.keyword_entries_note')}}</label>
 	<textarea title="{{trans('messages.keyword_public_note')}} " class="form-control" rows="7" name="noteenti" id="noteenti" placeholder="{{trans('messages.keyword_entries_note')}}">{{ old('noteenti') }}</textarea><br>
     </div>
 	</div>
 
-	<div class="col-xs-12">		
+	<div class="col-md-12 col-sm-12 col-xs-12">		
 		<button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}} </button>
     <div class="space50"></div>
 	</div>
+    </div>
+    
 <?php echo Form::close(); ?>  
 <div class="footer-svg add-deparment-page">
   <img src="{{asset('images/ADMIN_TASSONOMIE-footer.svg')}}" alt="tassonomie">

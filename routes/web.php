@@ -12,6 +12,9 @@
 */
 Route::get('/temper', 'HomeController@temp');
 
+Route::get('/redirect/{provider}', 'SocialAuthController@redirect');
+Route::get('/callback/{provider}', 'SocialAuthController@callback');
+
 
 //Route::get('/dashboard', 'HomeController@index')->name('home');
 
@@ -20,10 +23,7 @@ Route::post('dashboard/statistics/date', 'HomeController@statistic_date');
 
 Route::post('dashboard/weatherautocomplete', 'HomeController@weatherautocomplete');
 Route::post('dashboard/getweatherdetails', 'HomeController@getweatherdetails');
-Route::post('dashboard/getweatherdetails', 'HomeController@getweatherdetails');
-
 Route::get('dashboard/getreseller/json', 'HomeController@getjsonreseller');
-/*Route::get('/admin/language/json', 'AdminController@getjsonlanguage');*/
 
 Route::get('/',function(){
     if(!empty(Session::get('nuovaregistrazione'))) {
@@ -33,17 +33,22 @@ Route::get('/',function(){
     	    return view('welcome');		
     } 
     elseif (Auth::guest()){
-   	    return view('welcome');	
+   	    return Redirect::to('login');	
     }
     else{
     	return Redirect::action('HomeController@index');
         /*Route::get('/', 'HomeController@index')->name('home');*/
     }
 });
-Route::get('dashboard/client/charts', 'HomeController@clients');
+Route::get('dashboard/client/charts', 'HomeController@customer');
 Route::get('dashboard/reseller/charts', 'HomeController@reseller');
 Route::post('dashboard/widgetupdate', 'HomeController@widgetupdate');
 Route::post('dashboard/getcalendar', 'HomeController@getCalendarAjax');
+Route::get('/dashboard/searchmedia/{term?}', 'HomeController@getmediafiles');
+Route::get('dashboard/getdepartmentpackage/{departmentid}',"HomeController@getdepartmentpackage");
+Route::post('dashboard/uploadfiles/{code}', 'HomeController@uploadmedia');
+Route::get('dashboard/getfiles/{code}', 'HomeController@getmediafiles');
+
 
 Route::get('/unauthorized', function () {
     return view('errors.403');
@@ -362,6 +367,8 @@ Route::post('/preventivo/optional/aggiorna/{id}', 'QuoteController@aggiornaoptio
 Route::get('/preventivi/optional/elimina/{id}', 'QuoteController@eliminaoptionaldalprev');*/
 Route::get('estimates/json', 'QuoteController@getjson');
 Route::get('estimates/miei/json', 'QuoteController@getJsonMyestimates');
+Route::get('estimates/pendingquote/{type}', 'QuoteController@getpendingquote');
+Route::get('estimates/confirmedquote/{type}', 'QuoteController@getconfirmedquote');
 Route::get('/estimates/files/{id}', 'QuoteController@filequote');
 Route::post('/estimates/modify/quote/uploadfiles/{code}', 'QuoteController@fileupload');
 Route::get('/estimates/modify/quote/getfiles/{code}', 'QuoteController@fileget');
@@ -371,8 +378,8 @@ Route::get('/estimates/modify/quote/getdefaultfiles/{quote_id}', 'QuoteControlle
 Route::post('/estimates/mediacomment/{code}', 'QuoteController@updatemediaComment');
 Route::post('estimates/quoteconfirm', 'QuoteController@confirmQuote');
 Route::get('estimates/miei/confirmed', 'QuoteController@getJsonMyconfirmedestimates');
-
 Route::get('/estimates/changepublishstatus/{id}/{status}', 'QuoteController@updatepublishstatus');
+Route::get('/estimates/modify/quote/searchmedia/{quote_id}/{term?}', 'QuoteController@fileget');
 
 // user read alert
 Route::get('/alert/user-read', 'AdminController@userreadalert');
@@ -510,6 +517,8 @@ Route::post('/progetti/mediacomment/{code}', 'ProjectController@updatemediaComme
 Route::post('project/getprocessingcomment', 'ProjectController@getprocessingcomment');
 Route::post('projectprocessing/addcomment', 'ProjectController@addprocessingcomment');
 Route::post('project/deleteprocessingcomment', 'ProjectController@deleteprocessingcomment');
+Route::get('/project/searchmedia/{quote_id}/{term?}', 'ProjectController@fileget');
+Route::get('/project/changepublishstatus/{id}/{status}', 'ProjectController@updatepublishstatus');
 
 
 
@@ -553,6 +562,8 @@ Route::get('/pagamenti/linktoproject/{id}', 'AccountingController@linktoproject'
 
 Route::post('pagamenti/accounting/delete', 'AccountingController@deleteinvoicegroup');
 
+Route::get('/invoice/searchmedia/{quote_id}/{term?}', 'AccountingController@fileget');
+Route::get('/invoice/changepublishstatus/{id}/{status}', 'AccountingController@updatepublishstatus');
 
 
 /* =============================== Provisions Route =============================== */
@@ -685,9 +696,18 @@ Route::get('/download/csv','CommonController@downloadcsv');
 // upload csv
 Route::post('/upload/csv','CommonController@uploadcsv');
 Route::get('/register/step-two', 'CommonController@nextstep');
-Route::post('/registration-step-two', 'CommonController@storesteptwo');
-Route::post('/registration-step-three', 'CommonController@storestepthree');
+Route::get('/register/step-two', 'CommonController@nextstep');
+Route::post('/register/step-two', 'CommonController@storesteptwo');
+Route::post('/register/step-three', 'CommonController@storestepthree');
 Route::post('/registration-step-four', 'CommonController@storestepfour');
+
+Route::post('/register/uploadmedia/{user_id}', 'CommonController@fileupload');
+Route::get('/register/getmediafiles/{user_id}', 'CommonController@fileget');
+Route::get('/register/deletemediafiles/{id}', 'CommonController@filedelete');
+Route::post('/register/updatemediafiletype/{typeid}/{fileid}', 'CommonController@filetypeupdate');
+
+// update role type
+
 // update role type
 Route::post('/stepfive/updatefiletype/{typeid}/{fileid}', 'QuizController@filetypeupdate');
 
@@ -713,7 +733,6 @@ Route::get('/admin/pages', 'AdminController@pages');
 Route::get('/json/pages', 'AdminController@pagesjson');
 // add/modify page details
 Route::get('/admin/modify/page', 'AdminController@modifypage');
-
 Route::get('/admin/modify/page/{id}', 'AdminController@modifypage');
 // store page details
 Route::post('/admin/page/store/', 'AdminController@storepage');
@@ -768,9 +787,15 @@ Route::post('/social/update', 'SocialController@updatesocial');
 Route::post('social/image','SocialController@image');
 Route::get('social/share/{id}',"SocialController@share");
 
-Route::get('register/step-two',"CommonController@registerstep2");
 
 Route::get('register/getdepartmentpackage/{departmentid}',"CommonController@getdepartmentpackage");
+Route::post('register/step-client',"CommonController@stepclient");
+Route::post("register/step-other","CommonController@stepother");
 
+ Route::get('payPremium', ['as'=>'payPremium','uses'=>'PaypalController@payPremium']);
 
+ Route::post('getCheckout', ['as'=>'getCheckout','uses'=>'PaypalController@getCheckout']);
 
+  Route::get('getDone', ['as'=>'getDone','uses'=>'PaypalController@getDone']);
+
+  Route::get('getCancel', ['as'=>'getCancel','uses'=>'PaypalController@getCancel']);

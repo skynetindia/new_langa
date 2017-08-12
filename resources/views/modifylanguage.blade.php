@@ -52,7 +52,7 @@
         });
     </script>
 @include('common.errors')
-  <h1>Modifica language</h1><hr>
+  <h1> {{ trans('messages.keyword_modify_language') }} </h1><hr>
   <?php 
   if(isset($language) && !empty($language)){
   	echo Form::open(array('url' => '/admin/update/language' . "/$language->id", 'files' => true, 'id' => 'frmLanguage'));
@@ -64,7 +64,7 @@
     {{ csrf_field() }}
     <!-- colonna a sinistra -->
     <div class="row">
-   <div class="col-md-5">
+   <div class="col-md-5 col-sm-12 col-xs-12">
    <div class="form-group">
     <label for="name">{{trans('messages.keyword_name')}} <span class="required">(*)</span></label>
     <input type="hidden" name="language_id" value="{{ isset($language->id) ? $language->id : '' }}">
@@ -75,7 +75,7 @@
     <input value="{{isset($language->original_name) ? $language->original_name : old('original_name')}}" maxlength="50" class="form-control no-alpha" type="text" name="original_name" id="original_name" placeholder="{{trans('messages.keyword_original_name')}}">
 	</div>
     </div>
-     <div class="col-md-5">
+     <div class="col-md-5 col-sm-12 col-xs-12">
      <div class="form-group">
     <label for="name">{{trans('messages.keyword_code')}} <span class="required">(*)</span></label>
     <input value="{{ isset($language->code) ? $language->code : old('code') }}" class="form-control" maxlength="3" type="text" name="code" id="code" placeholder="{{trans('messages.keyword_code')}}">
@@ -85,7 +85,7 @@
     <?php echo Form::file('icon', ['class' => 'form-control']); ?>
     </div>
     </div>
-     <div class="col-md-2">
+     <div class="col-md-2 col-sm-12 col-xs-12">
       <label> &nbsp; </label>
      <div class="form-group form-inline chkselect">
         <input type="checkbox" name="is_default" id="is_default" value="1" <?php if(isset($language->is_default) && $language->is_default == '1'){ echo 'checked';} ?> class="form-control no-alpha" />
@@ -121,7 +121,7 @@
             },
             messages: {
                 name: {
-                    required: "{{trans('mesages.keyword_please_enter_a_language_name')}}",
+                    required: "{{ trans('messages.keyword_please_enter_a_language_name') }}",
                     maxlength: "{{trans('messages.keyword_language_name_less_than_50_characters')}}"
                 },
                 code: {
@@ -139,7 +139,7 @@
 </script>
 	<div class="col-md-12">
     <div class="space10"></div>
-		<button type="submit" class="btn btn-warning">Salva</button>
+		<button type="submit" class="btn btn-warning">{{trans('messages.keyword_save')}} </button>
     {!! link_to(URL::previous(), 'Cancel', ['class' => 'btn btn-danger']) !!}
     <div class="space30"></div>
 	</div>

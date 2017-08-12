@@ -43,7 +43,8 @@
         <div class="step-pane">
           <form role="form" class="text-center">
           <input type="hidden" name="quizid" id="quizid" value="{{ $quizid}}"/>
-            <div class="left-side">            
+          <div class="row">
+            <div class="left-side col-md-6 col-sm-12 col-xs-12">            
 				      <div class="height550">
               <?php $i = 1; ?>
               <div class="row">
@@ -82,14 +83,15 @@
 	             @endforeach                
               </div>
             </div></div>
-            <div class="height550">
+            <div class="height55 col-md-6 col-sm-12 col-xs-12">
             <div class="right-side" id="right_side">				    
               <?php 
                 if(isset($last_show)){ ?>
                   @include('quiz.step-two-details')
                <?php }
               ?>
-          	</div> </div>  
+          	</div> </div> 
+            </div> 
 
 			<div class="clearfix"></div>
           

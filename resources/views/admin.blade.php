@@ -55,6 +55,7 @@
 <div class="row">
 	<div class="col-md-12 col-sm-12 col-xs-12">
   <!-- Static Preventivi Start -->
+  <div class="table-responsive">
     <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php if(isset($miei)) echo url('estimates/miei/json'); else echo url('/estimates/json');?>" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="id" data-sortable="true">{{trans('messages.keyword_no_estimate')}}</th>
@@ -67,6 +68,7 @@
             <th data-field="statoemotivo" data-sortable="true">{{trans('messages.keyword_emotional_state')}}</th>
         </thead>
     </table>
+    </div>
 <!-- STatic Preventivi End -->
 	</div>
 </div>
@@ -81,7 +83,8 @@
     <div class="panel panel-default">
 	 <div class="panel-body">
     	<h1 class="cst-datatable-heading">{{trans('messages.keyword_projects')}}</h1>
-         <!-- Static Progetti Start -->         
+         <!-- Static Progetti Start -->     
+         <div class="table-responsive">    
         <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php if(isset($miei)) echo url('progetti/miei/json'); else echo url('/progetti/json');?>" data-classes="table table-bordered" id="table">
         <thead>
             <th data-field="codice" data-sortable="true">{{ucwords(trans('messages.keyword_noproject'))}}</th>
@@ -94,6 +97,7 @@
             <th data-field="statoemotivo" data-sortable="true">{{ucwords(trans('messages.keyword_emotional_state'))}}</th>
         </thead>
         </table>
+        </div>
     	<!-- Static Progetti End -->
     </div>
     </div>
@@ -105,20 +109,22 @@
 	 <div class="panel-body">
     	<h1 class="cst-datatable-heading">{{trans('messages.keyword_statistics')}}</h1>        
           <!-- Static Statistiche Start - Can use chart here -->
+          <div class="table-responsive">
     		<table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('costi/json');?>" data-classes="table table-bordered" id="table">
             <thead>
                 <th data-field="id" data-sortable="true">
-                {{ ucwords(trans('messages.keyword_code')) }} 
+                {{ ucwords(trans('messages.keyword_code')) }} </th>
                 <th data-field="ente" data-sortable="true">
-                {{ ucwords(trans('messages.keyword_entity')) }} 
+                {{ ucwords(trans('messages.keyword_entity')) }}</th>
                 <th data-field="oggetto" data-sortable="true">
-                {{ ucwords(trans('messages.keyword_object')) }} 
+                {{ ucwords(trans('messages.keyword_object')) }} </th>
                 <th data-field="costo" data-sortable="true"> 
-                {{ ucwords(trans('messages.keyword_cost')) }} 
+                {{ ucwords(trans('messages.keyword_cost')) }} </th>
                 <th data-field="datainserimento" data-sortable="true">
-                {{ ucwords(trans('messages.keyword_insertion_date')) }} 
+                {{ ucwords(trans('messages.keyword_insertion_date')) }} </th>
             </thead>
         </table>    
+        </div>
       <!-- Static Statistiche END -->
     </div>
 

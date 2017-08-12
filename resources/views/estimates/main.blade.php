@@ -18,13 +18,20 @@
 <div class="float-left">
     <h1>{{trans('messages.keyword_quotes')}}</h1><hr>
     @if(checkpermission('3', '16', 'scrittura','true'))
-    <form action="{{ url('/estimates/add') }}" method="post">
+    <form class="none480" action="{{ url('/estimates/add') }}" method="post">
         {{ csrf_field() }}
         <button class="btn btn-warning" type="submit" name="create" title="{{trans('messages.keyword_create_new_-_add_a_new_estimate')}}"><i class="fa fa-plus"></i></button>
     </form>
     @endif
     <!-- Inizio filtraggio miei/tutti -->
     <div class="btn-header-main-blade">
+      @if(checkpermission('3', '16', 'scrittura','true'))
+    <form class="show480" action="{{ url('/estimates/add') }}" method="post">
+        {{ csrf_field() }}
+        <button class="btn btn-warning" type="submit" name="create" title="{{trans('messages.keyword_create_new_-_add_a_new_estimate')}}"><i class="fa fa-plus"></i></button>
+    </form>
+    @endif
+    
     @if(isset($miei))
     <a id="miei" href="{{url('/estimates/my')}}"  class="button button2" name="miei" title="{{trans('messages.keyword_my_-_filter_your_budgets')}}">
 		{{trans('messages.keyword_my')}}

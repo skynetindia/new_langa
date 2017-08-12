@@ -28,7 +28,7 @@
 		<div class="col-md-4 col-sm-12 col-xs-12">
 			<div class="form-group"><input class="form-control color no-alpha" value="#f37f0d" name="color" /></div>
 		</div>
-		<div class="col-md-12 res-left">
+		<div class="col-md-12 res-left text-right">
 			<input type="submit" class="btn btn-primary" value="{{trans('messages.keyword_add')}}">
 		</div>
 	</div>

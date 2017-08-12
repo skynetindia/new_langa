@@ -19,24 +19,26 @@
 <form action="{{url('/admin/frequency/add')}}" method="post" id="frmemotionalest">
     {{ csrf_field() }}
     <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
     <div class="form-group">
       <labe>{{trans('messages.keyword_name')}} <input type="text" class="form-control" name="name" placeholder="{{trans('messages.keyword_name')}}"></labe>
     </div>		
 	</div>
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
     <div class="form-group">
       <labe>{{trans('messages.keyword_description')}}<input type="text" class="form-control" name="description" placeholder="{{trans('messages.keyword_description')}}"></labe>
     </div> 
 	</div>
-	<div class="col-md-4">
+	<div class="col-md-4 col-sm-12 col-xs-12">
     <div class="form-group">
       <labe>{{trans('messages.keyword_days')}}<input type="text" class="form-control" name="rinnovo" maxlength="4" value="1"></labe>
     </div>
 	</div>
-	<div style="text-align:right">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+	<div class="text-right res-left">
 		<input type="submit" class="btn btn-primary" value="{{trans('messages.keyword_add')}}">
 	</div>
+    </div>
 	</div>
 </form>
 <h4>{{trans('messages.keyword_edit_frequency')}}</h4>
@@ -55,7 +57,7 @@
 <form action="{{url('/admin/frequency/update')}}" method="post" id="frmemotionalestEdit">
 <input type="hidden" id="actiontype" name="action" value="update">
 <div class="table-responsive">
-		<table class="table table-striped table-bordered text-right">
+		<table class="table table-striped table-bordered text-right checkbox-tbl">
 	@foreach($frequency as $frequencies)
 	<tr>
         <td>

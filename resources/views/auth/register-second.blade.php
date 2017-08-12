@@ -2,8 +2,11 @@
 
 @section('content')
 
-
+<!-- Script required for Animation -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+<script src="{{ url('public/scripts/jquery.min.js')}}"></script>
+<link href="{{asset('public/css/dropzone.css')}}" rel="stylesheet" />
+<script type="text/javascript" src="{{asset('public/scripts/dropzone.js')}}"></script>
 
 <div class="">
 
@@ -15,6 +18,7 @@
         <li class="navigation-item navigation-previous-item  navigation-active-item" id="thirdst"></li>
         <li class="navigation-item" id="fourthst"></li>
         <li class="navigation-item" id="fifthst"></li>
+        <li class="navigation-item" id="sixthst"></li>
        
     </ul>
 </div>
@@ -26,17 +30,16 @@
         	<div class="row">
         	<div class="col-md-6 col-sm-12 col-xs-12">
             	<div class="registrtion-left-side">
-                    
-                       	
+                   <input type="hidden" name="user_id" id="user_id" value="{{$reg_user->id}}" />
                     <form action="" method="post">
-                      <div class="reg-five-left-side threestep none">
-                       <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                      <div class="reg-five-left-side threestep activestep">
+                       <div class="heading"><img src="{{url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}"/> </div>
                         <div class="registration-content heading"><h3>Entity Informations</h3><p>Tell us your plans so that we can give you the information you need to be successful?</p></div>
                         	<div class="row">
                             	<div class="col-md-6 col-sm-12 col-xs-12">
                                 	<div class="form-group">
                                     <div class="radio-question">
-                                        <input class="radio-button-radio" value="1" name="role" id="role_1" type="radio" onclick="fun_role();">
+                                        <input class="radio-button-radio" value="1" name="role" id="role_1" type="radio" onclick="fun_role();" checked="checked">
                                         <label for="role_1" class="radio-button-label"> Private
                                             <div class="radio-button-check">
                                                 <div class="radio-button-innr"></div>
@@ -60,99 +63,86 @@
                                 
                                 <div class="col-md-12 col-sm-12 col-xs-12 roletype none">
                                     <div class="form-group">
-                                   		 <input type="text" class="form-control" id="compnayname" name="compnayname" placeholder="Company Name">
+                                   		 <input type="text" class="form-control" id="compnayname" name="compnayname" placeholder="Company Name" value="{{old('compnayname')}}">
                                   	</div>
                                 </div>
                                 <div class="col-md-12 col-sm-12 col-xs-12 roletype none">
                                     <div class="form-group">
-                                   		 <input type="text" class="form-control" id="sector" name="sector" placeholder="Sector">
+                                   		 <input type="text" class="form-control" id="sector" name="sector" placeholder="Sector" alue="{{old('sector')}}">
                                   	</div>
                                 </div>
                                 
                                 <div class="col-md-12 col-sm-12 col-xs-12">
                                     <div class="form-group">
-                                   		 <input type="text" class="form-control" id="phone" name="phone" placeholder="Your Phone">
+                                   		 <input type="text" class="form-control" id="phone" name="phone" placeholder="Your Phone" alue="{{old('phone')}}">
                                   	</div>
                                 </div>
                                 
                                 <div class="col-md-12 col-sm-12 col-xs-12">
                                     <div class="form-group">
-                                   		 <input type="text" class="form-control" id="address" name="address" placeholder="Your Location">
+                                   		 <input type="text" class="form-control" id="address" name="address" placeholder="Your Location" alue="{{old('address')}}">
                                   	</div>
                                 </div>
                                 
                                  
                                  <div class="col-md-12 col-sm-12 col-xs-12">
                                  	<div class="privacy-blk">
-                                        <div class="btn btn-warning" id="fourstep" onclick="fun_hide(this.id);">Next</div>
+                                        <div class="btn btn-warning" id="fourstep">Next</div>
                                     </div>
                                  </div>   
                                  
                              </div>  
                            </div> 
-                           <script>
+                           <script type="text/javascript">
+						  $("#fourstep").click(function(e){
+							   var role=$("input[name='role']:checked").val();
+							   var company=$("#compnayname").val();
+							   var address=$("#address").val();
+							   var phone=$("#phone").val();
+							   var sector=$("#sector").val();
+							     var user_id=$("#user_id").val();
+								 var id=$(this).attr('id')
+							     $.ajax({            
+										url: "{{ url('/register/step-two') }}",
+										type:'POST',
+										data: { 'role': role, 'user_id' : user_id,'company' : company,'address' : address,'phone' : phone,'sector' : sector, '_token': '{{ csrf_token() }}'},              
+										success:function(data) { 
+											fun_hide(id);
+											$('#thirdst').removeClass('navigation-active-item');
+											$('#fourthst').addClass('navigation-previous-item navigation-active-item');
+											
+										},
+										error:function(data){
+											alert("Something went wrong. Please try again");
+										}
+								 });
+	                        });
 						   function fun_hide(id)
 						   {
-							   $('.activestep').addClass('none').removeClass('activestep');
-							   $('.'+id).removeClass('none').addClass('activestep');
-						   }
+							   
+										$('.activestep').addClass('none').removeClass('activestep');
+							  			 $('.'+id).removeClass('none').addClass('activestep');
+							}
 						   </script> 
                            
                            <div class="reg-left-side-step-six fourstep none">
                            <div class="row">
-                            	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                            	<div class="heading"><img src="{{url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}"/>  </div>
                         <div class="registration-content heading"><h3>Hi User,<br/> Welcome on board!</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
                                 <div class="col-md-12 col-sm-12 col-xs-12">
+                                @foreach($role as $rol)
                                     <div class="form-group">
                                         <div class="radio-question">
-                                        <input class="radio-button-radio" value="client" name="profile" id="profile_1" type="radio">
-                                        <label for="profile_1" class="radio-button-label"> Client
+                                        <input class="radio-button-radio" value="{{$rol->ruolo_id}}" data-value="{{strtolower($rol->nome_ruolo)}}" name="profile" id="profile_{{$rol->ruolo_id}}" type="radio">
+                                        <label for="profile_{{$rol->ruolo_id}}" class="radio-button-label"> {{($rol->nome_ruolo)}}
                                             <div class="radio-button-check">
                                                 <div class="radio-button-innr"></div>
                                             </div>
                                         </label>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <div class="radio-question">
-                                        <input class="radio-button-radio" value="administration" name="profile" id="profile_2" type="radio">
-                                        <label for="profile_2" class="radio-button-label"> Administration
-                                            <div class="radio-button-check">
-                                                <div class="radio-button-innr"></div>
-                                            </div>
-                                        </label>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="radio-question">
-                                        <input class="radio-button-radio" value="commerical" name="profile" id="profile_3" type="radio">
-                                        <label for="profile_3" class="radio-button-label"> Commerical
-                                            <div class="radio-button-check">
-                                                <div class="radio-button-innr"></div>
-                                            </div>
-                                        </label>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="radio-question">
-                                        <input class="radio-button-radio" value="reseller" name="profile" id="profile_4" type="radio">
-                                        <label for="profile_4" class="radio-button-label"> Reseller
-                                            <div class="radio-button-check">
-                                                <div class="radio-button-innr"></div>
-                                            </div>
-                                        </label>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="radio-question">
-                                        <input class="radio-button-radio" value="technician" name="profile" id="profile_5" type="radio">
-                                        <label for="profile_5" class="radio-button-label"> Technician
-                                            <div class="radio-button-check">
-                                                <div class="radio-button-innr"></div>
-                                            </div>
-                                        </label>
-                                        </div>
-                                    </div>
+                                    @endforeach
+                                   
                                     
                                     
                                     <div class="join-author form-group"><input class="selezione" id="check-select" type="checkbox"><label for="check-select"></label><span>join our author malling list to get all the latest tips from our community</span></div>
@@ -164,7 +154,7 @@
                                  
                                  <div class="col-md-12 col-sm-12 col-xs-12">
                                  	<div class="privacy-blk">
-                                        <div class="btn btn-warning" id="fivestep" onclick="fun_hide(this.id);">Next</div>
+                                        <div class="btn btn-warning" id="fivestep">Next</div>
                                     </div>
                                  </div>   
                                  
@@ -176,9 +166,33 @@
                                  
                              </div>
                              </div>
+                             <script>
+							   var user_id=$("#user_id").val();
+							  $("#fivestep").click(function(e){
+								  
+							   var profile=$("input[name='profile']:checked").val();
+							
+							   
+								 var id=$(this).attr('id')
+							     $.ajax({            
+										url: "{{ url('/register/step-three') }}",
+										type:'POST',
+										data: { 'profile': profile, 'user_id' : user_id,'_token': '{{ csrf_token() }}'},              
+										success:function(data) { 
+											fun_newprofile();
+											$('#fourthst').removeClass('navigation-active-item');
+											$('#fifthst').addClass('navigation-previous-item navigation-active-item');
+										},
+										error:function(data){
+											alert("Something went wrong. Please try again");
+										}
+								 });
+	                        
+							  });
+							 </script>
                              
-                             <div class="reg-left-side-step-seven fivestep activestep">
-                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                             <div class="reg-left-side-step-seven client csthide">
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}"/>  </div>
                         <div class="registration-content heading"><h3>Client requests</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
                              <div class="row">
                                 
@@ -186,7 +200,7 @@
                                 @foreach($departments as $keyd => $vald)
                                     <div class="form-group">
                                         <div class="radio-question">
-                                        <input class="radio-button-radio client_departments" value="{{$vald->id}}" name="role" id="depart_{{$vald->nomedipartimento}}" type="radio">
+                                        <input class="radio-button-radio client_departments" value="{{$vald->id}}" name="depart" id="depart_{{$vald->nomedipartimento}}" type="radio">
                                         <label for="depart_{{$vald->nomedipartimento}}" class="radio-button-label"> {{$vald->nomedipartimento}}
                                             <div class="radio-button-check">
                                                 <div class="radio-button-innr"></div>
@@ -220,24 +234,45 @@
                                     
                                     
                                     <div class="form-group">
-                                        <textarea role="4" class="form-control"></textarea>
+                                        <textarea role="4" class="form-control" id="description" name="description"></textarea>
                                     </div>
                                     
                                 </div>
                                
                                  <div class="col-md-12 col-sm-12 col-xs-12">
                                  	<div class="privacy-blk">
-                                        <div class="btn btn-warning" onclick="fun_newprofile();">Next</div>
+                                        <div class="btn btn-warning disable-button" onclick="fun_client();">Next</div>
                                     </div>
                                  </div>   
-                                 
+                                 <script>
+								 function fun_client()
+								 {
+									var depart=$("input[name='depart']:checked").val(); 
+									var package=$('#package').val(); 
+									var description=$('#description').val();
+									
+									 $.ajax({            
+										url: "{{ url('/register/step-client') }}",
+										type:'POST',
+										data: { 'depart': depart, 'user_id' : user_id,'package':package,'description':description,'_token': '{{ csrf_token() }}'},              
+										success:function(data) { 
+											$('.activestep').addClass('csthide').removeClass('activestep');
+		  									 $('.thank').removeClass('none').addClass('activestep');$('#fifthst').removeClass('navigation-active-item');
+											$('#sixthst').addClass('navigation-previous-item navigation-active-item');
+										},
+										error:function(data){
+											alert("Something went wrong. Please try again");
+										}
+									 });
+								 }
+								 </script>
                                  
                                  
                              </div>
                              </div>
                              
                              <div class="reg-left-side-step-eight administration csthide">
-                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}"/> </div>
                         <div class="registration-content heading"><h3>Administration details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
                        	
                         	<div class="row">
@@ -245,51 +280,92 @@
                                <div class="col-md-12 col-sm-12 col-xs-12">  
                                		
                                     <div class="form-group">
-                                        <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                        <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..." name="administration_desc" id="administration_desc"></textarea>
                                     </div>
                                     
                                 </div>
                                
                                  <div class="col-md-12 col-sm-12 col-xs-12">
                                  	<div class="privacy-blk">
-                                        <div class="btn btn-warning">Next</div>
+                                        <div class="btn btn-warning" onclick="fun_administration();">Next</div>
                                     </div>
                                  </div>   
-                                 
+                                 <script>
+								 function fun_administration()
+								 {
+									
+								
+									var description=$('#administration_desc').val();
+									
+									 $.ajax({            
+										url: "{{ url('/register/step-other') }}",
+										type:'POST',
+										data: { 'user_id' : user_id,'description':description,'location':'','_token': '{{ csrf_token() }}'},              
+										success:function(data) { 
+											$('.activestep').addClass('csthide').removeClass('activestep');
+		  									 $('.thank').removeClass('none').addClass('activestep');$('#fifthst').removeClass('navigation-active-item');
+											$('#sixthst').addClass('navigation-previous-item navigation-active-item');
+										},
+										error:function(data){
+											alert("Something went wrong. Please try again");
+										}
+									 });
+								 }
+								 </script>
                             	 </div>   
                              </div>
                              
-                             <div class="reg-left-side-step-nine commerical csthide">
-                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                             <div class="reg-left-side-step-nine commercial csthide">
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}"/> </div>
                         <div class="registration-content heading"><h3>Commercial details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
                              	<div class="row">
                                    <div class="col-md-12 col-sm-12 col-xs-12">  
                                         
                                         
                                         <div class="form-group">
-                                             <input type="text" class="form-control" id="" placeholder="Area of interest">
+                                             <input type="text" class="form-control" placeholder="Area of interest" name="commercial_area" id="commercial_area">
                                         </div>
                                         
                                         
                                         <div class="form-group">
-                                            <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                            <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..." name="commercial_desc" id="commercial_desc"></textarea>
                                         </div>
                                         
                                     </div>
                                
                                  <div class="col-md-12 col-sm-12 col-xs-12">
                                  	<div class="privacy-blk">
-                                        <div class="btn btn-warning">Next</div>
+                                        <div class="btn btn-warning" onclick="fun_commerical();">Next</div>
                                     </div>
                                  </div>   
                                 
-                                 
+                                  <script>
+								 function fun_commerical()
+								 {
+									var description=$('#commercial_desc').val();
+									var area=$('#commercial_area').val();
+									
+									 $.ajax({            
+										url: "{{ url('/register/step-other') }}",
+										type:'POST',
+										data: { 'user_id' : user_id,'description':description,'location':area,'_token': '{{ csrf_token() }}'},              
+										success:function(data) { 
+											$('.activestep').addClass('csthide').removeClass('activestep');
+		  									 $('.thank').removeClass('none').addClass('activestep');$('#fifthst').removeClass('navigation-active-item');
+											$('#sixthst').addClass('navigation-previous-item navigation-active-item');
+										},
+										error:function(data){
+											alert("Something went wrong. Please try again");
+										}
+									 });
+								 }
+								 </script>
                                  
                            	  </div>
                              </div>
                              
                              <div class="reg-left-side-step-ten reseller csthide">
-                             	 <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                             	 <div class="heading"><img src="{{url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}"/> </div>
                         <div class="registration-content heading"><h3>Reseller details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>
                     
                                  <div class="row">                
@@ -297,90 +373,99 @@
                                         
                                         
                                         <div class="form-group">
-                                             <input type="text" class="form-control" id="" placeholder="Location of my store">
+                                             <input type="text" class="form-control" placeholder="Area of interest" name="reseller_area" id="reseller_area">
                                         </div>
                                         
                                         
                                         <div class="form-group">
-                                            <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                            <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..." name="reseller_desc" id="reseller_desc"></textarea>
                                         </div>
                                         
                                     </div>
                                    
                                      <div class="col-md-12 col-sm-12 col-xs-12">
                                         <div class="privacy-blk">
-                                            <div class="btn btn-warning">Next</div>
+                                            <div class="btn btn-warning" onclick="fun_reseller();">Next</div>
                                         </div>
                                      </div>   
                                     
-                                     
+                                     <script>
+								 function fun_reseller()
+								 {
+									var description=$('#reseller_desc').val();
+									var area=$('#reseller_area').val();
+									
+									 $.ajax({            
+										url: "{{ url('/register/step-other') }}",
+										type:'POST',
+										data: { 'user_id' : user_id,'description':description,'location':area,'_token': '{{ csrf_token() }}'},              
+										success:function(data) { 
+											$('.activestep').addClass('csthide').removeClass('activestep');
+		  									 $('.thank').removeClass('none').addClass('activestep');$('#fifthst').removeClass('navigation-active-item');
+											$('#sixthst').addClass('navigation-previous-item navigation-active-item');
+										},
+										error:function(data){
+											alert("Something went wrong. Please try again");
+										}
+									 });
+								 }
+								 </script>
                                      
                                  </div>
                              </div>
                              
                              <div class="reg-left-side-step-eleven technician csthide">
-                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                             	<div class="heading"><img src="{{url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}"/>  </div>
                        			 <div class="registration-content heading"><h3>Technician details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>            
                                 <div class="row">
                             	
                                <div class="col-md-12 col-sm-12 col-xs-12">  
                                		
                                     
-                                    <div class="form-group">
-                                   		 <input type="text" class="form-control" id="" placeholder="Location of my store">
-                                  	</div>
+                                  
                                     
                                     
                                     <div class="form-group">
-                                        <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
+                                        <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..." name="technician_desc" id="technician_desc"></textarea>
                                     </div>
                                     
                                 </div>
                                
                                  <div class="col-md-12 col-sm-12 col-xs-12">
                                  	<div class="privacy-blk">
-                                        <div class="btn btn-warning">Next</div>
+                                        <div class="btn btn-warning" onclick="fun_technician();">Next</div>
                                     </div>
                                  </div>   
                                 
-                                 
+                                 <script>
+								 function fun_technician()
+								 {
+									var description=$('#technician_desc').val();
+									
+									
+									 $.ajax({            
+										url: "{{ url('/register/step-other') }}",
+										type:'POST',
+										data: { 'user_id' : user_id,'description':description,'location':'','_token': '{{ csrf_token() }}'},              
+										success:function(data) { 
+											$('.activestep').addClass('csthide').removeClass('activestep');
+		  									 $('.thank').removeClass('none').addClass('activestep');$('#fifthst').removeClass('navigation-active-item');
+											$('#sixthst').addClass('navigation-previous-item navigation-active-item');
+										},
+										error:function(data){
+											alert("Something went wrong. Please try again");
+										}
+									 });
+								 }
+								 </script>
                                  
                              </div>
                              
                              </div>
-                             <div class="reg-left-side-step-eleven client csthide">
-                             	<div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
-                       			 <div class="registration-content heading"><h3>Client details</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div>            
-                                <div class="row">
-                            	
-                               <div class="col-md-12 col-sm-12 col-xs-12">  
-                               		
-                                    
-                                    <div class="form-group">
-                                   		 <input type="text" class="form-control" id="" placeholder="Location of my store">
-                                  	</div>
-                                    
-                                    
-                                    <div class="form-group">
-                                        <textarea role="6" class="form-control" placeholder="I am Pinco Pallo and..."></textarea>
-                                    </div>
-                                    
-                                </div>
-                               
-                                 <div class="col-md-12 col-sm-12 col-xs-12">
-                                 	<div class="privacy-blk">
-                                        <div class="btn btn-warning">Next</div>
-                                    </div>
-                                 </div>   
-                                
-                                 
-                                 
-                             </div>
                              
-                             </div>
                              
                              <div class="reg-left-side-step-twelve thank none">
-                              <div class="heading"><img src="{{url('storage/app/images/logo/langa-logo1.png')}}"/> <h1><b>langa</b> group</h1> </div>
+                              <div class="heading"><img src="{{url('storage/app/images/logo/LOGO_Easy_LANGA_without_contour.svg')}}"/>  </div>
                        			 <div class="registration-content heading"><h3>Thank You</h3><p>Tell us your plans so that we can give you the information you need to be succesful?</p></div> 
                              	<div class="row">
                             	
@@ -388,7 +473,7 @@
                                    
                                      <div class="col-md-12 col-sm-12 col-xs-12">
                                         <div class="privacy-blk">
-                                            <div class="btn btn-warning">Go To Easy Langa</div>
+                                            <a class="btn btn-warning" href="{{url('/')}}">Go To Easy Langa</a>
                                         </div>
                                      </div>   
                                     
@@ -406,7 +491,7 @@
             
             <div class="col-md-6 col-sm-12 col-xs-12">
             	<div class="registrtion-right-side">
-            	<div class="reg-right-side-step-five threestep none">
+            	<div class="reg-right-side-step-five threestep activestep">
                 	<div id="map" class="map"></div>
                 </div>
                 <div class="reg-right-side-step-six fourstep none">
@@ -422,7 +507,7 @@
                     </div>
                 </div>
                 
-                <div class="reg-right-side-step-seven fivestep activestep">
+                <div class="reg-right-side-step-seven client csthide">
                 	<div class="shotting-video department_package" id="department_package">
                     	<div class="wrap-shot">
                         	<div class="icon-shot"><img src="{{url('public/images/video-shooting.jpg')}}" alt="Video Shooting"/></div>
@@ -444,22 +529,90 @@
                             <p>Post-produzione %Editing, post-produzione %3d</p>
                                 <p>Tell us your plans so that we can give you the information you need to be successful? Tell us your plans so that we can give you the information you need to be successful?</p></div>
                         </div>
-                        
-                        <div class="image_upload_div">
-                            <form method="" action="" accept-charset="" class="dropzone dz-clickable" enctype=""><input name="" value="" type="hidden">                        <input name="_" value="" type="hidden">
-                                    <input name="" value="" type="hidden">
-                            <div class="dz-default dz-message"><span>Drop files here to upload</span></div></form>				
-				</div>
+                      
                 </div>
+                  <input name="package" value="" id="package" type="hidden">
+                        <div class="image_upload_div">
+                            <?php /*<form method="" action="" accept-charset="" class="dropzone dz-clickable" enctype="">
+                                <input name="" value="" type="hidden">                        
+                                <input name="_" value="" type="hidden">                                  
+                                <div class="dz-default dz-message"><span>Drop files here to upload</span></div>
+                            </form>	*/?>			
+				        </div>
                 
             </div>
             
-            <div class="reg-right-side-eight administration csthide"><div class="drag-area"></div></div>
-            <div class="reg-right-side-step-nine commerical csthide"><div class="map" id="map2" style="height: 100vh"></div></div>
+            <div class="reg-right-side-eight administration csthide">
+                <div class="drag-area">
+                    <div class="image_upload_div">
+                    <?php echo Form::open(array('url' => '/register/uploadmedia/'.$reg_user->id, 'files' => true,'class'=>'dropzone')) ?>
+                        {{ csrf_field() }}                        
+                        </form>             
+                        <!--<form method="" action="" accept-charset="" class="dropzone dz-clickable" enctype="">
+                            <input name="" value="" type="hidden">                        
+                            <input name="_" value="" type="hidden">                                  
+                            <div class="dz-default dz-message"><span>Drop files here to upload</span></div>
+                        </form>-->             
+                    </div>
+                    <table class="table table-striped table-bordered">                  
+                    <tbody id="filesuploaded">                    
+                    </tbody>
+                    </table>
+                 </div>
+            </div>
+            <script type="text/javascript">
+                var urlgetfile = '<?php echo url('/register/getmediafiles/'.$reg_user->id); ?>';
+                Dropzone.autoDiscover = false;
+                $(".dropzone").each(function() {
+                  $(this).dropzone({
+                    complete: function(file) {
+                      if (file.status == "success") {
+                         $.ajax({url: urlgetfile, success: function(result){
+                            $("#filesuploaded").html(result);
+                            $(".dz-preview").remove();
+                            $(".dz-message").show();
+                        }});
+                      }
+                      if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
+                           //$( "#addMediacommnetmodal" ).modal();
+                           //$('#addMediacommnetmodal').on('shown.bs.modal', function(){});
+                      }
+                    }
+                  });
+                });
+
+                function deleteQuoteFile(id){
+                    var urlD = '<?php echo url('/register/deletemediafiles/'); ?>/'+id;
+                        $.ajax({url: urlD, success: function(result){
+                            $(".quoteFile_"+id).remove();
+                        }});
+                }
+
+                 function updateType(typeid,fileid,checkboxid1){           
+                    var ischeck = 0;            
+                    if($('#'+checkboxid1+':checkbox:checked').length > 0){                
+                        var ischeck = 1;
+                    }
+                    var checkValues = $('input[name=rdUtente_'+fileid+']:checked').map(function()
+                    {
+                        return $(this).val();
+                    }).get();
+                    var urlD = '<?php echo url('/register/updatemediafiletype/'); ?>/'+typeid+'/'+fileid;
+                    $.ajax({
+                        url: urlD,
+                        type: 'post',
+                        data: { "_token": "{{ csrf_token() }}",ids: checkValues },
+                        success:function(data){
+                        }
+                    });
+                    //$.ajax({url: urlD, success: function(result){ }});
+                }       
+            </script>
+            <div class="reg-right-side-step-nine commercial csthide"><div class="map" id="map2" style="height: 100vh"></div></div>
              <div class="reg-right-side-step-ten reseller csthide"><div class="map" id="map3" style="height: 100vh"></div></div>
              <div class="reg-right-side-step-elevan technician csthide"><div class="drag-area"></div></div>
-             <div class="reg-right-side-step-elevan client csthide"><div class="drag-area"></div></div>
-            <div class="reg-right-side-step-twelve none"><div class="animated-svg thankyou">
+           
+            <div class="reg-right-side-step-twelve-thankyou thank none"><div class="animated-svg thankyou">
             	<div class="thankyou-animated-wrap">
 <svg id="svg" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 800 280" enable-background="new 0 0 800 280" xml:space="preserve">
@@ -564,7 +717,7 @@
 </div>
 
 
-<script src="{{ url('public/scripts/jquery.min.js')}}"></script>
+
 <!-- jQuery validation js --> 
 <script src="http://localhost/easylanganew/public/scripts/jquery.validate.min.js"></script> 
 <script type="text/javascript" src="{{asset('public/scripts/colors.js')}}"></script>
@@ -600,7 +753,7 @@
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPyPHd-CTp9Nh_Jqe1NwJiX6WKQYpVEtI&callback=initMap">
     </script>
 
-<script type="text/javascript">
+<script>
 	function fun_role()
 	{
 		    var radioValue = $("input[name='role']:checked").val();
@@ -615,9 +768,13 @@
 	}
 	 function fun_newprofile()
 	   {
-		   var radioValue = $("input[name='profile']:checked").val();
+		   var id = $("input[name='profile']:checked").attr('id');
+		  var radioValue=$('#'+id).data('value');
+		 
 		   $('.activestep').addClass('none').removeClass('activestep');
+		 
 		   $('.'+radioValue).removeClass('csthide').addClass('activestep');
+		   
 	   }
 
     $(document).ready(function() {
@@ -652,7 +809,7 @@
             } 
                    
             $.ajax({            
-                url: '{{ url('registration-step-two') }}',
+                url: "{{ url('registration-step-two') }}",
                 type:'POST',
                 data: { 'role': role, 'user_id' : user_id, '_token': '{{ csrf_token() }}' 
                     },              
@@ -788,11 +945,11 @@
         });
 
     });
-
-$('.client_departments').on('click', function() {
+	
+	$('.client_departments').on('click', function() {
     var departmentid = $(this).val();
     $.ajax({
-        url: '{{ url('/register/getdepartmentpackage/') }}'+ '/' + departmentid,
+        url: "{{ url('/register/getdepartmentpackage/') }}/" + departmentid,
         type: "GET",        
         success:function(data) {
             $("#department_package").html(data);
@@ -800,6 +957,18 @@ $('.client_departments').on('click', function() {
     });    
 });
 $('.client_departments:first').trigger('click');
+function fun_package(idval)
+{
+	$('#package').val(idval);
+	if($('.disable-button').length)
+	{
+		$('.disable-button').removeClass('disable-button');
+	}
+}
+
+/*$('.wrap-shot').click(function(e){
+	alert('1');
+});*/
 </script>
 
 

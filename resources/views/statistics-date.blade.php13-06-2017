@@ -1,0 +1,116 @@
+
+<style>
+tr:hover {
+	background: #f39538;
+}
+.selected {
+	font-weight: bold;
+	font-size: 16px;
+}
+th {
+	cursor: pointer;
+}
+</style>
+
+<script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.min.js"></script>
+
+<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+
+<div class="canvas-holder" id="stat">
+	<canvas id="myChart" width="1080" height="540" style="display: block; width: 1080px; height: 540px;"></canvas>
+</div>
+
+<script>
+var ctx = $("#myChart");
+var data = {
+    labels: <?php echo json_encode($statistics['month']); ?>,
+    datasets: [
+        {
+            label: " {{ trans('messages.keyword_i_earn') }} ",
+            fill: false,
+            lineTension: 0.1,
+            backgroundColor: "#f37f0d",
+            borderColor: "#f37f0d",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "#333",
+            pointBackgroundColor: "#333",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "#333",
+            pointHoverBorderColor: "#f37f0d",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: <?php if(isset($statistics['earn'])){ echo json_encode($statistics['earn']); } else { echo json_encode($guadagno); }?>,
+            iGaps: false,
+        },
+		{
+            label: " {{ trans('messages.keyword_revenues') }} ",
+            fill: false,
+            lineTension: 0.1,
+            backgroundColor: "#64C64B",
+            borderColor: "#64C64B",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "#333",
+            pointBackgroundColor: "#333",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "#333",
+            pointHoverBorderColor: "#64C64B",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: <?php if(isset($statistics['revenue'])){ echo json_encode($statistics['revenue']); } else { echo json_encode($ricavi); }?>,
+            iGaps: false,
+        },
+		{
+            label: " {{ trans('messages.keyword_expenses') }} ",
+            fill: false,
+            lineTension: 0.1,
+            backgroundColor: "#E02424",
+            borderColor: "#E02424",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "#333",
+            pointBackgroundColor: "#333",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "#333",
+            pointHoverBorderColor: "#E02424",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data:  <?php if(isset($statistics['expense'])){ echo json_encode($statistics['expense']); } else { echo json_encode($spese); }?>,
+            iGaps: false,
+        }
+    ]
+};
+var myLineChart = new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: {
+		scales: {
+            xAxes: [{
+                display: true
+            }]
+        }
+	}
+});
+</script>

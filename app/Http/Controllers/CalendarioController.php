@@ -508,13 +508,7 @@ class CalendarioController extends Controller
 
             ]);
 
-/*    $date=explode(' - ',$request->giorno);
-	echo $date[0];
-echo 	$sdate=strtotime($date[0]);
-echo "======<br>";
-echo $date[1];
-echo 	$edate=strtotime($date[1]);
-exit;*/            
+            
 
             $date=explode('-',$request->giorno);
 

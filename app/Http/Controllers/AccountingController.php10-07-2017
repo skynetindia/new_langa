@@ -1761,10 +1761,7 @@ class AccountingController extends Controller
 							->where('id', $costo->id_ente)
 							->first();
 			$costo->ente = $ente->nomeazienda;
-			/*$costo->datainserimento = dateFormate($costo->datainserimento);*/			
-			$costo->datainserimento = str_replace('/', '-', $costo->datainserimento);
-			$costo->datainserimento =  ($costo->datainserimento != '0000-00-00') ? dateFormate($costo->datainserimento) : '-'; 
-
+			$costo->datainserimento = dateFormate($costo->datainserimento);
 			if ($user->id === 0 || $user->dipartimento === 1) {
 				$elenco_costi[] = $costo;
 			} else if($user->id == $tra->user_id) {

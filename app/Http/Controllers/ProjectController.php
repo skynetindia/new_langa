@@ -8,6 +8,7 @@ use DB;
 use Validator;
 use Redirect;
 use Storage;
+use Auth;
 use App\Http\Requests;
 use App\Project;
 use App\Classes\PdfWrapper as PDF;
@@ -38,26 +39,15 @@ class ProjectController extends Controller
 	//updatemediaComment
     /* File uploader : paras */
 	public function fileupload(Request $request){
-			/*$validator = Validator::make($request->all(), [
-                        'code' => 'required',
-						'file'=>'mimes:jpeg,jpg,png|max:1000',	
-            ]);
-            if ($validator->fails()) {
-                return Redirect::back()
-                                ->withInput()
-                                ->withErrors($validator);
-            }*/	
-			Storage::put(
-					'images/projects/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
-			);
-			$nome = $request->file('file')->getClientOriginalName();			
-				DB::table('media_files')->insert([
-				'name' => $nome,
-				'code' => $request->code,
-				'type'=>$request->user()->dipartimento,
-				'master_type'=>'1',
-				'date_time'=>time()
-			]);					
+		$nome = time().$request->file('file')->getClientOriginalName();
+		Storage::put('images/projects/' . $nome, file_get_contents($request->file('file')->getRealPath()));					
+			DB::table('media_files')->insert([
+			'name' => $nome,
+			'code' => $request->code,
+			'type'=>$request->user()->dipartimento,
+			'master_type'=>'1',
+			'date_time'=>time()
+		]);								
 	}
 
 	
@@ -70,17 +60,36 @@ class ProjectController extends Controller
                                 ->withInput()
                                 ->withErrors($validator);
             }*/
+            if(isset($request->quote_id)){				
+				$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='1'";			
+				$userprofileid = $request->user()->dipartimento;
+		 		$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
+		        $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+
+				if(isset($request->term) && $request->term != "") {
+					$where = ($request->user()->id === 0 || $type === 'SupperAdmin') ? "" : " AND find_in_set('$userprofileid',type) <> 0";
+					$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id  $where  AND (title LIKE '%$request->term%' OR  description LIKE '%$request->term%')";
+				}			
+				$updateData = DB::select($query);
+			}
+			else {	
+				$query = "SELECT * FROM media_files WHERE code=$request->code";		
+				$updateData = DB::select($query);				
+			}		
+
 			
-			if(isset($request->quote_id)) {
+			/*if(isset($request->quote_id)) {
 				$updateData = DB::table('media_files')->where('master_id', $request->quote_id)->get();										
 			}
 			else {
 				$updateData = DB::table('media_files')->where('code', $request->code)->get();				
-			}
+			}*/
 						
 			foreach($updateData as $prev) {
 				$imagPath = url('/storage/app/images/projects/'.$prev->name);
 				$downloadlink = url('/storage/app/images/projects/'.$prev->name);
+				/*$imagPath = url('/storage/app/images/quote/'.$prev->name);
+				$downloadlink = url('/storage/app/images/quote/'.$prev->name);*/
 				$filename = $prev->name;			
 				$arrcurrentextension = explode(".", $filename);
 				$extention = end($arrcurrentextension);
@@ -96,7 +105,7 @@ class ProjectController extends Controller
 				$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-success pull-right"  onclick="sociallinks('.$prev->id.')"><i class="fa fa-share-alt"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</p></td></tr>';
 
 				$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
-				$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
+				$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->where('nome_ruolo','!=','SupperAdmin')->get();							
 				foreach($utente_file as $key => $val){
 					if($request->user()->dipartimento == $val->ruolo_id){
 						$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
@@ -104,13 +113,13 @@ class ProjectController extends Controller
 						
 						$specailcharcters = array("'", "`");
                     	$rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-                    	$html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    	$html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 					}
 					else {
 						/*$html .=' <div class="cust-radio"><input type="radio" name="rdUtente_'.$prev->id.'" id="'.$val->nome_ruolo.'_'.$val->ruolo_id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.');"  value="'.$val->ruolo_id.'" /><label for="'.$val->nome_ruolo.'_'.$val->ruolo_id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';*/
 						$specailcharcters = array("'", "`");
                     	$rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-                    	$html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    	$html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 					}
 				}
 				echo $html .='</td></tr>';
@@ -140,8 +149,9 @@ class ProjectController extends Controller
 		$updateData = DB::table('media_files')->where('code', $request->code)->orderBy('id', 'desc')->first();										
 		$title = $request->title;
 		$descriptions = $request->descriptions;
+		$url = $request->url;
 		
-		$response = DB::table('media_files')->where('date_time', $updateData->date_time)->update(array('description' => $descriptions,'title'=>$title));
+		$response = DB::table('media_files')->where('date_time', $updateData->date_time)->update(array('description' => $descriptions,'title'=>$title,'url'=>$url));
 		echo ($response) ? 'success' :'fail';   			    		
 		exit;
 	}
@@ -161,15 +171,31 @@ class ProjectController extends Controller
 		if($progetti != ''){
 			foreach($progetti as $prog) {
 				$anno = substr($prog->datainizio, -2);
-				if($prog->id_ente != null)
-					$prog->ente = DB::table('corporations')
-						->where('id', $prog->id_ente)
-						->first()->nomeazienda;
+				$id = $prog->id;
+				if($prog->id_ente != null){
+					$prog->ente = DB::table('corporations')->where('id', $prog->id_ente)->first()->nomeazienda;				
+				}
 				$prog->codice = '::' . $prog->id . '/' . $anno;
+
+				$Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
+	        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+	        	//$arrwhere = ($type === 'Client') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0);
+
+	        	$checked = ($prog->is_published==1) ? 'checked' : '';
+	        	$prog->publishstatus = '<div class="switch"><input name="status" readonly="readonly" disabled="disabled"  id="activestatus_'.$id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$id.'"></label></div>';
+
+	        	if(Auth::user()->id == '0' || (Auth::user()->dipartimento == 0) || $prog->user_id == Auth::user()->id) {				
+	        		$prog->publishstatus = '<div class="switch"><input name="status" onchange="updateStaus('.$id.')" id="activestatus_'.$id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$id.'"></label></div>';
+	        	}
 			}
 		}
 		
 	}
+	public function updatepublishstatus(Request $request) {				
+		$update = DB::table('projects')->where('id', $request->id)->update(array('is_published' => $request->status));
+		return ($update) ? 'true' : 'false';		
+	}
+
 	
 	public function getJsonMiei(Request $request)
 	{
@@ -292,7 +318,9 @@ class ProjectController extends Controller
         $quotes = DB::table('quotes')
         ->Join('statipreventivi', 'statipreventivi.id_preventivo', '=', 'quotes.id')
         ->Join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')            
-        ->where($arrwhere)            
+        ->leftJoin('projects', 'projects.id_preventivo', '=', 'quotes.id')
+        ->where($arrwhere) 
+        ->whereNull('projects.id')           
         ->select('quotes.*')->get();                
 
         /*DB::table('quotes')->where('legameprogetto', 1)->get() */
@@ -506,29 +534,45 @@ class ProjectController extends Controller
     	/*if(!checkpermission($this->module, $this->sub_id, 'scrittura')){
     		return redirect('/unauthorized');
     	}*/
-
 		// $this->authorize('modify', $project);
     	$project = DB::table('projects')->where('id', $project->id)->first();    	
     	$quote = DB::table('quotes')->where('id', $project->id_preventivo)->first();
     	$dipartimento= (isset($quote->dipartimento) && !empty($quote->dipartimento)) ? $quote->dipartimento : '1';
     	$processing = DB::table('lavorazioni')->where('departments_id', $dipartimento)->get();
+    	//$processing = DB::table('lavorazioni')->get();
     	$departments = DB::table('departments')->where('id', $dipartimento)->first();
 
+    	$userprofileid = $request->user()->dipartimento;
+ 		$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
+        $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+        //print_r($type);
+        //exit;
+        if ($request->user()->id === 0 || $type === 'SupperAdmin') {
+			$quotefiles = DB::table('media_files')->select('*')->where('master_id', $project->id)->where('master_type', '1')->get();					
+		}
+		else {
+    		$quotefiles = DB::select("select * from media_files where master_id = ".$project->id." AND master_type = '1' AND find_in_set('$userprofileid',type) <> 0");
+    	}
+		
+		/*
+		$chartdetails = DB::select("select `lavorazioni`.*, AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `lavorazioni` left join `progetti_lavorazioni` on `lavorazioni`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $project->id WHERE `lavorazioni`.`departments_id`=$dipartimento GROUP BY id ORDER BY completedPercentage DESC");
+
+		$chartdetails = DB::select("select `lavorazioni`.*, AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `lavorazioni` left join `progetti_lavorazioni` on `lavorazioni`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $project->id GROUP BY id ORDER BY completedPercentage DESC");
+		*/
+
+		$chartdetails = DB::select("select `lavorazioni`.*, AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `lavorazioni` inner join `progetti_lavorazioni` on `lavorazioni`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $project->id GROUP BY id ORDER BY completedPercentage DESC");
 
         return view('progetti.modifica', [
             'progetto' => $project,
             'files' => DB::table('progetti_files')
                         ->where('id_progetto', $project->id)
                         ->get(),
-            'projectmediafiles' => DB::table('media_files')
-								->select('*')
-								->where('master_id', $project->id)->where('master_type','1')
-								->get(),								
+            'projectmediafiles' => $quotefiles,								
             'datisensibili' => DB::table('progetti_datisensibili')
                         ->where('id_progetto', $project->id)
                         ->get(),
             'lavorazioni' => DB::table('progetti_lavorazioni')
-                        ->where('id_progetto', $project->id)
+                        ->where('id_progetto', $project->id)->orderBy('ordine', 'asc')
                         ->get(),
             'partecipanti' => DB::table('progetti_partecipanti')
                                 ->where('id_progetto', $project->id)
@@ -540,7 +584,7 @@ class ProjectController extends Controller
             					->get(),
             'departments'=>$departments,
 			'oggettostato' => $processing,
-			 'chartdetails'=> DB::select("select `lavorazioni`.*, AVG(`progetti_lavorazioni`.`completamento`) as `completedPercentage` from `lavorazioni` left join `progetti_lavorazioni` on `lavorazioni`.`id` = `progetti_lavorazioni`.`completato` AND `progetti_lavorazioni`.`id_progetto` = $project->id WHERE `lavorazioni`.`departments_id`=$dipartimento GROUP BY id ORDER BY completedPercentage DESC"),
+			 'chartdetails'=> $chartdetails,
 			'statiemotivi' => DB::table('statiemotiviprogetti')->get(),			
 			'statoemotivoselezionato' => DB::table('statiprogetti')
 				->where('id_progetto', $project->id)
@@ -744,7 +788,8 @@ class ProjectController extends Controller
 			$datainserimento = $request->datainserimento;
 			$completato = $request->completato;
 			$completamento = $request->percentvalue;
-			$proceesingcode = $request->processing_code;			
+			$proceesingcode = $request->processing_code;	
+			$ordine = $request->ordine;		
 
 			DB::table('progetti_lavorazioni')->where('id_progetto', $project->id)->delete();
 			for($i = 0; $i < count($appunti); $i++) {
@@ -755,6 +800,7 @@ class ProjectController extends Controller
 					'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : "",
 					'completato' => isset($completato[$i]) ? $completato[$i] : 0,
 					'completamento' =>isset($completamento[$i]) ? $completamento[$i] : 0,
+					'ordine' => isset($ordine[$i]) ? $ordine[$i] : "0",
 				]);
 				$arrwhereprocoment = array('code'=>$proceesingcode[$i]);
 				DB::table('project_processing_comments')->where($arrwhereprocoment)->update(array('processing_id' => $procceingID));
@@ -772,7 +818,8 @@ class ProjectController extends Controller
 		/* Update Project Id in Media files Paras */
 			DB::table('media_files')
 			->where('code', $request->mediaCode)
-			->update(array('master_id' => $project->id));
+			->update(array('master_id' => $project->id_preventivo));
+
 		/* Update Project Id in Media files */
 
 		return redirect("/progetti/modify/project/$project->id")
@@ -823,17 +870,19 @@ class ProjectController extends Controller
 		/* Medai files from project to qoute */
 		$medifilesQuote = DB::table('media_files')->where(['master_id'=>$quote->id,'master_type'=>'0'])->get();
 		foreach ($medifilesQuote as $keymq => $valuemq) {
+			$currentTime = time();
+			$newname = $currentTime.$valuemq->name;
 			$mediafileid = DB::table('media_files')->insertGetId([
-					'name' => 'pro'.$valuemq->name,
+					'name' => $newname,
 				    'master_id' => $project->id,
 					'type' => $request->user()->dipartimento,					
 					'master_type' => 1,
 					'title' => $valuemq->title,
 					'description' =>$valuemq->description,
-					'created_at'=>time()
+					'created_at'=>$currentTime
 				]);
-			if(file_exists('storage/app/images/quote/'.$valuemq->name)){			
-				copy('storage/app/images/quote/'.$valuemq->name, 'storage/app/images/projects/pro'.$valuemq->name);
+			if(file_exists('storage/app/images/quote/'.$valuemq->name)) {			
+				copy('storage/app/images/quote/'.$valuemq->name, 'storage/app/images/projects/'.$newname);				
 			}
 		}
 		/* User added as participant */	
@@ -874,28 +923,29 @@ class ProjectController extends Controller
     	/*$where = (isset($request->id) && $request->id != '0') ? array('processing_id'=> $request->id) : array('code'=> $request->code); */
     	$where = array('code'=> $request->code); 
     	$orwhere = (isset($request->id) && $request->id != '0') ? array('processing_id'=> $request->id) : array();
-
     	return view('progetti.processingComments', [
         	'comments' => DB::table('project_processing_comments')->where($where)->orWhere($orwhere)->get()])->render();         
     }
-    public function addprocessingcomment(Request $request){
-    	if ($request->user()->id  != 0 && $request->user()->dipartimento != 0) {
+    public function addprocessingcomment(Request $request) {
+    	/*if ($request->user()->id  != 0 && $request->user()->dipartimento != 0) {
             return redirect('/unauthorized');
         } 
-        else {                	
-			$validator = Validator::make($request->all(), ['frontlogo'=>'max:1000']);
-			if ($validator->fails()) {
-            	 echo 'fail'; 
-            	 exit;
-        	}        	        	
-        	DB::table('project_processing_comments')->insert([
-				'processing_id' => $request->processingid,
-				'comments' => $request->comments,
-				'code'=>$request->hdCode,				
-				'date'=> date('Y-m-d')]);
+        else { */
+        	if(isset($request->action) && $request->action == 'edit' && isset($request->commentid)){
+        			DB::table('project_processing_comments')->where('id', $request->commentid)->update(array('comments' => $request->comments,'is_private'=>$request->is_private));
+        	}
+        	else {
+	        	DB::table('project_processing_comments')->insert([
+					'processing_id' => $request->processingid,
+					'comments' => $request->comments,
+					'code'=>$request->hdCode,				
+					'is_private'=>$request->is_private,
+					'user_id'=>$request->user()->id,
+					'date'=> date('Y-m-d')]);
+        	}
 			echo 'success';
 			exit;
-        }
+        //}
     }
 
      public function deleteprocessingcomment(Request $request) {

@@ -19,24 +19,27 @@ body {
    font-weight: normal;
    color:#000;
 }
-
+table { page-break-inside:auto }
+   tr    {  }
 strong, bold {
      font-family: 'nexa_boldregular';
       font-weight: normal;
 }
+
 .main-wrapper {
  background: white none repeat scroll 0 0;
     margin: 0 auto;
 	width:100%;
-}
+	}
 </style>
-    <table class="main-wrapper" cellpadding="0" cellspacing="0">
+
+<table class="main-wrapper" cellpadding="0" cellspacing="0" style="page-break-inside: avoid" >
         <tr>
-            <td style="padding:0.53cm 1cm 0;">
-                    <table style="margin:0 auto;" width="100%" align="center" cellpadding="0" cellspacing="0">
+            <td style="padding:0.53cm 1cm 0;" colspan="8">
+                    <table  style="margin:0 auto;" width="100%" align="center" cellpadding="0" cellspacing="0">
                     <tr>
                         <td align="left" valign="middle" style="width:49%">
-                            <table cellpadding="0" cellspacing="0" width="100%">
+                            <table  cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td style="font-size:0.3496028cm;"><strong>{{isset($ente_DA->nomereferente) ? $ente_DA->nomereferente : ''}}</strong> {{trans('messages.keyword_of')}} {{isset($ente_DA->nomeazienda) ? $ente_DA->nomeazienda : '' }}</td>
                                 </tr>
@@ -51,11 +54,9 @@ strong, bold {
                                 </tr>                            
                             </table>
                         </td>
-                        <td>&nbsp;
-                        
-                        </td>
+                        <td>&nbsp; </td>
                         <td align="left" valign="middle" style="width:49%">
-                            <table cellpadding="0" cellspacing="0" width="100%">
+                            <table  cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td style="font-size:0.3496028cm;">{{trans('messages.keyword_date')}}: {{$preventivo->data}}</td>
                                 </tr>
@@ -73,8 +74,8 @@ strong, bold {
             </td>
         </tr>
         <tr>
-            <td style="padding:0cm 1cm;" width="100%">
-                <table style="margin:0 auto; max-width:100%" width="100%" align="center" cellpadding="0" cellspacing="0">
+            <td style="padding:0cm 1cm;" width="100%"  colspan="8">
+                <table  style="margin:0 auto; max-width:100%" width="100%" align="center" cellpadding="0" cellspacing="0">
                     <tr>
                         <td style="height:0.98cm; background-color:#34393d;  color:#fff; font-size:0.48965556cm;  vertical-align:middle; padding-left:0.25cm;" width="49%"> <strong>{{trans('messages.keyword_from')}} </strong></td>
                         <td  style="background-color:#fff; ">&nbsp;  </td>
@@ -82,7 +83,7 @@ strong, bold {
                     </tr>
                     <tr>
                         <td valign="top" style="padding:0.3cm 0; ">
-                            <table width="100%" cellpadding="0" cellspacing="0">
+                            <table  width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td valign="middle" style="padding: 0 0.45cm;"  rowspan="5">
                                     <img src="{{asset('images/pdfimages/langa-web.jpg')}}" alt="langa web" style="width:1.74cm; display:block;">
@@ -117,7 +118,7 @@ strong, bold {
                         </td>
                         <td style="">&nbsp;</td>
                        <td valign="top" style="padding:0.3cm 0; ">
-                            <table width="100%" cellpadding="0" cellspacing="0">
+                            <table  width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td valign="middle" style="padding: 0 0.45cm;" rowspan="5">
                                     <img src="{{asset('images/pdfimages/hotel-griselda.jpg')}}" alt="hotel griselda" style="width:1.74cm; display:block;">
@@ -152,36 +153,42 @@ strong, bold {
                 </table>
             </td>
         </tr>
-        <tr>
-            <td style="padding:0cm 1cm;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                            <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm;  color:#fff; vertical-align: middle; "> {{trans('messages.keyword_qty')}}</td>
-                            <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm; color:#fff; vertical-align: middle;"> {{trans('messages.keyword_object')}}</td>
-                            <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm; color:#fff; vertical-align: middle;"> {{trans('messages.keyword_description')}}</td>
-                            <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm; color:#fff; vertical-align: middle;"> {{trans('messages.keyword_frequency')}}</td>
-                            <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm; color:#fff; vertical-align: middle;"> {{trans('messages.keyword_unit_price')}}</td>
-                            <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm;  color:#fff; vertical-align: middle;"> {{trans('messages.keyword_subtotal')}}</td>
-                       </tr>                       
-                       @foreach($optional_preventivi as $optional_preventivi_val)                       
-                       <tr>
-                            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff; text-align:center" valign="middle">{{$optional_preventivi_val->qta}}</td>
-                            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff;" valign="middle">{{$optional_preventivi_val->oggetto}}</td>
-                            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff;" valign="middle">{{$optional_preventivi_val->descrizione}}</td>
-                            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff; text-align:center" valign="middle"><?php echo preg_replace('/\s+/', '_', $optional_preventivi_val->Ciclicita); ?></td>
-                            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff; text-align:center" valign="middle">{{number_format($optional_preventivi_val->prezzounitario,2)}}</td>
-                            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff; text-align:center" valign="middle">{{number_format($optional_preventivi_val->totale,2)}}</td>                       
-                       </tr>
-                       @endforeach                                               
-                    </table>    
-            </td>
+       
+        <tr>	
+        		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        	   <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm;  color:#fff; vertical-align: middle; "> {{trans('messages.keyword_qty')}}</td>
+                <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm; color:#fff; vertical-align: middle;"> {{trans('messages.keyword_object')}}</td>
+                <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm; color:#fff; vertical-align: middle;"> {{trans('messages.keyword_description')}}</td>
+                <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm; color:#fff; vertical-align: middle;"> {{trans('messages.keyword_frequency')}}</td>
+                <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm; color:#fff; vertical-align: middle;"> {{trans('messages.keyword_unit_price')}}</td>
+                <td style="background-color: #34393d;height: 0.98cm; padding: 0 0.45cm; font-size:0.282222cm;  color:#fff; vertical-align: middle;"> {{trans('messages.keyword_subtotal')}}</td>
+                <td >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         </tr>
+         <?php $i=0; $counter=1;?>                      
+                       @foreach($optional_preventivi as $optional_preventivi_val) 
+                                        
+       <tr >
+       		<td style="">&nbsp;</td>
+            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff; text-align:center" valign="middle">{{$optional_preventivi_val->qta}}</td>
+            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff;" valign="middle">{{$optional_preventivi_val->oggetto}}</td>
+            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff;" valign="middle">{{$optional_preventivi_val->descrizione}}</td>
+            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff; text-align:center" valign="middle"><?php echo preg_replace('/\s+/', '_', $optional_preventivi_val->Ciclicita); ?></td>
+            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff; text-align:center" valign="middle">{{number_format($optional_preventivi_val->prezzounitario,2)}}</td>
+            <td style="font-size:0.282222cm; background-color:#f5f3f4; padding:0.1cm; line-height:1.3; border:0.03cm solid #fff; text-align:center" valign="middle">{{number_format($optional_preventivi_val->totale,2)}}</td>
+            <td style="">&nbsp;</td>                       
+       </tr>
+                         <?php $i++;
+					   //echo ($i%12==0)?"<pagebreak resetpagenum='1'>":"";?>   
+                       @endforeach   
+</table>
+
+<table class="main-wrapper" cellpadding="0" cellspacing="0" >               
         <tr>
             <td style="padding:0.53cm 1cm 0;">
-                    <table style="margin:0 auto;" width="100%" align="center" cellpadding="0" cellspacing="0">
+                    <table  style="margin:0 auto;" width="100%" align="center" cellpadding="0" cellspacing="0">
                     <tr>
                         <td align="left" valign="middle" width="70%">
-                            <table cellpadding="0" cellspacing="0" width="100%" style="font-size:12px; padding:0 15px 0 0;">
+                            <table  cellpadding="0" cellspacing="0" width="100%" style="font-size:12px; padding:0 15px 0 0;">
                                 <tr>
                                     <td style=""><b>{{strtoupper(trans('messages.keyword_considerations'))}} : {{ $preventivo->id.'/'.$preventivo->anno.' | '.$ente->nomeazienda }} </b></td>
                                 </tr>
@@ -201,7 +208,7 @@ strong, bold {
                             </table>
                          </td>
                        <td align="left" valign="middle" width="30%" style="vertical-align:top;">
-                            <table cellpadding="0" cellspacing="0" width="100%">
+                            <table  cellpadding="0" cellspacing="0" width="100%">
                                 <tr  style="">
                                     <td style="border:2px solid #000; padding:5px; font-size:12px; ">{{strtoupper(trans('messages.keyword_work_presence_of_terms'))}}</td>
                                     <td style="padding:0px 8px;"><img src="{{asset('images/pdfimages/delivery-bg.jpg')}}"/></td>
@@ -245,7 +252,7 @@ strong, bold {
         </tr>
         <tr>
         	<td style="padding:0.53cm 1cm 0;">
-            	<table style="margin:0 auto;" width="100%" cellspacing="0" cellpadding="0" align="center">
+            	<table  style="margin:0 auto;" width="100%" cellspacing="0" cellpadding="0" align="center">
                 	<tbody><tr>
                     	<td style="border-bottom:2px solid #000; padding-top:25px;">&nbsp; </td>
                     </tr>
@@ -282,4 +289,4 @@ strong, bold {
             </td>
         </tr>
                  
-    </table>      
+    </table> 

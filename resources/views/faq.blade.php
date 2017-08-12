@@ -3,7 +3,7 @@
 <div class="container">
     <br />
     <br />
-    <div class="panel-group" id="accordion">
+    <div class="panel-group faq-block" id="accordion">
  <div class="faqHeader">{{trans('messages.keyword_dashboard')}}</div>
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -686,9 +686,8 @@
     </div>
 </div>
 
-<br><br/><br><br/><br><br/><br><br/>
 
-<style>
+<!--<style>
     .faqHeader {
         font-size: 27px;
         margin: 20px;
@@ -718,6 +717,6 @@
         transform: rotate(90deg);
         color: #454444;
     }
-</style>
+</style>-->
 
 @endsection

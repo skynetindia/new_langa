@@ -445,7 +445,7 @@ class HomeController extends Controller {
 
     /* this is used for temparary in dashboard */
     public function temp(Request $request) {        
-        
+      
         /* return view('onworking'); */
         $Querytype = DB::table('ruolo_utente')->where('ruolo_id', Auth::user()->dipartimento)->first();
         $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";

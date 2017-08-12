@@ -17,13 +17,14 @@
 <script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 <script src="{{asset('public/scripts/select2.full.min.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.1.62/jquery.inputmask.bundle.js"></script>
 
  <!-- CSS required for STEP Wizard  -->
  
   <!-- HTML Structure -->
 
 <div class="row quiz-wizard">
-<div class="col-md-12">
+<div class="col-md-12 col-sm-12 col-xs-12">
     <h1> {{ trans('messages.keyword_quiz') }} </h1>
     <div class="wizard wizard-step-line">
       <div class="wizard-inner">
@@ -52,13 +53,13 @@
             <div class="form-group">
               <label for="usr"> {{ trans('messages.keyword_company_name') }}<span class="required"> (*) </span></label>
               <!-- <div class = "input-group"> -->
-                <input type = "text" class = "form-control" name="nome_azienda" id="nome_azienda" placeholder="{{ trans('messages.keyword_enter_company_name') }} ">
+                <input type = "text" class="form-control" name="nome_azienda" id="nome_azienda" placeholder="{{ trans('messages.keyword_enter_company_name') }} " >
                 <span class = "input-group-addon" id="exist" style="display: none;"><a href="#" id="link" onclick="return confirm('{{ trans('messages.keyword_sure_exsting_entity') }} ?');"></a> {{ trans('messages.keyword_existing_entity') }} ? </span>
                 <div id="confirm" class="none"> 
                 {{ trans('messages.keyword_do_you_want') }}  
-                  <b id="oldente"> {{ trans('messages.keyword_old') }} </b> {{ trans('messages.keyword_or') }} 
-                  <b id="newente"> 
-                  {{ trans('messages.keyword_new') }} </b>
+                  <a id="oldente" href="Javascript:void(0);"><b> {{ trans('messages.keyword_old') }}</b> </a> {{ trans('messages.keyword_or') }} 
+                  <a id="newente"href="Javascript:void(0);"><b> 
+                  {{ trans('messages.keyword_new') }}</b> </a>
                 </div>
                  <!-- </div> -->
                  
@@ -74,12 +75,13 @@
               <datalist id="settori"></datalist>
               <label for="sel1"> {{ trans('messages.keyword_commodity_sector') }}  <span class="required">(*)</span> </label>
               <?php $arrsettori = json_decode(file_get_contents(url('public/json/settori.json'))); ?>
-              <select id="settore_merceologico" name="settore_merceologico" name="settore_merceologico" class="commodity_sector form-control">
-              <option style="background-color:white" value="" selected="" disabled="">-- {{ trans('messages.keyword_please_select_a_sector') }} --</option>
+              <select id="settore_merceologico" name="settore_merceologico"  class="commodity_sector form-control">
+              <option style="background-color:white" value="" >-- {{ trans('messages.keyword_please_select_a_sector') }} --</option>
               @foreach($arrsettori as $key => $val)             
                 <option value="{{$val}}">{{$val}}</option>            
               @endforeach
               </select>
+              <div id="targeted"></div>
                <?php /*<input value="" list="settori" class="form-control" type="text" id="settore_merceologico" name="settore_merceologico" placeholder=" {{ trans('messages.keyword_search_industry') }} ">*/?>
             </div>
             <span id="span_settore" style="display: none;"> {{ trans('messages.keyword_commodity_sector_required') }} </span>
@@ -158,25 +160,25 @@
           </span>
 	 -->
         
-        <div class="form-group">
+       <!-- <div class="form-group">
             <div class="row">
-              <div class="col-md-12 quiz-file-upload">
+              <div class="col-md-10 col-sm-12 col-xs-12 quiz-file-upload">
                   <label for="Logo">{{ trans('messages.keyword_image') }} </label>
                   	<div class="form-control-txt">
                     <label for="logo">{{ trans('messages.keyword_browse') }}...</label>
                   	<input class="form-control" id="logo" name="logo" type="file">
                   	</div>
-                  
-                    <div class="col-md-2 logopreview" id="logopreview"> 
-                  <div class="img-border-preview"></div>
+                  </div>   
+                    <div class="col-md-2 col-sm-12 col-xs-12 logopreview" id="logopreview"> 
+                  <div class="img-border-preview" style="display:block;"><img src="http://betaeasy.langa.tv/storage/app/images/mancalogo.jpg" class="img-responsive" height="100" width="100"></div>
                 </div>  
-                </div>
+             
                             
             </div>    
           </div>
           <span id="span_logo" class="none">
             {{ trans('messages.keyword_please_upload_a_valid__image') }} 
-          </span>
+          </span>-->
         
 
 			  
@@ -186,10 +188,11 @@
         <div class="col-md-6 col-sm-12 col-xs-12">
        	 <div class="">
             <div class="">
-            	<label>{{trans('messages.keyword_address')}} </label>
+            	<label>{{trans('messages.keyword_address')}} <span class="required"> (*) </span> &nbsp; &nbsp;  &nbsp;  <span id="span_indirizzo" style="color: red;" class="none"> {{ trans('messages.keyword_address_required') }}  </span>
+                </label>
             </div>
              <input value="" id="pac-input" name="indirizzo" class="controls required-input" type="text" placeholder="{{trans('messages.keyword_enter_an_address')}} (*)">
-             <span id="span_indirizzo" class="none"> {{ trans('messages.keyword_address_required') }}  </span>
+           
             <div id="type-selector" class="controls">
               <input type="radio" name="type" id="changetype-all" checked="checked">
               <label for="changetype-all">{{trans('messages.keyword_all')}}</label>
@@ -370,7 +373,9 @@ $('#logo').change(function() {
   <!-- JQeury code required for STEP wizard -->
 
 <script type="text/javascript">   
-    $(".commodity_sector").select2();
+    $(".commodity_sector").select2({
+  dropdownParent: $('#targeted')
+});
 </script>
 
 <script>
@@ -447,11 +452,16 @@ $('#logo').change(function() {
       readURL(this);  
     }
   });
-   
+   var phones = [{ "mask": "(###) ###-####"}, { "mask": "(###) ###-##############"}];
+    $('#telefono').inputmask({ 
+        mask: phones, 
+        greedy: false, 
+        definitions: { '#': { validator: "[0-9]", cardinality: 1}} });
+		
    $(document).ready(function () {
 
-   $('#nome_azienda').on('keyup',function(){
-
+   $('#nome_azienda').on('keyup keypress blur change',function(){
+	   if(this.value==''){document.getElementById('span_azienda').style.display='inline-block';}else{document.getElementById('span_azienda').style.display='none';}
     var company_name = $("#nome_azienda").val(); 
 	  var newvalue=$("#ref_name").val(); 
     var _token = $('input[name="_token"]').val();    
@@ -468,7 +478,7 @@ $('#logo').change(function() {
 					$("#ref_name").val(''); $("#vat").val('');
 					$("#settore_merceologico").val('');                
 					$("#pac-input").val(''); 
-          $("#telefono").val('');               
+         			$("#telefono").val('');               
 					$("#email").val('');   
 				} else {
 					$("#exist").css("display", "block");
@@ -478,6 +488,7 @@ $('#logo').change(function() {
 					data=$.parseJSON(data);
 					$("#ref_name").val(data.nomereferente);
 					$("#settore_merceologico").val(data.settore);
+					$("#select2-settore_merceologico-container").text(data.settore);
 					$("#vat").val(data.piva);
 					$("#pac-input").val(data.indirizzo);
 					$("#telefono").val(data.telefonoazienda);
@@ -539,7 +550,7 @@ $('#logo').change(function() {
                 'email': email,
                 '_token' : _token
               },
-        url: '{{ url('newente') }}',
+        url: "{{ url('newente') }}",
 
         success:function(data) {
           document.location = "steptwo/" + data;
@@ -562,7 +573,7 @@ $('#logo').change(function() {
         var vat = document.getElementById("vat");                
         
         if (nome_azienda.value == '') {            
-            document.getElementById("span_azienda").style.display = "block";
+            document.getElementById("span_azienda").style.display = "inline-block";
             document.getElementById("span_azienda").style.color = "red"; 
             document.getElementById("span_referente").style.display = "none";
             document.getElementById("span_settore").style.display = "none";
@@ -690,11 +701,11 @@ $('#logo').change(function() {
         }
 
         var mob = /^[1-9]{1}[0-9]{9}$/;
-        if (mob.test(telefono.value) == false) {
+        /*if (mob.test(telefono.value) == false) {
             alert("{{ trans('messages.keyword_mobile_number_range') }} ");
             telefono.focus();
             return false;
-        }
+        }*/
         
         var email = email.value;
         var atpos = email.indexOf("@");
@@ -716,7 +727,7 @@ $('#logo').change(function() {
           var telefono = $("#telefono").val(); 
           var email = $("#email").val();
           // var logo = $("#logo").val();
-          var file =  $('#logo').val().split('\\').pop();          
+         // var file =  $('#logo').val().split('\\').pop();          
           var _token = $('input[name="_token"]').val();
 
           //var formData = new FormData(this);

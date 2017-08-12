@@ -1,0 +1,437 @@
+@extends('layouts.app')
+@section('content')
+
+<style>
+tr:hover {
+	background: #f39538;
+}
+.selected {
+	font-weight: bold;
+	font-size: 16px;
+}
+th {
+	cursor: pointer;
+}
+</style>
+
+<script src="{{ asset('public/scripts/jquery.min.js') }}"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.min.js"></script>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+
+<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-it-IT.min.js"></script> -->
+
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+<div class="col-md-12">
+	<div class="col-md-8">
+        <div class="btn-group">
+            <h3 style="display:inline"><a href='{{url("/statistiche/economiche") . '/' . ($anno - 1)}}'><i class="fa fa-arrow-left"></i>{{$anno - 1}}</a></h3>
+            <h3 style="display:inline;color:#f37f0d"> {{$anno}} </h3><h3 style="display:inline"><a href='{{url("/statistiche/economiche") . '/' . ($anno + 1)}}'>{{$anno + 1}}<i class="fa fa-arrow-right"></i></a></h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+
+        <span class="datapicker-icon">
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+        </span> 
+        <span class="select-date">
+            <input type="text" id="datepicker_to" name="datepicker_to[]" class="form-control" value="">
+        </span>
+
+    </div>
+
+    <script type="text/javascript">
+
+        $("#datepicker_to").daterangepicker({
+            autoApply: true,
+            timePicker: true,
+            timePickerIncrement: 30,
+            locale: {
+                format: 'MM/DD/YYYY h:mm A'
+            }
+        });    
+        
+        $('#datepicker_to').on("change", function() {
+
+            var date = $('#datepicker_to').val();                        
+            date = date.replace(/\//g, '-');     
+            $.ajax({
+                type:'POST',
+                data: { 'date': date, '_token': '{{ csrf_token() }}' },
+                url: '{{ url('statistiche/date') }}',
+                success:function(data) {
+                    // console.log(data);  
+                    $("#stat").html(data);                        
+                }
+            });     
+        });
+
+        // var url = "<?php //echo url('/statistiche/date'); ?>" + '/';
+        // $('#datepicker_to').on("change", function() {
+        //     var date = $('#datepicker_to').val();
+        //     date = date.replace(/\//g, '-');
+        //     url += date;
+        //     window.location.replace(url);
+        // });
+
+    </script>
+</div>
+
+<div class="canvas-holder" id="stat">
+	<canvas id="myChart" width="1080" height="540" style="display: block; width: 1080px; height: 540px;"></canvas>
+</div>
+
+<script>
+var ctx = $("#myChart");
+var data = {
+    labels: <?php echo json_encode($statistics['month']); ?>,
+    datasets: [
+        {
+            label: " {{ trans('messages.keyword_i_earn') }} ",
+            fill: false,
+            lineTension: 0.1,
+            backgroundColor: "#f37f0d",
+            borderColor: "#f37f0d",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "#333",
+            pointBackgroundColor: "#333",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "#333",
+            pointHoverBorderColor: "#f37f0d",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: <?php echo json_encode($statistics['earn']); ?>,
+            iGaps: false,
+        },
+		{
+            label: " {{ trans('messages.keyword_revenues') }} ",
+            fill: false,
+            lineTension: 0.1,
+            backgroundColor: "#64C64B",
+            borderColor: "#64C64B",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "#333",
+            pointBackgroundColor: "#333",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "#333",
+            pointHoverBorderColor: "#64C64B",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: <?php echo json_encode($statistics['revenue']); ?>,
+            iGaps: false,
+        },
+		{
+            label: " {{ trans('messages.keyword_expenses') }} ",
+            fill: false,
+            lineTension: 0.1,
+            backgroundColor: "#E02424",
+            borderColor: "#E02424",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "#333",
+            pointBackgroundColor: "#333",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "#333",
+            pointHoverBorderColor: "#E02424",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data:  <?php echo json_encode($statistics['expense']); ?>,
+            iGaps: false,
+        }
+    ]
+};
+var myLineChart = new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: {
+		scales: {
+            xAxes: [{
+                display: true
+            }]
+        }
+	}
+});
+</script>
+
+<div class="col-md-12">
+	<div class="col-md-6">
+    	<h4> {{ trans('messages.keyword_costs') }} </h4><hr>
+        <div class="btn-group">
+        	<a onclick="multipleAction('modify');" id="modifica" style="display:inline;">
+            	<button class="btn btn-primary" type="button" name="update" title="{{ trans('messages.keyword_edit_last_selected_format') }}"><i class="fa fa-pencil"></i></button>
+            </a>
+            <a id="delete" onclick="multipleAction('delete');" style="display:inline;">
+            	<button class="btn btn-danger" type="button" name="remove" title="{{ trans('messages.keyword_delete_last_selected_lauout') }}"><i class="fa fa-eraser"></i></button>
+            </a>
+        </div>
+    	<table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('costi/json');?>" data-classes="table table-bordered" id="table">
+            <thead>
+                <th data-field="id" data-sortable="true">
+                {{ trans('messages.keyword_code') }} 
+                <th data-field="ente" data-sortable="true">
+                {{ trans('messages.keyword_entity') }} 
+                <th data-field="oggetto" data-sortable="true">
+                {{ trans('messages.keyword_object') }} 
+                <th data-field="costo" data-sortable="true"> 
+                {{ trans('messages.keyword_cost') }} 
+                <th data-field="datainserimento" data-sortable="true">
+                {{ trans('messages.keyword_insertion_date') }} 
+            </thead>
+        </table>
+        <!-- COSTI -->
+
+<!-- change variable name for case 'delete' like n to n2 And indici to indici2-->
+
+        <script>
+			var selezione2 = [];
+			var indici2 = [];
+			var n2 = 0;
+			
+			$('#table').on('click-row.bs.table', function (row, tr, el) {
+				var cod = /\d+/.exec($(el[0]).children()[0].innerHTML);
+				if (!selezione2[cod]) {
+					$(el[0]).addClass("selected");
+					selezione2[cod] = cod;
+					indici2[n2] = cod;
+					n2++;
+
+				} else {
+					$(el[0]).removeClass("selected");
+					selezione2[cod] = undefined;
+					for(var i = 0; i < n; i++) {
+						if(indici2[i] == cod) {
+							for(var x = i; x < indici2.length - 1; x++)
+								indici2[x] = indici2[x + 1];
+							break;	
+						}
+					}
+					n--;
+				}
+			});
+			function check() { return confirm(" {{ trans('messages.keyword_sure') }}: " + n2  + " {{ trans('messages.keyword_costs') }} ?"); }
+			function multipleAction(act) {
+				var link = document.createElement("a");
+				var clickEvent = new MouseEvent("click", {
+					"view": window,
+					"bubbles": true,
+					"cancelable": false
+				});
+				var error = false;
+
+					switch(act) {
+						case 'delete':
+							link.href = "{{ url('/costo/delete/') }}" + '/';
+							if(check() && n2!=0) {
+
+								for(var i = 0; i < n2; i++) {
+                                
+									$.ajax({
+
+										type: "GET",
+										url : link.href + indici2[i],
+
+										error: function(url) {
+
+											if(url.status==403) {
+												link.href = "{{ url('/costo/delete') }}" + '/' + indici2[n];
+												link.dispatchEvent(clickEvent);
+											} 
+
+										}
+
+									});
+								}
+                                
+								selezione2 = undefined;
+								setTimeout(function(){location.reload();},100*n);
+								n = 0;
+							}
+						break;
+						case 'modify':
+							if(n2 != 0) {
+								n2--;
+								link.target = "new";
+								link.href = "{{ url('/costi/modify') }}" + '/' + indici2[n];
+								n2 = 0;
+								selezione2 = undefined;
+								link.dispatchEvent(clickEvent);
+							}
+						break;
+					}
+			}
+		</script>
+        <!-- FINE COSTI -->
+    </div>
+    <div class="col-md-6">
+    	<h4> {{ trans('messages.keyword_revenues') }} </h4><hr>
+        <div class="btn-group">
+<a onclick="mAction('modify');" id="modifica" style="display:inline;">
+<button class="btn btn-primary" type="button" name="update" title=" {{ trans('messages.keyword_edit_last_selected_format') }}"><i class="fa fa-pencil"></i></button>
+</a>
+<a id="duplicate" onclick="mAction('duplicate');" style="display:inline;">
+<button class="btn btn-info" type="button" name="duplicate" title=" {{ trans('messages.keyword_duplicates_selected_layouts') }} "><i class="fa fa-files-o"></i></button>
+</a>    
+<a id="delete" onclick="mAction('delete');" style="display:inline;">
+<button class="btn btn-danger" type="button" name="remove" title=" {{ trans('messages.keyword_delete_last_selected_lauout') }} "><i class="fa fa-eraser"></i></button>
+</a>
+<a id="pdf" onclick="mAction('pdf');" style="display:inline;">
+<button class="btn" type="button" name="pdf" title=" {{ trans('messages.keyword_generate_pdf_selected_formats') }} "><i class="fa fa-file-pdf-o"></i></button>
+</a>
+</div>
+        <table data-toggle="table" data-search="true" data-pagination="true" data-id-field="id" data-show-refresh="true" data-show-columns="true" data-url="<?php echo url('/pagamenti/tranche/json');?>" data-classes="table table-bordered" id="tabella">
+        <thead>
+        	<th data-field="idfattura" data-sortable="true"> 
+            {{ trans('messages.keyword_invoicenumber') }}  
+            <th data-field="id" data-sortable="true"> 
+            {{ trans('messages.keyword_no_disposition') }} 
+            <th data-field="nomequadro" data-sortable="true">
+            {{ trans('messages.keyword_picturename') }} 
+            <th data-field="tipo" data-sortable="true">
+            {{ trans('messages.keyword_type') }} 
+            <th data-field="datascadenza" data-sortable="true">
+            {{ trans('messages.keyword_deadline') }} 
+            <th data-field="percentuale" data-sortable="true">
+            % 
+            <th data-field="netto" data-sortable="true">
+            {{ trans('messages.keyword_net') }} 
+            <th data-field="scontoaggiuntivo" data-sortable="true">
+            {{ trans('messages.keyword_additional_discount') }} 
+            <th data-field="imponibile" data-sortable="true"> 
+            {{ trans('messages.keyword_taxable') }} 
+            <th data-field="prezzoiva" data-sortable="true"> 
+            {{ trans('messages.keyword_vat_price') }} 
+            <th data-field="dapagare" data-sortable="true">
+            {{ trans('messages.keyword_topay') }} 
+            <th data-field="statoemotivo" data-sortable="true">
+            {{ trans('messages.keyword_emotional_state') }} 
+        </thead>
+    </table>
+    <script>
+var selezione = [];
+var indici = [];
+var n = 0;
+
+$('#tabella').on('click-row.bs.table', function (row, tr, el) {
+	var cod = /\d+/.exec($(el[0]).children()[1].innerHTML);
+	if (!selezione[cod]) {
+		$(el[0]).addClass("selected");
+		selezione[cod] = cod;
+		indici[n] = cod;
+		n++;
+	} else {
+		$(el[0]).removeClass("selected");
+		selezione[cod] = undefined;
+		for(var i = 0; i < n; i++) {
+			if(indici[i] == cod) {
+				for(var x = i; x < indici.length - 1; x++)
+					indici[x] = indici[x + 1];
+				break;	
+			}
+		}
+		n--;
+	}
+});
+
+
+
+function check2() { return confirm("{{ trans('messages.keyword_sure') }}: " + n + " {{ trans('messages.keyword_revenues') }} / {{ trans('messages.keyword_provisions') }} ?"); }
+function mAction(act) {
+	var link = document.createElement("a");
+	var clickEvent = new MouseEvent("click", {
+	    "view": window,
+	    "bubbles": true,
+	    "cancelable": false
+	});
+	var error = false;
+		switch(act) {
+			case 'delete':
+				link.href = "{{ url('/pagamenti/tranche/delete/') }}" + '/';
+				if(check2() && n!=0) {
+                                    for(var i = 0; i < n; i++) {
+                                        $.ajax({
+                                            type: "GET",
+                                            url : link.href + indici[i],
+                                            error: function(url) {
+                                                if(url.status==403) {
+                                                    link.href = "{{ url('/pagamenti/tranche/delete/') }}" + '/' + indici[n];
+                                                    link.dispatchEvent(clickEvent);
+                                                } 
+                                            }
+                                        });
+                                    }
+                                    selezione = undefined;
+                                    setTimeout(function(){location.reload();},100*n);
+                                    n = 0;
+                                }
+			break;
+			case 'modify':
+                if(n != 0) {
+					n--;
+					link.href = "{{ url('/pagamenti/tranche/modifica') }}" + '/' + indici[n];
+					n = 0;
+					selezione = undefined;
+					link.dispatchEvent(clickEvent);
+				}
+			break;
+			case 'pdf':
+               link.href = "{{ url('/pagamenti/tranche/pdf') }}" + '/';
+			    for(var i = 0; i < n; i++) {
+                    var url = link.href + indici[i];
+                    var win = window.open(url, '_blank');
+                    win.focus();
+                }
+                n = 0;
+                selezione = undefined;
+                setTimeout(function(){location.reload();},100*n);
+			break;
+            case 'duplicate':
+				link.href = "{{ url('/pagamenti/tranche/duplicate') }}" + '/';
+                for(var i = 0; i < n; i++) {
+                    $.ajax({
+                        type: "GET",
+                        url : link.href + indici[i],
+                        error: function(url) {
+                            if(url.status==403) {
+                                link.href = "{{ url('/pagamenti/tranche/duplicate') }}" + '/' + indici[n];
+                                link.dispatchEvent(clickEvent);
+                                error = true;
+                            } 
+                        }
+                    });
+                }
+                selezione = undefined;
+                if(error === false)
+                    setTimeout(function(){location.reload();},100*n);
+                n = 0;
+			break;
+		}
+}    
+
+</script>
+    <!-- fine RICAVI -->
+    </div>
+</div>
+
+@endsection

@@ -53,16 +53,67 @@ class AccountingController extends Controller
 			// return redirect('/unauthorized');
 	}
 
+	public function updatepublishstatus(Request $request) {				
+		$update = DB::table('tranche')->where('id', $request->id)->update(array('is_published' => $request->status));
+		return ($update) ? 'true' : 'false';		
+	}
+
 	public function getjsontuttetranche(Request $request)
 	{
+		DB::enableQueryLog();
 		// $tranche = DB::table('tranche')->get();
-		$tranche = DB::table('tranche')
+		/*$tranche = DB::table('tranche')
 			->join('users', 'tranche.user_id','=','users.id')
+			->select(DB::raw('tranche.*, users.id as uid, users.is_delete'))
+			->where('users.is_delete', '=', 0)->get();*/
+
+		if(($request->user()->id == 0) || ($request->user()->dipartimento == 0)) {
+			$tranche = DB::table('tranche')
+			->join('users', 'tranche.user_id','=','users.id')
+			/*->join('projects','tranche.id_disposizione','=','projects.id')
+			->join('quotes','projects.id_preventivo','=','quotes.id')*/
 			->select(DB::raw('tranche.*, users.id as uid, users.is_delete'))
 			->where('users.is_delete', '=', 0)->get();
 
+		  /*$data = DB::table("tranche")
+          ->select("tranche.*",
+                    DB::raw("(SELECT projects.id FROM projects
+                    			JOIN quotes on quotes.id = projects.id_preventivo
+                                WHERE projects.id = tranche.id_disposizione) as projectid"))->get();*/
+          	
+          	/*$tranche = DB::table("tranche")->select('*')
+            ->whereIn('tranche.id_disposizione',function($query){
+               $query->select('projects.id')->join('quotes','projects.id_preventivo','=','quotes.id')->from('projects');
+            })
+            ->join('users', 'tranche.user_id','=','users.id')
+            ->where('users.is_delete', '=', 0)
+            ->get();*/
+	        /*$queries = DB::getQueryLog();
+	        $last_query = end($queries);
+	        print_r($last_query);                
+	        exit;*/
+		}
+		else {
+			$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $request->user()->dipartimento)->first();
+        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+        	$arrwhere = ($type === 'Client' || $type === 'Customer') ? array('tranche.is_published'=>1,'users.is_delete'=>0) : array('users.is_delete'=>0); 			
+			$tranche = DB::table('tranche')
+			->join('users', 'tranche.user_id','=','users.id')
+			/*->join('projects','tranche.id_disposizione','=','projects.id')
+			->join('quotes','projects.id_preventivo','=','quotes.id')*/
+			->select(DB::raw('tranche.*, users.id as uid, users.is_delete'))
+			->where($arrwhere)->get();
+		}
+
+		/*$queries = DB::getQueryLog();
+        $last_query = end($queries);
+        print_r($last_query);                
+        exit;*/
+		$tranche_return = array();
+		if(count($tranche) > 0){
 		foreach($tranche as $tr) {
 			if($tr->is_deleted == 0) {
+				$id = $tr->id;
 				$tr->datainserimento = str_replace('/', '-', $tr->datainserimento);
 				$tr->datainserimento =  ($tr->datainserimento != '0000-00-00') ? dateFormate($tr->datainserimento) : '-'; 
 				
@@ -71,10 +122,22 @@ class AccountingController extends Controller
 				
 				$tr->emissione = str_replace('/', '-', $tr->emissione);
 				$tr->emissione = ($tr->emissione != '0000-00-00') ? dateFormate($tr->emissione) : '-';
+				
+				$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $request->user()->dipartimento)->first();
+	        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+	        	/*$arrwhere = ($type === 'Client') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0);*/
+
+	        	$checked = ($tr->is_published==1) ? 'checked' : '';
+	        	$tr->publishstatus = '<div class="switch"><input name="status" readonly="readonly" disabled="disabled"  id="activestatus_'.$id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$id.'"></label></div>';
+
+	        	if($request->user()->id == '0' || ($request->user()->dipartimento == 0) || $tr->user_id == $request->user()->id) {				
+	        		$tr->publishstatus = '<div class="switch"><input name="status" onchange="updateStaus('.$id.')" id="activestatus_'.$id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$id.'"></label></div>';
+	        	}
 				$tranche_return[] = $tr;	
-			}
+			}			
 		}
 		$tranche_return = $this->aggiungiNomeQuadro($tranche_return, $request->user());
+		}
 
 		return json_encode($tranche_return);
 	}
@@ -115,8 +178,7 @@ class AccountingController extends Controller
 				}
 				if(isset($statoemotivo->color)){	
 					$tra->statoemotivo = '<span style="color:'.$statoemotivo->color.'">'.$tra->statoemotivo.'</span>';			
-				}
-				
+				}				
 			}
 			if ($user->id === 0 || $user->dipartimento === 1) {
             	$elenco_tranche[] = $tra;
@@ -129,17 +191,34 @@ class AccountingController extends Controller
 	
 	public function modificatranche(Request $request)
 	{
+		//$tranche = DB::table('tranche')->where('id', $request->id)->first();
+		DB::enableQueryLog();
 		$tranche = DB::table('tranche')
-			->where('id', $request->id)
-			->first();
+				->leftjoin('projects', 'projects.id', '=', 'tranche.id_disposizione')
+				->leftjoin('corporations', 'corporations.id', '=', 'tranche.DA')
+				->leftjoin('quotes', 'quotes.id', '=', 'projects.id_preventivo')				
+				->select(DB::raw('tranche.*, projects.nomeprogetto, projects.datainizio, corporations.nomeazienda,quotes.id as quoteId,quotes.anno quoteyear,projects.id_preventivo'))		
+				/*->where('tranche.is_deleted', 0)
+				->where('projects.is_deleted', 0)*/
+				->where('tranche.id', $request->id)
+				->first();
+				//$ordine = isset($quote->id) ? ':'.$quote->id.'/'.$quote->anno : '';
+		/*$queries = DB::getQueryLog();
+		$last_query = end($queries);
+		print_r($last_query);
+	    print('<pre>');
+		print_r($tranche);
+		exit;*/
+
+
 		$arrwhereTax = array('is_active'=>0,'tassazione_nome'=>'IVA');
 		$arrorwhereTax = array('is_active'=>0,'tassazione_nome'=>'IVA');
    		$taxation = DB::table('tassazione')->where($arrwhereTax)->orWhere($arrorwhereTax)->first();
 		return view('pagamenti.modificatranche', [
 			'tranche' => $tranche,
 			'utenti' => DB::table('users')->get(),
-			'quotefiles' => DB::table('media_files')->select('*')->where('master_id', $request->id)->where('master_type','3')->get(),				
-			'invoicebody'=>	DB::table('corpofattura')->where('id_tranche', $request->id)->get(),
+			'quotefiles' => DB::table('media_files')->select('*')->where('master_id', $tranche->id_preventivo)->where('master_type','0')->get(),				
+			'invoicebody'=>	DB::table('corpofattura')->where('id_tranche', $request->id)->orderBy('ordine_numerico', 'asc')->get(),
 			'enti' => DB::table('corporations')->orderBy('id', 'asc')->get(),
 			'statiemotivi' => DB::table('statiemotivipagamenti')->get(),
 			'statoemotivoselezionato' => DB::table('statipagamenti')->where('id_pagamento', $tranche->id)->first(),
@@ -531,6 +610,10 @@ class AccountingController extends Controller
 		$tranche = DB::table('tranche')
 					->where('id', $request->id)
 					->first();
+
+		/*$project = DB::table('projects')
+					->where('id', $tranche->id_disposizione)
+					->first();*/
 		
 		DB::table('notifiche')
 			->where('id', $tranche->id_notifica)
@@ -602,6 +685,7 @@ class AccountingController extends Controller
 		if(isset($request->ordine)) {
 
 			$ordine = $request->ordine;
+			$ordine_numerico = $request->ordine_numerico;
 			$descrizione = $request->desc;
 			$qt = $request->qt;
 			$subtotale = $request->subtotale;
@@ -609,6 +693,7 @@ class AccountingController extends Controller
 			$prezzonetto = $request->prezzonetto;
 			$is_active = $request->is_active;
 			$iva = $request->iva;
+			$unitario = $request->unitario;
 			
 
 			for($i = 0; $i < count($ordine); $i++) {
@@ -621,12 +706,14 @@ class AccountingController extends Controller
 
 				DB::table('corpofattura')->insert([
 					'id_tranche' => $request->id,
+					'ordine_numerico'=>isset($ordine_numerico[$i]) ? $ordine_numerico[$i] : '',
 					'ordine' => isset($ordine[$i]) ? $ordine[$i] : '',					
 					'descrizione' => isset($descrizione[$i]) ? $descrizione[$i] : '',
 					'qta' => isset($qt[$i]) ? $qt[$i] : '',
+					//'unit_price'=>isset($unitario[$i]) ? $unitario[$i] : '0',
 					'subtotale' => isset($subtotale[$i]) ? $subtotale[$i] : '',
 					'scontoagente' => isset($request->scontoagente[$i]) ? $request->scontoagente[$i] : 0,
-					'netto' => isset($request->prezzonetto[$i]) ? $request->prezzonetto[$i] : 0,
+					'netto' => isset($request->unitario[$i]) ? $request->unitario[$i] : 0,
 					'percentualeiva' => isset($request->iva[$i]) ? $request->iva[$i] : 0,
 					'project_refer_no' => isset($request->project_refer_no[$i]) ? $request->project_refer_no[$i] : 0,	
 					'is_active' => isset($is_active[$i]) ? intval($is_active[$i]) : 0,
@@ -684,7 +771,12 @@ class AccountingController extends Controller
 			 }
              return view('pagamenti.aggiungitranche', [
 				'utenti' => DB::table('users')->get(),
-				'progetti' => DB::table('projects')->where('statoemotivo', 'FINE PROGETTO')->orWhere('statoemotivo', '12')->get(),
+				'progetti' => DB::table('projects')
+					->join('quotes','projects.id_preventivo','=','quotes.id')
+					->where(function($query) {
+                        $query->where('projects.statoemotivo', '=', 'FINE PROGETTO')
+                            ->orWhere('projects.statoemotivo', '=', '12');
+                    })->get(),
 				'selectProject' =>$progetto,
 				'enti' => DB::table('corporations')->orderBy('id', 'asc')->get(),
 				'idfattura' => $request->id,
@@ -832,7 +924,7 @@ class AccountingController extends Controller
                       ]);
 		/* Medai files from project to qoute */
 
-		$medifilesQuote = DB::table('media_files')->where(['master_id'=>$request->id,'master_type'=>'1'])->get();
+		/*$medifilesQuote = DB::table('media_files')->where(['master_id'=>$request->id,'master_type'=>'1'])->get();get
 		foreach ($medifilesQuote as $keymq => $valuemq) {
 			$mediafileid = DB::table('media_files')->insertGetId([
 					'name' => 'inv'.$valuemq->name,
@@ -846,7 +938,7 @@ class AccountingController extends Controller
 			if(file_exists('storage/app/images/projects/'.$valuemq->name)){			
 				copy('storage/app/images/projects/'.$valuemq->name, 'storage/app/images/invoice/inv'.$valuemq->name);
 			}
-		}
+		}*/
 
 		$logs = $this->logmainsection.' -> Add New Invoice (ID: '. $tranche . ')';
 		storelogs($request->user()->id, $logs);
@@ -854,10 +946,12 @@ class AccountingController extends Controller
 		//if($request->statoemotivo!=null) {
 			// Memorizzo lo stato emotivo
 			$tipo = DB::table('statiemotivipagamenti')->where('id', '12')->first();
-			DB::table('statipagamenti')->insert([
-				'id_pagamento' => $tranche,
-				'id_tipo' => $tipo->id,
-			]);
+			if(isset($tipo->id)){
+				DB::table('statipagamenti')->insert([
+					'id_pagamento' => $tranche,
+					'id_tipo' => $tipo->id,
+				]);
+			}
 		//}
 		
 		/* ================= Invoice Body Sections ==================== */
@@ -925,15 +1019,42 @@ class AccountingController extends Controller
 
     public function getjsontranche(Request $request)
 	{
-		$tranche = DB::table('tranche')
-			->where('id_disposizione', $request->id)
-			->get();
-			
-		foreach($tranche as $tr) {
-			if($tr->is_deleted == 0)
-				$tranche_return[] = $tr;	
+		if(($request->user()->id == 0) || ($request->user()->dipartimento == 0)) {
+
+			$tranche = DB::table('tranche')
+						/*->join('projects','tranche.id_disposizione','=','projects.id')
+						->join('quotes','projects.id_preventivo','=','quotes.id')*/
+						->where('id_disposizione', $request->id)->get();
 		}
-		$this->compilaTranche($tranche_return);
+		else {
+			$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $request->user()->dipartimento)->first();
+        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+        	$arrwhere = ($type === 'Client' || $type === 'Customer') ? array('id_disposizione'=>$request->id,'is_published'=>1) : array('id_disposizione'=>$request->id); 
+			$tranche = DB::table('tranche')
+			/*->join('projects','tranche.id_disposizione','=','projects.id')
+			->join('quotes','projects.id_preventivo','=','quotes.id')*/
+			->where($arrwhere)->get();	
+		}
+		$tranche_return=array();
+		if(count($tranche) > 0){
+			foreach($tranche as $tr) {
+				if($tr->is_deleted == 0){
+					$id = $tr->id;
+					$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $request->user()->dipartimento)->first();
+		        	$type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+		        	/*$arrwhere = ($type === 'Client') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0);*/
+
+		        	$checked = ($tr->is_published==1) ? 'checked' : '';
+		        	$tr->publishstatus = '<div class="switch"><input name="status" readonly="readonly" disabled="disabled"  id="activestatus_'.$id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$id.'"></label></div>';
+
+		        	if($request->user()->id == '0' || ($request->user()->dipartimento == 0) || $tr->user_id == $request->user()->id) {				
+		        		$tr->publishstatus = '<div class="switch"><input name="status" onchange="updateStaus('.$id.')" id="activestatus_'.$id.'" '.$checked.' on value="1"  type="checkbox"><label for="activestatus_'.$id.'"></label></div>';
+		        	}
+					$tranche_return[] = $tr;	
+				}
+			}
+			$this->compilaTranche($tranche_return);
+		}
 		return json_encode($tranche_return);
 	}
 
@@ -978,29 +1099,59 @@ class AccountingController extends Controller
 	public function fileupload(Request $request){
 	
 		Storage::put(
-				'images/invoice/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
+				'images/quote/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
 		);
-		
+
+		/*Storage::put(
+				'images/invoice/' . $request->file('file')->getClientOriginalName(), file_get_contents($request->file('file')->getRealPath())
+		);*/
+
+		$tranche = DB::table('tranche')
+					->where('id', $request->idtranche)
+					->first();
+		if(isset($tranche->id_disposizione)){			
+			$project = DB::table('projects')
+					->where('id', $tranche->id_disposizione)
+					->first();
+		}
 		$nome = $request->file('file')->getClientOriginalName();			
 			DB::table('media_files')->insert([
 			'name' => $nome,
 			'code' => $request->code,
-			'master_type' => 3,
+			'master_type' => 0,
 			'type'=>$request->user()->dipartimento,
-			'master_id' => isset($request->idtranche) ? $request->idtranche : 0,
+			'master_id' => isset($project->id_preventivo) ? $project->id_preventivo : 0,
 			'date_time'=>time()
 		]);					
 	}
 
 	public function fileget(Request $request){
 		if(isset($request->quote_id)){
+			$query = "SELECT * FROM media_files WHERE master_id = $request->quote_id and master_type='3'";		
+			$userprofileid = $request->user()->dipartimento;
+	 		$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
+	        $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
+
+			if(isset($request->term) && $request->term != "") {
+				$where = ($request->user()->id === 0 || $type === 'SupperAdmin') ? "" : " AND find_in_set('$userprofileid',type) <> 0";
+				$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id $where  AND (title LIKE '%$request->term%' OR  description LIKE '%$request->term%')";
+			}			
+			$updateData = DB::select($query);
+		}
+		else {
+			$query = "SELECT * FROM media_files WHERE code=$request->code";		
+			$updateData = DB::select($query);			
+		}		
+		
+		/*if(isset($request->quote_id)){
 			$updateData = DB::table('media_files')->where('quote_id', $request->quote_id)->get();	
 		} else {
 			$updateData = DB::table('media_files')->where('code', $request->code)->get();				
-		}					
+		}*/
+
 		foreach($updateData as $prev) {
-			$imagPath = url('/storage/app/images/invoice/'.$prev->name);			
-			$downloadlink = url('/storage/app/images/invoice/'.$prev->name);
+			$imagPath = url('/storage/app/images/quote/'.$prev->name);			
+			$downloadlink = url('/storage/app/images/quote/'.$prev->name);
 			$filename = $prev->name;			
 			$arrcurrentextension = explode(".", $filename);
 			$extention = end($arrcurrentextension);
@@ -1018,18 +1169,18 @@ class AccountingController extends Controller
 			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
 
-			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->get();							
+			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->where('nome_ruolo','!=','SupperAdmin')->get();							
 			foreach($utente_file as $key => $val){
 				if($request->user()->dipartimento == $val->ruolo_id){
 					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
 					
 					$specailcharcters = array("'", "`");
                     $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" checked="checked" name="rdUtente_'.$prev->id.'" id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 				} else {
 					$specailcharcters = array("'", "`");
                     $rolname = str_replace($specailcharcters, "", $val->nome_ruolo);
-                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.$rolname.'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.$rolname.'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
+                    $html .=' <div class="cust-checkbox"><input type="checkbox" name="rdUtente_'.$prev->id.'" id="'.trim($rolname).'_'.$prev->id.'" onchange="updateType('.$val->ruolo_id.','.$prev->id.',this.id);"  value="'.$val->ruolo_id.'" /><label for="'.trim($rolname).'_'.$prev->id.'"> '.$val->nome_ruolo.'</label><div class="check"><div class="inside"></div></div></div>';
 				}
 			}
 			echo $html .='</td></tr>';
@@ -1165,6 +1316,7 @@ class AccountingController extends Controller
 			$data = DB::table('projects')
     			->join('users', 'projects.user_id', '=', 'users.id')
     			->join('accountings', 'projects.id', '=', 'accountings.id_progetto')	
+    			/*->join('quotes','projects.id_preventivo','=','quotes.id')*/
     			->select(DB::raw('projects.*, users.id as uid, users.is_delete,accountings.nomeprogetto as groupname,accountings.id as groupid'))
 				->where('projects.is_deleted','0')
 				->where('accountings.is_delete','0')
@@ -1173,7 +1325,8 @@ class AccountingController extends Controller
 				->paginate(12);
 
 			$tranche = DB::table('tranche')
-				->join('projects', 'projects.id', '=', 'tranche.id_disposizione')
+				->join('projects', 'projects.id', '=', 'tranche.id_disposizione')				
+				->join('quotes','projects.id_preventivo','=','quotes.id')
 				->select(DB::raw('tranche.*'))
 				->where('tranche.is_deleted', 0)
 				->where('projects.is_deleted', 0)
@@ -1614,7 +1767,7 @@ class AccountingController extends Controller
 				}
 				
 				$statistics = array('month' => $date_month, 'revenue' => $revenue, 'expense' => $expense, 'earn' => $earn);				
-			}			
+			}		
 			return view('statistics-date', [
 				'statistics' => $statistics,
 				'year' => date("Y")
