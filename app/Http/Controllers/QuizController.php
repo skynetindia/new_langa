@@ -830,7 +830,7 @@ class QuizController extends Controller
 	}
 
 	public function stepsix(Request $request){
- 		$this->stepsixsetup($request);exit();
+ 		$this->stepsixsetup($request);
  		$departments = DB::table('departments')
 			->where('nomedipartimento', 'LANGA WEB')->first();
 
@@ -886,45 +886,77 @@ class QuizController extends Controller
 		$valence = date('d/m/Y', strtotime("+ $days days"));
 		$show_date = date('Y-m-d', strtotime("+ $days days"));
 		$enddate = date("d/m/Y",strtotime($show_date."+7 day"));
-		echo $quoteid = DB::table('quotes')->updateOrCreate([	
-			'quiz_id' =>$quizid ,
-			'user_id' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
-			'idutente' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
-			'idente' => $entity->id,
-			'data' => isset($date) ? $date : '',
-			'oggetto' => isset($order->nome_azienda) ? trans('keyword_quiz_pacchetto').' '.$order->nome_azienda : '',
-			'dipartimento' => isset($departments->id) ? $departments->id : 0,
-			//'scontoagente' => isset($request->agent_discount) ? $request->agent_discount : 0,
-			'valenza' => isset($valence) ? $valence : '',
-			'finelavori' => isset($enddate) ? $enddate : '',
-			'progress' => isset($remaining_avg) ? $remaining_avg : 0,
-			'subtotale'=> isset($order->totale_prezzo) ? $request->totale_prezzo : 0,
-			'totale' => isset($order->totale_prezzo) ? $request->totale_prezzo : 0,
-			//'totaledapagare' => isset($request->discount_tax) ? $request->discount_tax : 0,
-			
-			//'nome_azienda' => isset($order->nome_azienda) ? $order->nome_azienda : '',
-			//'email' => isset($order->email) ? $order->email : '',
-			//'settore_merceologico' => isset($order->settore_merceologico) ? $order->settore_merceologico : '',	
-			//'vat_number' => isset($order->vat_number) ? $order->vat_number : '',
-			//'indirizzo' => isset($order->indirizzo) ? $order->indirizzo : '',
-			//'telefono' => isset($order->telefono) ? $order->telefono : '',	
-			'totale_elementi' => isset($order->totale_elementi) ? $order->totale_elementi : 0,
-			'anno' => date('y'),
-			//'prezzo_confermato' => isset($request->total) ? $request->total : 0
-		]);	
-		$optional = DB::table('order_record')
-			->where('quiz_id', $quizid)->get();
-		foreach($optional as $optional)
+		$quote=DB::table('quotes')->where('quiz_id',$quizid)->first();
+		if(!$quote)
 		{
-			DB::table('quotes')->updateOrCreate([
-			'oggetto' =>  $optional->label,
-			'descrizione' =>  $optional->description,
-			'qta'=>$optional->qty,
-			'prezzounitario'=>$optional->prezzo_base,
-			'totale'=>$optional->prezzo_totale,
-			'Ciclicita'=>$optional->frequency,
-			]);
+			$quoteid = DB::table('quotes')->insertGetid([	
+				'quiz_id' =>$quizid ,
+				'user_id' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
+				'idutente' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
+				'idente' => $entity->id,
+				'data' => isset($date) ? $date : '',
+				'oggetto' => isset($order->nome_azienda) ? trans('keyword_quiz_pacchetto').' '.$order->nome_azienda : '',
+				'dipartimento' => isset($departments->id) ? $departments->id : 0,
+				'valenza' => isset($valence) ? $valence : '',
+				'finelavori' => isset($enddate) ? $enddate : '',
+				'progress' => isset($remaining_avg) ? $remaining_avg : 0,
+				'subtotale'=> isset($order->totale_prezzo) ? $order->totale_prezzo : 0,
+				'totale' => isset($order->totale_prezzo) ? $order->totale_prezzo : 0,
+				'totale_elementi' => isset($order->totale_elementi) ? $order->totale_elementi : 0,
+				'anno' => date('y'),
+				
+			]);	
+			
+			$optional = DB::table('order_record')
+			->where('quiz_id', $quizid)->get();
+			foreach($optional as $optional)
+			{
+				DB::table('optional_preventivi')->insert([
+				'oggetto' =>  $optional->label,
+				'descrizione' =>  $optional->description,
+				'qta'=>$optional->qty,
+				'prezzounitario'=>$optional->prezzo_base,
+				'totale'=>$optional->prezzo_totale,
+				'Ciclicita'=>$optional->frequency,
+				'id_preventivo'=>$quoteid
+				]);
+			}
 		}
+		else{
+			$quoteid = DB::table('quotes')->where('quiz_id',$quizid)->update([	
+				
+				'user_id' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
+				'idutente' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
+				'idente' => $entity->id,
+				'data' => isset($date) ? $date : '',
+				'oggetto' => isset($order->nome_azienda) ? trans('keyword_quiz_pacchetto').' '.$order->nome_azienda : '',
+				'dipartimento' => isset($departments->id) ? $departments->id : 0,
+				'valenza' => isset($valence) ? $valence : '',
+				'finelavori' => isset($enddate) ? $enddate : '',
+				'progress' => isset($remaining_avg) ? $remaining_avg : 0,
+				'subtotale'=> isset($order->totale_prezzo) ? $order->totale_prezzo : 0,
+				'totale' => isset($order->totale_prezzo) ? $order->totale_prezzo : 0,
+				'totale_elementi' => isset($order->totale_elementi) ? $order->totale_elementi : 0,
+				'anno' => date('y'),
+				
+			]);	
+			DB::table('optional_preventivi')->where('id_preventivo',$quote->id)->delete();
+			$optional = DB::table('order_record')
+			->where('quiz_id', $quizid)->get();
+			foreach($optional as $optional)
+			{
+				DB::table('optional_preventivi')->insert([
+				'oggetto' =>  $optional->label,
+				'descrizione' =>  $optional->description,
+				'qta'=>$optional->qty,
+				'prezzounitario'=>$optional->prezzo_base,
+				'totale'=>$optional->prezzo_totale,
+				'Ciclicita'=>$optional->frequency,
+				'id_preventivo'=>$quote->id
+				]);
+			}
+		}
+		
 			
 	}
 	
@@ -992,73 +1024,52 @@ class QuizController extends Controller
 	}
 
 public function stepsixconfirm(Request $request){
+	
 
 		$quizid = $request->input('quizid');
 		$payment_status = $request->input('payment_status');
-
 		$order = DB::table('quiz_order')
 			->where('quiz_id', $quizid)->first();
-		$entity = DB::table('corporations')
-			->where('nomeazienda', $order->nome_azienda)->first();
-		$date = date("d/m/Y"); $time = date("his");
-
-		$departments = DB::table('departments')
-			->where('nomedipartimento', 'LANGA WEB')->first();
-
-		$total_project = DB::table('projects')->where('is_deleted', 0)->where('statoemotivo', '!=', 11)->count();
-
-		$avg_project = DB::table('projects')->where('is_deleted', 0)->where('statoemotivo', '!=', 11)->avg('progresso');
-
-		$projects = DB::table('projects')
-			->select(DB::raw('AVG(progresso) as average'))
-			->where('is_deleted', 0)->where('statoemotivo', '!=', 11)
-			->get();
-
-		$days = isset($total_project) ? $total_project*5 : 5;
-		$remaining_avg = isset($avg_project) ? 100 - $avg_project : 0;
 		
-		$days = ceil($days*$remaining_avg/100);
-		$year = date("Y");
-		echo $valence = date('d/m/Y', strtotime("+ $days days"));
-		echo $show_date = date('Y-m-d', strtotime("+ $days days"));
-		echo $enddate = date("d/m/Y",strtotime($show_date."+7 day"));
-		exit(); 
-		$quoteid = DB::table('quotes')->insertGetId([			
-			'user_id' => isset($order->user_id) ? $order->user_id : 0,
-			'idutente' => isset($order->user_id) ? $order->user_id : 0,
-			'idente' => isset($entity->id) ? $entity->id : 0,
-			'data' => isset($date) ? $date : '',
-			'oggetto' => isset($order->nome_azienda) ? 'quiz_'.$order->nome_azienda.'_'.$time : '',
-			'dipartimento' => isset($departments->id) ? $departments->id : 0,
+		
+		$quoteid = DB::table('quotes')->where('quiz_id',$quizid)->update([			
+			
 			'scontoagente' => isset($request->agent_discount) ? $request->agent_discount : 0,
-			'valenza' => isset($valence) ? $valence : '',
-			'finelavori' => isset($enddate) ? $enddate : '',
-			'progress' => isset($remaining_avg) ? $remaining_avg : 0,
+		
 			'subtotale'=> isset($request->total) ? $request->total : 0,
 			'totale' => isset($request->discount) ? $request->discount : 0,
 			'totaledapagare' => isset($request->discount_tax) ? $request->discount_tax : 0,
-			'quiz_id' => isset($order->quiz_id) ? $order->quiz_id : 0,
-			'nome_azienda' => isset($order->nome_azienda) ? $order->nome_azienda : '',
-			'email' => isset($order->email) ? $order->email : '',
-			'settore_merceologico' => isset($order->settore_merceologico) ? $order->settore_merceologico : '',	
-			'vat_number' => isset($order->vat_number) ? $order->vat_number : '',
-			'indirizzo' => isset($order->indirizzo) ? $order->indirizzo : '',
-			'telefono' => isset($order->telefono) ? $order->telefono : '',	
-			'totale_elementi' => isset($order->totale_elementi) ? $order->totale_elementi : 0,
-			'prezzo_confermato' => isset($request->total) ? $request->total : 0
+			'prezzo_confermato' => isset($request->discount_tax) ? $request->discount_tax : 0,
 		]);	
-
-		DB::table('payment_status')->insert([
-			'quiz_id' => isset($order->quiz_id) ? $order->quiz_id : 0,
-			'user_id' => isset($order->user_id) ? $order->user_id : 0,
-			'nome_azienda' => isset($order->nome_azienda) ? $order->nome_azienda : '',
-			'email' => isset($order->email) ? $order->email : '',
-			'vat_number' => isset($order->vat_number) ? $order->vat_number : '',
-			'indirizzo' => isset($order->indirizzo) ? $order->indirizzo : '',
-			'telefono'=> isset($order->telefono)?$order->telefono : '',	
-			'totale' => isset($request->total) ? $request->total : 0,
-			'payment_status' => $payment_status
-		]);	
+		$payment=DB::table('payment_status')->where('quiz_id',$quizid)->first();
+		if(!$payment)
+		{
+			DB::table('payment_status')->insert([
+				'quiz_id' => isset($order->quiz_id) ? $order->quiz_id : 0,
+				'user_id' => isset($order->user_id) ? $order->user_id : 0,
+				'nome_azienda' => isset($order->nome_azienda) ? $order->nome_azienda : '',
+				'email' => isset($order->email) ? $order->email : '',
+				'vat_number' => isset($order->vat_number) ? $order->vat_number : '',
+				'indirizzo' => isset($order->indirizzo) ? $order->indirizzo : '',
+				'telefono'=> isset($order->telefono)?$order->telefono : '',	
+				'totale' => isset($request->discount_tax) ? $request->discount_tax : 0,
+				'payment_status' => $payment_status
+			]);	
+		}
+		else
+		{
+			DB::table('payment_status')->where('quiz_id',$quizid)->update([
+				'quiz_id' => isset($order->quiz_id) ? $order->quiz_id : 0,
+				'user_id' => isset($order->user_id) ? $order->user_id : 0,
+				'nome_azienda' => isset($order->nome_azienda) ? $order->nome_azienda : '',
+				'email' => isset($order->email) ? $order->email : '',
+				'vat_number' => isset($order->vat_number) ? $order->vat_number : '',
+				'indirizzo' => isset($order->indirizzo) ? $order->indirizzo : '',
+				'telefono'=> isset($order->telefono)?$order->telefono : '',	
+				'totale' => isset($request->discount_tax) ? $request->discount_tax : 0,
+				'payment_status' => $payment_status
+			]);	
+		}
 		$paypal=new PaypalController();
 		return $redirect=$paypal->getCheckout(['amount'=>$request->total,'description'=>'Payment for quiz section purchase under'.$order->nome_azienda.'for quiz id '.$quoteid]);
 		 
