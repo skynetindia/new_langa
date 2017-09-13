@@ -8,19 +8,50 @@ use Redirect;
 use DB;
 use Storage;
 use Mail;
-
+use Auth;
 use App\Http\Requests;
 use App\Http\Controllers\PaypalController;
+use Paypal;
 
 class QuizController extends Controller
 {
 	
-	public function __construct(){
-	   $this->middleware('auth');
-	}   
+	 private $_apiContext;
+	 protected $logmainsection;
+
+
+    public function __construct()
+    {
+		 $this->middleware('auth');
+        $this->_apiContext = PayPal::ApiContext(
+
+            config('services.paypal.client_id'),
+
+            config('services.paypal.secret'));
+
+
+        $this->_apiContext->setConfig(array(
+
+            'mode' => 'sandbox',
+
+            'service.EndPoint' => 'https://api.sandbox.paypal.com',
+
+            'http.ConnectionTimeOut' => 30,
+
+            'log.LogEnabled' => true,
+
+            'log.FileName' => storage_path('logs/paypal.log'),
+
+            'log.LogLevel' => 'FINE'
+
+        ));
+
+
+    }
+
 
 	public function index(Request $request){
-
+		
 		return view('quiz.quiz', [          
 			'optional' => DB::table('optional')->where('escludi_da_quiz', 1)->get(),
 			'default' => DB::table('optional')->where('escludi_da_quiz', 1)->first()        
@@ -32,10 +63,19 @@ class QuizController extends Controller
 	}
 
 	public function checkentity(Request $request){	  	
+		DB::enableQueryLog();
+		$step = DB::table('corporations')
+		->select("nomeazienda as label","nomereferente","settore","piva","indirizzo","telefonoazienda","email","user_id","id")
+			->where("nomeazienda", 'like','%'.$request->company_name.'%')->where('is_deleted',0)
+			->get()->toarray();
+ 		
+		return json_encode($step);
+	}
+	/*public function checkentity(Request $request){	  	
 
 		$step = DB::table('corporations')
 		->select("nomeazienda","nomereferente","settore","piva","indirizzo","telefonoazienda","email","user_id","id")
-			->where("nomeazienda", $request->company_name)
+			->where("nomeazienda", 'like','%'.$request->company_name.'%')
 			->first();
  		
 		if(!empty($step->nomeazienda)) {			
@@ -53,7 +93,7 @@ class QuizController extends Controller
 		} else {
 			return "true";
 		}
-	}
+	}*/
 
 	public function storestepone(Request $request){
 	  	
@@ -231,7 +271,9 @@ class QuizController extends Controller
 
 
 	public function steptwo(Request $request){ 
-
+		$alltheme=DB::table('quiztype_user_rat')->select('demo_detail_id')
+			->where('user_id', $request->user()->id)
+			->where('quiz_id', $request->id)->distinct()->get();
 		$last_show = DB::table('demo_detail_show')
 			->where('user_id', $request->user()->id)
 			->where('quiz_id', $request->id)
@@ -241,7 +283,10 @@ class QuizController extends Controller
 		 			->first();
 
 		if($last_show) {
-	 		
+			$alldemo=[];
+	 		foreach($alltheme as $allt):
+			$alldemo[]=$allt->demo_detail_id;
+			endforeach;
 			return view('quiz.step-two', [
 				'quizdemodettagli' => DB::table('quizdemodettagli')->get(),
 				'demodettagli' => DB::table('quizdemodettagli')
@@ -254,7 +299,8 @@ class QuizController extends Controller
 				'payment_status' => DB::table('payment_status')
 					->where('quiz_id', $request->id)
 					->first(),				
-				'quizid'=>$request->id,                 
+				'quizid'=>$request->id,
+				'alldemo'=>$alldemo,                 
 				'detail_id'=>$request->id,
 				'last_show' => $last_show,
 				'quizdetail'=>$quizdetail,
@@ -381,7 +427,7 @@ class QuizController extends Controller
 		
 		$rating_demo_avg = DB::table('quiztype_user_rat')
 			->select(DB::raw('AVG(rating) as average'))
-			->where('demo_detail_id', $request->demo_detail_id)->get();
+			->where('demo_detail_id', $request->demo_detail_id)->where('quiz_id', $request->quiz_id)->get();
 
 		// $rating_demo_avg = DB::table('quiz_avg_rate')
 		// 	->select(DB::raw('AVG(average) as average'))
@@ -511,7 +557,7 @@ class QuizController extends Controller
 				->update(array(             
 					'qty' => $total_pages,
 					'label' => isset($pacchetto->nome_pacchetto) ?$pacchetto->nome_pacchetto : '-',
-					'description' => isset($pacchetto->description) ? $pacchetto->description: '-',
+					'description' => isset($pacchetto->description) ? $pacchetto->description."-". $pages: '-',
 					'prezzo_base' => $pacchetto->prezzo_pacchetto,
 					'prezzo_totale' => $pacchetto_price
 				));  
@@ -568,7 +614,7 @@ class QuizController extends Controller
 					'nome_azienda' => $quiz->nome_azienda,  
 					'pacchetto_id' => $pacchetto->id,
 					'label' => isset($pacchetto->nome_pacchetto) ?$pacchetto->nome_pacchetto : '-',
-					'description' => isset($pacchetto->description) ? $pacchetto->description: '-',
+					'description' => isset($pacchetto->description) ? $pacchetto->description."-". $pages: '-',
 					'optional_id' => '',
 					'tipo' => 'pacchetto',
 					'qty' => $total_pages,
@@ -608,9 +654,9 @@ class QuizController extends Controller
 	  	$cart = implode(',', $cart);
 
 	  	return view('quiz.step-four', [	  		
-			'optional' => DB::table('optional')->where('escludi_da_quiz', 1)->get(),
+			'optional' => DB::table('optional')->where('escludi_da_quiz', 1)->where('dipartimento',1)->get(),
 			'payment_status' => DB::table('payment_status')->where('quiz_id', $request->id)->first(),
-			'default' => DB::table('optional')->where('escludi_da_quiz', 1)->first(),
+			'default' => DB::table('optional')->where('escludi_da_quiz', 1)->where('dipartimento',1)->first(),
 			'quizid' =>$request->id,
 			'locationpercentage'=>$percentage,
 			'cartdetail'=>$optioanl,
@@ -618,8 +664,10 @@ class QuizController extends Controller
 	}
 
 	public function removecart(Request $request){
-		$cartid = $request->cartid;		
-		$response = DB::table('store_optioanl')->where('id', $cartid)->delete();
+		$cartid = $request->cartid;
+		$response=DB::table('store_optioanl')->where('id',$cartid)->first();
+		DB::table('order_record')->where(['quiz_id'=>$response->quiz_id,'optional_id'=>$response->optional_id])->delete();
+		$response = DB::table('store_optioanl')->where('id',$cartid)->delete();
 		return "true";
 	}
 
@@ -635,7 +683,6 @@ class QuizController extends Controller
 		$order = DB::table('quiz_order')
 			->where('quiz_id', $quiz->quiz_id)
 			->first();
-		
 		$totale_elementi = $order->totale_elementi + 1;
 		$totale_prezzo = $order->totale_prezzo + $request->price;
 		$optional=DB::table('optional')->where('id', $request->optioan_id)->first();
@@ -833,12 +880,13 @@ class QuizController extends Controller
  		$this->stepsixsetup($request);
  		$departments = DB::table('departments')
 			->where('nomedipartimento', 'LANGA WEB')->first();
-
-		$reference = DB::table('corporations')
-			->where('nomeazienda', 'LANGA WEB INFORMATICA')->first();
-		
 		$quiz_detail = DB::table('quiz_dati')
 	    	->where('id', $request->id)->first();
+			
+		$reference = DB::table('corporations')
+			->where('nomeazienda', $quiz_detail->nome_azienda)->first();
+		
+		
 
 	  	return view('quiz.step-six', [
 	    	'quizid' => $request->id,
@@ -895,7 +943,7 @@ class QuizController extends Controller
 				'idutente' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
 				'idente' => $entity->id,
 				'data' => isset($date) ? $date : '',
-				'oggetto' => isset($order->nome_azienda) ? trans('keyword_quiz_pacchetto').' '.$order->nome_azienda : '',
+				'oggetto' => isset($order->nome_azienda) ? trans('messages.keyword_quiz_pacchetto').' '.$order->nome_azienda : '',
 				'dipartimento' => isset($departments->id) ? $departments->id : 0,
 				'valenza' => isset($valence) ? $valence : '',
 				'finelavori' => isset($enddate) ? $enddate : '',
@@ -917,7 +965,7 @@ class QuizController extends Controller
 				'qta'=>$optional->qty,
 				'prezzounitario'=>$optional->prezzo_base,
 				'totale'=>$optional->prezzo_totale,
-				'Ciclicita'=>$optional->frequency,
+				'Ciclicita'=>isset($optional->frequency)?$optional->frequency:1,
 				'id_preventivo'=>$quoteid
 				]);
 			}
@@ -929,7 +977,7 @@ class QuizController extends Controller
 				'idutente' => isset($order->user_id) ? $order->user_id : Auth::user()->id,
 				'idente' => $entity->id,
 				'data' => isset($date) ? $date : '',
-				'oggetto' => isset($order->nome_azienda) ? trans('keyword_quiz_pacchetto').' '.$order->nome_azienda : '',
+				'oggetto' => isset($order->nome_azienda) ? trans('messages.keyword_quiz_pacchetto').' '.$order->nome_azienda : '',
 				'dipartimento' => isset($departments->id) ? $departments->id : 0,
 				'valenza' => isset($valence) ? $valence : '',
 				'finelavori' => isset($enddate) ? $enddate : '',
@@ -951,7 +999,7 @@ class QuizController extends Controller
 				'qta'=>$optional->qty,
 				'prezzounitario'=>$optional->prezzo_base,
 				'totale'=>$optional->prezzo_totale,
-				'Ciclicita'=>$optional->frequency,
+				'Ciclicita'=>isset($optional->frequency)?$optional->frequency:1,
 				'id_preventivo'=>$quote->id
 				]);
 			}
@@ -1031,16 +1079,23 @@ public function stepsixconfirm(Request $request){
 		$order = DB::table('quiz_order')
 			->where('quiz_id', $quizid)->first();
 		
-		
+		$quote = DB::table('quotes')->where('quiz_id',$quizid)->first();
 		$quoteid = DB::table('quotes')->where('quiz_id',$quizid)->update([			
-			
 			'scontoagente' => isset($request->agent_discount) ? $request->agent_discount : 0,
-		
 			'subtotale'=> isset($request->total) ? $request->total : 0,
-			'totale' => isset($request->discount) ? $request->discount : 0,
+			'totale' => isset($request->discount) ? ($request->total - $request->discount) : 0,
 			'totaledapagare' => isset($request->discount_tax) ? $request->discount_tax : 0,
 			'prezzo_confermato' => isset($request->discount_tax) ? $request->discount_tax : 0,
 		]);	
+		    
+		// Get confirm state id
+		$tipo = DB::table('statiemotivipreventivi')->where('id', '6')->first();
+		DB::table('statipreventivi')->where('id_preventivo', $quote->id)->delete();
+		DB::table('statipreventivi')->insert([
+				'id_tipo' => $tipo->id,
+				'id_preventivo' => $quote->id,
+				'created_at'=>date('Y-m-d H:i:s')
+			]);
 		$payment=DB::table('payment_status')->where('quiz_id',$quizid)->first();
 		if(!$payment)
 		{
@@ -1070,8 +1125,8 @@ public function stepsixconfirm(Request $request){
 				'payment_status' => $payment_status
 			]);	
 		}
-		$paypal=new PaypalController();
-		return $redirect=$paypal->getCheckout(['amount'=>$request->total,'description'=>'Payment for quiz section purchase under'.$order->nome_azienda.'for quiz id '.$quoteid]);
+		//$paypal=new PaypalController();
+		return $redirect=$this->getCheckout(['amount'=>$request->total,'description'=>'Payment for quiz section purchase under '.$order->nome_azienda.'for quiz id '.$quizid]);
 		 
 		//return $quoteid;	
 	}
@@ -1170,5 +1225,253 @@ public function stepsixconfirm(Request $request){
 	        return $keyword_key;
         }
     }
+	
+	public function getDone(Request $request)
+	{
+	    $id = $request->get('paymentId');
+	    $token = $request->get('token');
+	    $payer_id = $request->get('PayerID');
+
+
+	    $payment = PayPal::getById($id, $this->_apiContext);
+
+
+	    $paymentExecution = PayPal::PaymentExecution();
+
+
+	    $paymentExecution->setPayerId($payer_id);
+
+	   $executePayment = $payment->execute($paymentExecution, $this->_apiContext);
+	  // dd($executePayment);
+	   //exit();
+		//echo $description=json_encode($executePayment);
+		$response=json_decode($executePayment,true);
+		$trans_id=$response['id'];
+		$cart=$response['cart'];
+		$state=$response['state'];
+		$payer=$response['payer'];
+		$status=$payer['status'];
+		$email=$payer['payer_info']['email'];
+		$address=implode(',',$payer['payer_info']['shipping_address']);
+		$transaction=$response['transactions'];
+		
+		$amount=$transaction[0]['amount']['total'];
+		$currency=$transaction[0]['amount']['currency'];
+		$description=$transaction[0]['description'];
+		$quiz=explode('quiz id ',$description);
+		$quizid=$quiz[1];
+		$quote=DB::table('quotes')->select('id')->where('quiz_id',$quizid)->first();
+		$quoteid=$quote->id;
+		DB::table('payment_history')->insertGetId([
+                        'user_id' 		=> Auth::user()->id,
+						'type'			=>1,
+						'ref_id'		=>$quizid,
+						'trans_id'		=>$trans_id,
+						'state'			=>$state,
+						'status'		=>$status,
+						'email'			=>$email,
+						'cart'			=>$cart,
+						'address'		=>$address,
+						'amount'		=>$amount,
+						'currency'		=>$currency,
+						'description'	=>$description,
+						'message'		=>$executePayment,
+						'create_time'	=>$response['create_time']
+					]);
+					
+		DB::table('quotes')->where('id',$quoteid)
+						->update([
+									'totaledapagare'		=>$amount,
+									'metodo'				=>'Paypal',
+									'updated_at'			=>$response['create_time']
+					
+					]);
+		$paymentid=	DB::table('quote_paymento')->insertGetId([
+									'qp_quote_id'		=>$quoteid,
+									'qp_data'			=>date('Y-m-d'),
+									'qp_amnt'			=>$amount,
+									'qp_create_dt'		=>$response['create_time'],
+									'qp_update_dt'		=>$response['create_time'],
+									'qp_entryby'		=>Auth::user()->id
+					
+					]);
+		$invoiceid=$this->createquoteinvoice($quizid);
+		return view('quiz/thank-you',['invoice'=>$invoiceid]);
+	}
+
+	public function quizthanks(){
+		$invoiceid=123;
+		return view('quiz/thank-you',['invoice'=>$invoiceid]);
+
+	}
+
+	public function getCancel(Request $request)
+	{
+		//dd($request);
+	    return Redirect::back();
+		
+
+	}
+	
+	public function createquoteinvoice($quoteId = "") {		
+    	
+    	if($quoteId=="") {
+    		return false;
+    	}
+		$quote = DB::table('quotes')->where('quiz_id', $quoteId)->first();
+		$dipartimento= (isset($quote->dipartimento) && !empty($quote->dipartimento)) ? $quote->dipartimento : '1';
+		$ente = DB::table('corporations')->where('id', $quote->idente)->first();
+
+    	$project = DB::table('projects')->where('id_preventivo', $quoteId)->first();  	  
+		$tipofattura = "FATTURA DI VENDITA"; 	
+		$datainserimento = date('Y-m-d', time());
+	
+		$enddate= isset($quote->finelavori) ? date('Y-m-d',strtotime(str_replace('/', '-',$quote->finelavori))):date('Y-m-d',strtotime("+ $this->endday days"));
+	
+		$emissione = date('Y-m-d', time());
+
+		$tranche = DB::table('tranche')->insertGetId([
+                        'user_id' => Auth::user()->id,
+                        'id_disposizione' => isset($project->id) ? $project->id : '0',/* Project id */
+						'id_quote'=> isset($quoteId) ? $quoteId: "0", /* Quote Id */
+						'tipo' => 0,
+						'datainserimento' => $datainserimento,
+						'datascadenza' => $enddate,
+						'percentuale' => 0,
+						'dettagli' => isset($quote->considerazioni) ? $quote->considerazioni : '',
+						'note' => isset($quote->considerazioni) ? $quote->considerazioni : '',
+						'DA' => isset($quote->dipartimento) ? $quote->dipartimento : 1,
+						'A' => isset($quote->idente) ? $quote->idente : '',
+						'idfattura' => isset($request->idfattura) ? $request->idfattura : '',
+						'emissione' => $emissione,
+						'indirizzospedizione' => isset($ente->indirizzospedizione) ? $ente->indirizzospedizione : '',
+						'privato' => 0,
+						'base' => $quote->oggetto,
+						'modalita' => 'Paypal',
+						'tipofattura' => $tipofattura,
+						'iban' => isset($ente->iban) ? $ente->iban : '',
+						'netto' => $quote->subtotale,
+						'scontoaggiuntivo' => $quote->totale,
+						'imponibile' => ($quote->subtotale - $quote->totale),
+						'prezzoiva' => ($quote->prezzo_confermato-($quote->subtotale - $quote->totale)),
+						
+						'dapagare' => $quote->prezzo_confermato,
+                      ]);
+		/* Medai files from project to qoute */
+		$arrwhere = (isset($project->id)) ? array('master_id'=>$project->id,'master_type'=>'1') : array('master_id'=>$quoteId,'master_type'=>'0');
+		$medifilesQuote = DB::table('media_files')->where($arrwhere)->get();
+		foreach ($medifilesQuote as $keymq => $valuemq) {
+			$mediafileid = DB::table('media_files')->insertGetId([
+					'name' => 'inv'.$valuemq->name,
+				    'master_id' => $tranche,
+					'type' => Auth::user()->dipartimento,					
+					'master_type' => 3,
+					'title' => $valuemq->title,
+					'description' =>$valuemq->description,
+					'created_at'=>time()
+				]);
+			if(isset($project->id)){
+				if(file_exists('storage/app/images/projects/'.$valuemq->name)){			
+					copy('storage/app/images/projects/'.$valuemq->name, 'storage/app/images/invoice/inv'.$valuemq->name);
+				}
+			}
+			else {
+				if(file_exists('storage/app/images/quote/'.$valuemq->name)){			
+					copy('storage/app/images/quote/'.$valuemq->name, 'storage/app/images/invoice/inv'.$valuemq->name);
+				}	
+			}
+		}
+
+		$logs = $this->logmainsection.' -> Add New Invoice (ID: '. $tranche . ')';
+		storelogs(Auth::user()->id, $logs);
+
+		//if($request->statoemotivo!=null) {
+			// Memorizzo lo stato emotivo
+			$tipo = DB::table('statiemotivipagamenti')->where('id', '12')->first();
+			if(isset($tipo->id)){
+				DB::table('statipagamenti')->insert([
+					'id_pagamento' => $tranche,
+					'id_tipo' => $tipo->id,
+					'created_at'=>date('Y-m-d H:i:s')
+				]);
+			}
+		//}
+		
+		/* ================= Invoice Body Sections ==================== */
+		$ordine = isset($quote->id) ? ':'.$quote->id.'/'.$quote->anno : '';
+		$project_refer_no = isset($project->id) ? ':'.$project->id.'/'.substr($project->datainizio, -2) : '';		
+		if(isset($quote->id)) {
+			$quote_optional = DB::table('optional_preventivi')->where('id_preventivo', $quote->id)->get();		
+			foreach ($quote_optional as $quoteopkey => $quoteopvalue) {
+				DB::table('corpofattura')->insert([
+						'id_tranche' => $tranche,
+						'ordine' => $ordine,
+						'project_refer_no'=>$project_refer_no,
+						'descrizione' => $quoteopvalue->descrizione,
+						'qta' => $quoteopvalue->qta,
+						'subtotale' =>$quoteopvalue->totale,
+						/*'scontoagente' => isset($scontoagente[$i]) ? $scontoagente[$i] : 0 ,
+						'scontobonus' => $scontobonus[$i],*/
+						'netto' => $quoteopvalue->prezzounitario,						
+						'percentualeiva' => 0,
+						'is_active' => 0,
+					]);
+			}
+		}
+		return true;
+		/*return redirect('/pagamenti/tranche/modifica/' . $tranche)
+                        ->with('error_code', 5)
+                        ->with('msg', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> '.trans('messages.keyword_addsuccessmsg').'!</div>');*/
+	}
+	
+	public function getCheckout($data)
+
+	{
+		
+	    $payer = PayPal::Payer();
+
+	    $payer->setPaymentMethod('paypal');
+
+
+	    $amount = PayPal:: Amount();
+
+	    $amount->setCurrency('EUR');
+
+	    //$amount->setTotal($data['amount']);
+		 $amount->setTotal(100);
+
+	    $transaction = PayPal::Transaction();
+
+	    $transaction->setAmount($amount);
+
+	    $transaction->setDescription($data['description']);
+
+
+	    $redirectUrls = PayPal:: RedirectUrls();
+
+	    $redirectUrls->setReturnUrl(route('getDone'));
+
+	    $redirectUrls->setCancelUrl(route('getCancel'));
+
+
+	    $payment = PayPal::Payment();
+
+	    $payment->setIntent('sale');
+
+	    $payment->setPayer($payer);
+
+	    $payment->setRedirectUrls($redirectUrls);
+
+	    $payment->setTransactions(array($transaction));
+
+
+	    $response = $payment->create($this->_apiContext);
+
+	   $redirectUrl = $response->links[1]->href;
+		 
+      
+	    return $redirectUrl;
+
+	}
 
 }

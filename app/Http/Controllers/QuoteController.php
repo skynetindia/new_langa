@@ -21,6 +21,7 @@ class QuoteController extends Controller
 	protected $logmainsection;
 
 	protected $module;
+	protected $endday=10;
 	protected $sub_id;
 	
 	public function __construct(QuoteRepository $quotes, CorporationRepository $corporations)
@@ -132,7 +133,7 @@ class QuoteController extends Controller
 		DB::enableQueryLog();
 		if(isset($request->quote_id)){
 			//$updateData = DB::table('media_files')->where('quote_id',$request->quote_id)->get();									
-			$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0'";
+			$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0' order by id desc";
 		
 			$userprofileid = $request->user()->dipartimento;
 	 		$Querytype = DB::table('ruolo_utente')->where('ruolo_id', $userprofileid)->first();
@@ -140,12 +141,12 @@ class QuoteController extends Controller
                 
 			if(isset($request->term) && $request->term != ""){
 				$where = ($request->user()->id === 0 || $type === 'SupperAdmin') ? "" : " AND find_in_set('$userprofileid',type) <> 0";
-				$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0' $where  AND (title LIKE '%$request->term%' OR  description LIKE '%$request->term%')";
+				$query = "SELECT * FROM media_files WHERE master_id=$request->quote_id and master_type='0' $where  AND (title LIKE '%$request->term%' OR  description LIKE '%$request->term%') order by id desc";
 			}			
 			$updateData = DB::select($query);
 		}
 		else {
-			$query = "SELECT * FROM media_files WHERE code=$request->code";		
+			$query = "SELECT * FROM media_files WHERE code=$request->code order by id desc";		
 			$updateData = DB::select($query);
 			/*DB::table('media_files')->where('code',$request->code)->get();*/				
 		}		
@@ -163,11 +164,15 @@ class QuoteController extends Controller
 				if(isset($arrextension[$extention])){
 					$imagPath = url('/storage/app/images/default/'.$arrextension[$extention]);			
 				}
-			$titleDescriptions = (!empty($prev->title)) ? '<hr><strong>'.$prev->title.'</strong><p>'.$prev->description.'</p>' : "";			
-			$html = '<tr class="quoteFile_'.$prev->id.'"><td><img src="'.$imagPath.'" height="100" width="100"><a href="'.$downloadlink.'" class="btn btn-info pull-right"  download><i class="fa fa-download"></i></a><a class="btn btn-danger pull-right" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a>'.$titleDescriptions.'</td></tr>';
+			$titleDescriptions = (!empty($prev->title)) ? '<div class="hey-content"><div class="hey-heading"><strong>'.$prev->title.'</strong></div><div class="hey-description"><p>'.$prev->description.'</p></div></div>' : "";			
+			
+			$title = (!empty($prev->title)) ? '<strong>'.$prev->title.'</strong>' : "";
+            $Descriptions = (!empty($prev->description)) ? '<p>'.$prev->description.'</p>' : "";
+				
+			$html = '<tr class="quoteFile_'.$prev->id.'"><td><div class="image-wrapper"><img src="'.$imagPath.'" height="100" width="100"></div>'.$titleDescriptions.'<div class="hey-actions"><a href="'.$downloadlink.'" class="btn btn-info"  download><i class="fa fa-download"></i></a><a class="btn btn-danger" style="text-decoration: none; color:#fff" onclick="deleteQuoteFile('.$prev->id.')"><i class="fa fa-trash"></i></a></div></td></tr>';
 
 			$html .='<tr class="quoteFile_'.$prev->id.'"><td>';
-			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->where('nome_ruolo','!=','SupperAdmin')->get();							
+			$utente_file = DB::table('ruolo_utente')->select('*')->where('is_delete', 0)->where('ruolo_id','!=','0')->get();							
 			foreach($utente_file as $key => $val){
 				if($request->user()->dipartimento == $val->ruolo_id){
 					$response = DB::table('media_files')->where('id', $prev->id)->update(array('type' => $val->ruolo_id));	    
@@ -212,8 +217,14 @@ class QuoteController extends Controller
 		echo ($response) ? 'success' :'fail';   				
 		exit;
 	}
-	public function confirmQuote(Request $request){		 				
-		$response = DB::table('quotes')->where('id', $request->id)->update(array('signature' => $request->signature));	    
+	public function confirmQuote(Request $request){		 	
+		/*$js= json_decode($request->signature,true);		
+		$jse = json_encode($js['lines']);*/
+		
+		//$filename = time().'signature.png';		
+		//Storage::put('images/signature/'.$filename, $request->signature);
+		
+		$response = DB::table('quotes')->where('id', $request->id)->update(array('signature' => $request->signature,'signaturejson'=>$request->signaturejson));	    
 		// Get confirm state id
 		$tipo = DB::table('statiemotivipreventivi')->where('id', '6')->first();
 		DB::table('statipreventivi')->where('id_preventivo', $request->id)->delete();
@@ -222,7 +233,7 @@ class QuoteController extends Controller
 				'id_preventivo' => $request->id,
 				'created_at'=>date('Y-m-d H:i:s')
 			]);
-	
+		
 		if($response) {
 			$this->createquoteinvoice($request->id);
 		}
@@ -239,6 +250,7 @@ class QuoteController extends Controller
 			->where('is_deleted', 0)
 			->orderBy('id', 'desc')			
 			->get();
+			//echo "<pre>";print_r($preventivi);
 			$this->completeListCode($preventivi);
 			return json_encode($preventivi);
 		}
@@ -248,6 +260,7 @@ class QuoteController extends Controller
         	$arrwhere = ($type === 'Client' || Auth::user()->dipartimento == '16' || Auth::user()->dipartimento == '13') ? array('is_deleted'=>0,'is_published'=>1) : array('is_deleted'=>0); 
 
 			$preventivi = DB::table('quotes')->where($arrwhere)->orderBy('id', 'desc')->get();
+			
 			
 			$id = $request->user()->id;
 			foreach($preventivi as $prev) {
@@ -400,6 +413,30 @@ class QuoteController extends Controller
 		return $this->add($request);
 	}
 	
+	public function getpackages(Request $request){	
+		$optional = DB::table('optional')->where('dipartimento',$request->department_id)->select('*')->get();
+		$packages = DB::table('pack')->where('departments_id',$request->department_id)->select('*')->get();
+//		 var pacchetti = json_encode($pacchetti);
+		$optionalhtml = '<option></option>';
+		$packageshtml = '<option></option>';
+		foreach($optional as $keyop => $valop) {
+			$optionalhtml .= '<option value="'.$valop->id.'">'.$valop->code.'</option>';
+		}		
+		foreach($packages as $keypac => $valpac) {
+			$packageshtml .= '<option value="'.$valpac->id.'">'.$valpac->label.'</option>';
+		}
+		$result['optional'] = $optionalhtml;
+		$result['package'] = $packageshtml;
+		$result['packagedata'] = $packages;
+		$result['optionaldata'] = $optional;
+		$result['packagelength'] = count($packages);
+		$result['optionallength'] = count($optional);
+		
+		
+		exit(json_encode($result));
+	}
+	
+	
 	// Mostra la pagina per aggiungere un nuovo preventivo
 	public function add(Request $request)
 	{
@@ -409,7 +446,7 @@ class QuoteController extends Controller
 
 		return view('estimates.add', [
 			'utenti' => DB::table('users')->select('*')->get(),
-			'enti' => $this->corporations->forUser2($request->user()),
+			'enti' => $this->corporations->forUser($request->user()),
 			'dipartimenti' => DB::table('departments')->select('*')->get(),
 			'optional' => DB::table('optional')->select('*')->get(),
 			'pacchetti' => DB::table('pack')->select('*')->get(),
@@ -663,32 +700,26 @@ class QuoteController extends Controller
         $type = isset($Querytype->nome_ruolo) ? $Querytype->nome_ruolo : "";
         // print_r($type);
         // exit;
-        if ($request->user()->id === 0 || $type === 'SupperAdmin') {
-			$quotefiles = DB::table('media_files')->select('*')->where('master_id', $quote->id)->where('master_type', '0')->get();
+        if ($request->user()->id === 0 || $userprofileid ==0) {
+			$quotefiles = DB::table('media_files')->select('*')->where('master_id', $quote->id)->where('master_type', '0')->orderBy('id', 'desc')->get();
 		}
 		else {
-    		$quotefiles = DB::select("select * from media_files where master_id = ".$quote->id." AND master_type = '0' AND find_in_set('$userprofileid',type) <> 0");
+    		$quotefiles = DB::select("select * from media_files where master_id = ".$quote->id." AND master_type = '0' AND find_in_set('$userprofileid',type) <> 0 order by id desc");
     	}
 
+		$quotes = DB::table('quotes')->select('*')->where('id', $quote->id)->first();
+		$department = (isset($quotes->dipartimento) && $quotes->dipartimento != "") ? $quotes->dipartimento : 1;
+		
 		return view('estimates.modifica', [
-			'preventivo' => DB::table('quotes')
-								->select('*')
-								->where('id', $quote->id)
-								->first(),
+			'preventivo' => $quotes,
 			'quotefiles' => $quotefiles,								
 			'utenti' => DB::table('users')
 							->select('*')
 							->get(),
-			'enti' => $this->corporations->forUser2($request->user()),
-			'dipartimenti' => DB::table('departments')
-								->select('*')
-								->get(),
-			'optional' => DB::table('optional')
-							->select('*')
-							->get(),
-			'pacchetti' => DB::table('pack')
-							->select('*')
-							->get(),
+			'enti' => $this->corporations->forUser($request->user()),
+			'dipartimenti' => DB::table('departments')->select('*')->get(),
+			'optional' => DB::table('optional')->where('dipartimento',$department)->select('*')->get(),
+			'pacchetti' => DB::table('pack')->where('departments_id',$department)->select('*')->get(),
 			'optional_pack' => DB::table('optional_pack')
 								->select('*')
 								->get(),
@@ -736,8 +767,10 @@ class QuoteController extends Controller
 			$scontoagente = $request->scontoagente;
 			$scontobonus = $request->scontobonus;
 			$scontibonus = [];
+			$scontoagente_max=$request->user()->sconto;
+			$scontobonus_max=$request->user()->sconto_bonus;
 			// Seleziono l'ente relativo alla utenza in uso
-			$ente = DB::table('corporations')
+			/*$ente = DB::table('corporations')
 						->where('id', $request->user()->id_ente)
 						->first();
 	
@@ -783,7 +816,7 @@ class QuoteController extends Controller
 				if($max < $scontibonus[$i])
 					$max = $scontibonus[$i];
 			}
-			$scontobonus_max = $max;
+			$scontobonus_max = $max;*/
 		if($scontoagente > $scontoagente_max) {
 					return Redirect::back()
 						->withInput()
@@ -982,24 +1015,26 @@ class QuoteController extends Controller
     	$project = DB::table('projects')->where('id_preventivo', $quoteId)->first();  	  
 		$tipofattura = "FATTURA DI VENDITA"; /* Sales note */	
 		
-		$date = isset($quote->data) ? str_replace('/', '-', $quote->data) :  date('Y-m-d');
-		$datainserimento = date('Y-m-d', strtotime($date));		
-
+		//$date = isset($quote->data) ? str_replace('/', '-', $quote->data) :  date('Y-m-d');
+		//$datainserimento = date('Y-m-d', strtotime($date));		
+		$datainserimento = date('Y-m-d', time());
 		/*$date = str_replace('/', '-', $request->datascadenza);
 		$datascadenza = date('Y-m-d', strtotime($date));*/
-
+		$enddate= isset($quote->finelavori) ? date('Y-m-d',strtotime(str_replace('/', '-',$quote->finelavori))):date('Y-m-d',strtotime("+ $this->endday days"));
 		//$date = str_replace('/', '-', $request->data);
-		$emissione = date('Y-m-d', strtotime($date));
+		$emissione = date('Y-m-d', time());
 
 		$tranche = DB::table('tranche')->insertGetId([
                         'user_id' => Auth::user()->id,
                         'id_disposizione' => isset($project->id) ? $project->id : '0',/* Project id */
+						'id_quote'=> isset($quoteId) ? $quoteId: "0", /* Quote Id */
 						'tipo' => 0,
 						//'datainserimento' => isset($request->datainserimento) ? $request->datainserimento : '',
 						'datainserimento' => $datainserimento,
-						'datascadenza' => isset($quote->finelavori) ? $quote->finelavori : '',
+						'datascadenza' => $enddate,
 						'percentuale' => 0,
 						'dettagli' => isset($quote->considerazioni) ? $quote->considerazioni : '',
+						'note' => isset($quote->considerazioni) ? $quote->considerazioni : '',
 						/*'frequenza' => $request->frequenza,*/
 						'DA' => isset($quote->dipartimento) ? $quote->dipartimento : Auth::user()->dipartimento,
 						'A' => isset($quote->idente) ? $quote->idente : '',
@@ -1020,7 +1055,6 @@ class QuoteController extends Controller
 						/*'percentualeiva' => isset($request->percentualeiva) ? $request->percentualeiva : '',*/
 						/*'dapagare' => isset($request->dapagare) ? $request->dapagare : '',*/
                       ]);
-
 		/* Medai files from project to qoute */
 		$arrwhere = (isset($project->id)) ? array('master_id'=>$project->id,'master_type'=>'1') : array('master_id'=>$quoteId,'master_type'=>'0');
 		$medifilesQuote = DB::table('media_files')->where($arrwhere)->get();
@@ -1056,6 +1090,7 @@ class QuoteController extends Controller
 				DB::table('statipagamenti')->insert([
 					'id_pagamento' => $tranche,
 					'id_tipo' => $tipo->id,
+					'created_at'=>date('Y-m-d H:i:s')
 				]);
 			}
 		//}
@@ -1273,7 +1308,8 @@ public function eliminaoptional(Request $request, Quote $quote)
 			$ente_DA = DB::table('corporations')->where('id', $utente->id_ente)->first();
 		}
 		$ownerDepartments = DB::table('departments')->where('id', $preventivo->dipartimento)->first();
-		$optional_preventivi = DB::table('optional_preventivi')->where('id_preventivo', $preventivo->id)->get();
+		$optional_preventivi = DB::table('optional_preventivi')->leftJoin('frequenze', 'frequenze.id', '=', 'optional_preventivi.Ciclicita')->where('optional_preventivi.id_preventivo', $preventivo->id)->orderBy('optional_preventivi.ordine','asc')->select('optional_preventivi.*','frequenze.rinnovo')->get();
+		
 		$taxation = DB::table('tassazione')->where('is_active',0)->get();
 
 			
@@ -1282,9 +1318,20 @@ public function eliminaoptional(Request $request, Quote $quote)
 		//$pdf->tableMinSizePriority = false;
 		//$pdf->mirrorMargins(1);
 						
-		$header = \View::make('pdf.quotation_header')->render();				
+		 $header = \View::make('pdf.quotation_header',[
+			'preventivo' =>$preventivo,										
+			'ente' => $ente,
+			'utente' => $utente,
+			'ente_DA' => $ente_DA,
+			'owner'=>$ownerDepartments,
+			'responsabile'=>$responsabile,
+			'optional_preventivi'=>$optional_preventivi,
+			'taxation'=>$taxation])->render();			
+						
 		$footer = \View::make('pdf.quotation_footer')->render();
 		
+		$title= $preventivo->id.'-'.$preventivo->anno.'_'.$preventivo->oggetto;
+		$pdf->SetTitle($title);
 		$pdf->SetHTMLHeader($header, 'O');
 		$pdf->SetHTMLHeader($header, 'E');
 		$pdf->SetHTMLFooter($footer, 'O');
@@ -1319,7 +1366,8 @@ public function eliminaoptional(Request $request, Quote $quote)
 		storelogs($request->user()->id, $logs);
 		
 		/*$pdf->download('test.pdf');*/
-		$pdf->stream('quote.pdf');				
+		$filenamepdf = $preventivo->id.'-'.$preventivo->anno.'_'.$preventivo->oggetto.'.pdf';
+		$pdf->stream($filenamepdf);				
 	
 	}
 	
@@ -1353,4 +1401,369 @@ public function eliminaoptional(Request $request, Quote $quote)
 
 		return json_encode($jsonQuotes);
 	}
+	
+	/*========================================================= Sales Statistics ================================================= */	
+    public function salesstatistics() {
+        $day = date('j');
+        $month = date('n');
+        $year = date('Y');
+        $arrCurrentLocation = getLocationInfoByIp();
+		
+        /*=============== Statistics sections ============== */            
+            $notconfirm = []; $pendingconfirm = []; $confirm = [];
+            
+            $this->confirm($confirm, $year);            
+            $this->pendingConfirm($pendingconfirm, $year);            
+            $this->notConfirm($notconfirm, $pendingconfirm, $confirm,$year);            
+            $monthName = array(
+                    ''.trans("messages.keyword_january").'',
+                    ''.trans("messages.keyword_february").'',
+                    ''.trans("messages.keyword_march").'',
+                    ''.trans("messages.keyword_april").'',
+                    ''.trans("messages.keyword_may").'',
+                    ''.trans("messages.keyword_june").'',
+                    ''.trans("messages.keyword_july").'',
+                    ''.trans("messages.keyword_august").'',
+                    ''.trans("messages.keyword_september").'',
+                    ''.trans("messages.keyword_october").'',
+                    ''.trans("messages.keyword_november").'',
+                    ''.trans("messages.keyword_december").'' );        
+        $statistics = array('month' => $monthName, 'pendingconfirm' => $pendingconfirm, 'confirm' => $confirm, 'notconfirm' => $notconfirm);
+		        
+        return view('sales_statistiche',[
+            'statistics' =>$statistics,
+            'year' => $year,
+            'day' => $day,
+            'month' => $month
+        ]);
+    }
+	
+	    public function confirm(&$confirm, $year, $startDate = '0', $endDate ='0') {        
+        $startMonth =  1;
+        $endMonth = 12;
+        $particpantid=check_participant();
+        if($year == '0' && $startDate != '0' && $endDate !='0') {
+            
+            $startMonth = date("m",strtotime($startDate));
+            $endMonth = date("m",strtotime($endDate));                       
+            $startYear = date("Y",strtotime($startDate));
+            $endYear = date("Y",strtotime($endDate));
+            $totalmonth = (($endYear - $startYear) * 12) + ($endMonth - $startMonth);
+            /*$endMonth = ($totalmonth > 12) ? $totalmonth : 12;
+            $startMonth = ($totalmonth > 12) ? $startMonth : 1;*/
+        }
+        else {
+
+             $startYear = $year;
+             $endYear = $year;
+        }
+
+        $totalYear = ($endYear - $startYear);
+		
+        for($y = $startYear; $y <= $endYear; $y++) {
+
+            $endmonth = ($y == $endYear) ? $endMonth : 12;
+            $startmonth = ($y == $startYear) ? $startMonth : 01;
+
+            /* Get the Year wise data */
+            if($totalYear > 2){  
+			$confirmamount=0;                          
+                    /*$timestamp = ($year != 0) ? strtotime('1-'.$i.'-'.$year) : strtotime('1-'.$i.'-'.$y);            
+                    $timestamp =   
+                    $last_day = date('01-01-Y', strtotime('-1-'.$y));
+                    $last_day = date('31-12-Y', strtotime('1-1-'.$y));*/
+                    
+                    $arrbetween = array(date('Y-01-01',strtotime('1-1-'.$y)),date('Y-12-31',strtotime('1-1-'.$y))); 
+
+                    DB::connection()->enableQueryLog();
+                    $query = DB::table('quotes')
+                    ->selectRaw("quotes.totale,quotes.subtotale")
+                    ->join('statipreventivi', 'quotes.id', '=', 'statipreventivi.id_preventivo')
+                    ->join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+                     ->whereBetween('quotes.created_at',$arrbetween)
+                    ->where('quotes.is_deleted', 0);                  
+                    if(Auth::user()->id!=0 || Auth::user()->departmento!=0) 
+					{
+                       $query= $query->where(function($query) use($particpantid) {$query->where('quotes.user_id', '=', Auth::user()->id)
+                            ->orWhere('quotes.idutente', '=', Auth::user()->id)
+                   			->orWhereIn('quotes.idente',$particpantid);});
+					}	$query=$query->get();
+					foreach($query as $qur)
+					{
+						$confirmamount+=($qur->totale==0)?$qur->subtotale:$qur->totale;
+						
+					}
+                    $confirm[] =  ($confirmamount!=null)?$confirmamount:0;             
+            }
+            else {
+                for($i = $startmonth; $i <= $endmonth; $i++) {
+                  
+					$confirmamount=0;               
+                    $timestamp = ($year != 0) ? strtotime('1-'.$i.'-'.$year) : strtotime('1-'.$i.'-'.$y);            
+                    $arrbetween = array(date('Y-m-01',$timestamp),date('Y-m-t',$timestamp)); 
+					
+                    DB::connection()->enableQueryLog();
+                    $query = DB::table('quotes')
+                    ->selectRaw("quotes.totale,quotes.subtotale")
+                    ->join('statipreventivi', 'quotes.id', '=', 'statipreventivi.id_preventivo')
+                    ->join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+                    
+					->where('statiemotivipreventivi.id', '6')
+                    ->whereBetween('quotes.created_at',$arrbetween)
+                    ->where('quotes.is_deleted', 0);  
+					if(Auth::user()->id!=0 || Auth::user()->departmento!=0) 
+					{
+                       $query= $query->where(function($query) use($particpantid) {$query->where('quotes.user_id', '=', Auth::user()->id)
+                            ->orWhere('quotes.idutente', '=', Auth::user()->id)
+                   			->orWhereIn('quotes.idente',$particpantid);});
+					}
+					$query=$query->get();
+					foreach($query as $qur)
+					{
+						$confirmamount+=($qur->totale==0)?$qur->subtotale:$qur->totale;
+						
+					}
+					//echo $confirmamount;
+                    // $query = DB::getQueryLog();
+                    // $lastQuery = end($query);
+        
+                    // dd($preventivi);
+                  /* $queries = DB::getQueryLog();
+                    $last_query = end($queries);
+                    print_r($last_query);  echo "<br>";  */            
+                   
+                    $confirm[] =  ($confirmamount!=null)?$confirmamount:0;
+                } //exit();
+            }
+        }
+    }
+    public function pendingConfirm(&$pendingconfirm, $year, $startDate = '0', $endDate ='0')
+    {
+		$particpantid=check_participant();
+        $startMonth =  1;
+        $endMonth = 12;
+        if($year == '0' && $startDate != '0' && $endDate !='0') {
+              $startMonth = date("m",strtotime($startDate));
+              $endMonth = date("m",strtotime($endDate));
+              $startYear = date("Y",strtotime($startDate));
+              $endYear = date("Y",strtotime($endDate));
+              $totalmonth = (($endYear - $startYear) * 12) + ($endMonth - $startMonth);
+              /*$endMonth = ($totalmonth > 12) ? $totalmonth : 12;
+              $startMonth = ($totalmonth > 12) ? $startMonth : 1;*/
+        } 
+        else {
+             $startYear = $year;
+             $endYear = $year;
+        }  
+        $totalYear = ($endYear - $startYear);  
+
+        for($y = $startYear; $y <= $endYear; $y++) {
+            $endmonth = ($y == $endYear) ? $endMonth : 12;                         
+            $startmonth = ($y == $startYear) ? $startMonth : 01;  
+            if($totalYear > 2){                                                                  
+                    $arrbetween = array(date('Y-01-01',strtotime('1-1-'.$y)),date('Y-12-31',strtotime('1-1-'.$y))); 
+					$confirmamount=0; 
+                
+                    $query = DB::table('quotes')
+                    ->selectRaw("quotes.totale,quotes.subtotale")
+                    ->join('statipreventivi', 'quotes.id', '=', 'statipreventivi.id_preventivo')
+                    ->join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+                 	->where('statiemotivipreventivi.id', '9')
+                    ->whereBetween('quotes.created_at',$arrbetween)
+                    ->where('quotes.is_deleted', 0);                  
+                    if(Auth::user()->id!=0 || Auth::user()->departmento!=0) 
+					{
+                       $query= $query->where(function($query) use($particpantid) {$query->where('quotes.user_id', '=', Auth::user()->id)
+                            ->orWhere('quotes.idutente', '=', Auth::user()->id)
+                   			->orWhereIn('quotes.idente',$particpantid);});
+					}	$query=$query->get();
+					foreach($query as $qur)
+					{
+						$confirmamount+=($qur->totale==0)?$qur->subtotale:$qur->totale;
+						
+					}
+                    $pendingconfirm[] =  ($confirmamount!=null)?$confirmamount:0;                
+            }
+            else {
+                for($i = $startmonth; $i <= $endmonth; $i++) {
+					$confirmamount=0; 
+                   
+                    $timestamp = ($year != 0) ? strtotime('1-'.$i.'-'.$year) : strtotime('1-'.$i.'-'.$y);            
+                    $arrbetween = array(date('Y-m-01',$timestamp),date('Y-m-t',$timestamp)); 
+
+                  //  DB::connection()->enableQueryLog();
+                    $query = DB::table('quotes')
+                    ->selectRaw("quotes.totale,quotes.subtotale")
+                    ->join('statipreventivi', 'quotes.id', '=', 'statipreventivi.id_preventivo')
+                    ->join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+                  	->where('statiemotivipreventivi.id', '9')
+                    ->whereBetween('quotes.created_at',$arrbetween)
+                    ->where('quotes.is_deleted', 0);  
+					 if(Auth::user()->id!=0 || Auth::user()->departmento!=0) 
+					{
+                       $query= $query->where(function($query) use($particpantid) { $query->where('quotes.user_id', '=', Auth::user()->id)
+                            ->orWhere('quotes.idutente', '=', Auth::user()->id)
+                   			->orWhereIn('quotes.idente',$particpantid);});
+					}	$query=$query->get();
+					foreach($query as $qur)
+					{
+						$confirmamount+=($qur->totale==0)?$qur->subtotale:$qur->totale;
+						
+					}
+                    $pendingconfirm[] =  ($confirmamount!=null)?$confirmamount:0;  
+                  
+                }
+
+
+            } 
+        }       
+    }
+    public function notConfirm(&$notconfirm, $pendingconfirm, $confirm,$year, $startDate = '0', $endDate ='0') { 
+	$particpantid=check_participant();              
+        $startMonth =  1;
+        $endMonth = 12;
+        if($year == '0' && $startDate != '0' && $endDate !='0') {
+              $startMonth = date("m",strtotime($startDate));
+              $endMonth = date("m",strtotime($endDate));
+              $startYear = date("Y",strtotime($startDate));
+              $endYear = date("Y",strtotime($endDate));
+              $totalmonth = (($endYear - $startYear) * 12) + ($endMonth - $startMonth);
+              /*$endMonth = ($totalmonth > 12) ? $totalmonth : 12;
+              $startMonth = ($totalmonth > 12) ? $startMonth : 1;*/
+        }  
+        else {
+             $startYear = $year;
+             $endYear = $year;
+        }    
+        $totalYear = ($endYear - $startYear);  
+         for($y = $startYear; $y <= $endYear; $y++) {
+            $endmonth = ($y == $endYear) ? $endMonth : 12;                         
+            $startmonth = ($y == $startYear) ? $startMonth : 01;                        
+             if($totalYear > 2){ 
+			 $confirmamount=0;                                                 
+                $arrbetween = array(date('Y-01-01',strtotime('1-1-'.$y)),date('Y-12-31',strtotime('1-1-'.$y)));            
+             
+                $query = DB::table('quotes')
+                ->selectRaw("quotes.totale,quotes.subtotale")
+                ->join('statipreventivi', 'quotes.id', '=', 'statipreventivi.id_preventivo')
+                ->join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+               	->where('statiemotivipreventivi.id', '8')
+                ->whereBetween('quotes.created_at',$arrbetween)
+                ->where('quotes.is_deleted', 0);                  
+                if(Auth::user()->id!=0 || Auth::user()->departmento!=0) 
+				{
+				   $query= $query->where(function($query) use($particpantid) {$query->where('quotes.user_id', '=', Auth::user()->id)
+						->orWhere('quotes.idutente', '=', Auth::user()->id)
+						->orWhereIn('quotes.idente',$particpantid);});
+				}	$query=$query->get();
+				foreach($query as $qur)
+				{
+					$confirmamount+=($qur->totale==0)?$qur->subtotale:$qur->totale;
+					
+				}
+				$notconfirm[] =  ($confirmamount!=null)?$confirmamount:0;               
+          }
+          else {
+            for($i = $startmonth; $i <= $endmonth; $i++) {
+       		 $confirmamount=0;    
+           
+             $timestamp = ($year != 0) ? strtotime('1-'.$i.'-'.$year) : strtotime('1-'.$i.'-'.$y);            
+             $arrbetween = array(date('Y-m-01',$timestamp),date('Y-m-t',$timestamp)); 
+           
+            $query = DB::table('quotes')
+            ->selectRaw("quotes.totale,quotes.subtotale")
+            ->join('statipreventivi', 'quotes.id', '=', 'statipreventivi.id_preventivo')
+            ->join('statiemotivipreventivi', 'statiemotivipreventivi.id', '=', 'statipreventivi.id_tipo')
+           	->where('statiemotivipreventivi.id', '8')
+            ->whereBetween('quotes.created_at',$arrbetween)
+            ->where('quotes.is_deleted', 0);
+			 if(Auth::user()->id!=0 || Auth::user()->departmento!=0) 
+			{
+			   $query= $query->where(function($query) use($particpantid) {$query->where('quotes.user_id', '=', Auth::user()->id)
+					->orWhere('quotes.idutente', '=', Auth::user()->id)
+					->orWhereIn('quotes.idente',$particpantid);});
+			}	$query=$query->get();
+			foreach($query as $qur)
+			{
+				$confirmamount+=($qur->totale==0)?$qur->subtotale:$qur->totale;
+				
+			}
+			$notconfirm[] =  ($confirmamount!=null)?$confirmamount:0;                    
+          }
+          }
+        }        
+    }
+	
+	
+ /* This function is used to get the data for adminstartor/commercials FILTER BY DATE */
+    public function statistic_date(Request $request)
+    {        
+       //$request->year = isset($request->year) ? $request->year : date('Y');
+        $monthName['01'] = trans("messages.keyword_january");
+        $monthName['02'] = trans("messages.keyword_february");
+        $monthName['03'] = trans("messages.keyword_march");
+        $monthName['04'] = trans("messages.keyword_april");
+        $monthName['05'] = trans("messages.keyword_may");
+        $monthName['06'] = trans("messages.keyword_june");
+        $monthName['07'] = trans("messages.keyword_july");
+        $monthName['08'] = trans("messages.keyword_august");
+        $monthName['09'] = trans("messages.keyword_september");
+        $monthName['10'] = trans("messages.keyword_october");
+        $monthName['11'] = trans("messages.keyword_november");
+        $monthName['12'] = trans("messages.keyword_december");        
+        
+        $year = isset($request->year) ? $request->year : '0';
+        $startDate = isset($request->startDate) ? $request->startDate : '0';
+        $endDate = isset($request->endDate) ? $request->endDate : '0';
+        /*$month= date("F",$time);*/
+        $startyear = ($startDate != '0') ? date("Y",strtotime($startDate)) : '0';
+        $endyear = ($endDate != '0') ? date("Y",strtotime($endDate)) : '0';
+        $arrmonth = array();  
+        if($year == '0' && $startDate != '0' && $endDate !='0') {              
+            $idate = date("Ym", strtotime($startDate));
+            while($idate <= date("Ym", strtotime($endDate))) {
+                /*echo $idate."\n";*/                
+                $arrmonth[] = $monthName[substr($idate, -2)];
+                if(substr($idate, 4, 2) == "12"){
+                    $idate = (date("Y", strtotime($idate."01")) + 1)."01";
+                }
+                else {
+                    $idate++;
+                }
+            }               
+        }
+        else {
+            $arrmonth = array_values($monthName);            
+        }        
+
+     	 if($request->user()->id === 0 || $request->user()->dipartimento === 2 || $request->user()->dipartimento === 4) {
+             $notconfirm = []; $pendingconfirm = []; $confirm = [];
+            //dd($expenses);
+            $this->confirm($confirm, $year,$startDate, $endDate);
+            $this->pendingConfirm($pendingconfirm, $year,$startDate, $endDate);
+            $this->notConfirm($notconfirm, $pendingconfirm, $confirm,$year,$startDate, $endDate);  
+            $totalYear = (date("Y", strtotime($endDate)) - date("Y", strtotime($startDate)));
+            if($totalYear > 2){
+                $iyear = date("Y", strtotime($startDate));
+                 while($iyear <= date("Y", strtotime($endDate))) {
+                    /*echo $idate."\n";*/                
+                    $arryear[] = $iyear;
+                    $iyear++;                
+                }
+               $arrmonth=$arryear;
+            }            
+
+            $statistics = array('month' => $arrmonth, 'pendingconfirm' => $pendingconfirm, 'confirm' => $confirm, 'notconfirm' => $notconfirm);      
+            return view('sales_statistiche_ajax', [
+                'statistics' =>$statistics,
+                'year' => ($year=='0') ? $startyear : $year,
+                'startDate'=> $startDate,
+                'endDate'=> $endDate
+            ]);  
+        }
+        else {
+            return redirect('/unauthorized');
+        }
+    }
+	
 }

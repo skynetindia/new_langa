@@ -711,3 +711,148 @@
 
     	return $quotefiles;
     }
+	
+	/* Get the active currency details */
+	function getActiveCurrency() {
+		$Query = DB::table('currency')->where('is_active', '0')->first();
+		$collection= collect($Query);
+		$returnarr = $collection->toArray();
+		if(!isset($Query->id)){
+			$returnarr =array('id'=>'1','name'=>'Euro','symbol'=>'€','price'=>'64','code'=>'EUR','is_active'=>'0');
+		}
+		return $returnarr;
+	}
+	
+	function getAllUsers($isArray=false){
+		$users = DB::table('users')
+                ->join('ruolo_utente', 'users.dipartimento', '=', 'ruolo_utente.ruolo_id')
+                ->leftjoin('stato', 'users.id_stato', '=', 'stato.id_stato')
+                ->select('*')
+                ->where('id', '!=', 0)
+                ->where('users.is_delete', '=', 0)                
+                ->where('is_approvato', '=', 1)                
+                ->where('ruolo_utente.is_delete', '=', 0)
+                ->get();
+		if($isArray == true){
+			$users->toArray();
+		}
+		return $users;
+	}
+	
+	//app blade function
+	function salvaNotifica($evento) {
+		$notifica = DB::table('notifiche')
+			->insertGetId([
+				'oggetto' => $evento->titolo,
+				'user_id' => Auth::user()->id,
+				'cancellata' => 0,
+				'nome' => 'hai un evento!',
+				'datascadenza' => $evento->giorno . '/' . $evento->mese . '/' . $evento->anno . ' alle ' . $evento->sh,
+				'target' => '<i class="fa fa-calendar"></i>  ' . $evento->id_ente,
+				'id_ente' => $evento->id_ente,
+			]);
+		DB::table('events')
+				->where('id', $evento->id)
+				->update(array(
+					'id_notifica' => $notifica
+				));	
+	}
+	function salvaNotificaPrev($evento) {
+		$notifica = DB::table('notifiche')
+			->insertGetId([
+				'oggetto' => $evento->oggetto,
+				'user_id' => Auth::user()->id,
+				'cancellata' => 0,
+				'nome' => 'scad. preventivo!',
+				'datascadenza' => $evento->valenza,
+				'target' => '<i class="fa fa-file-text"></i>  ' . ':' . $evento->id . '/' . $evento->anno,
+				'id_ente' => $evento->idente
+			]);
+		DB::table('quotes')
+				->where('id', $evento->id)
+				->update(array(
+					'id_notifica' => $notifica
+				));	
+	}
+	function salvaNotificaLav($evento) {
+		$progetto = DB::table('projects')
+						->where('id', $evento->id_progetto)
+						->first();
+		$notifica = DB::table('notifiche')
+			->insertGetId([
+				'oggetto' => $evento->nome,
+				'user_id' => Auth::user()->id,
+				'cancellata' => 0,
+				'nome' => 'scad. lavorazione!',
+				'datascadenza' => $evento->scadenza . ' ' . $evento->alle,
+				'target' => '<i class="fa fa-briefcase"></i>  ' . '::' . $progetto->id . '/' . substr($progetto->datainizio, -2),
+				'id_ente' => $progetto->id_ente
+			]);
+		DB::table('progetti_lavorazioni')
+				->where('id', $evento->id)
+				->update(array(
+					'id_notifica' => $notifica
+				));	
+	}
+	function salvaNotificaDisposizione($evento) {
+		if($evento->id_disposizione!=0)
+		{
+			$quadro = DB::table('accountings')
+						->where('id', $evento->id_disposizione)
+						->first();
+	  //dd($quadro);
+			$notifica = DB::table('notifiche')
+				->insertGetId([
+					'oggetto' => $quadro->nomeprogetto,
+					'user_id' => Auth::user()->id,
+					'cancellata' => 0,
+					'nome' => '#scad. disposizione!',
+					'datascadenza' => isset($evento->datascadenza)?$evento->datascadenza:date('Y-m-d',strtotime('7days')),
+					'target' => '<i class="fa fa-usd"></i>  ' . $evento->idfattura,
+					'id_ente' => $evento->A
+				]);
+			DB::table('tranche')
+					->where('id', $evento->id)
+					->update(array(
+						'id_notifica' => $notifica
+					));	
+		}
+	}
+	function salvaNotificaConversazione($evento) {
+		$notifica = DB::table('notifiche')
+			->insertGetId([
+				'oggetto' => $evento->appunti,
+				'user_id' => Auth::user()->id,
+				'cancellata' => 0,
+				'nome' => 'ricontattare!',
+				'datascadenza' => $evento->ricontattare,
+				'target' => '<i class="fa fa-phone"></i>  ' . $evento->id_ente,
+				'id_ente' => $evento->id_ente
+			]);
+		DB::table('messages')
+				->where('id', $evento->id)
+				->update(array(
+					'id_notifica' => $notifica
+				));	
+	}
+
+	function salvaNotificaServizio($evento) {
+		$progetto = DB::table('projects')
+			->where('id', $evento->id_progetto)
+			->first();
+		$notifica = DB::table('notifiche')
+			->insertGetId([
+				'oggetto' => $evento->nome,
+				'user_id' => Auth::user()->id,
+				'cancellata' => 0,
+				'nome' => 'scad. servizio!',
+				'datascadenza' => $evento->scadenza,
+				'target' => '<i class="fa fa-clock-o"></i>  ' . '::' . $progetto->id . '/' . substr($progetto->datainizio, -2),
+				'id_ente' => $progetto->id_ente
+			]);
+		DB::table('progetti_noteprivate')
+				->where('id', $evento->id)
+				->update(array(
+					'id_notifica' => $notifica
+				));	
+	}
